@@ -20,16 +20,27 @@ python -m scripts.load_ontology
 
 ## DB 준비
 
-로컬 PostgreSQL 서버를 실행한 상태에서 다음 명령으로 준비합니다.
+로컬 PostgreSQL 16 서버를 실행한 상태에서 준비합니다.
 
-```sh
-brew install pgvector
-createdb marketon
-export DATABASE_URL=postgresql://postgres@localhost:5432/marketon
-cd backend
-python -m scripts.migrate --dry-run
-python -m scripts.migrate
-```
+1. pgvector 설치 (0.8 이상 필요). Homebrew `pgvector` 패키지는 PostgreSQL 18·19용만 들어 있어서, PostgreSQL 16에는 소스로 빌드합니다.
+
+   ```sh
+   cd /tmp && git clone --depth 1 --branch v0.8.7 https://github.com/pgvector/pgvector.git
+   cd pgvector && export PG_CONFIG=/opt/homebrew/opt/postgresql@16/bin/pg_config
+   make && make install
+   ```
+
+2. DB 생성과 마이그레이션. Homebrew PostgreSQL의 기본 사용자는 맥 계정 이름이라 URL에 사용자를 적지 않습니다.
+
+   ```sh
+   createdb marketon
+   export DATABASE_URL=postgresql://localhost:5432/marketon   # 또는 .env에 적기
+   cd backend
+   python -m scripts.migrate --dry-run
+   python -m scripts.migrate
+   ```
+
+서버를 켠 상태에서 마이그레이션을 처음 적용했다면 서버를 한 번 재시작하세요 (pgvector 타입 등록).
 
 미적용 SQL을 파일명 순서로 실행하며 파일마다 하나의 트랜잭션으로 처리합니다. `--dry-run`은 미적용 파일 목록만 출력합니다.
 

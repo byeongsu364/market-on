@@ -232,9 +232,9 @@ scripts/rag/
 ## 10. 정해야 할 것
 
 - [x] RAG DB 마이그레이션 작성: `backend/migrations/0001_rag_schema.sql` (8개 테이블·인덱스·SQL 함수 2개)
-- [ ] 조각이 수만 개로 늘고 엔터티 필터가 좁으면 HNSW가 결과를 덜 돌려줄 수 있어요. 그때 `hnsw.iterative_scan` 설정(pgvector 0.8+)을 검토해요. 시연 규모(수천 개 이하)에서는 문제없어요.
+- [x] HNSW 필터 누락 해결: 조각 2,000개 중 대파 10개를 찾을 때 1개만 나왔어요. `0002` 마이그레이션으로 `match_chunks`에 `hnsw.iterative_scan = strict_order`를 걸어 10개 모두 나오는 것을 확인했어요 (pgvector 0.8.7, 2026-11-22).
+- [x] 로컬 개발 DB: PostgreSQL 16 + pgvector 0.8.7, DB 이름 `marketon`, 마이그레이션 0001·0002 적용
 
-- [ ] 개발용 PostgreSQL에 pgvector 설치 (로컬 Homebrew PostgreSQL 16 사용 예정)
 - [ ] **[확인 필요]** 시연·배포용 DB를 어디서 돌릴지 (노트북 로컬, 서버, 관리형 서비스)
 - [ ] `entities.kamis` 초기값은 Wayket `n8n_가격조회목록_v1.csv`에서 가져와요 (00 문서 참고). 채소·수산은 새로 찾아야 해요.
 - [ ] **[확인 필요]** 사용할 Gemini 임베딩 모델명과 지원 차원
