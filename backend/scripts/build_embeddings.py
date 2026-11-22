@@ -1,10 +1,18 @@
-"""build_embeddings 실행 진입점. 허용 의존성: app 패키지."""
+"""Build only absent document embeddings."""
+from collections import Counter
+from app.db.pool import connection
+from app.llm.factory import get_embedder
+from app.knowledge.embedder import embed_pending
+from ._common import summary, run
 
-def main() -> None:
-    raise NotImplementedError('build_embeddings: 아직 구현되지 않았습니다.')
+def build_embeddings(conn, embedder=None):
+    count = embed_pending(conn, embedder or get_embedder())
+    summary('embeddings', Counter(changed=count))
+    return count
+
+def main():
+    with connection() as conn:
+        build_embeddings(conn)
 
 if __name__ == '__main__':
-    try:
-        main()
-    except NotImplementedError as exc:
-        print(exc)
+    run(main)

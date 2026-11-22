@@ -1,10 +1,22 @@
-"""load_sources 실행 진입점. 허용 의존성: app 패키지."""
+"""Load the authoritative source registry."""
+from collections import Counter
+import yaml
+from app.db.pool import connection
+from app.db.repositories import knowledge_repo as repo
+from ._common import DATA, summary, run
 
-def main() -> None:
-    raise NotImplementedError('load_sources: 아직 구현되지 않았습니다.')
+def load_sources(conn, path=DATA / 'sources.yaml'):
+    sources = yaml.safe_load(path.read_text())
+    counts = Counter()
+    with conn.transaction():
+        for key, value in sources.items():
+            counts[repo.upsert_source(conn, key, value)] += 1
+    summary('sources', counts)
+    return counts
+
+def main():
+    with connection() as conn:
+        load_sources(conn)
 
 if __name__ == '__main__':
-    try:
-        main()
-    except NotImplementedError as exc:
-        print(exc)
+    run(main)

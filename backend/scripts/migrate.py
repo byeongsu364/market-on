@@ -4,31 +4,22 @@ from pathlib import Path
 import sys
 
 from app.core.errors import AppError
-from app.db.pool import close_pool, connection
+from app.db.pool import close_pool
+from app.db import migrations
 
 MIGRATIONS = Path(__file__).resolve().parents[1] / 'migrations'
 
 
 def migrate(dry_run: bool = False) -> None:
-    with connection() as conn:
-        exists = conn.execute("SELECT to_regclass('public.schema_migrations')").fetchone()[0]
-        applied = {
-            row[0] for row in conn.execute('SELECT version FROM public.schema_migrations')
-        } if exists else set()
+    applied = migrations.applied_versions()
     pending = [path for path in sorted(MIGRATIONS.glob('*.sql')) if path.name not in applied]
     if dry_run:
         for path in pending:
             print(path.name)
         return
-    with connection() as conn:
-        conn.execute('''CREATE TABLE IF NOT EXISTS public.schema_migrations (
-            version text primary key,
-            applied_at timestamptz not null default now()
-        )''')
+    migrations.ensure_history()
     for path in pending:
-        with connection() as conn:
-            conn.execute(path.read_text(encoding='utf-8'), prepare=False)
-            conn.execute('INSERT INTO public.schema_migrations (version) VALUES (%s)', (path.name,))
+        migrations.apply(path.name, path.read_text(encoding='utf-8'))
         print(f'적용 완료: {path.name}')
 
 

@@ -11,7 +11,7 @@
 market-on/
 ├─ docs/                         기획·설계
 ├─ data/
-│  ├─ ontology/                  품목 온톨로지 원본 (JSON-LD)
+│  ├─ ontology/                  품목 온톨로지 원본 (YAML)
 │  ├─ rag_docs/                  확인 포인트·출하 시기·저장 조건·레시피 문서
 │  ├─ markets/                   시연 시장 점포 목록 + 평면도 SVG
 │  ├─ kamis/                     KAMIS 품목 코드표 (Wayket에서 가져옴)

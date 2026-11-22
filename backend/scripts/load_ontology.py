@@ -1,10 +1,53 @@
-"""load_ontology 실행 진입점. 허용 의존성: app 패키지."""
+"""Merge YAML ontology files with file/line diagnostics for relationships."""
+from collections import Counter
+import yaml
+from app.db.pool import connection
+from app.db.repositories import knowledge_repo as repo
+from ._common import DATA, summary, run
 
-def main() -> None:
-    raise NotImplementedError('load_ontology: 아직 구현되지 않았습니다.')
+def load_ontology(conn, directory=DATA / 'ontology'):
+    records = []
+    for path in sorted(directory.glob('*.yaml')):
+        text = path.read_text()
+        value = yaml.safe_load(text)
+        node = yaml.compose(text)
+        entities_node = next(v for k,v in node.value if k.value == 'entities')
+        for entity, entity_node in zip(value['entities'], entities_node.value):
+            relations_node = next((v for k,v in entity_node.value if k.value == 'relations'), None)
+            lines = [n.start_mark.line+1 for n in relations_node.value] if relations_node else []
+            records.append((path, entity, lines))
+    ids = [e['id'] for _,e,_ in records]
+    if len(set(ids)) != len(ids):
+        raise ValueError('온톨로지 파일에 중복 엔터티 ID가 있습니다.')
+    counts = Counter()
+    with conn.transaction():
+        known = repo.entity_ids(conn) | set(ids)
+        prepared = []
+        for path, entity, lines in records:
+            relations = []
+            for relation, line in zip(entity.get('relations', []), lines):
+                location = f'{path}:{line}'
+                if ('o' in relation) == ('v' in relation) or relation.get('o', True) is None or ('v' in relation and relation['v'] is None):
+                    raise ValueError(f'{location}: o 또는 v 중 하나의 값이 필요합니다.')
+                if 'o' in relation and relation['o'] not in known:
+                    raise ValueError(f'{location}: 알 수 없는 엔터티 {relation["o"]}')
+                try:
+                    source = repo.source_id(conn, relation['source']) if relation.get('source') else None
+                except ValueError as exc:
+                    raise ValueError(f'{location}: {exc}') from exc
+                relations.append((relation['p'], relation.get('o'), relation.get('v'), source))
+            status = repo.upsert_entity(conn, entity, relations)
+            counts[status] += 1
+            prepared.append((entity['id'], relations, status))
+        for eid, relations, status in prepared:
+            if status != 'skipped':
+                repo.replace_relations(conn, eid, relations)
+    summary('ontology', counts)
+    return counts
+
+def main():
+    with connection() as conn:
+        load_ontology(conn)
 
 if __name__ == '__main__':
-    try:
-        main()
-    except NotImplementedError as exc:
-        print(exc)
+    run(main)

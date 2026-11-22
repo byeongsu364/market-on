@@ -184,7 +184,7 @@ response_cache (entity_id 참조)
 1. `entity_labels`의 모든 라벨로 사전을 만들어요.
 2. 조각 본문에서 라벨을 찾고, 찾은 엔터티를 `chunk_entities`에 넣어요.
 3. 문서를 만들 때 품목을 이미 알면(예: 품목별로 쓴 확인 포인트 문서) 그 품목을 바로 태그해요.
-4. "파"처럼 짧은 라벨은 다른 단어(예: 양파) 안에서 잘못 잡힐 수 있어요. 짧은 라벨은 앞뒤가 공백이나 문장부호일 때만 인정해요.
+4. "파"처럼 짧은 라벨은 다른 단어(예: 양파) 안에서 잘못 잡힐 수 있어요. 긴 라벨부터 매칭하고 겹친 짧은 라벨은 버려요. 한 글자 라벨은 정규화한 본문의 바로 앞 글자가 한글이 아닐 때만 인정해요.
 
 ---
 
@@ -217,15 +217,16 @@ response_cache (entity_id 참조)
 ## 9. 적재 스크립트 구성
 
 ```
-scripts/rag/
-├─ 01_load_ontology    data/ontology/*.jsonld → entities, entity_labels, entity_relations
-├─ 02_load_sources     data/SOURCES.md(또는 yaml) → sources
-├─ 03_load_documents   data/rag_docs/** → documents → chunks (나누기·태깅)
-└─ 04_embed            embedding이 빈 chunks만 골라 임베딩 후 update
+backend/scripts/
+├─ load_sources.py    data/sources.yaml → sources
+├─ load_ontology.py   data/ontology/*.yaml → entities, entity_labels, entity_relations
+├─ load_documents.py data/rag_docs/** → documents → chunks (나누기·태깅)
+└─ build_embeddings.py embedding이 빈 chunks만 골라 임베딩 후 update
 ```
 
+- 온톨로지는 팀원이 직접 편집하기 쉬운 YAML을 사용해요 (JSON-LD 대신). 출처 → 온톨로지 → 문서 → 임베딩 순서로 실행해요.
 - 순서대로 돌리고, 몇 번을 다시 돌려도 결과가 같게 만들어요 (content_hash로 upsert).
-- 상인 노하우(C3)는 스크립트가 아니라 백엔드 API가 03·04와 같은 함수를 불러서 바로 적재해요.
+- 상인 노하우(C3)는 스크립트가 아니라 백엔드 API가 문서 적재·임베딩과 같은 함수를 불러서 바로 적재해요.
 
 ---
 

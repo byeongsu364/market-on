@@ -1,13 +1,19 @@
-"""설정에 따른 LLM 선택. 허용 의존성: llm 및 core."""
+"""Independent generation and embedding provider selection."""
 from app.core.config import settings
 from app.core.errors import AppError
 from .base import LLMProvider
 from .gemini import GeminiProvider
 from .gemma import GemmaProvider
+from .fake import FakeProvider
+
+def _provider(name: str) -> LLMProvider:
+    providers = {'gemini': GeminiProvider, 'gemma': GemmaProvider, 'fake': FakeProvider}
+    if name not in providers:
+        raise AppError('INVALID_LLM_PROVIDER', f'지원하지 않는 공급자: {name}')
+    return providers[name]()
 
 def get_llm() -> LLMProvider:
-    providers = {'gemini': GeminiProvider, 'gemma': GemmaProvider}
-    provider = providers.get(settings.LLM_PROVIDER)
-    if provider is None:
-        raise AppError('INVALID_LLM_PROVIDER', '지원하지 않는 LLM 공급자입니다.')
-    return provider()
+    return _provider(settings.LLM_PROVIDER)
+
+def get_embedder() -> LLMProvider:
+    return _provider(settings.EMBEDDING_PROVIDER)

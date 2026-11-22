@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     KAKAO_REST_API_KEY: str | None = None
     KMA_SERVICE_KEY: str | None = None
     LLM_PROVIDER: str = 'gemini'
+    EMBEDDING_PROVIDER: str = 'gemini'
+    EMBEDDING_MODEL: str = 'gemini-embedding-001'
     EMBEDDING_DIM: int = 768
     CORS_ORIGINS: list[str] = ['http://localhost:5173']
 
