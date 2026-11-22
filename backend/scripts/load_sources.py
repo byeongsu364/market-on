@@ -10,6 +10,8 @@ def load_sources(conn, path=DATA / 'sources.yaml'):
     counts = Counter()
     with conn.transaction():
         for key, value in sources.items():
+            if not key.startswith('src:'):
+                raise ValueError(f'출처 키에는 src: 접두어가 필요합니다: {key}')
             counts[repo.upsert_source(conn, key, value)] += 1
     summary('sources', counts)
     return counts

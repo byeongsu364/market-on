@@ -1,6 +1,7 @@
 """Shared ingestion and retrieval value types."""
 from dataclasses import dataclass, field
 from typing import Literal
+from datetime import date
 
 @dataclass
 class Document:
@@ -11,6 +12,8 @@ class Document:
     title: str
     body: str
     store_id: str | None = None
+    market_id: str | None = None
+    published: date | None = None
     entities: list[str] = field(default_factory=list)
     entity_names: list[str] = field(default_factory=list)
 
@@ -37,3 +40,6 @@ class RetrievedChunk:
     source_title: str
     source_url: str | None
     license: str | None
+    quote_only: bool = False
+    published: date | None = None
+    market_id: str | None = None

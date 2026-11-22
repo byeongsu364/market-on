@@ -16,6 +16,26 @@ def load_ontology(conn, directory=DATA / 'ontology'):
             relations_node = next((v for k,v in entity_node.value if k.value == 'relations'), None)
             lines = [n.start_mark.line+1 for n in relations_node.value] if relations_node else []
             records.append((path, entity, lines))
+    # Generated nodes carry an ownership marker so removed criteria can be pruned
+    # without deleting manually authored criterion entities.
+    generated = []
+    for path, entity, lines in records:
+        criteria = entity.get('criteria', [])
+        if criteria and (entity['type'] != 'item' or not entity['id'].startswith('item:')):
+            raise ValueError(f'{path}: criteria는 item 엔터티에만 허용합니다.')
+        entity['relations'] = list(entity.get('relations', []))
+        for criterion in criteria:
+            cid = f"crit:{entity['id'].removeprefix('item:')}-{criterion['key']}"
+            source = criterion.get('source', entity.get('source'))
+            labels = {'ko': [criterion['text']], **criterion.get('labels', {})}
+            generated.append((path, {
+                'id': cid, 'type': 'criterion', 'name_ko': criterion['text'],
+                'labels': labels, 'source': source,
+                'attrs': {'generated_criterion': True, 'criterion_parent': entity['id']},
+            }, []))
+            entity['relations'].append({'p': 'hasCriterion', 'o': cid, 'source': source})
+            lines.append(1)
+    records.extend(generated)
     ids = [e['id'] for _,e,_ in records]
     if len(set(ids)) != len(ids):
         raise ValueError('온톨로지 파일에 중복 엔터티 ID가 있습니다.')
@@ -35,13 +55,14 @@ def load_ontology(conn, directory=DATA / 'ontology'):
                     source = repo.source_id(conn, relation['source']) if relation.get('source') else None
                 except ValueError as exc:
                     raise ValueError(f'{location}: {exc}') from exc
-                relations.append((relation['p'], relation.get('o'), relation.get('v'), source))
+                relations.append((relation['p'], relation.get('o'), relation.get('v'), source, relation.get('props')))
             status = repo.upsert_entity(conn, entity, relations)
             counts[status] += 1
             prepared.append((entity['id'], relations, status))
         for eid, relations, status in prepared:
             if status != 'skipped':
                 repo.replace_relations(conn, eid, relations)
+        counts['deleted'] = repo.prune_generated_criteria(conn, [e['id'] for _, e, _ in generated])
     summary('ontology', counts)
     return counts
 

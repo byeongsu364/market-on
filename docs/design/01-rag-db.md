@@ -54,7 +54,7 @@ response_cache (entity_id 참조)
 
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
-| id | text PK | 사람이 읽는 ID. 예: `item:daepa`, `cat:vegetable`, `season:nov` |
+| id | text PK | 사람이 읽는 ID. 예: `item:green_onion`, `cat:vegetable`, `season:nov` |
 | type | text | `item` · `category` · `region` · `season` · `recipe` · `store_category` · `criterion` |
 | name_ko | text | 대표 이름 |
 | kamis | jsonb | 품목일 때 KAMIS 코드 `{ctgry_cd, item_cd, vrty_cd, unit}` |
@@ -144,7 +144,7 @@ response_cache (entity_id 참조)
 
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
-| cache_key | text PK | `{entity_id}:{intent}:{yyyyMMdd}:{lang}` 예: `item:daepa:criterion:20261122:ko` |
+| cache_key | text PK | `{entity_id}:{intent}:{yyyyMMdd}:{lang}` 예: `item:green_onion:criterion:20261122:ko` |
 | answer | jsonb | 답변 본문 + 사용한 chunk id + 출처 |
 | model | text | 답변을 만든 모델 (Gemini/Gemma 전환 시연용) |
 | created_at | timestamptz | |

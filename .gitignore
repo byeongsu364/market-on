@@ -10,3 +10,8 @@ frontend/node_modules/
 dist/
 .pytest_cache/
 *.py[cod]
+
+# 생성물
+data/index/
+data/snapshots/
+*.db

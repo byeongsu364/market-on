@@ -1,5 +1,5 @@
 ---
-source: team_draft
+source: src:team-draft
 doc_type: storage
 lang: ko
 title: 사과 저장 조건

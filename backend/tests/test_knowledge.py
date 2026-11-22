@@ -15,7 +15,7 @@ DICTIONARY = [('양파', 'onion', '양파'), ('파', 'daepa', '파'),
 
 def doc(**kwargs):
     values = dict(doc_key='a.md', source_key='team', doc_type='recipe', lang='ko',
-                  title='연습', body='짧은 문서', entities=['item:daepa'], entity_names=['대파'])
+                  title='연습', body='짧은 문서', entities=['item:green_onion'], entity_names=['대파'])
     return Document(**(values | kwargs))
 
 @pytest.mark.parametrize('text,expected', [
@@ -29,7 +29,7 @@ def test_short_document():
     chunks = chunk_document(doc())
     assert len(chunks) == 1
     assert chunks[0].content == '[대파 · 레시피] 짧은 문서'
-    assert chunks[0].entity_ids == {'item:daepa'}
+    assert chunks[0].entity_ids == {'item:green_onion'}
 
 @pytest.mark.parametrize('kind', ['criterion','season','storage','prep','merchant_tip'])
 def test_whole_topics(kind):
@@ -99,3 +99,28 @@ def test_gemini_bad_dimension(monkeypatch):
     client.__enter__.return_value.models.embed_content.return_value.embeddings = [MagicMock(values=[1.0])]
     with pytest.raises(AppError, match='차원'):
         gemini.GeminiProvider().embed(['x'], task='document')
+
+
+@pytest.mark.parametrize('kind,topic', [('grade', '품질 등급'), ('story', '시장 이야기'),
+    ('origin', '원산지'), ('safety', '안전 주의'), ('context', '구매 맥락'),
+    ('specialty', '지역 특산물'), ('guide', '이용 안내')])
+def test_new_topic_prefix(kind, topic):
+    assert chunk_document(doc(doc_type=kind))[0].content == f'[대파 · {topic}] 짧은 문서'
+
+
+def test_intent_mapping_and_search(monkeypatch):
+    from app.knowledge.intents import doc_types_for_intent, DOC_TYPE_TO_INTENT
+    from app.knowledge.retriever import search
+    from app.db.repositories import knowledge_repo as repo
+    from app.knowledge.ingest import TOPICS
+    assert set(DOC_TYPE_TO_INTENT) == set(TOPICS)
+    assert doc_types_for_intent('select') == ['criterion', 'grade', 'merchant_tip']
+    assert doc_types_for_intent('origin') == ['origin', 'specialty']
+    with pytest.raises(ValueError):
+        doc_types_for_intent('unknown')
+    match = MagicMock(return_value=[])
+    monkeypatch.setattr(repo, 'match_chunks', match)
+    search(None, FakeProvider(), '대파', entity_ids=['item:green_onion'], intent='store')
+    assert match.call_args.args[3] == ['storage']
+    search(None, FakeProvider(), '대파', entity_ids=[], intent='store', doc_types=['recipe'])
+    assert match.call_args.args[3] == []

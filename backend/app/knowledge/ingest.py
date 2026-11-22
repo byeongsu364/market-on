@@ -8,7 +8,9 @@ from app.schemas.knowledge import Chunk, Document, UpsertResult
 from .ontology import normalize, load_label_dictionary
 
 TOPICS = {'criterion': '확인 포인트', 'season': '출하 시기', 'storage': '저장 조건',
-          'recipe': '레시피', 'merchant_tip': '상인 노하우', 'prep': '손질법'}
+          'recipe': '레시피', 'merchant_tip': '상인 노하우', 'prep': '손질법', 'grade': '품질 등급', 'story': '시장 이야기',
+          'origin': '원산지', 'safety': '안전 주의', 'context': '구매 맥락',
+          'specialty': '지역 특산물', 'guide': '이용 안내'}
 WHOLE = {'criterion', 'season', 'storage', 'prep', 'merchant_tip'}
 
 def tag_entities(text, dictionary) -> set[str]:
@@ -57,7 +59,7 @@ def _hash(*values):
     return hashlib.sha256(json.dumps(values, ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
 
 def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
-    digest = _hash(doc.source_key, doc.doc_type, doc.lang, doc.title, doc.store_id, doc.body)
+    digest = _hash(doc.source_key, doc.doc_type, doc.lang, doc.title, doc.store_id, doc.body, doc.market_id, str(doc.published) if doc.published else None)
     with conn.transaction():
         # Serialize writers for the same stable key, including first insertion.
         repo.lock_document(conn, doc.doc_key)

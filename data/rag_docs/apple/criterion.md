@@ -1,5 +1,5 @@
 ---
-source: team_draft
+source: src:team-draft
 doc_type: criterion
 lang: ko
 title: 사과 확인 포인트

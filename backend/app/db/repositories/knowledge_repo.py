@@ -9,15 +9,16 @@ def source_id(conn, key):
     return row[0]
 
 def upsert_source(conn, key, value):
-    fields = ('title', 'publisher', 'url', 'license', 'kind', 'retrieved_at')
+    fields = ('title', 'publisher', 'url', 'license', 'kind', 'retrieved_at', 'quote_only')
+    value = {'quote_only': False, **value}
     values = tuple(value.get(k) for k in fields)
-    old = conn.execute('select title,publisher,url,license,kind,retrieved_at from sources where source_key=%s', (key,)).fetchone()
+    old = conn.execute('select title,publisher,url,license,kind,retrieved_at,quote_only from sources where source_key=%s', (key,)).fetchone()
     if old == values:
         return 'skipped'
-    conn.execute("""insert into sources(source_key,title,publisher,url,license,kind,retrieved_at)
-        values (%s,%s,%s,%s,%s,%s,%s) on conflict(source_key) do update set
+    conn.execute("""insert into sources(source_key,title,publisher,url,license,kind,retrieved_at,quote_only)
+        values (%s,%s,%s,%s,%s,%s,%s,%s) on conflict(source_key) do update set
         title=excluded.title,publisher=excluded.publisher,url=excluded.url,
-        license=excluded.license,kind=excluded.kind,retrieved_at=excluded.retrieved_at""", (key, *values))
+        license=excluded.license,kind=excluded.kind,retrieved_at=excluded.retrieved_at,quote_only=excluded.quote_only""", (key, *values))
     return 'changed' if old else 'added'
 
 def entity_ids(conn):
@@ -32,18 +33,22 @@ def entity_names(conn, ids):
 
 def upsert_entity(conn, entity, relations):
     eid = entity['id']
-    values = (entity['type'], entity['name_ko'], entity.get('kamis'), entity.get('attrs', {}))
-    old = conn.execute('select type,name_ko,kamis,attrs from entities where id=%s', (eid,)).fetchone()
+    values = (entity['type'], entity['name_ko'], entity.get('kamis'), entity.get('attrs', {}),
+              source_id(conn, entity['source']) if entity.get('source') else None)
+    old = conn.execute('select type,name_ko,kamis,attrs,source_id from entities where id=%s', (eid,)).fetchone()
     labels = sorted((label, lang, 'preferred' if i == 0 else 'synonym')
                     for lang, names in entity.get('labels', {}).items() for i, label in enumerate(names))
+    vision = set(entity.get('vision', []))
+    labels = [row for row in labels if not (row[1] == 'en' and row[0] in vision)]
+    labels = sorted(labels + [(label, 'en', 'vision') for label in vision])
     old_labels = sorted(conn.execute('select label,lang,kind from entity_labels where entity_id=%s', (eid,)).fetchall())
-    old_relations = conn.execute('select predicate,object_id,object_value,source_id from entity_relations where subject_id=%s order by id', (eid,)).fetchall()
+    old_relations = conn.execute('select predicate,object_id,object_value,source_id,props from entity_relations where subject_id=%s order by id', (eid,)).fetchall()
     if old == values and old_labels == labels and old_relations == relations:
         return 'skipped'
-    conn.execute("""insert into entities(id,type,name_ko,kamis,attrs) values(%s,%s,%s,%s,%s)
+    conn.execute("""insert into entities(id,type,name_ko,kamis,attrs,source_id) values(%s,%s,%s,%s,%s,%s)
         on conflict(id) do update set type=excluded.type,name_ko=excluded.name_ko,
-        kamis=excluded.kamis,attrs=excluded.attrs,updated_at=now()""",
-        (eid, values[0], values[1], Jsonb(values[2]) if values[2] is not None else None, Jsonb(values[3])))
+        kamis=excluded.kamis,attrs=excluded.attrs,source_id=excluded.source_id,updated_at=now()""",
+        (eid, values[0], values[1], Jsonb(values[2]) if values[2] is not None else None, Jsonb(values[3]), values[4]))
     conn.execute('delete from entity_labels where entity_id=%s', (eid,))
     for label, lang, kind in labels:
         conn.execute('insert into entity_labels(entity_id,label,lang,kind) values(%s,%s,%s,%s)', (eid,label,lang,kind))
@@ -52,9 +57,9 @@ def upsert_entity(conn, entity, relations):
 
 def replace_relations(conn, eid, relations):
     conn.execute('delete from entity_relations where subject_id=%s', (eid,))
-    for p, o, v, source in relations:
-        conn.execute('insert into entity_relations(subject_id,predicate,object_id,object_value,source_id) values(%s,%s,%s,%s,%s)',
-                     (eid,p,o,Jsonb(v) if v is not None else None,source))
+    for p, o, v, source, props in relations:
+        conn.execute('insert into entity_relations(subject_id,predicate,object_id,object_value,source_id,props) values(%s,%s,%s,%s,%s,%s)',
+                     (eid,p,o,Jsonb(v) if v is not None else None,source,Jsonb(props) if props is not None else None))
 
 def label_dictionary(conn):
     return conn.execute('select label_norm,entity_id,label from entity_labels order by length(label_norm) desc,entity_id,label').fetchall()
@@ -69,9 +74,9 @@ def delete_document(conn, did):
     conn.execute('delete from documents where id=%s', (did,))
 
 def insert_document(conn, doc, digest):
-    return conn.execute("""insert into documents(doc_key,source_id,doc_type,lang,title,store_id,body,content_hash)
-        values(%s,%s,%s,%s,%s,%s,%s,%s) returning id""",
-        (doc.doc_key,source_id(conn,doc.source_key),doc.doc_type,doc.lang,doc.title,doc.store_id,doc.body,digest)).fetchone()[0]
+    return conn.execute("""insert into documents(doc_key,source_id,doc_type,lang,title,store_id,body,content_hash,market_id,published)
+        values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id""",
+        (doc.doc_key,source_id(conn,doc.source_key),doc.doc_type,doc.lang,doc.title,doc.store_id,doc.body,digest,doc.market_id,doc.published)).fetchone()[0]
 
 def insert_chunk(conn, did, doc, chunk, digest):
     cid = conn.execute('insert into chunks(document_id,chunk_index,content,doc_type,lang,content_hash) values(%s,%s,%s,%s,%s,%s) returning id',
@@ -90,7 +95,11 @@ def update_embeddings(conn, ids, vectors):
         conn.execute('update chunks set embedding=%s where id=%s', (Vector(vector),cid))
 
 def match_chunks(conn, vector, entity_ids, doc_types, lang, k, minimum):
-    return conn.execute('select * from match_chunks(%s,%s,%s,%s,%s,%s)',
+    return conn.execute('''select m.chunk_id,m.content,m.similarity,m.doc_type,m.document_title,m.store_id,m.source_title,m.source_url,m.license, s.quote_only, d.published, d.market_id
+        from match_chunks(%s,%s,%s,%s,%s,%s) with ordinality as m
+        join chunks c on c.id=m.chunk_id
+        join documents d on d.id=c.document_id
+        join sources s on s.id=d.source_id order by m.ordinality''',
         (Vector(vector),entity_ids,doc_types,lang,k,minimum)).fetchall()
 
 def invalidate_cache_for_entity(conn, eid):
@@ -106,3 +115,10 @@ def prune_documents(conn, keys):
 
 def lock_document(conn, key):
     conn.execute('select pg_advisory_xact_lock(hashtextextended(%s,0))', (key,))
+
+
+def prune_generated_criteria(conn, ids):
+    rows = conn.execute("""delete from entities
+        where type='criterion' and attrs @> '{"generated_criterion": true}'::jsonb
+        and not (id=any(%s)) returning id""", (ids,)).fetchall()
+    return len(rows)

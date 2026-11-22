@@ -1,5 +1,5 @@
 ---
-source: team_draft
+source: src:team-draft
 doc_type: recipe
 lang: ko
 title: 긴 레시피 분할 연습

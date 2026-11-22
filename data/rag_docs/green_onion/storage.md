@@ -1,9 +1,9 @@
 ---
-source: team_draft
+source: src:team-draft
 doc_type: storage
 lang: ko
 title: 대파 저장 조건
-entities: [item:daepa]
+entities: [item:green_onion]
 store_id: null
 ---
 > 샘플 데이터 · 검수 전

@@ -19,7 +19,7 @@ def read_document(path, directory):
     return Document(doc_key=path.relative_to(directory).as_posix(),
         source_key=meta['source'], doc_type=meta['doc_type'], lang=meta['lang'],
         title=meta['title'], body=parts[2].strip(), store_id=meta.get('store_id'),
-        entities=meta.get('entities', []))
+        entities=meta.get('entities', []), market_id=meta.get('market_id'), published=meta.get('published'))
 
 def load_documents(conn, directory=DATA / 'rag_docs', *, prune=False):
     counts = Counter()
