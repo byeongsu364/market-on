@@ -59,7 +59,7 @@ def test_fake_and_independent_factory(monkeypatch):
     monkeypatch.setattr(settings, 'EMBEDDING_PROVIDER', 'fake')
     monkeypatch.setattr(settings, 'LLM_PROVIDER', 'gemma')
     assert isinstance(get_embedder(), FakeProvider)
-    assert get_llm().__class__.__name__ == 'GemmaProvider'
+    assert get_llm().__class__.__name__ == 'OllamaProvider'
     a, b, c = FakeProvider().embed(['대파', '대파', '사과'], task='document')
     assert a == b and a != c
     assert math.isclose(sum(x*x for x in a), 1.0)

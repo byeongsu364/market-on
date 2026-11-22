@@ -123,7 +123,7 @@ response_cache (entity_id 참조)
 | document_id | FK documents (cascade) | |
 | chunk_index | int | 문서 안 순서 |
 | content | text | 조각 본문 |
-| embedding | vector(768) | 임베딩 (차원은 4장 참고) |
+| embedding | vector(1024) | 임베딩 (차원은 4장 참고) |
 | doc_type | text | documents에서 복사. 필터를 빠르게 하려고 둠 |
 | lang | text | |
 | content_hash | text UNIQUE | |
@@ -156,9 +156,9 @@ response_cache (entity_id 참조)
 
 ## 4. 임베딩
 
-- 모델: Gemini 임베딩 API **[확인 필요: 대회 당일 최신 모델명]**
-- 차원: **768 [확정].** pgvector HNSW 인덱스는 `vector` 타입 기준 2,000차원까지만 지원해요. 768이면 저장과 검색이 빠르고, 짧은 확인 포인트 문서에는 충분해요.
-- 문서용과 질문용 작업 유형(task type)을 구분해서 호출해요 (문서: retrieval document, 질문: retrieval query).
+- 모델: Ollama `bge-m3:latest` **[확정]**
+- 차원: **1024 [확정].** 단위 벡터를 반환하며 HNSW cosine 인덱스를 사용해요.
+- bge-m3는 문서·질문 작업 유형을 구분하지 않아요.
 - 임베딩 호출도 `backend/app/llm/` 한 곳에서만 해요 (J1).
 
 ---
@@ -214,6 +214,23 @@ response_cache (entity_id 참조)
 
 ---
 
+### 8-1. 서버 DB로 옮기기 [확정: 별도 서버]
+
+개발은 로컬 PostgreSQL로 하고, 시연·배포는 별도 서버의 PostgreSQL로 옮겨요. 코드는 `.env`의 `DATABASE_URL`만 바꾸면 돼요.
+
+| 조건 | 이유 |
+|---|---|
+| PostgreSQL 16 이상 + pgvector 0.8 이상 | `match_chunks`의 `hnsw.iterative_scan`(0002)이 0.8부터 지원 |
+| DB 포트를 인터넷에 열지 않기 | Tailscale 안에서만 접속하거나 방화벽으로 백엔드 서버 IP만 허용 |
+| 앱 전용 계정 | 테이블 읽기·쓰기와 함수 실행만. 마이그레이션은 소유자 계정으로 따로 실행 |
+| 접속 암호화 | Tailscale 밖으로 나가면 `?sslmode=require` |
+| 백엔드 ↔ DB 지연 | 백엔드와 DB가 다른 서버라 쿼리마다 왕복이 생겨요. 같은 네트워크(Tailscale)에 두고, 적재는 배치로 |
+
+옮기는 순서
+1. 서버에 DB 생성 → `DATABASE_URL` 바꾸고 `python -m scripts.migrate`
+2. `python -m scripts.load_all --embed` 로 `data/` 파일에서 다시 적재 (로컬 DB를 복사하지 않아요)
+3. 앱에서 쌓인 데이터(상인 노하우·가격표 등)가 있으면 그것만 `pg_dump --data-only -t ...`로 옮겨요
+
 ## 9. 적재 스크립트 구성
 
 ```
@@ -236,9 +253,10 @@ backend/scripts/
 - [x] HNSW 필터 누락 해결: 조각 2,000개 중 대파 10개를 찾을 때 1개만 나왔어요. `0002` 마이그레이션으로 `match_chunks`에 `hnsw.iterative_scan = strict_order`를 걸어 10개 모두 나오는 것을 확인했어요 (pgvector 0.8.7, 2026-11-22).
 - [x] 로컬 개발 DB: PostgreSQL 16 + pgvector 0.8.7, DB 이름 `marketon`, 마이그레이션 0001·0002 적용
 
-- [ ] **[확인 필요]** 시연·배포용 DB를 어디서 돌릴지 (노트북 로컬, 서버, 관리형 서비스)
+- [x] 시연·배포용 DB: **별도 서버의 PostgreSQL** [확정] (Ollama 서버와 다른 서버). 옮길 때 체크리스트는 8-1장
+- [x] 로컬 개발 DB `marketon`: 0001~0004 적용, 샘플 17조각 bge-m3 임베딩 완료 (2026-11-22)
 - [ ] `entities.kamis` 초기값은 Wayket `n8n_가격조회목록_v1.csv`에서 가져와요 (00 문서 참고). 채소·수산은 새로 찾아야 해요.
-- [ ] **[확인 필요]** 사용할 Gemini 임베딩 모델명과 지원 차원
+- [x] Ollama `bge-m3:latest`, 1024차원 확정 (2026-11-22)
 - [ ] **[제안]** 관계 이름 `ingredientAt` → `soldAt`
 - [ ] **[제안]** 시연 품목 범위 (예: 대파 포함 10~15개 품목부터)
-- [ ] 무료 요금제 한도 확인 (DB 500MB 기준이면 768차원 조각 수만 개도 충분해요)
+- [ ] 무료 요금제 한도 확인 (DB 500MB 기준이면 1024차원 조각 수만 개도 충분해요)

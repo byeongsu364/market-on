@@ -16,7 +16,11 @@ uvicorn app.main:app --reload
 python -m scripts.load_ontology
 ```
 
-키 없이 `/health`와 문서가 열립니다. DB는 처음 의존성을 호출할 때 DATABASE_URL을 확인하며, LLM과 적재 스크립트는 미구현입니다. 설정은 루트 `.env` 또는 환경변수로 읽습니다. `.env.example`은 필드 목록이며 이번 작업에서는 `.env`를 생성하지 않습니다. 기본값을 사용하려면 비어 있는 숫자·목록 설정을 환경변수로 지정하지 마세요. `CORS_ORIGINS` 설정 형식은 JSON 배열입니다.
+키 없이 `/health`와 문서가 열립니다. DB는 처음 의존성을 호출할 때 DATABASE_URL을 확인하며, 일부 기능은 아직 미구현입니다. 설정은 루트 `.env` 또는 환경변수로 읽습니다. `.env.example`은 필드 목록이며 이번 작업에서는 `.env`를 생성하지 않습니다. 기본값을 사용하려면 비어 있는 숫자·목록 설정을 환경변수로 지정하지 마세요. `CORS_ORIGINS` 설정 형식은 JSON 배열입니다.
+
+## Ollama 설정
+
+임베딩 기본 공급자는 Ollama `bge-m3:latest`(1024차원)입니다. `.env`에 `OLLAMA_BASE_URL`, `OLLAMA_CHAT_MODEL=gemma4:e4b`, `OLLAMA_EMBEDDING_MODEL=bge-m3:latest`를 설정하세요. 실제 서버 주소는 `.env`에만 보관합니다. 대화는 기본 Gemini이며 `LLM_PROVIDER=ollama`(또는 별칭 `gemma`)로 전환할 수 있습니다. Gemini 임베딩 모델 설정은 `GEMINI_EMBEDDING_MODEL`입니다. 0004 적용 시 기존 임베딩과 응답 캐시가 초기화되므로 `python -m scripts.load_all --embed`로 다시 임베딩하세요.
 
 ## DB 준비
 

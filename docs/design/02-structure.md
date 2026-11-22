@@ -54,7 +54,7 @@ market-on/
 │  │  │
 │  │  ├─ llm/            ★ J1    ④ LLM 호출은 이 폴더에서만
 │  │  │  ├─ base.py              LLMProvider 인터페이스 (generate, embed)
-│  │  │  ├─ gemini.py  gemma.py  구현체
+│  │  │  ├─ gemini.py  ollama.py  fake.py  구현체
 │  │  │  ├─ factory.py           config 값으로 provider 선택 (교체 지점)
 │  │  │  └─ prompts/             프롬프트 템플릿 파일 (코드와 분리)
 │  │  │
@@ -170,3 +170,5 @@ market-on/
 - **[확정]** DB는 PostgreSQL + pgvector예요 (2026-11-22 Supabase에서 변경).
 - **[확정]** DB 접근은 psycopg 3 + 커넥션 풀로 해요. ORM은 쓰지 않고, 테이블 정의는 `backend/migrations/` SQL에만 둬요. 적용은 `python -m scripts.migrate`.
 - **[확정]** 프론트는 React + Vite + TypeScript예요.
+
+- **[확정]** Ollama로 Gemma 대화와 bge-m3 임베딩(1024차원)을 호출하며 `gemma` 공급자 이름은 `ollama`의 별칭이에요.

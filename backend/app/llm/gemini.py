@@ -26,7 +26,7 @@ class GeminiProvider(LLMProvider):
                 for attempt in range(4):
                     try:
                         response = client.models.embed_content(
-                            model=settings.EMBEDDING_MODEL, contents=batch,
+                            model=settings.GEMINI_EMBEDDING_MODEL, contents=batch,
                             config=types.EmbedContentConfig(task_type=tasks[task],
                                 output_dimensionality=settings.EMBEDDING_DIM))
                         break
