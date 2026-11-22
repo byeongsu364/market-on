@@ -1,0 +1,48 @@
+entities:
+  - id: cat:vegetable
+    type: "category"
+    name_ko: "채소"
+    labels: {"ko": ["채소"]}
+    kamis: null
+    attrs: {}
+  - id: cat:fruit
+    type: "category"
+    name_ko: "과일"
+    labels: {"ko": ["과일"]}
+    kamis: null
+    attrs: {}
+  - id: item:daepa
+    type: "item"
+    name_ko: "대파"
+    kamis: null
+    attrs: {}
+    labels: {"ko": ["대파", "파"], "en": ["green onion", "scallion"]}
+    relations: [{"p": "isA", "o": "cat:vegetable"}]
+  - id: item:onion
+    type: "item"
+    name_ko: "양파"
+    kamis: null
+    attrs: {}
+    labels: {"ko": ["양파"], "en": ["onion"]}
+    relations: [{"p": "isA", "o": "cat:vegetable"}]
+  - id: item:apple
+    type: "item"
+    name_ko: "사과"
+    kamis: {"ctgry_cd": "400", "item_cd": "411", "vrty_cd": "07", "grd_cd": "04", "unit": "개"}
+    attrs: {}
+    labels: {"ko": ["사과"], "en": ["apple"]}
+    relations: [{"p": "isA", "o": "cat:fruit"}]
+  - id: item:pear
+    type: "item"
+    name_ko: "배"
+    kamis: {"ctgry_cd": "400", "item_cd": "412", "vrty_cd": "01", "grd_cd": "04", "unit": "개"}
+    attrs: {}
+    labels: {"ko": ["배"], "en": ["pear"]}
+    relations: [{"p": "isA", "o": "cat:fruit"}]
+  - id: item:persimmon
+    type: "item"
+    name_ko: "단감"
+    kamis: {"ctgry_cd": "400", "item_cd": "416", "vrty_cd": "00", "grd_cd": "04", "unit": "개"}
+    attrs: {}
+    labels: {"ko": ["단감"], "en": ["sweet persimmon"]}
+    relations: [{"p": "isA", "o": "cat:fruit"}]
