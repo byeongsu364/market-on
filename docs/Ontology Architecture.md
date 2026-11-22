@@ -10,7 +10,7 @@
 
 ## 0. ERD
 
-![Market-On 온톨로지 ERD](./Market-On_온톨로지_ERD.png)
+![Market-On 온톨로지 ERD](./img/Market-On_온톨로지_ERD.png)
 
 | 색 | 의미 |
 |---|---|
