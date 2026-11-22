@@ -1,7 +1,8 @@
-# 01. RAG 적재용 DB 설계 (Supabase)
+# 01. RAG 적재용 DB 설계 (PostgreSQL + pgvector)
 
 > 상태: **[제안]** 초안 · 2026-11-22
-> 범위: 온톨로지·RAG 지식을 Supabase(Postgres + pgvector)에 적재하고 검색하는 구조. 가격표·점포·재고 테이블은 다음 문서에서 다뤄요.
+> 2026-11-22 변경: PostgreSQL → 직접 운영하는 PostgreSQL. RLS·RPC 대신 앱 전용 DB 계정과 SQL 함수를 써요.
+> 범위: 온톨로지·RAG 지식을 PostgreSQL(pgvector)에 적재하고 검색하는 구조. 가격표·점포·재고 테이블은 다음 문서에서 다뤄요.
 > 사전 제작 제한은 구두 합의로 적용하지 않아요 (2026-11-22). 설계가 확정되면 SQL과 적재 스크립트를 바로 만들어요.
 
 ---
@@ -24,7 +25,7 @@
 
 ```
 [적재]
-원천 자료 ─→ 정리(텍스트화) ─→ 조각 나누기 ─→ 엔터티 태깅 ─→ 임베딩 ─→ Supabase upsert
+원천 자료 ─→ 정리(텍스트화) ─→ 조각 나누기 ─→ 엔터티 태깅 ─→ 임베딩 ─→ PostgreSQL upsert
  (공공문서·                      (항목 단위)    (라벨 사전 매칭)  (Gemini)
   상인 녹음 요약 등)
 
@@ -156,7 +157,7 @@ response_cache (entity_id 참조)
 ## 4. 임베딩
 
 - 모델: Gemini 임베딩 API **[확인 필요: 대회 당일 최신 모델명]**
-- 차원: **768 제안.** pgvector HNSW 인덱스는 `vector` 타입 기준 2,000차원까지만 지원해요. 768이면 저장과 검색이 빠르고, 짧은 확인 포인트 문서에는 충분해요.
+- 차원: **768 [확정].** pgvector HNSW 인덱스는 `vector` 타입 기준 2,000차원까지만 지원해요. 768이면 저장과 검색이 빠르고, 짧은 확인 포인트 문서에는 충분해요.
 - 문서용과 질문용 작업 유형(task type)을 구분해서 호출해요 (문서: retrieval document, 질문: retrieval query).
 - 임베딩 호출도 `backend/app/llm/` 한 곳에서만 해요 (J1).
 
@@ -187,7 +188,7 @@ response_cache (entity_id 참조)
 
 ---
 
-## 7. 검색 함수 (Supabase RPC)
+## 7. 검색 함수 (SQL 함수)
 
 **match_chunks(query_embedding, entity_ids, doc_types, lang, match_count, min_similarity)**
 
@@ -204,10 +205,11 @@ response_cache (entity_id 참조)
 
 ---
 
-## 8. 보안 (RLS)
+## 8. 보안
 
-- 모든 테이블에 RLS를 켜고, anon 역할 정책은 만들지 않아요. 프론트는 Supabase에 직접 접근하지 않고 백엔드 API만 불러요.
-- 백엔드만 `service_role` 키를 `.env`에 두고 써요. 키는 Git·문서·화면 코드에 넣지 않아요.
+- 프론트는 DB에 직접 접근하지 않고 백엔드 API만 불러요. DB 포트는 외부에 열지 않아요.
+- 백엔드는 `.env`의 `DATABASE_URL` 하나로 접속해요. 접속 정보는 Git·문서·화면 코드에 넣지 않아요.
+- 운영 DB에서는 슈퍼유저 대신 앱 전용 계정(테이블 읽기·쓰기, 함수 실행만)을 써요. **[제안]**
 - 점포·가격표처럼 프론트가 직접 읽어도 되는 테이블은 다음 문서에서 따로 정해요.
 
 ---
@@ -229,7 +231,11 @@ scripts/rag/
 
 ## 10. 정해야 할 것
 
-- [ ] Supabase 프로젝트 생성과 pgvector 활성화 (2026-11-22 기준 미구축)
+- [x] RAG DB 마이그레이션 작성: `backend/migrations/0001_rag_schema.sql` (8개 테이블·인덱스·SQL 함수 2개)
+- [ ] 조각이 수만 개로 늘고 엔터티 필터가 좁으면 HNSW가 결과를 덜 돌려줄 수 있어요. 그때 `hnsw.iterative_scan` 설정(pgvector 0.8+)을 검토해요. 시연 규모(수천 개 이하)에서는 문제없어요.
+
+- [ ] 개발용 PostgreSQL에 pgvector 설치 (로컬 Homebrew PostgreSQL 16 사용 예정)
+- [ ] **[확인 필요]** 시연·배포용 DB를 어디서 돌릴지 (노트북 로컬, 서버, 관리형 서비스)
 - [ ] `entities.kamis` 초기값은 Wayket `n8n_가격조회목록_v1.csv`에서 가져와요 (00 문서 참고). 채소·수산은 새로 찾아야 해요.
 - [ ] **[확인 필요]** 사용할 Gemini 임베딩 모델명과 지원 차원
 - [ ] **[제안]** 관계 이름 `ingredientAt` → `soldAt`

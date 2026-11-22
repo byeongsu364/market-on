@@ -6,7 +6,7 @@
 
 ## 결정 사항
 - **[확정]** YOLO 모델은 쓰지 않아요. 품목 인식은 **Google Cloud Vision API**로 해요.
-- **[확정]** DB는 **Supabase**예요. 아직 프로젝트를 만들지 않았어요.
+- **[확정]** DB는 **PostgreSQL + pgvector**예요 (2026-11-22 Supabase에서 변경).
 - Wayket의 KAMIS 처리는 Python이 아니라 **n8n 워크플로**에 있어요. 로직을 참고해서 Market-On 백엔드(Python)로 새로 옮겨요.
 
 ---

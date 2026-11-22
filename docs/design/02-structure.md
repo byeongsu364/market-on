@@ -17,9 +17,6 @@ market-on/
 │  ├─ kamis/                     KAMIS 품목 코드표 (Wayket에서 가져옴)
 │  └─ SOURCES.md                 모든 데이터·이미지 출처와 라이선스
 │
-├─ supabase/
-│  └─ migrations/                ★ 테이블·인덱스·RLS·RPC SQL (DB 구조의 유일한 원본)
-│
 ├─ backend/
 │  ├─ app/
 │  │  ├─ main.py                 앱 생성 + 라우터 등록만
@@ -48,7 +45,7 @@ market-on/
 │  │  │  ├─ ontology.py          품목 조회·동의어 정규화·KAMIS 코드 매핑
 │  │  │  ├─ ingest.py            문서 → 조각 나누기 → 엔터티 태깅 → 저장 (scripts·상인 노하우 공용)
 │  │  │  ├─ embedder.py          임베딩 생성 (llm/ 호출)
-│  │  │  ├─ retriever.py         RAG 검색 (match_chunks RPC)
+│  │  │  ├─ retriever.py         RAG 검색 (match_chunks SQL 함수)
 │  │  │  ├─ answer_cache.py      DB 응답 캐시 (엔터티+의도+날짜+언어)
 │  │  │  └─ citation.py          근거 출처 붙이기
 │  │  │
@@ -62,7 +59,7 @@ market-on/
 │  │  │  └─ prompts/             프롬프트 템플릿 파일 (코드와 분리)
 │  │  │
 │  │  ├─ db/                     ④ DB 접근은 이 폴더에서만
-│  │  │  ├─ client.py            Supabase 클라이언트 생성 (service_role 키)
+│  │  │  ├─ pool.py              psycopg 커넥션 풀 (DATABASE_URL, pgvector 타입 등록)
 │  │  │  └─ repositories/        테이블별 함수
 │  │  │     ├─ knowledge_repo.py entities·labels·relations·documents·chunks·cache
 │  │  │     ├─ price_repo.py     가격표 기록 (B)
@@ -71,6 +68,8 @@ market-on/
 │  │  │
 │  │  ├─ schemas/                Pydantic 요청/응답 모델 (router·service 공용)
 │  │  └─ utils/                  순수 함수: 단위 변환, 가격 포맷, 날짜, 한글 정규화
+│  │
+│  ├─ migrations/                ★ 테이블·인덱스·SQL 함수 (DB 구조의 유일한 원본, 0001_xxx.sql 순서)
 │  │
 │  ├─ scripts/                   app 패키지를 import해서 재사용 (backend/에서 python -m scripts.xxx)
 │  │  ├─ load_ontology.py        data/ontology → entities·labels·relations
@@ -142,7 +141,7 @@ market-on/
 | 인식·시세 | `llm/`, `clients/kamis.py`·`vision.py`, `scan_service`, `price_service`, `scripts/update_prices.py` |
 | 지도·상인 | `data/markets`, `clients/stores.py`, `store_service`, `merchant_service` |
 | 프론트 | `frontend/` 전체 |
-| 공용 (먼저 합의) | `schemas/`, `supabase/migrations/`, `core/` |
+| 공용 (먼저 합의) | `schemas/`, `backend/migrations/`, `core/` |
 
 - 공용 폴더는 첫 1~2시간 안에 함께 정하고, 이후에는 바꿀 때 팀에 알려요.
 
@@ -152,8 +151,8 @@ market-on/
 
 | 고친 곳 | 이유 |
 |---|---|
-| `supabase/migrations/` 추가 | DB 구조(01 문서)를 SQL 파일로 관리할 곳이 없었어요. 팀원 모두 같은 SQL로 DB를 만들 수 있어요. |
-| `db/session.py`·`models/` → `db/client.py`·`repositories/` | Supabase를 쓰면 ORM 모델 없이 Supabase 클라이언트로 테이블·RPC를 바로 불러요. 테이블 구조는 마이그레이션 SQL 한 곳에만 둬요. |
+| `backend/migrations/` 추가 | DB 구조(01 문서)를 SQL 파일로 관리할 곳이 없었어요. 팀원 모두 같은 SQL로 DB를 만들 수 있어요. |
+| `db/session.py`·`models/` → `db/pool.py`·`repositories/` | ORM 모델 없이 repositories에서 SQL을 직접 써요. 테이블 구조는 마이그레이션 SQL 한 곳에만 둬요. |
 | `models/knowhow.py` 삭제 | 01 문서에서 상인 노하우는 `documents` 테이블의 `merchant_tip` 유형으로 넣기로 했어요. 별도 테이블이 없어요. |
 | `knowledge/ingest.py` 추가 | 적재 스크립트와 상인 노하우 API가 같은 조각 나누기·태깅 로직을 쓰게 해요. |
 | `knowledge` 층 위치 명시 | 원래 규칙에 knowledge가 llm·db를 불러도 되는지 빠져 있었어요. |
@@ -168,5 +167,6 @@ market-on/
 
 ## 5. 결정 사항
 
-- **[확정]** DB 접근은 supabase-py 클라이언트로 해요. 테이블 정의는 `supabase/migrations/` SQL에만 둬요.
+- **[확정]** DB는 PostgreSQL + pgvector예요 (2026-11-22 Supabase에서 변경).
+- **[확정]** DB 접근은 psycopg 3 + 커넥션 풀로 해요. ORM은 쓰지 않고, 테이블 정의는 `backend/migrations/` SQL에만 둬요. 적용은 `python -m scripts.migrate`.
 - **[확정]** 프론트는 React + Vite + TypeScript예요.

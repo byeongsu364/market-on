@@ -4,8 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=Path(__file__).resolve().parents[3] / '.env', extra='ignore')
-    SUPABASE_URL: str | None = None
-    SUPABASE_SERVICE_ROLE_KEY: str | None = None
+    DATABASE_URL: str | None = None
     GEMINI_API_KEY: str | None = None
     GOOGLE_VISION_API_KEY: str | None = None
     KAMIS_SERVICE_KEY: str | None = None
