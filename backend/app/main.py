@@ -1,0 +1,19 @@
+"""앱 생성 및 라우터 등록. 허용 의존성: routers 및 core."""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
+from app.core.errors import AppError, app_error_handler
+from app.core.logging import setup_logging
+from app.routers import scan, price, merchant, stores, recipe, card, agent
+
+setup_logging()
+routers = [scan.router, price.router, merchant.router, stores.router, recipe.router, card.router, agent.router]
+app = FastAPI(title='Market-On', openapi_tags=[{'name': router.tags[0]} for router in routers])
+app.add_middleware(CORSMiddleware, allow_origins=settings.CORS_ORIGINS, allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
+app.add_exception_handler(AppError, app_error_handler)
+for router in routers:
+    app.include_router(router)
+
+@app.get('/health')
+def health() -> dict[str, str]:
+    return {'status': 'ok'}
