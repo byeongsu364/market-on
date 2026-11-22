@@ -1,0 +1,35 @@
+# RAG 파일 형식
+
+작업 경로는 `backend/`, Python은 저장소의 `.venv/bin/python`을 사용합니다.
+적재 전 `DATABASE_URL`을 대상 DB로 명시하고 `python -m scripts.migrate`를 실행합니다.
+검증용 대상은 `postgresql://localhost:5432/marketon_test`입니다.
+
+- `sources.yaml`: `source_key`를 키로 하는 매핑. 값에는 `title`, `publisher`, `url`, `license`, `kind`, `retrieved_at`, 선택적인 `quote_only`(기본 false)를 둡니다. 키는 `src:<영어-kebab>` 형식입니다. 날짜는 YAML 날짜(`YYYY-MM-DD`)로 씁니다.
+- `ontology/*.yaml`: 각 파일의 `entities` 목록을 합칩니다. `labels`는 언어별 목록이며 첫 라벨이 preferred입니다. `relations`는 `p`와 `o`(엔터티 ID) 또는 `v`(JSON 호환 값) 중 하나를 가집니다. 선택적인 `source`는 출처 키입니다. 파일 간 엔터티 ID 중복과 존재하지 않는 관계 목적어는 오류입니다.
+- `rag_docs/**/*.md`: YAML frontmatter에 `source`, `doc_type`, `lang`, `title`, `entities`, `store_id`, 선택적인 `market_id`, `published`(YYYY-MM-DD)를 두고 뒤에 본문을 씁니다. 파일의 상대 경로가 `doc_key`입니다. 상인 API용 문서 키는 `merchant_tip:<uuid>`입니다.
+
+샘플에는 분류 2개, 품목 5개, 확인 포인트 5개, 저장 조건 2개, 긴 레시피 1개가 있습니다. 모든 본문 첫 줄에 검수 전 표시를 넣었습니다. 시연용 사실 자료로 사용하지 않습니다.
+과일 KAMIS 코드는 제공 CSV에서 이름별 우선순위 1의 첫 행을 선택했습니다. CSV에 단위 열이 없어 샘플 `unit`은 `개`로 명시했습니다. 실제 가격 API의 거래 단위는 검수해야 합니다.
+
+```sh
+# 반드시 테스트 DB를 명시합니다. 운영 marketon에는 실행하지 않습니다.
+export DATABASE_URL=postgresql://localhost:5432/marketon_test
+export EMBEDDING_PROVIDER=fake
+python -m scripts.load_all --embed
+python -m scripts.load_all --no-embed
+python -m scripts.load_documents --prune
+python -m scripts.search "파 고르는 법" --lang ko --k 5
+```
+
+`--prune`은 사라진 파일 문서를 삭제하며 `merchant_tip:` 키는 보존합니다. 기본 적재는 삭제하지 않습니다.
+같은 문서 해시면 건너뜁니다. 해시 필드는 작업 지시서대로 출처·유형·언어·제목·점포·본문·시장·발행일이며, `entities`만 수정하거나 온톨로지 라벨만 바꿔도 기존 문서를 다시 태깅하지 않습니다.
+`fake`는 해시 특징으로 만든 결정적 단위 벡터이며 연결·검색 흐름 검증용입니다. 실제 의미 검색 품질은 Gemini로 별도 평가해야 합니다.
+
+
+품목 ID는 `item:green_onion`, `item:onion`, `item:apple`, `item:pear`, `item:sweet_persimmon`처럼 영어 snake_case로 쓰며 문서 폴더도 품목 이름에 맞춥니다. 출처 예시는 `src:team-draft`입니다.
+엔터티의 선택적인 `source`는 근거 출처이고, `vision: [green onion, scallion]`은 영어 vision 라벨입니다. 같은 영어 라벨이 labels에도 있으면 vision이 우선합니다.
+관계의 선택적인 `props`는 JSON 속성입니다. 예: `{p: soldBy, o: 'unit:bunch', props: {factor_kg: 0.8, default: true}}`.
+품목의 `criteria`는 `key`, `text`, 선택적인 `source`, `labels`를 가진 목록입니다. `crit:<품목>-<key>` 엔터티와 `hasCriterion` 관계를 자동 생성합니다. 출처는 criterion의 source가 우선이고 없으면 품목 source를 사용합니다. 파일에서 빠진 자동 생성 criterion은 삭제하며 직접 작성한 criterion은 보존합니다.
+
+허용 doc_type: `criterion`, `grade`, `storage`, `prep`, `story`, `season`, `origin`, `safety`, `context`, `specialty`, `guide`, `recipe`, `merchant_tip`.
+검색 intent 대응표는 `knowledge/intents.py`에서 관리합니다. intent와 doc_types를 같이 주면 교집합으로 검색하며 알 수 없는 intent는 오류입니다.

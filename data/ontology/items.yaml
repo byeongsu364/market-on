@@ -1,0 +1,62 @@
+entities:
+  - id: cat:vegetable
+    type: "category"
+    name_ko: "채소"
+    labels: {"ko": ["채소"]}
+    kamis: null
+    attrs: {}
+  - id: cat:fruit
+    type: "category"
+    name_ko: "과일"
+    labels: {"ko": ["과일"]}
+    kamis: null
+    attrs: {}
+  - id: item:green_onion
+    type: "item"
+    name_ko: "대파"
+    kamis: null
+    attrs: {}
+    source: src:team-draft
+    labels: {"ko": ["대파", "파"]}
+    vision: [green onion, scallion]
+    criteria:
+      - {key: leaf, text: 잎 끝이 마르지 않고 누런 잎이 없어요, source: 'src:team-draft', labels: {en: [Healthy leaves]}}
+      - {key: stem, text: 흰 줄기가 단단하고 윤기가 있어요, source: 'src:team-draft'}
+      - {key: root, text: 뿌리 쪽에 수분이 남아 있어요, source: 'src:team-draft'}
+    relations:
+      - {p: isA, o: 'cat:vegetable'}
+      - {p: soldBy, o: 'unit:bunch', props: {factor_kg: 0.8, default: true}, source: 'src:team-draft'}
+  - id: item:onion
+    type: "item"
+    name_ko: "양파"
+    kamis: null
+    attrs: {}
+    labels: {"ko": ["양파"], "en": ["onion"]}
+    relations: [{"p": "isA", "o": "cat:vegetable"}]
+  - id: item:apple
+    type: "item"
+    name_ko: "사과"
+    kamis: {"ctgry_cd": "400", "item_cd": "411", "vrty_cd": "07", "grd_cd": "04", "unit": "개"}
+    attrs: {}
+    labels: {"ko": ["사과"], "en": ["apple"]}
+    relations: [{"p": "isA", "o": "cat:fruit"}]
+  - id: item:pear
+    type: "item"
+    name_ko: "배"
+    kamis: {"ctgry_cd": "400", "item_cd": "412", "vrty_cd": "01", "grd_cd": "04", "unit": "개"}
+    attrs: {}
+    labels: {"ko": ["배"], "en": ["pear"]}
+    relations: [{"p": "isA", "o": "cat:fruit"}]
+  - id: item:sweet_persimmon
+    type: "item"
+    name_ko: "단감"
+    kamis: {"ctgry_cd": "400", "item_cd": "416", "vrty_cd": "00", "grd_cd": "04", "unit": "개"}
+    attrs: {}
+    labels: {"ko": ["단감"], "en": ["sweet persimmon"]}
+    relations: [{"p": "isA", "o": "cat:fruit"}]
+  - id: unit:bunch
+    type: unit
+    name_ko: 단
+    labels: {ko: [단], en: [bunch]}
+    kamis: null
+    attrs: {}
