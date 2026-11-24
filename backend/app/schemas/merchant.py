@@ -10,7 +10,7 @@ class Credentials(BaseModel):
 
 
 class Signup(Credentials):
-    store_id: str
+    store_id: str = Field(max_length=100)
 
 
 class Hours(BaseModel):

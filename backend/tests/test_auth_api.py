@@ -102,6 +102,18 @@ def memory(monkeypatch):
         ),
     )
     monkeypatch.setattr(session_repo, 'delete', lambda c, digest: sessions.pop(digest, None))
+
+    def drop_sessions(c, uid, before=None):
+        for digest in [
+            d
+            for d, s in sessions.items()
+            if s['user_id'] == uid and (before is None or s['expires_at'] <= before)
+        ]:
+            sessions.pop(digest)
+
+    monkeypatch.setattr(session_repo, 'delete_for_user', lambda c, uid: drop_sessions(c, uid))
+    monkeypatch.setattr(session_repo, 'purge_expired', drop_sessions)
+    monkeypatch.setattr(auth_service, '_unknown_logins', {})
     monkeypatch.setattr(store_repo, 'get_store', lambda c, sid: stores.get(sid))
     monkeypatch.setattr(store_repo, 'get_market', lambda c, mid: dict(name_ko='시장'))
     monkeypatch.setattr(
@@ -230,7 +242,9 @@ def test_pending_approval_store_taken_and_disable(memory):
     )
     assert client.post(f'/admin/merchants/{first_id}/disable', headers=HEADER).status_code == 200
     client.cookies.set('mo_session', merchant_cookie, domain='testserver.local', path='/')
-    assert client.get('/merchant/store').status_code == 403
+    # 비활성 즉시 기존 로그인(쿠키)도 끊김
+    assert client.get('/merchant/store').status_code == 401
+    assert client.get('/auth/me').status_code == 401
 
 
 def test_cookie_digest_expiry_logout_and_no_secrets(memory):
@@ -316,3 +330,62 @@ def test_openapi_tags_and_secure_cookie(memory, monkeypatch):
     assert {'auth', 'merchant', 'admin', 'sales'} <= {tag['name'] for tag in app.openapi()['tags']}
     monkeypatch.setattr(settings, 'COOKIE_SECURE', True)
     assert 'Secure' in signup(memory).headers['set-cookie']
+
+
+def test_unknown_id_locks_like_real_account(memory):
+    """잠금 응답으로 아이디 존재 여부를 알아낼 수 없어야 함."""
+    client = memory['client']
+    signup(memory)
+
+    def codes(lid):
+        return [
+            client.post(
+                '/auth/login', headers=HEADER, json=dict(login_id=lid, password='incorrect')
+            ).json()['error']['code']
+            for _ in range(6)
+        ]
+
+    assert codes('merchant_a') == codes('nobody_here')
+    assert codes('nobody_here')[-1] == 'ACCOUNT_LOCKED'
+
+
+def test_password_length_limits(memory, monkeypatch):
+    client = memory['client']
+    too_long = 'a' * 129
+    r = client.post(
+        '/auth/signup',
+        headers=HEADER,
+        json=dict(login_id='long_pw', password=too_long, store_id='store:a'),
+    )
+    assert r.json()['error']['code'] == 'INVALID_PASSWORD' and too_long not in r.text
+    signup(memory)
+    calls = []
+
+    class Spy:
+        def verify(self, *args):
+            calls.append(args)
+            return True
+
+    monkeypatch.setattr(security, '_hasher', Spy())
+    r = client.post(
+        '/auth/login', headers=HEADER, json=dict(login_id='merchant_a', password='a' * 10_000)
+    )
+    assert r.status_code == 401 and calls == []  # 해시 계산 없이 바로 거절
+
+
+def test_reject_revokes_sessions(memory):
+    client = memory['client']
+    user_id = signup(memory).json()['user']['id']
+    merchant_cookie = client.cookies.get('mo_session')
+    operator(memory)
+    assert client.post(f'/admin/merchants/{user_id}/reject', headers=HEADER).status_code == 200
+    client.cookies.set('mo_session', merchant_cookie, domain='testserver.local', path='/')
+    assert client.get('/auth/me').status_code == 401
+
+
+def test_cors_wildcard_rejected():
+    from pydantic import ValidationError
+    from app.core.config import Settings
+
+    with pytest.raises(ValidationError):
+        Settings(CORS_ORIGINS=['*'])

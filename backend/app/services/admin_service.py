@@ -1,7 +1,7 @@
 """Operator-only approval transitions, serialized per store."""
 
 from app.core.errors import AppError
-from app.db.repositories import user_repo
+from app.db.repositories import user_repo, session_repo
 from .auth_service import public_user
 
 
@@ -21,4 +21,8 @@ def set_status(conn, operator, user_id, status):
         user = user_repo.get(conn, user_id, lock=True)
         if status == 'approved' and user_repo.store_taken(conn, user['store_id'], user_id):
             raise AppError('STORE_TAKEN', '이미 승인된 상인이 있는 점포입니다.', 409)
-        return public_user(conn, user_repo.set_status(conn, user_id, status, operator['id']))
+        updated = user_repo.set_status(conn, user_id, status, operator['id'])
+        if status in ('rejected', 'disabled'):
+            # 이미 로그인해 있던 기기도 바로 로그아웃 (쿠키가 30일 유지되므로)
+            session_repo.delete_for_user(conn, user_id)
+        return public_user(conn, updated)
