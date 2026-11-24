@@ -24,6 +24,9 @@ def nearby(conn, lat=None, lng=None):
         for m in store_repo.list_markets(conn)
         if m['lat'] is not None and m['lng'] is not None
     ]
+    for market in markets:
+        if lat is not None and lng is not None:
+            market.distance_m = round(distance(lat, lng, market) * 6_371_000)
     return sorted(
         markets,
         key=lambda m: (

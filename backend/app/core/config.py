@@ -1,7 +1,9 @@
 """환경변수 설정. 허용 의존성: 표준 라이브러리 및 pydantic-settings."""
 
+import logging
 from pathlib import Path
-from pydantic import field_validator
+
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +11,17 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[3] / '.env', extra='ignore'
     )
+    DEVICE_HASH_SALT: str = ''
+
+    @model_validator(mode='after')
+    def device_salt(self):
+        if not self.DEVICE_HASH_SALT.strip():
+            self.DEVICE_HASH_SALT = 'market-on-development-device-salt'
+            logging.getLogger(__name__).warning(
+                'DEVICE_HASH_SALT 미설정: 개발용 고정값을 사용합니다.'
+            )
+        return self
+
     COOKIE_SECURE: bool = False
     SESSION_DAYS: int = 30
     DATABASE_URL: str | None = None

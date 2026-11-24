@@ -128,3 +128,40 @@ def baseline(conn, item_id, *, on_date, sgg_nm=None, market_at_cd=None, lookback
         all=stats(selected),
         this_market={'price': market['price'], 'mrkt_nm': market['mrkt_nm']} if market else None,
     )
+
+
+def lock_device(conn, device_hash):
+    conn.execute('select pg_advisory_xact_lock(hashtextextended(%s,0))', (device_hash,))
+
+
+def hourly_report_count(conn, device_hash):
+    return conn.execute(
+        """select count(*) from price_reports where device_hash=%s
+        and reported_at > clock_timestamp() - interval '1 hour'""",
+        (device_hash,),
+    ).fetchone()[0]
+
+
+def save_recent_report(conn, values):
+    recent = conn.execute(
+        """select id from price_reports where device_hash=%s and item_id=%s
+        and market_id=%s and store_id is not distinct from %s
+        and reported_at > clock_timestamp() - interval '10 minutes'
+        order by reported_at desc,id desc limit 1 for update""",
+        (values['device_hash'], values['item_id'], values['market_id'], values['store_id']),
+    ).fetchone()
+    if recent:
+        conn.execute(
+            """update price_reports set unit_id=%s,quantity=%s,price=%s,method=%s,
+            media_id=%s,reported_at=clock_timestamp() where id=%s""",
+            (
+                values['unit_id'],
+                values['quantity'],
+                values['price'],
+                values['method'],
+                values['media_id'],
+                recent[0],
+            ),
+        )
+        return {'id': recent[0], 'updated': True}
+    return {'id': insert_report(conn, **values), 'updated': False}

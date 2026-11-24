@@ -22,7 +22,7 @@ def api(monkeypatch, tmp_path):
     conn = Mock()
     conn.transaction.side_effect = nullcontext
     monkeypatch.setattr(settings, 'MEDIA_DIR', tmp_path)
-    media = Mock()
+    media = Mock(return_value='11111111-1111-1111-1111-111111111111')
     monkeypatch.setattr(media_repo, 'insert_media', media)
     dictionary = [
         {'id': 'item:green_onion', 'name_ko': '대파', 'label': label}
@@ -90,7 +90,7 @@ def test_contract_and_weights(api, labels, expected):
     response = upload(client)
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == {'vision_labels', 'candidates'}
+    assert set(body) == {'vision_labels', 'candidates', 'media_id', 'price_tag'}
     assert body['vision_labels'] == labels
     assert [(c['item_id'], c['confidence']) for c in body['candidates']] == expected
     assert all(set(c) == {'item_id', 'name', 'confidence'} for c in body['candidates'])
@@ -199,7 +199,9 @@ def test_save_failure_continues(api, monkeypatch, caplog, failure):
         monkeypatch.setattr(settings, 'MEDIA_DIR', blocked)
     else:
         media.side_effect = RuntimeError('DB write failure')
-    assert upload(client).json()['candidates'][0]['item_id'] == 'item:green_onion'
+    body = upload(client).json()
+    assert body['candidates'][0]['item_id'] == 'item:green_onion'
+    assert body['media_id'] is None
     assert '사진 저장 실패' in caplog.text
 
 
@@ -261,3 +263,45 @@ def test_empty_vocabulary_uses_free_prompt(api, monkeypatch):
     assert '영어 일반명(소문자) 1~3개' in prompt
     assert '{vocabulary}' not in prompt
     assert '아래 목록' not in prompt
+
+
+@pytest.mark.parametrize(
+    ('tag', 'expected'),
+    [
+        ({'price': 3000, 'unit_text': '1단', 'quantity': 1}, ('unit:bunch', 1)),
+        ({'price': '5000', 'unit_text': '3개', 'quantity': None}, ('unit:piece', 3)),
+        ({'price': 3000, 'unit_text': '1kg', 'quantity': 1}, ('unit:kg', 1)),
+        ({'price': 3000, 'unit_text': '한 바구니', 'quantity': None}, (None, None)),
+        (None, None),
+        ({'price': '5천원', 'unit_text': '단'}, None),
+        ({'price': 9, 'unit_text': '단'}, None),
+        ({'price': 10000001, 'unit_text': '단'}, None),
+        ({'price': 'NaN', 'unit_text': '단'}, None),
+        ({'price': 3000}, None),
+        ('bad', None),
+    ],
+)
+def test_price_tag(api, monkeypatch, tag, expected):
+    import json
+
+    client, provider, _, _ = api
+    monkeypatch.setattr(
+        knowledge_repo,
+        'unit_labels',
+        lambda c: [
+            {'id': 'unit:bunch', 'label': '단'},
+            {'id': 'unit:piece', 'label': '개'},
+            {'id': 'unit:kg', 'label': 'kg'},
+        ],
+    )
+    provider.generate.return_value = json.dumps({'labels': ['green onion'], 'price_tag': tag})
+    body = upload(client).json()
+    assert body['candidates'][0]['item_id'] == 'item:green_onion'
+    assert body['media_id'] == '11111111-1111-1111-1111-111111111111'
+    assert provider.generate.call_count == 1
+    if expected is None:
+        assert body['price_tag'] is None
+    else:
+        assert set(body['price_tag']) == {'price', 'unit_text', 'unit', 'quantity'}
+        assert (body['price_tag']['unit'], body['price_tag']['quantity']) == expected
+        assert body['price_tag']['price'] == float(tag['price'])

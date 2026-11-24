@@ -392,3 +392,21 @@ def item_vocabulary(conn) -> list[dict]:
         where e.type='item'
         order by chosen.label,e.id""",
     )
+
+
+def unit_labels(conn):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id,l.label from entities e
+        join entity_labels l on l.entity_id=e.id
+        where e.type='unit' and l.lang in ('ko','en') order by e.id,l.label""",
+    )
+
+
+def valid_unit(conn, unit_id):
+    return (
+        conn.execute("select 1 from entities where id=%s and type='unit'", (unit_id,)).fetchone()
+        is not None
+    )

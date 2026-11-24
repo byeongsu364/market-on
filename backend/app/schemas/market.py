@@ -10,6 +10,7 @@ class Market(BaseModel):
     name: str
     lat: float
     lng: float
+    distance_m: int | None = None
 
 
 class Zone(BaseModel):

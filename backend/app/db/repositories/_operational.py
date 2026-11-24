@@ -8,7 +8,7 @@ TABLE_FIELDS = {
     'markets': 'id name_ko region_id address lat lng at_mrkt_cd at_sgg_nm floorplan_svg source',
     'zones': 'id market_id store_category_id name_ko svg_path x y',
     'stores': 'id market_id zone_id name_ko store_category_id sbiz_id sbiz_industry floor map_x map_y hours source active',
-    'price_reports': 'market_id store_id item_id unit_id quantity price method media_id reported_at',
+    'price_reports': 'market_id store_id item_id unit_id quantity price method media_id reported_at device_hash',
     'media': 'id kind path mime bytes',
 }
 

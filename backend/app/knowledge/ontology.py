@@ -70,3 +70,12 @@ def match_vision_labels(conn, labels: list[str]) -> list[dict]:
                 },
             )
     return sorted(candidates.values(), key=lambda c: (-c['confidence'], c['item_id']))[:3]
+
+
+def match_unit(conn, unit_text):
+    def words(text):
+        return normalize(re.sub(r'[\d.]+', '', text))
+
+    target = words(unit_text)
+    matches = {r['id'] for r in repo.unit_labels(conn) if words(r['label']) == target and target}
+    return next(iter(matches)) if len(matches) == 1 else None

@@ -21,6 +21,7 @@ from app.routers import (
     sales,
     items,
     markets,
+    price_reports,
 )
 
 setup_logging()
@@ -37,6 +38,7 @@ routers = [
     sales.router,
     items.router,
     markets.router,
+    price_reports.router,
 ]
 
 
