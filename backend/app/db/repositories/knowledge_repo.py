@@ -1,7 +1,7 @@
 """All knowledge SQL, including file-loader operations, lives here."""
 
-from psycopg.types.json import Jsonb
 from pgvector import Vector
+from psycopg.types.json import Jsonb
 
 
 def source_id(conn, key):
@@ -221,6 +221,7 @@ def _prune_unreferenced(conn, table, key, candidates):
     Row locks also prevent new FK references racing the check and delete.
     """
     import sys
+
     from psycopg import sql
 
     deleted = 0
@@ -343,4 +344,51 @@ def search_items(conn, query):
         order by l.entity_id,rank,preferred
         ) matches order by rank,preferred,entity_id limit 10""",
         (query, query, query),
+    )
+
+
+def vision_item_labels(conn):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id,e.name_ko,l.label from entities e
+        join entity_labels l on l.entity_id=e.id
+        where e.type='item' and (l.kind='vision' or
+        (l.lang='en' and l.kind in ('preferred','synonym')))
+        order by e.id,l.label""",
+    )
+
+
+def similar_items(conn, item_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id,e.name_ko from entities e join entities top on top.id=%s
+        where e.type='item' and e.id<>top.id and (
+          (nullif(top.kamis->>'item_cd','') is not null
+           and e.kamis->>'item_cd'=top.kamis->>'item_cd')
+          or exists (select 1 from entity_relations r where r.predicate='substituteFor'
+            and ((r.subject_id=top.id and r.object_id=e.id)
+              or (r.object_id=top.id and r.subject_id=e.id)))) order by e.id""",
+        (item_id,),
+    )
+
+
+def item_vocabulary(conn) -> list[dict]:
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id as item_id, chosen.label as name_en
+        from entities e
+        join lateral (
+          select l.label from entity_labels l where l.entity_id=e.id
+          and ((l.lang='en' and l.kind='preferred') or l.kind='vision')
+          order by case when l.lang='en' and l.kind='preferred' then 0 else 1 end,
+                   l.label limit 1
+        ) chosen on true
+        where e.type='item'
+        order by chosen.label,e.id""",
     )
