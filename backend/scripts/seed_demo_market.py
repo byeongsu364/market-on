@@ -32,7 +32,14 @@ def seed_demo_market(conn):
         for key, name in ITEMS:
             demo_repo.ensure_entity(conn, f'item:{key}', 'item', name)
         store_repo.upsert_market(
-            conn, id='market:demo', name_ko='시연 시장', lat=DEMO_LAT, lng=DEMO_LNG, source='manual'
+            conn,
+            id='market:demo',
+            name_ko='시연 시장',
+            lat=DEMO_LAT,
+            lng=DEMO_LNG,
+            source='manual',
+            at_sgg_nm='서울',
+            at_mrkt_cd=None,
         )
         for index, (key, name) in enumerate(CATEGORIES):
             category_id = f'store_category:{key}'

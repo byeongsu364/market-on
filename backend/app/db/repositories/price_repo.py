@@ -68,6 +68,20 @@ def sale_units(conn, item_id):
     )
 
 
+def observation_unit_id(conn, unit, size):
+    """Only single survey units can use an existing ontology unit ID."""
+    try:
+        if float(size) != 1:
+            return None
+    except (ValueError, TypeError):
+        return None
+    suffix = {'개': 'piece', '단': 'bunch', '킬로그램': 'kg', '그램': 'g'}.get(unit, unit)
+    result = fetch_rows(
+        conn, "select id from entities where id=%s and type='unit'", (f'unit:{suffix}',)
+    )
+    return result[0]['id'] if result else None
+
+
 def baseline(conn, item_id, *, on_date, sgg_nm=None, market_at_cd=None, lookback_days=14):
     from datetime import timedelta
 
@@ -79,11 +93,17 @@ def baseline(conn, item_id, *, on_date, sgg_nm=None, market_at_cd=None, lookback
         and p.exmn_ymd between %s and %s order by p.exmn_ymd desc,p.mrkt_cd""",
         (item_id, on_date - timedelta(days=lookback_days), on_date),
     )
+    data = [
+        r
+        for r in data
+        if on_date - timedelta(days=lookback_days) <= r['exmn_ymd'] <= on_date
+        and r['market_type'] in ('traditional', 'large_retail')
+    ]
     if not data:
         return None
     regional = [r for r in data if r['sgg_nm'] == sgg_nm] if sgg_nm else []
     selected = regional or data
-    latest = selected[0]['exmn_ymd']
+    latest = max(r['exmn_ymd'] for r in selected)
     selected = [r for r in selected if r['exmn_ymd'] == latest]
     unit, size = selected[0]['unit'], selected[0]['unit_sz']
     # Never average prices expressed in different observation units.

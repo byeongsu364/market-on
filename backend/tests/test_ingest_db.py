@@ -53,7 +53,7 @@ def test_load_replace_search_cache_and_prune(db, tmp_path):
     data = tmp_path / 'data'
     fake = FakeProvider()
     first = load_all(db, data_dir=data, embedder=fake)
-    assert first['added'] == 20  # source + 8 explicit/3 generated entities + 8 documents
+    assert first['added'] == 28  # source + 16 explicit/3 generated entities + 8 documents
     ids = db.execute('select id from chunks order by id').fetchall()
     second = load_all(db, data_dir=data, embedder=fake)
     assert second['added'] == second['changed'] == second['deleted'] == 0
