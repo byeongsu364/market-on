@@ -29,3 +29,13 @@ def reject(user_id: UUID, operator=Depends(require_operator), conn=Depends(get_d
 @router.post('/merchants/{user_id}/disable')
 def disable(user_id: UUID, operator=Depends(require_operator), conn=Depends(get_db)):
     return {'user': service.set_status(conn, operator, user_id, 'disabled')}
+
+
+@router.get('/market-admins')
+def market_admins(operator=Depends(require_operator), conn=Depends(get_db)):
+    return service.market_admins(conn)
+
+
+@router.post('/market-admins/{user_id}/disable')
+def disable_market_admin(user_id: UUID, operator=Depends(require_operator), conn=Depends(get_db)):
+    return {'user': service.disable_market_admin(conn, operator, user_id)}

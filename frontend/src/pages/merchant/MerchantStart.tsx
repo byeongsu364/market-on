@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useT } from '../../i18n';
 import MerchantHome from './MerchantHome';
@@ -6,6 +6,10 @@ export default function MerchantStart() {
   const auth = useAuth();
   const t = useT();
   if (auth.loading) return <p>{t('loading')}</p>;
+  if (auth.user?.role === 'market_admin' && auth.user.status === 'approved')
+    return <Navigate to="/market-admin" replace />;
+  if (auth.user?.role === 'operator' && auth.user.status === 'approved')
+    return <Navigate to="/admin" replace />;
   if (auth.user?.role === 'merchant' && auth.user.status === 'approved') return <MerchantHome />;
   if (auth.user)
     return (

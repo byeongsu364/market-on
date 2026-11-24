@@ -17,11 +17,22 @@ import SaleNew from './pages/merchant/SaleNew';
 import StoreEdit from './pages/merchant/StoreEdit';
 import Poster from './pages/merchant/Poster';
 import AdminHome from './pages/admin/AdminHome';
+import MarketAdmin from './pages/MarketAdmin';
 import StorePage from './pages/StorePage';
 function MerchantGuard() {
   const { user, loading } = useAuth();
   if (loading) return null;
   return user?.role === 'merchant' && user.status === 'approved' ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/merchant" replace />
+  );
+}
+
+function MarketAdminGuard() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user?.role === 'market_admin' && user.status === 'approved' ? (
     <Outlet />
   ) : (
     <Navigate to="/merchant" replace />
@@ -46,6 +57,10 @@ function AppRoutes() {
           <Route path="merchant/sale/new" element={<SaleNew />} />
           <Route path="merchant/store" element={<StoreEdit />} />
           <Route path="merchant/poster" element={<Poster />} />
+        </Route>
+        <Route element={<MarketAdminGuard />}>
+          <Route path="market-admin" element={<MarketAdmin />} />
+          <Route path="market-admin/poster" element={<Poster market />} />
         </Route>
         <Route path="admin" element={<AdminHome />} />
         <Route path="s/:storeId" element={<StorePage />} />

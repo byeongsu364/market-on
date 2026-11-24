@@ -38,3 +38,23 @@ it('손님 가격을 그대로 확인 요청한다', async () => {
   expect(post).toHaveBeenCalledWith({ item_id: 'i', unit: price.unit, price: 1800 });
   vi.restoreAllMocks();
 });
+it('내 확인 가격이 있으면 상인 확인 줄은 한 번만 보여 준다', async () => {
+  vi.spyOn(api, 'getPrices').mockResolvedValue([
+    {
+      item_id: 'i',
+      name: '대파',
+      unit: price.unit,
+      customers: price,
+      my_confirmation: { price: 1800, confirmed_at: price.latest_at },
+    },
+  ]);
+  render(
+    <SessionProvider>
+      <MerchantPrices />
+    </SessionProvider>,
+  );
+  const label = await screen.findByText(/상인 확인 ·/);
+  expect(label.tagName).toBe('P');
+  expect(screen.queryByText('· 상인 확인')).not.toBeInTheDocument();
+  vi.restoreAllMocks();
+});

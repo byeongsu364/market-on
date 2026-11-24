@@ -36,6 +36,25 @@ export const useSessionState = () => {
   };
   useEffect(() => {
     let active = true;
+    const requested = new URLSearchParams(window.location.search).get('market');
+    if (requested) {
+      void getMarkets()
+        .then((markets) => {
+          const selected = markets.find((m) => m.market_id === requested);
+          if (active && !manuallyChosen.current && selected) {
+            setMarket(selected);
+          }
+        })
+        .catch(() => {
+          /* market list remains available */
+        })
+        .finally(() => {
+          if (active) setMarketLoading(false);
+        });
+      return () => {
+        active = false;
+      };
+    }
     if (market) {
       setMarketLoading(false);
       return;

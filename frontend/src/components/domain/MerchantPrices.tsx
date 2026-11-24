@@ -23,7 +23,7 @@ export default function MerchantPrices() {
         {rows.data?.map((row) => (
           <article key={row.item_id}>
             <h3>{row.name}</h3>
-            <StorePriceDisplay price={row.customers} />
+            <StorePriceDisplay price={row.customers} showConfirmation={!row.my_confirmation} />
             {row.my_confirmation && (
               <p>
                 상인 확인 · {priceTime(row.my_confirmation.confirmed_at)}

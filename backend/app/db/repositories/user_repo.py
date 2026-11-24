@@ -36,18 +36,19 @@ def store_taken(conn, store_id, exclude=None):
     )
 
 
-def create(conn, login_id, password_hash, *, role='merchant', store_id=None):
+def create(conn, login_id, password_hash, *, role='merchant', store_id=None, market_id=None):
     uid = uuid4()
     conn.execute(
-        """insert into users(id,login_id,password_hash,role,status,store_id,approved_at)
-        values(%s,%s,%s,%s,%s,%s,case when %s='operator' then now() end)""",
+        """insert into users(id,login_id,password_hash,role,status,store_id,market_id,approved_at)
+        values(%s,%s,%s,%s,%s,%s,%s,case when %s<>'merchant' then now() end)""",
         (
             uid,
             login_id,
             password_hash,
             role,
-            'approved' if role == 'operator' else 'pending',
+            'pending' if role == 'merchant' else 'approved',
             store_id,
+            market_id,
             role,
         ),
     )
@@ -75,3 +76,16 @@ def set_status(conn, uid, status, operator_id):
         (status, status, operator_id, uid),
     )
     return get(conn, uid)
+
+
+def list_market_admins(conn):
+    return rows(conn, "select * from users where role='market_admin' order by created_at,id")
+
+
+def scoped_merchants(conn, status, market_id):
+    return rows(
+        conn,
+        """select u.* from users u join stores s on s.id=u.store_id
+        where u.role='merchant' and u.status=%s and s.market_id=%s order by u.created_at,u.id""",
+        (status, market_id),
+    )

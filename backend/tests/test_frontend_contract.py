@@ -3,7 +3,7 @@
 from tests.test_merchant_api import merchant, sale_payload
 from tests.test_auth_api import memory, signup, operator, HEADER
 
-USER = {'id', 'login_id', 'role', 'status', 'store'}
+USER = {'id', 'login_id', 'role', 'status', 'store', 'market'}
 STORE = {'store_id', 'name', 'market_id', 'hours', 'item_ids', 'today_views', 'sale_views'}
 SALE = {'id', 'store_id', 'item_id', 'sale_price', 'starts_at', 'ends_at', 'status', 'view_count'}
 ITEM = {

@@ -5,13 +5,7 @@ import { useAction } from '../../hooks/useResource';
 import Button from '../common/Button';
 import ErrorBox from '../common/ErrorBox';
 import { useT } from '../../i18n';
-export default function AuthForm({
-  storeId,
-  operator = false,
-}: {
-  storeId?: string;
-  operator?: boolean;
-}) {
+export default function AuthForm({ storeId }: { storeId?: string; operator?: boolean }) {
   const t = useT();
   const auth = useAuth();
   const navigate = useNavigate();
@@ -20,9 +14,19 @@ export default function AuthForm({
   const [visible, setVisible] = useState(false);
   const action = useAction(async () => {
     const q = { login_id: id, password, store_id: storeId };
-    if (storeId) await auth.signup(q);
-    else await auth.login(q);
-    navigate(operator ? '/admin' : '/merchant');
+    if (storeId) {
+      await auth.signup(q);
+      navigate('/merchant');
+    } else {
+      const user = await auth.login(q);
+      navigate(
+        user.role === 'operator'
+          ? '/admin'
+          : user.role === 'market_admin'
+            ? '/market-admin'
+            : '/merchant',
+      );
+    }
     return true;
   });
   return (

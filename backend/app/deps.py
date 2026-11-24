@@ -39,11 +39,17 @@ def current_user(request: Request, conn=Depends(get_db)):
 
 def require_merchant(user=Depends(current_user)):
     if user['role'] != 'merchant' or user['status'] != 'approved':
-        raise AppError('NOT_APPROVED', '운영자 승인 후 사용할 수 있습니다.', 403)
+        raise AppError('NOT_APPROVED', '시장 관리자가 확인하면 열려요', 403)
     return user
 
 
 def require_operator(user=Depends(current_user)):
     if user['role'] != 'operator' or user['status'] != 'approved':
         raise AppError('FORBIDDEN', '운영자 권한이 필요합니다.', 403)
+    return user
+
+
+def require_market_admin(user=Depends(current_user)):
+    if user['role'] != 'market_admin' or user['status'] != 'approved':
+        raise AppError('FORBIDDEN', '시장 관리자 권한이 필요합니다.', 403)
     return user

@@ -129,7 +129,9 @@ it('시세 404에서도 확인 포인트와 판매 점포를 보여 준다', asy
   vi.mocked(getPrice).mockRejectedValue({ status: 404 });
   show('/items/item:green_onion');
   await waitFor(() => expect(screen.getByText('기준시세가 아직 없어요')).toBeInTheDocument());
-  expect(await screen.findByRole('button', { name: '점포 A-05' })).toBeInTheDocument();
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: '점포 A-05' })).toBeInTheDocument(),
+  );
 });
 
 it('시장 API 실패도 목록으로 대체한다', async () => {

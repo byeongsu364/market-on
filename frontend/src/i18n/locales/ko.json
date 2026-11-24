@@ -80,7 +80,7 @@
   "logout": "로그아웃",
   "operatorTitle": "상인 승인",
   "pendingTitle": "승인 대기 중이에요",
-  "pendingHelp": "운영자가 확인하면 바로 쓸 수 있어요",
+  "pendingHelp": "시장 관리자가 확인하면 열려요",
   "unavailableTitle": "지금은 상인 기능을 쓸 수 없어요",
   "merchantIntro": "상인이신가요?",
   "merchantBenefit": "마감세일을 올려 손님에게 알려 주세요.",

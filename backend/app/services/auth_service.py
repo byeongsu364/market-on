@@ -32,6 +32,7 @@ def _remember_unknown(login_id, failures, locked_until):
 
 def public_user(conn, user):
     store = store_repo.get_store(conn, user['store_id']) if user['store_id'] else None
+    market = store_repo.get_market(conn, user['market_id']) if user.get('market_id') else None
     return {key: user[key] for key in ('id', 'login_id', 'role', 'status')} | {
         'store': {
             'store_id': store['id'],
@@ -39,7 +40,8 @@ def public_user(conn, user):
             'market_id': store['market_id'],
         }
         if store
-        else None
+        else None,
+        'market': {'market_id': user['market_id'], 'name': market['name_ko']} if market else None,
     }
 
 
@@ -112,5 +114,19 @@ def create_operator(conn, login_id, password):
     try:
         with conn.transaction():
             return user_repo.create(conn, login_id, digest, role='operator')
+    except UniqueViolation:
+        raise AppError('LOGIN_ID_TAKEN', '이미 사용 중인 아이디입니다.', 409) from None
+
+
+def create_market_admin(conn, login_id, password, market_id):
+    login_id = security.normalize_login_id(login_id)
+    digest = security.hash_password(password)
+    try:
+        with conn.transaction():
+            if not store_repo.get_market(conn, market_id):
+                raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
+            return user_repo.create(
+                conn, login_id, digest, role='market_admin', market_id=market_id
+            )
     except UniqueViolation:
         raise AppError('LOGIN_ID_TAKEN', '이미 사용 중인 아이디입니다.', 409) from None

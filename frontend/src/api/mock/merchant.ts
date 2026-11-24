@@ -15,6 +15,7 @@ const users: PendingMerchant[] = [
   {
     id: 'admin',
     login_id: 'admin',
+    market: null,
     role: 'operator',
     status: 'approved',
     store: null,
@@ -23,6 +24,7 @@ const users: PendingMerchant[] = [
   {
     id: 'demo_a05',
     login_id: 'demo_a05',
+    market: null,
     role: 'merchant',
     status: 'approved',
     store: { store_id: 'store:A-05', name: '점포 A-05', market_id: 'market:demo' },
@@ -31,6 +33,7 @@ const users: PendingMerchant[] = [
   {
     id: 'pending_a08',
     login_id: 'pending_a08',
+    market: null,
     role: 'merchant',
     status: 'pending',
     store: { store_id: 'store:A-08', name: '점포 A-08', market_id: 'market:demo' },
@@ -94,6 +97,7 @@ export async function signup(q: AuthRequest) {
   const u: PendingMerchant = {
     id: q.login_id,
     login_id: q.login_id,
+    market: null,
     role: 'merchant',
     status: 'pending',
     store: { store_id: s.store_id, name: s.name, market_id: markets[0].market_id },

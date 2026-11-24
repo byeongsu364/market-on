@@ -112,7 +112,8 @@ export type ApiError = {
 export type User = {
   id: string;
   login_id: string;
-  role: 'merchant' | 'operator';
+  role: 'merchant' | 'operator' | 'market_admin';
+  market: { market_id: string; name: string } | null;
   status: 'pending' | 'approved' | 'rejected' | 'disabled';
   store: { store_id: string; name: string; market_id: string } | null;
 };
@@ -174,3 +175,16 @@ export type MerchantPriceRow = {
   my_confirmation: { price: number; confirmed_at: string } | null;
 };
 export type PriceConfirmRequest = { item_id: string; unit?: string; price: number };
+
+export type MarketSummary = {
+  market_id: string;
+  name: string;
+  stores_total: number;
+  merchants_approved: number;
+  merchants_pending: number;
+  views_7d: number;
+};
+export type MarketMerchant = Pick<User, 'id' | 'login_id' | 'status'> & {
+  created_at: string;
+  store: { store_id: string; name: string };
+};

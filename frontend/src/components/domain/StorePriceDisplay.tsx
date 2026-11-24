@@ -1,7 +1,13 @@
 import type { StorePrice } from '../../types/contract';
 import { unitLabel } from '../../utils/convertUnit';
 import { priceTime } from '../../utils/priceTime';
-export default function StorePriceDisplay({ price }: { price: StorePrice }) {
+export default function StorePriceDisplay({
+  price,
+  showConfirmation = true,
+}: {
+  price: StorePrice;
+  showConfirmation?: boolean;
+}) {
   if (!price) return <p className="caption">가격 정보 준비 중</p>;
   return (
     <div className={price.stale ? 'store-price stale' : 'store-price'}>
@@ -13,7 +19,9 @@ export default function StorePriceDisplay({ price }: { price: StorePrice }) {
         {' · '}
         {priceTime(price.latest_at)}
       </small>
-      {price.source === 'customers' && price.merchant_confirmed && <small> · 상인 확인</small>}
+      {showConfirmation && price.source === 'customers' && price.merchant_confirmed && (
+        <small> · 상인 확인</small>
+      )}
     </div>
   );
 }

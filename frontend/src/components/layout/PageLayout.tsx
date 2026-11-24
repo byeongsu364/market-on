@@ -6,7 +6,13 @@ export default function PageLayout() {
   return (
     <div
       className="app"
-      data-mode={pathname.startsWith('/merchant') || pathname === '/admin' ? 'merchant' : undefined}
+      data-mode={
+        pathname.startsWith('/merchant') ||
+        pathname.startsWith('/market-admin') ||
+        pathname === '/admin'
+          ? 'merchant'
+          : undefined
+      }
     >
       <Header />
       <main id="main">
