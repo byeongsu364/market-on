@@ -295,3 +295,52 @@ def prune_generated_criteria(conn, ids):
         )
     }
     return _prune_unreferenced(conn, 'entities', 'id', candidates)
+
+
+def get_item(conn, item_id):
+    from ._operational import rows
+
+    result = rows(conn, "select * from entities where id=%s and type='item'", (item_id,))
+    return result[0] if result else None
+
+
+def item_labels(conn, entity_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        'select * from entity_labels where entity_id=%s order by lang,kind,label',
+        (entity_id,),
+    )
+
+
+def item_relations(conn, item_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select r.*,e.name_ko,e.type,s.title as source_title
+        from entity_relations r join entities e on e.id=r.object_id
+        left join sources s on s.id=r.source_id
+        where r.subject_id=%s and r.predicate in ('hasCriterion','soldBy') order by r.id""",
+        (item_id,),
+    )
+
+
+def search_items(conn, query):
+    from ._operational import rows
+
+    # strpos treats %, _ and backslashes as literal query characters.
+    return rows(
+        conn,
+        """select entity_id from (
+        select distinct on (l.entity_id) l.entity_id,
+          case when l.label_norm=%s then 0
+               when strpos(l.label_norm,%s)=1 then 1 else 2 end as rank,
+          case when l.kind='preferred' then 0 else 1 end as preferred
+        from entity_labels l join entities e on e.id=l.entity_id
+        where e.type='item' and strpos(l.label_norm,%s)>0
+        order by l.entity_id,rank,preferred
+        ) matches order by rank,preferred,entity_id limit 10""",
+        (query, query, query),
+    )

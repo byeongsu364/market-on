@@ -68,3 +68,16 @@ def public_get(conn, sale_id):
         (sale_id,),
     )
     return result[0] if result else None
+
+
+def latest_active_by_store(conn, market_id, now):
+    return rows(
+        conn,
+        """select distinct on (c.store_id)
+        c.store_id,c.sale_price,c.regular_price,c.ends_at
+        from closing_sales c join stores s on s.id=c.store_id
+        where s.market_id=%s and s.active and c.status='active'
+        and %s between c.starts_at and c.ends_at
+        order by c.store_id,c.created_at desc,c.id desc""",
+        (market_id, now),
+    )

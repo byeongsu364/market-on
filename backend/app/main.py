@@ -8,7 +8,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.logging import setup_logging
-from app.routers import scan, price, merchant, stores, recipe, card, agent, auth, admin, sales
+from app.routers import (
+    scan,
+    price,
+    merchant,
+    stores,
+    recipe,
+    card,
+    agent,
+    auth,
+    admin,
+    sales,
+    items,
+    markets,
+)
 
 setup_logging()
 routers = [
@@ -22,6 +35,8 @@ routers = [
     auth.router,
     admin.router,
     sales.router,
+    items.router,
+    markets.router,
 ]
 
 
