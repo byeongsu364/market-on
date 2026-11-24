@@ -1,2 +1,1 @@
-// formatPrice: 추후 구현할 모듈.
-export {}
+export const formatPrice = (value: number) => `${Math.round(value).toLocaleString('ko-KR')}원`;

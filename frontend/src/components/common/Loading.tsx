@@ -1,2 +1,5 @@
-// Loading: 추후 구현할 모듈.
-export {}
+import { useT } from '../../i18n';
+export default function Loading() {
+  const t = useT();
+  return <p role="status">{t('loadingStatus')}</p>;
+}

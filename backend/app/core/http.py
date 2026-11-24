@@ -1,4 +1,5 @@
 """공통 외부 HTTP 전송과 두 번 재시도. 허용 의존성: core 및 httpx."""
+
 import asyncio
 import logging
 import time
@@ -12,10 +13,13 @@ def _retryable(exc: Exception) -> bool:
     if isinstance(exc, (httpx.ConnectError, httpx.TimeoutException)):
         return True
     return isinstance(exc, httpx.HTTPStatusError) and (
-        exc.response.status_code == 429 or 500 <= exc.response.status_code < 600)
+        exc.response.status_code == 429 or 500 <= exc.response.status_code < 600
+    )
 
 
-async def _request(method: str, url: str, *, timeout: float = 10.0, **kwargs: Any) -> httpx.Response:
+async def _request(
+    method: str, url: str, *, timeout: float = 10.0, **kwargs: Any
+) -> httpx.Response:
     async with httpx.AsyncClient(timeout=timeout) as client:
         for attempt in range(3):
             try:
@@ -59,3 +63,20 @@ def get_sync(url: str, *, timeout: float = 10.0, **kwargs: Any) -> httpx.Respons
 
 def post_sync(url: str, *, timeout: float = 10.0, **kwargs: Any) -> httpx.Response:
     return _request_sync('POST', url, timeout=timeout, **kwargs)
+
+
+class _MaskServiceKey(logging.Filter):
+    """httpx INFO URL 로그 및 예외 문자열의 공공데이터 키를 가린다."""
+
+    def filter(self, record):
+        import re
+
+        record.msg = re.sub(
+            r'(serviceKey(?:=|%3D))[^&\s\"\']+', r'\1***', record.getMessage(), flags=re.I
+        )
+        record.args = ()
+        return True
+
+
+for _name in ('httpx', 'httpcore', __name__):
+    logging.getLogger(_name).addFilter(_MaskServiceKey())

@@ -14,7 +14,7 @@ entities:
   - id: item:green_onion
     type: "item"
     name_ko: "대파"
-    kamis: null
+    kamis: {ctgry_cd: "200", item_cd: "246", vrty_cd: "00", grd_cd: "04", unit: kg, unit_sz: "1"}
     attrs: {}
     source: src:team-draft
     labels: {"ko": ["대파", "파"]}
@@ -29,28 +29,28 @@ entities:
   - id: item:onion
     type: "item"
     name_ko: "양파"
-    kamis: null
+    kamis: {ctgry_cd: "200", item_cd: "245", vrty_cd: "00", grd_cd: "04", unit: kg, unit_sz: "1"}
     attrs: {}
     labels: {"ko": ["양파"], "en": ["onion"]}
     relations: [{"p": "isA", "o": "cat:vegetable"}]
   - id: item:apple
     type: "item"
     name_ko: "사과"
-    kamis: {"ctgry_cd": "400", "item_cd": "411", "vrty_cd": "07", "grd_cd": "04", "unit": "개"}
+    kamis: {"ctgry_cd": "400", "item_cd": "411", "vrty_cd": "07", "grd_cd": "04", "unit": "개", "unit_sz": "10"}
     attrs: {}
     labels: {"ko": ["사과"], "en": ["apple"]}
     relations: [{"p": "isA", "o": "cat:fruit"}]
   - id: item:pear
     type: "item"
     name_ko: "배"
-    kamis: {"ctgry_cd": "400", "item_cd": "412", "vrty_cd": "01", "grd_cd": "04", "unit": "개"}
+    kamis: {"ctgry_cd": "400", "item_cd": "412", "vrty_cd": "01", "grd_cd": "04", "unit": "개", "unit_sz": "10"}
     attrs: {}
     labels: {"ko": ["배"], "en": ["pear"]}
     relations: [{"p": "isA", "o": "cat:fruit"}]
   - id: item:sweet_persimmon
     type: "item"
     name_ko: "단감"
-    kamis: {"ctgry_cd": "400", "item_cd": "416", "vrty_cd": "00", "grd_cd": "04", "unit": "개"}
+    kamis: {"ctgry_cd": "400", "item_cd": "416", "vrty_cd": "00", "grd_cd": "04", "unit": "개", "unit_sz": "5"}
     attrs: {}
     labels: {"ko": ["단감"], "en": ["sweet persimmon"]}
     relations: [{"p": "isA", "o": "cat:fruit"}]

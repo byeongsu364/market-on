@@ -1,2 +1,4 @@
-// Card: 추후 구현할 모듈.
-export {}
+import type { ReactNode } from 'react';
+export default function Card({ children }: { children: ReactNode }) {
+  return <section className="card">{children}</section>;
+}
