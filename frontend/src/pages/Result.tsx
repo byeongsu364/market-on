@@ -3,6 +3,7 @@ import { useResultFlow, useRequireMarket } from '../hooks/useFlows';
 import Resource from '../components/common/Resource';
 import Checklist from '../components/domain/Checklist';
 import PriceCompare from '../components/domain/PriceCompare';
+import StorePriceDisplay from '../components/domain/StorePriceDisplay';
 import { unitLabel } from '../utils/convertUnit';
 import { useT } from '../i18n';
 export default function Result() {
@@ -15,10 +16,12 @@ export default function Result() {
       {f.item.data && (
         <>
           <h1>{f.item.data.name}</h1>
-          <small>
-            {t('visionLabels')}
-            {(f.labels.length ? f.labels : f.item.data.vision_labels).join(', ')}
-          </small>
+          {f.method !== 'manual' && (
+            <small>
+              {t('visionLabels')}
+              {(f.labels.length ? f.labels : f.item.data.vision_labels).join(', ')}
+            </small>
+          )}
           <Checklist key={f.itemId} criteria={f.item.data.criteria} />
           <section className="card">
             <h2>{t('priceComparison')}</h2>
@@ -62,12 +65,18 @@ export default function Result() {
                 .filter((s) => s.highlight)
                 .map((s) => (
                   <article className="card" key={s.store_id}>
-                    <h3>{s.name}</h3>
+                    <h3>
+                      <Link
+                        to={`/s/${encodeURIComponent(s.store_id)}?item=${encodeURIComponent(f.itemId)}&unit=${encodeURIComponent(f.unit)}`}
+                      >
+                        {s.name}
+                      </Link>
+                    </h3>
                     <p>{f.map.data?.zones.find((z) => z.id === s.zone_id)?.name}</p>
                     {s.active_sale && (
                       <p>마감세일 · {s.active_sale.sale_price.toLocaleString()}원</p>
                     )}
-                    <p className="caption">가격 정보 준비 중</p>
+                    <StorePriceDisplay price={s.price} />
                   </article>
                 ))}
               {f.map.data?.stores.filter((s) => s.highlight).length === 0 && (
@@ -97,7 +106,10 @@ export default function Result() {
             <p className="caption">이 가격은 시장 가격표에 익명으로 더해져요</p>
           )}
           <div className="fixed-action">
-            <Link className="button" to={`/map?item=${encodeURIComponent(f.itemId)}`}>
+            <Link
+              className="button"
+              to={`/map?item=${encodeURIComponent(f.itemId)}&unit=${encodeURIComponent(f.unit)}`}
+            >
               {t('stores')}
             </Link>
           </div>

@@ -37,7 +37,9 @@ def nearby(conn, lat=None, lng=None):
     )
 
 
-def market_map(conn, market_id, item_id=None):
+def market_map(conn, market_id, item_id=None, unit=None):
+    from .store_price_service import store_price
+
     if store_repo.get_market(conn, market_id) is None:
         raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
     zones = sorted(
@@ -77,9 +79,14 @@ def market_map(conn, market_id, item_id=None):
                 else '',
                 highlight=item_id is not None and item_id in sells,
                 active_sale=ActiveSale(**sale) if sale else None,
+                price=store_price(conn, row, item_id, unit)[1]
+                if item_id and item_id in sells
+                else None,
             )
         )
     logger.info('Market %s: omitted %d stores without map coordinates', market_id, omitted)
+    if item_id:
+        stores.sort(key=lambda s: 2 if s.price is None else int(s.price.stale))
     return MarketMap(
         market_id=market_id,
         zones=[Zone(id=z['id'], name=z['name_ko'], x=z['x'], y=z['y']) for z in zones],

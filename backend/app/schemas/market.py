@@ -1,6 +1,7 @@
 """Public market and map contracts."""
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -26,6 +27,16 @@ class ActiveSale(BaseModel):
     ends_at: datetime
 
 
+class StorePrice(BaseModel):
+    price: int
+    unit: str
+    source: Literal['customers', 'merchant']
+    reporters: int
+    latest_at: datetime
+    stale: bool
+    merchant_confirmed: bool
+
+
 class Store(BaseModel):
     store_id: str
     name: str
@@ -36,6 +47,7 @@ class Store(BaseModel):
     hours: str
     highlight: bool
     active_sale: ActiveSale | None
+    price: StorePrice | None = None
 
 
 class MarketMap(BaseModel):

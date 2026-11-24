@@ -7,7 +7,7 @@ import type {
   RecommendResponse,
 } from '../../types/contract';
 import { items, markets, stores, source } from './data';
-import { activeForStore } from './merchant';
+import { activeForStore, storePrice } from './merchant';
 import { zones } from '../../constants/zones';
 import { convertUnit } from '../../utils/convertUnit';
 import { diffPct } from '../../utils/diffPct';
@@ -81,7 +81,7 @@ export const price = (q: PriceRequest): Promise<Price> =>
       },
     };
   });
-export const map = (market_id: string, item_id?: string): Promise<MarketMap> =>
+export const map = (market_id: string, item_id?: string, unit?: string): Promise<MarketMap> =>
   mock(() => ({
     market_id,
     zones,
@@ -90,8 +90,14 @@ export const map = (market_id: string, item_id?: string): Promise<MarketMap> =>
         ...s,
         highlight: !!item_id && s.sells.includes(item_id),
         active_sale: activeForStore(s.store_id, item_id),
+        price: item_id && s.sells.includes(item_id) ? storePrice(s.store_id, item_id, unit) : null,
       }))
-      .sort((a, b) => Number(!!b.active_sale) - Number(!!a.active_sale)),
+      .sort(
+        (a, b) =>
+          (item_id
+            ? (a.price ? Number(a.price.stale) : 2) - (b.price ? Number(b.price.stale) : 2)
+            : 0) || Number(!!b.active_sale) - Number(!!a.active_sale),
+      ),
   }));
 export const recommend = (q: RecommendRequest): Promise<RecommendResponse> =>
   mock(() => ({

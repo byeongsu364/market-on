@@ -128,7 +128,7 @@ it('503 인식 실패를 직접 입력으로 대체한다', async () => {
 it('시세 404에서도 확인 포인트와 판매 점포를 보여 준다', async () => {
   vi.mocked(getPrice).mockRejectedValue({ status: 404 });
   show('/items/item:green_onion');
-  expect(await screen.findByText('기준시세가 아직 없어요')).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByText('기준시세가 아직 없어요')).toBeInTheDocument());
   expect(await screen.findByRole('button', { name: '점포 A-05' })).toBeInTheDocument();
 });
 
@@ -158,6 +158,7 @@ it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
     expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();
     await waitFor(() => expect(log).toHaveBeenCalled());
     expect(screen.getByRole('heading', { name: '이 시장 판매 점포' })).toBeInTheDocument();
+    expect(screen.queryByText(/인식 라벨/)).not.toBeInTheDocument();
   } finally {
     log.mockRestore();
   }
@@ -192,4 +193,31 @@ it('사진 저장에 실패해 media_id가 없으면 유효하지 않은 사진 
   show('/items/item:green_onion', { price: 3000, method: 'price_tag_photo', media_id: null });
   await screen.findByRole('button', { name: '점포 A-05' });
   expect(postPriceReport).not.toHaveBeenCalled();
+});
+
+it('결과 판매 점포에 손님·상인·미등록 가격을 표시한다', async () => {
+  const storesApi = await import('../api/stores');
+  const map = await mock.map('market:demo', 'item:green_onion', 'unit:bunch');
+  const base = {
+    price: 1800,
+    unit: 'unit:bunch',
+    reporters: 3,
+    latest_at: new Date().toISOString(),
+    stale: false,
+    merchant_confirmed: true,
+  };
+  const sellers = map.stores.filter((s) => s.highlight);
+  sellers[0].price = { ...base, source: 'customers' };
+  sellers[1].price = { ...base, price: 2000, source: 'merchant', reporters: 0, stale: true };
+  const spy = vi.spyOn(storesApi, 'getMarketMap').mockResolvedValue(map);
+  try {
+    show('/items/item:green_onion', { method: 'manual' });
+    expect(await screen.findByText('1,800원 / 1단')).toBeInTheDocument();
+    expect(screen.getByText(/손님 3명 확인/)).toBeInTheDocument();
+    expect(screen.getByText('2,000원 / 1단').closest('.store-price')).toHaveClass('stale');
+    expect(screen.getByText('가격 정보 준비 중')).toBeInTheDocument();
+    expect(screen.queryByText(/인식 라벨/)).not.toBeInTheDocument();
+  } finally {
+    spy.mockRestore();
+  }
 });

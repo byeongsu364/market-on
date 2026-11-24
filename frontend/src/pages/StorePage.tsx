@@ -1,3 +1,6 @@
+import { useSearchParams } from 'react-router-dom';
+import { useMarketMap } from '../hooks/useMarketMap';
+import StorePriceDisplay from '../components/domain/StorePriceDisplay';
 import { getMarkets } from '../api/markets';
 import { Link, useParams } from 'react-router-dom';
 import { usePublicStore } from '../hooks/useSales';
@@ -10,6 +13,13 @@ export default function StorePage() {
   const { storeId = '' } = useParams();
   const state = usePublicStore(storeId);
   const t = useT();
+  const [params] = useSearchParams();
+  const selectedItem = params.get('item') ?? undefined;
+  const map = useMarketMap(
+    state.data?.store.market_id ?? '',
+    selectedItem,
+    params.get('unit') ?? undefined,
+  );
   const session = useSession();
   useEffect(() => {
     if (!state.data) return;
@@ -44,6 +54,13 @@ export default function StorePage() {
           <Link className="button" to="/scan">
             이 점포에서 찍기
           </Link>
+          {selectedItem && (
+            <Resource state={map}>
+              <StorePriceDisplay
+                price={map.data?.stores.find((s) => s.store_id === storeId)?.price ?? null}
+              />
+            </Resource>
+          )}
           <h2>{t('sells')}</h2>
           <div className="chips">
             {state.data.items.map((i) => (

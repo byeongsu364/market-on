@@ -72,6 +72,7 @@ export type Zone = {
   y: number;
 };
 export type Store = {
+  price: StorePrice;
   store_id: string;
   name: string;
   zone_id: string;
@@ -155,3 +156,21 @@ export type PriceReportRequest = {
   media_id?: string;
 };
 export type PriceReportResponse = { id: number; updated: boolean };
+
+export type StorePrice = {
+  price: number;
+  unit: string;
+  source: 'customers' | 'merchant';
+  reporters: number;
+  latest_at: string;
+  stale: boolean;
+  merchant_confirmed: boolean;
+} | null;
+export type MerchantPriceRow = {
+  item_id: string;
+  name: string;
+  unit: string;
+  customers: StorePrice;
+  my_confirmation: { price: number; confirmed_at: string } | null;
+};
+export type PriceConfirmRequest = { item_id: string; unit?: string; price: number };

@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 import pytest
 from fastapi.testclient import TestClient
 
-from app.db.repositories import knowledge_repo, sale_repo, store_repo
+from app.db.repositories import knowledge_repo, sale_repo, store_repo, price_repo
 from app.deps import get_db
 from app.main import app
 from scripts import seed_demo_market as seed
@@ -25,6 +25,9 @@ ITEM_KEYS = {
 
 @pytest.fixture
 def public(monkeypatch):
+    monkeypatch.setattr(price_repo, 'list_reports', lambda *a, **kw: [])
+    monkeypatch.setattr(price_repo, 'store_confirmations', lambda *a: [])
+    monkeypatch.setattr(price_repo, 'sale_units', lambda *a: [])
     markets, zones, stores, items = {}, {}, {}, {}
     for name, target in [
         ('upsert_market', markets),
@@ -189,6 +192,7 @@ def test_markets_contract(public, caplog):
             'hours',
             'highlight',
             'active_sale',
+            'price',
         }
         z = result['zones'][i // 4]
         assert s['map_x'] == z['x'] + 8 + (i % 2) * 80

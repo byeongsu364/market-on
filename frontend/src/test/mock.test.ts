@@ -51,3 +51,29 @@ it('상인 수정과 마감세일이 지도에 반영된다', async () => {
   await merchant.endSale(sale.id);
   expect(merchant.activeSales().some((s) => s.id === sale.id)).toBe(false);
 });
+it('상인 가격 확인과 지도 가격의 계약 키를 유지한다', async () => {
+  const merchant = await import('../api/mock/merchant');
+  await merchant.login(merchant.demoCredentials());
+  await merchant.confirmPrice({ item_id: 'item:green_onion', price: 1800 });
+  const row = (await merchant.getPrices()).find((r) => r.item_id === 'item:green_onion')!;
+  expect(Object.keys(row).sort()).toEqual([
+    'customers',
+    'item_id',
+    'my_confirmation',
+    'name',
+    'unit',
+  ]);
+  expect(Object.keys(row.my_confirmation!).sort()).toEqual(['confirmed_at', 'price']);
+  const map = await api.map('market:demo', row.item_id);
+  expect(map.stores[0].price?.source).toBe('merchant');
+  expect(Object.keys(map.stores[0].price!).sort()).toEqual([
+    'latest_at',
+    'merchant_confirmed',
+    'price',
+    'reporters',
+    'source',
+    'stale',
+    'unit',
+  ]);
+  expect((await api.map('market:demo')).stores.every((s) => s.price === null)).toBe(true);
+});

@@ -40,7 +40,9 @@ def test_public_sql_contract(db):
                     assert len({v['item_id'] for v in result}) == len(result) <= 10
                     assert all(set(v) == ITEM_KEYS for v in result)
                 empty = c.get('/items/search?q=').json()
-                assert empty and all(set(v) == ITEM_KEYS for v in empty)  # 빈 검색어 = 전체 목록 (직접 입력용)
+                assert empty and all(
+                    set(v) == ITEM_KEYS for v in empty
+                )  # 빈 검색어 = 전체 목록 (직접 입력용)
                 instant = datetime.now(UTC)
                 # Use Seoul midnight to satisfy the operational same-day constraint.
                 from zoneinfo import ZoneInfo

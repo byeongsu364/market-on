@@ -1,3 +1,4 @@
+import MerchantPrices from '../../components/domain/MerchantPrices';
 import { Link } from 'react-router-dom';
 import { useMerchantHome } from '../../hooks/useMerchant';
 import { useAuth } from '../../hooks/useAuth';
@@ -35,6 +36,7 @@ export default function MerchantHome() {
           </div>
         )}
       </Resource>
+      <MerchantPrices />
       <Link className="button wide" to="/merchant/sale/new">
         {t('postSale')}
       </Link>

@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import type { Store } from '../../types/contract';
 import { useActiveSales } from '../../hooks/useSales';
 import { useItemCatalog } from '../../hooks/useFlows';
+import StorePriceDisplay from './StorePriceDisplay';
 import StoreCard from './StoreCard';
 import Resource from '../common/Resource';
 export default function StoreSheet({
@@ -69,6 +70,7 @@ export default function StoreSheet({
         </button>
         <h2 id="store-title">{store.name}</h2>
         <p>{zone}</p>
+        {store.highlight && <StorePriceDisplay price={store.price} />}
         <h3>{t('sells')}</h3>
         <Resource state={catalog}>
           <div className="chips">

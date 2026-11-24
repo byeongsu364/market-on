@@ -35,5 +35,6 @@ export const stores: Store[] = Array.from({ length: 24 }, (_, i) => ({
   map_y: zones[Math.floor(i / 4)].y + 40 + Math.floor((i % 4) / 2) * 60,
   hours: '09:00–20:00 · 샘플',
   highlight: false,
+  price: null,
 }));
 export const itemName = (id: string) => items.find((i) => i.item_id === id)?.name ?? id;

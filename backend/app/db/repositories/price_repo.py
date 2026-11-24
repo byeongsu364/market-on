@@ -176,3 +176,22 @@ def save_recent_report(conn, values):
         )
         return {'id': recent[0], 'updated': True}
     return {'id': insert_report(conn, **values), 'updated': False}
+
+
+def store_confirmations(conn, store_id, item_id=None):
+    return fetch_rows(
+        conn,
+        """select * from store_price_confirmations where store_id=%s
+        and (%s::text is null or item_id=%s) order by confirmed_at desc,id desc""",
+        (store_id, item_id, item_id),
+    )
+
+
+def confirm_store_price(conn, store_id, item_id, unit_id, price, user_id):
+    return fetch_rows(
+        conn,
+        """insert into store_price_confirmations
+        (store_id,item_id,unit_id,price,confirmed_by) values (%s,%s,%s,%s,%s)
+        returning price,confirmed_at""",
+        (store_id, item_id, unit_id, price, user_id),
+    )[0]

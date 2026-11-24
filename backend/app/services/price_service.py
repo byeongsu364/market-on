@@ -37,24 +37,19 @@ def get_price(conn, item_id, *, market_id=None, on_date=None, unit_id=None, seen
     represented = price_repo.observation_unit_id(conn, raw_unit, size)
     if represented:
         unit = represented
-    if target and raw_unit in ('kg', 'g'):
+    if target:
         try:
-            kg = float(size) * (0.001 if raw_unit == 'g' else 1)
-            factor = float((target['props'] or {}).get('factor_kg', 0))
-        except (ValueError, TypeError):
-            kg = factor = 0
-        if kg > 0 and factor > 0:
-            multiplier = factor / kg
-            unit = target['id']
-    elif target and raw_unit in ('개', '포기', '마리', '송이', '손'):
-        # 개수 단위: aT 조사 수량(예: 10개)을 판매 단위 수량(props.count, 예: 1개)으로 나눔
-        try:
-            survey_count = float(size)
-            count = float((target['props'] or {}).get('count', 0))
-        except (ValueError, TypeError):
-            survey_count = count = 0
-        if survey_count > 0 and count > 0:
-            multiplier = count / survey_count
+            survey_size = float(size)
+        except (TypeError, ValueError):
+            survey_size = 0
+        props = {}
+        if raw_unit in ('kg', 'g'):
+            props['factor_kg'] = survey_size * (0.001 if raw_unit == 'g' else 1)
+        elif raw_unit in ('개', '포기', '마리', '송이', '손'):
+            props['count'] = survey_size
+        factor = unit_multiplier({'id': 'survey', 'props': props}, target)
+        if factor is not None:
+            multiplier = factor
             unit = target['id']
     reference = baseline['traditional'] or baseline['all']
     reference_price = round(reference['avg'] * multiplier)
@@ -93,3 +88,22 @@ def get_price(conn, item_id, *, market_id=None, on_date=None, unit_id=None, seen
             price=round(baseline['this_market']['price'] * multiplier), name=market['name_ko']
         )
     return PriceResponse(**values)
+
+
+def unit_multiplier(source, target):
+    """Convert one sale unit using the same kg/count ontology denominations as baselines."""
+    if source['id'] == target['id']:
+        return 1
+
+    def amount(unit, key):
+        implicit = {'unit:kg': 1, 'unit:g': 0.001} if key == 'factor_kg' else {}
+        try:
+            return float((unit.get('props') or {}).get(key, implicit.get(unit['id'], 0)))
+        except (TypeError, ValueError):
+            return 0
+
+    for key in ('factor_kg', 'count'):
+        a, b = amount(source, key), amount(target, key)
+        if a > 0 and b > 0:
+            return b / a
+    return None

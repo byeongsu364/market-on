@@ -608,3 +608,7 @@ summary {
   justify-content: space-between;
   gap: 12px;
 }
+
+.store-price.stale {
+  color: var(--color-text-secondary);
+}

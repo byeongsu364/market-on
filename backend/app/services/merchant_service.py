@@ -85,3 +85,61 @@ def poster(conn, user, base_url):
         'market_name': market['name_ko'],
         'url': f'{base_url.rstrip("/")}/s/{store["store_id"]}',
     }
+
+
+def prices(conn, user):
+    from .store_price_service import store_price
+    from .item_service import get_item
+    from app.db.repositories import price_repo
+
+    store = store_repo.get_store(conn, user['store_id'])
+    result = []
+    for row in merchant_repo.items(conn, user['store_id']):
+        item = get_item(conn, row['item_id'])
+        customers, _ = store_price(conn, store, item.item_id)
+        confirmations = price_repo.store_confirmations(conn, user['store_id'], item.item_id)
+        confirmation = confirmations[0] if confirmations else None
+        if confirmation:
+            from .price_service import unit_multiplier
+
+            units = price_repo.sale_units(conn, item.item_id)
+            by_id = {u['id']: u for u in units}
+            factor = unit_multiplier(
+                by_id.get(confirmation['unit_id'], {'id': confirmation['unit_id']}),
+                by_id.get(item.default_unit, {'id': item.default_unit}),
+            )
+            confirmation = (
+                dict(
+                    price=int(confirmation['price'] * factor + 0.5),
+                    confirmed_at=confirmation['confirmed_at'],
+                )
+                if factor is not None
+                else None
+            )
+        result.append(
+            dict(
+                item_id=item.item_id,
+                name=item.name,
+                unit=item.default_unit,
+                customers=customers,
+                my_confirmation=confirmation,
+            )
+        )
+    return result
+
+
+def confirm_price(conn, user, data):
+    from .item_service import get_item
+    from app.db.repositories import price_repo
+
+    with conn.transaction():
+        user_repo.lock_store(conn, user['store_id'])
+        if data.item_id not in {i['item_id'] for i in merchant_repo.items(conn, user['store_id'])}:
+            raise AppError('ITEM_NOT_SOLD', '내 점포의 취급 품목을 선택하세요.', 422)
+        item = get_item(conn, data.item_id)
+        unit = data.unit or item.default_unit
+        if unit not in item.units:
+            raise AppError('INVALID_UNIT', '판매 단위를 확인하세요.', 422)
+        return price_repo.confirm_store_price(
+            conn, user['store_id'], data.item_id, unit, data.price, user['id']
+        )

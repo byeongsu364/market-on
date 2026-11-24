@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from app.deps import get_db, require_merchant, require_csrf
 from app.core.config import settings
-from app.schemas.merchant import StorePatch, SaleCreate, Repost, SaleStatus
+from app.schemas.merchant import StorePatch, SaleCreate, Repost, SaleStatus, PriceConfirm
 from app.services import merchant_service as service
 
 router = APIRouter(prefix='/merchant', tags=['merchant'], dependencies=[Depends(require_csrf)])
@@ -42,3 +42,13 @@ def end(sale_id: int, user=Depends(require_merchant), conn=Depends(get_db)):
 @router.get('/poster')
 def poster(user=Depends(require_merchant), conn=Depends(get_db)):
     return service.poster(conn, user, settings.CORS_ORIGINS[0])
+
+
+@router.get('/prices')
+def prices(user=Depends(require_merchant), conn=Depends(get_db)):
+    return service.prices(conn, user)
+
+
+@router.post('/prices/confirm')
+def confirm_price(data: PriceConfirm, user=Depends(require_merchant), conn=Depends(get_db)):
+    return service.confirm_price(conn, user, data)

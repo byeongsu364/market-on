@@ -35,7 +35,7 @@ export function useResultFlow() {
     unit,
     seen_price: Number(value) > 0 ? Number(value) / (initial.quantity || 1) : undefined,
   });
-  const map = useMarketMap(market?.market_id ?? '', itemId);
+  const map = useMarketMap(market?.market_id ?? '', itemId, unit);
   const submitted = useRef(new Set<string>());
   useEffect(() => {
     if (
@@ -80,6 +80,7 @@ export function useResultFlow() {
     unit,
     setSelected,
     labels: initial.labels ?? [],
+    method: initial.method,
     itemId,
     map,
     storeId,
@@ -92,7 +93,7 @@ export function useMapFlow() {
   const { market, setStoreContext } = useSession();
   const [params] = useSearchParams();
   const item = params.get('item') ?? undefined;
-  const map = useMarketMap(market?.market_id ?? '', item);
+  const map = useMarketMap(market?.market_id ?? '', item, params.get('unit') ?? undefined);
   const [selected, setSelected] = useState<Store | null>(null);
   const [trigger, setTrigger] = useState<Element | null>(null);
   const close = useCallback(() => setSelected(null), []);

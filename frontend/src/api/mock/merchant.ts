@@ -243,6 +243,7 @@ export async function view(id: number) {
 
 export function resetMock() {
   current = null;
+  confirmations.clear();
   users.splice(0, users.length, ...structuredClone(initialUsers));
   passwords.clear();
   users.forEach((u) => passwords.set(u.login_id, password));
@@ -257,4 +258,63 @@ export function resetMock() {
   } catch {
     /* unavailable */
   }
+}
+
+const confirmations = new Map<string, { price: number; confirmed_at: string; unit: string }>();
+export function storePrice(
+  id: string,
+  item: string,
+  unit?: string,
+): import('../../types/contract').StorePrice {
+  const c = confirmations.get(`${id}:${item}`);
+  if (!c || Date.now() - Date.parse(c.confirmed_at) > 7 * 86400000 || (unit && unit !== c.unit))
+    return null;
+  return {
+    price: c.price,
+    unit: c.unit,
+    source: 'merchant',
+    reporters: 0,
+    latest_at: c.confirmed_at,
+    stale:
+      new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(
+        new Date(c.confirmed_at),
+      ) !== seoulDay(),
+    merchant_confirmed: true,
+  };
+}
+function lastConfirmation(id: string, item: string) {
+  const c = confirmations.get(`${id}:${item}`);
+  return c ? { price: c.price, confirmed_at: c.confirmed_at } : null;
+}
+export async function getPrices(): Promise<import('../../types/contract').MerchantPriceRow[]> {
+  const id = merchant().store_id;
+  return items
+    .filter((i) => info(id).item_ids.includes(i.item_id))
+    .map((i) => ({
+      item_id: i.item_id,
+      name: i.name,
+      unit: i.default_unit,
+      customers: null,
+      my_confirmation: lastConfirmation(id, i.item_id),
+    }));
+}
+export async function confirmPrice(q: import('../../types/contract').PriceConfirmRequest) {
+  const id = merchant().store_id;
+  const item = items.find((i) => i.item_id === q.item_id);
+  if (
+    !item ||
+    !info(id).item_ids.includes(q.item_id) ||
+    !Number.isInteger(q.price) ||
+    q.price < 10 ||
+    q.price > 10000000 ||
+    (q.unit && !item.units.includes(q.unit))
+  )
+    throw new Error('품목·가격·단위를 확인하세요.');
+  const result = {
+    price: q.price,
+    confirmed_at: new Date().toISOString(),
+    unit: q.unit ?? item.default_unit,
+  };
+  confirmations.set(`${id}:${q.item_id}`, result);
+  return { price: result.price, confirmed_at: result.confirmed_at };
 }
