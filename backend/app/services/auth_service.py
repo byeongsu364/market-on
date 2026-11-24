@@ -1,5 +1,6 @@
 """Registration, login throttling and persistent opaque sessions."""
 
+import threading
 from datetime import datetime, timedelta, timezone
 from psycopg.errors import UniqueViolation
 from app.core.config import settings
@@ -8,8 +9,25 @@ from app.core import security
 from app.db.repositories import user_repo, session_repo, store_repo
 
 
+LOCK_AFTER = 5
+LOCK_FOR = timedelta(minutes=10)
+# 없는 아이디도 실제 계정처럼 5회 실패 시 ACCOUNT_LOCKED를 돌려줘서
+# "잠기는 아이디 = 있는 아이디"로 계정 존재를 알아내지 못하게 함 (메모리에만, 개수 제한).
+_UNKNOWN_MAX = 10_000
+_unknown_logins: dict[str, dict] = {}
+_unknown_lock = threading.Lock()
+
+
 def now():
     return datetime.now(timezone.utc)
+
+
+def _remember_unknown(login_id, failures, locked_until):
+    with _unknown_lock:
+        _unknown_logins.pop(login_id, None)
+        while len(_unknown_logins) >= _UNKNOWN_MAX:
+            _unknown_logins.pop(next(iter(_unknown_logins)))
+        _unknown_logins[login_id] = {'failed_logins': failures, 'locked_until': locked_until}
 
 
 def public_user(conn, user):
@@ -50,24 +68,29 @@ def signup(conn, data):
 
 def login(conn, data):
     """Return failures instead of raising so the request transaction saves counters."""
+    login_id = data.login_id.lower()
+    password = data.password.get_secret_value()
+    locked_error = AppError('ACCOUNT_LOCKED', '10분 후 다시 로그인하세요.', 423)
     with conn.transaction():
-        user = user_repo.by_login(conn, data.login_id.lower(), lock=True)
+        user = user_repo.by_login(conn, login_id, lock=True)
+        state = user or _unknown_logins.get(login_id) or {'failed_logins': 0, 'locked_until': None}
         instant = now()
-        if user and user['locked_until'] and user['locked_until'] > instant:
-            return AppError('ACCOUNT_LOCKED', '10분 후 다시 로그인하세요.', 423)
-        valid = security.verify_password(
-            data.password.get_secret_value(), user['password_hash'] if user else None
-        )
-        if not user or not valid:
-            if user:
-                failures = (0 if user['locked_until'] else user['failed_logins']) + 1
-                locked = instant + timedelta(minutes=10) if failures >= 5 else None
-                user_repo.login_result(conn, user['id'], failures, locked)
-                if locked:
-                    return AppError('ACCOUNT_LOCKED', '10분 후 다시 로그인하세요.', 423)
-            return AppError('INVALID_CREDENTIALS', '아이디 또는 비밀번호를 확인하세요.', 401)
-        user_repo.login_result(conn, user['id'], 0, None)
-        return session(conn, user)
+        if state['locked_until'] and state['locked_until'] > instant:
+            return locked_error
+        valid = security.verify_password(password, user['password_hash'] if user else None)
+        if user and valid:
+            user_repo.login_result(conn, user['id'], 0, None)
+            session_repo.purge_expired(conn, user['id'], instant)
+            return session(conn, user)
+        failures = (0 if state['locked_until'] else state['failed_logins']) + 1
+        locked = instant + LOCK_FOR if failures >= LOCK_AFTER else None
+        if user:
+            user_repo.login_result(conn, user['id'], failures, locked)
+        else:
+            _remember_unknown(login_id, failures, locked)
+        if locked:
+            return locked_error
+        return AppError('INVALID_CREDENTIALS', '아이디 또는 비밀번호를 확인하세요.', 401)
 
 
 def current(conn, token):

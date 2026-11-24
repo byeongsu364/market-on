@@ -107,3 +107,32 @@ def test_login_failure_commits_across_connections(db):
     finally:
         with connection() as conn:
             conn.execute("delete from users where login_id='commit_check'")
+
+
+def test_disable_revokes_sessions_and_login_purges_expired(auth_db):
+    conn, client = auth_db
+    response = client.post(
+        '/auth/signup',
+        headers=HEADER,
+        json=dict(login_id='db_revoke', password=PASSWORD, store_id='store:demo-A05'),
+    )
+    uid = response.json()['user']['id']
+    merchant_cookie = client.cookies.get('mo_session')
+    # 만료된 세션은 다음 로그인 때 정리됨
+    conn.execute(
+        "insert into sessions(id,user_id,expires_at) values(%s,%s,now()-interval '1 day')",
+        ('0' * 64, uid),
+    )
+    assert (
+        client.post(
+            '/auth/login', headers=HEADER, json=dict(login_id='db_revoke', password=PASSWORD)
+        ).status_code
+        == 200
+    )
+    assert not conn.execute('select 1 from sessions where id=%s', ('0' * 64,)).fetchone()
+    auth_service.create_operator(conn, 'db_admin2', PASSWORD)
+    client.post('/auth/login', headers=HEADER, json=dict(login_id='db_admin2', password=PASSWORD))
+    assert client.post(f'/admin/merchants/{uid}/disable', headers=HEADER).status_code == 200
+    assert conn.execute('select count(*) from sessions where user_id=%s', (uid,)).fetchone()[0] == 0
+    client.cookies.set('mo_session', merchant_cookie, domain='testserver.local', path='/')
+    assert client.get('/auth/me').status_code == 401

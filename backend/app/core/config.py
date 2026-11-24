@@ -1,6 +1,7 @@
 """환경변수 설정. 허용 의존성: 표준 라이브러리 및 pydantic-settings."""
 
 from pathlib import Path
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,6 +27,14 @@ class Settings(BaseSettings):
     OLLAMA_CHAT_MODEL: str = 'gemma4:e4b'
     OLLAMA_EMBEDDING_MODEL: str = 'bge-m3:latest'
     CORS_ORIGINS: list[str] = ['http://localhost:5173']
+
+    @field_validator('CORS_ORIGINS')
+    @classmethod
+    def no_wildcard_origin(cls, value: list[str]) -> list[str]:
+        # 로그인 쿠키(allow_credentials=True)와 '*'를 같이 쓰면 아무 사이트나 로그인된 요청을 보낼 수 있음
+        if any(origin.strip() == '*' for origin in value):
+            raise ValueError('CORS_ORIGINS에 *를 쓸 수 없어요. 실제 주소를 적어요.')
+        return value
 
 
 settings = Settings()

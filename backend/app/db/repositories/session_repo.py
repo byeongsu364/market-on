@@ -21,3 +21,12 @@ def get(conn, digest, now):
 
 def delete(conn, digest):
     conn.execute('delete from sessions where id=%s', (digest,))
+
+
+def delete_for_user(conn, user_id):
+    """승인 취소·거절·비활성 시 그 사용자의 모든 로그인을 즉시 끊음."""
+    conn.execute('delete from sessions where user_id=%s', (user_id,))
+
+
+def purge_expired(conn, user_id, now):
+    conn.execute('delete from sessions where user_id=%s and expires_at<=%s', (user_id, now))
