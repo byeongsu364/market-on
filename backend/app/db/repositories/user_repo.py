@@ -36,20 +36,23 @@ def store_taken(conn, store_id, exclude=None):
     )
 
 
-def create(conn, login_id, password_hash, *, role='merchant', store_id=None, market_id=None):
+def create(
+    conn, login_id, password_hash, *, role='merchant', store_id=None, market_id=None, status=None
+):
     uid = uuid4()
+    status = status or ('pending' if role == 'merchant' else 'approved')
     conn.execute(
         """insert into users(id,login_id,password_hash,role,status,store_id,market_id,approved_at)
-        values(%s,%s,%s,%s,%s,%s,%s,case when %s<>'merchant' then now() end)""",
+        values(%s,%s,%s,%s,%s,%s,%s,case when %s='approved' then now() end)""",
         (
             uid,
             login_id,
             password_hash,
             role,
-            'pending' if role == 'merchant' else 'approved',
+            status,
             store_id,
             market_id,
-            role,
+            status,
         ),
     )
     return get(conn, uid)

@@ -1,3 +1,5 @@
+import MarketRequest from '../components/domain/MarketRequest';
+import { useMarketChoice } from '../hooks/useFlows';
 import ManualInput from '../components/domain/ManualInput';
 import { useRequireMarket } from '../hooks/useFlows';
 import { Link } from 'react-router-dom';
@@ -34,11 +36,24 @@ function PriceTag({ item }: { item: Item }) {
   );
 }
 export default function Home() {
-  const { market, automatic } = useSession();
+  const { market, automatic, unsupported, nearbyActive } = useSession();
+  const choose = useMarketChoice();
   const ready = useRequireMarket();
   const t = useT();
   const catalog = useItemCatalog();
   const sales = useActiveSales(market?.market_id ?? 'market:demo');
+  if (unsupported)
+    return (
+      <>
+        <MarketRequest market={unsupported} />
+        {nearbyActive && (
+          <button onClick={() => choose(nearbyActive)}>
+            가까운 지원 시장 · {nearbyActive.name}
+          </button>
+        )}
+        <Link to="/markets">시장 목록 보기</Link>
+      </>
+    );
   if (!ready) return null;
   return (
     <>

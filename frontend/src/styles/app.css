@@ -612,3 +612,21 @@ summary {
 .store-price.stale {
   color: var(--color-text-secondary);
 }
+
+.market-admin-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.market-admin-stats .card {
+  min-width: 0;
+  padding: 8px;
+}
+.market-admin-stats .big-number {
+  font-size: clamp(20px, 6vw, 32px);
+}
+.market-admin-logout {
+  display: block;
+  margin-top: 48px;
+}
+.poster h1 {
+  word-break: keep-all;
+}

@@ -12,6 +12,7 @@ vi.mock('../api/scan', () => ({ recognize: vi.fn() }));
 vi.mock('../api/price', () => ({ getPrice: vi.fn() }));
 vi.mock('../api/priceReports', () => ({ postPriceReport: vi.fn() }));
 const market = {
+  status: 'active' as const,
   market_id: 'market:demo',
   name: '가까운 시장',
   lat: 37.57,

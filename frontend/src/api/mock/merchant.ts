@@ -87,9 +87,7 @@ export async function logout() {
   session(null);
 }
 export async function signup(q: AuthRequest) {
-  if (!/^[a-z0-9_]{4,20}$/.test(q.login_id) || q.password.length < 8)
-    throw new Error('아이디는 4~20자 영문 소문자·숫자·_, 비밀번호는 8자 이상이에요.');
-  if (users.some((u) => u.login_id === q.login_id)) throw new Error('이미 쓰는 아이디예요.');
+  validateSignup(q.login_id, q.password);
   if (users.some((u) => u.store?.store_id === q.store_id && u.status === 'approved'))
     throw new Error('이미 승인된 상인이 있는 점포예요.');
   const s = stores.find((s) => s.store_id === q.store_id);
@@ -210,7 +208,7 @@ export async function poster() {
     url: `${window.location.origin}/s/${s.store_id}`,
   };
 }
-function operator() {
+export function operator() {
   if (current?.role !== 'operator') throw new Error('운영자만 쓸 수 있어요.');
 }
 export async function pending() {
@@ -228,7 +226,7 @@ export async function decide(id: string, status: User['status']) {
     )
   )
     throw new Error('이미 승인된 점포예요.');
-  u.status = status;
+  transitionAccount(u, status);
 }
 export async function publicStore(id: string) {
   const key = `${seoulDay()}:${id}`;
@@ -321,4 +319,37 @@ export async function confirmPrice(q: import('../../types/contract').PriceConfir
   };
   confirmations.set(`${id}:${q.item_id}`, result);
   return { price: result.price, confirmed_at: result.confirmed_at };
+}
+
+export function createPendingManager(login_id: string, password: string, market_id: string) {
+  login_id = login_id.toLowerCase();
+  validateSignup(login_id, password);
+  const market = markets.find((m) => m.market_id === market_id);
+  if (!market) throw new Error('시장을 찾을 수 없어요.');
+  const user: PendingMerchant = {
+    id: login_id,
+    login_id,
+    role: 'market_admin',
+    status: 'pending',
+    store: null,
+    market: { market_id, name: market.name },
+    created_at: new Date().toISOString(),
+  };
+  users.push(user);
+  passwords.set(login_id, password);
+  return user.id;
+}
+export function reviewManager(id: string, status: 'approved' | 'rejected') {
+  const user = users.find((u) => u.id === id);
+  if (user) transitionAccount(user, status);
+}
+
+function validateSignup(login_id: string, password: string) {
+  if (!/^[a-z0-9_]{4,20}$/.test(login_id) || password.length < 8 || password.length > 128)
+    throw new Error('아이디·비밀번호 규칙을 확인하세요.');
+  if (users.some((u) => u.login_id === login_id)) throw new Error('이미 쓰는 아이디예요.');
+}
+
+function transitionAccount(user: User, status: User['status']) {
+  user.status = status;
 }

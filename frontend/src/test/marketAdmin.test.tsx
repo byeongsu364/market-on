@@ -59,7 +59,14 @@ it('시장 관리자는 승인하고 거절 전에 확인한다', async () => {
 });
 it('QR 시장은 저장된 시장보다 우선하고 그날 유지된다', async () => {
   window.history.replaceState({}, '', '/?market=market:test');
-  const market = { market_id: 'market:test', name: '시험시장', distance_m: null, lat: 0, lng: 0 };
+  const market = {
+    status: 'active' as const,
+    market_id: 'market:test',
+    name: '시험시장',
+    distance_m: null,
+    lat: 0,
+    lng: 0,
+  };
   vi.spyOn(markets, 'getMarkets').mockResolvedValue([market]);
   const { result, unmount } = renderHook(() => useSessionState());
   await waitFor(() => expect(result.current.market?.market_id).toBe('market:test'));
@@ -109,7 +116,7 @@ it('시장 입구 포스터는 시장 URL의 QR을 표시한다', async () => {
       <App />
     </MemoryRouter>,
   );
-  await screen.findByRole('heading', { name: '시험시장 · 사진 한 장으로 이 품목 어디서 파는지' });
+  await screen.findByRole('heading', { name: '사진 한 장으로 어디서 파는지 바로' });
   await waitFor(() => expect(container.querySelector('.poster-qr svg')).toBeTruthy());
   vi.restoreAllMocks();
 });

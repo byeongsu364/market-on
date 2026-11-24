@@ -1,3 +1,4 @@
+import Applications from '../../components/domain/Applications';
 import { useAuth } from '../../hooks/useAuth';
 import { useAdmin } from '../../hooks/useMerchant';
 import AuthForm from '../../components/domain/AuthForm';
@@ -45,6 +46,7 @@ export default function AdminHome() {
         <AuthForm operator />
       ) : auth.user.role === 'operator' ? (
         <>
+          <Applications />
           <Pending />
           <button className="secondary" onClick={() => void auth.logout()}>
             {t('logout')}

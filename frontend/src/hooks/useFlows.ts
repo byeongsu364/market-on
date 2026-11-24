@@ -144,12 +144,12 @@ export function useRecommendFlow() {
   };
 }
 export function useRequireMarket() {
-  const { market, marketLoading } = useSession();
+  const { market, marketLoading, unsupported } = useSession();
   const navigate = useNavigate();
   const location = useLocation();
   useEffect(() => {
-    if (!market && !marketLoading)
+    if (!market && !marketLoading && !(unsupported && location.pathname === '/'))
       navigate('/markets', { replace: true, state: { from: location.pathname + location.search } });
-  }, [market, marketLoading, navigate, location.pathname, location.search]);
+  }, [market, marketLoading, unsupported, navigate, location.pathname, location.search]);
   return !!market;
 }

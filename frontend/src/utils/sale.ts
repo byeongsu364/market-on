@@ -21,10 +21,10 @@ export const saleTime = (value: string) =>
     minute: '2-digit',
     hour12: false,
   }).format(new Date(value));
-export const seoulDay = () =>
+export const seoulDay = (date = new Date()) =>
   new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).format(new Date());
+  }).format(date);

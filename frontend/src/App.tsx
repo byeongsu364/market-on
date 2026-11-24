@@ -2,6 +2,7 @@ import { useT } from './i18n';
 import { Route, Routes, Link, Navigate, Outlet } from 'react-router-dom';
 import { SessionProvider } from './store/SessionProvider';
 import PageLayout from './components/layout/PageLayout';
+import Join from './pages/Join';
 import Home from './pages/Home';
 import Scan from './pages/Scan';
 import Result from './pages/Result';
@@ -32,6 +33,8 @@ function MerchantGuard() {
 function MarketAdminGuard() {
   const { user, loading } = useAuth();
   if (loading) return null;
+  if (user?.role === 'market_admin' && user.status === 'pending')
+    return <p>운영팀이 확인하면 열려요</p>;
   return user?.role === 'market_admin' && user.status === 'approved' ? (
     <Outlet />
   ) : (
@@ -48,6 +51,7 @@ function AppRoutes() {
         <Route path="scan" element={<Scan />} />
         <Route path="items/:itemId" element={<Result />} />
         <Route path="map" element={<MarketMap />} />
+        <Route path="join" element={<Join />} />
         <Route path="markets" element={<MarketSelect />} />
         <Route path="recommend" element={<Recommend />} />
         <Route path="merchant" element={<MerchantStart />} />

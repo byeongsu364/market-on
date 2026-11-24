@@ -7,8 +7,12 @@ from app.core.errors import AppError
 from app.db.repositories import knowledge_repo, media_repo, price_repo, store_repo
 
 
+def hash_device(device_id):
+    return sha256((str(device_id) + settings.DEVICE_HASH_SALT).encode()).hexdigest()
+
+
 def submit(conn, data, device_id):
-    device_hash = sha256((str(device_id) + settings.DEVICE_HASH_SALT).encode()).hexdigest()
+    device_hash = hash_device(device_id)
     with conn.transaction():
         if not knowledge_repo.get_item(conn, data.item_id):
             raise AppError('INVALID_ITEM', '품목을 확인하세요.', 422)

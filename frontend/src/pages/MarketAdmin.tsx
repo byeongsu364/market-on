@@ -23,7 +23,7 @@ export default function MarketAdmin() {
       <h1>{auth.user?.market?.name}</h1>
       <Resource state={market}>
         {market.data && (
-          <div className="merchant-stats">
+          <div className="merchant-stats market-admin-stats">
             <p className="card">
               점포 수<strong className="big-number">{market.data.stores_total}</strong>
             </p>
@@ -49,7 +49,7 @@ export default function MarketAdmin() {
             {list.data?.map((user) => (
               <article className="card" key={user.id}>
                 <h3>{user.store.name}</h3>
-                <p className="card">{user.login_id}</p>
+                <p>{user.login_id}</p>
                 <time dateTime={user.created_at}>
                   {new Date(user.created_at).toLocaleString('ko-KR')}
                 </time>
@@ -72,7 +72,7 @@ export default function MarketAdmin() {
       ))}
       {action.error && <ErrorBox message={action.error} />}
       <Link to="/market-admin/poster">시장 입구 QR 포스터</Link>
-      <button className="secondary" onClick={() => void auth.logout()}>
+      <button className="secondary market-admin-logout" onClick={() => void auth.logout()}>
         로그아웃
       </button>
     </>

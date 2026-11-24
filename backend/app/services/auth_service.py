@@ -118,7 +118,7 @@ def create_operator(conn, login_id, password):
         raise AppError('LOGIN_ID_TAKEN', '이미 사용 중인 아이디입니다.', 409) from None
 
 
-def create_market_admin(conn, login_id, password, market_id):
+def create_market_admin(conn, login_id, password, market_id, *, pending=False):
     login_id = security.normalize_login_id(login_id)
     digest = security.hash_password(password)
     try:
@@ -126,7 +126,12 @@ def create_market_admin(conn, login_id, password, market_id):
             if not store_repo.get_market(conn, market_id):
                 raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
             return user_repo.create(
-                conn, login_id, digest, role='market_admin', market_id=market_id
+                conn,
+                login_id,
+                digest,
+                role='market_admin',
+                market_id=market_id,
+                **({'status': 'pending'} if pending else {}),
             )
     except UniqueViolation:
         raise AppError('LOGIN_ID_TAKEN', '이미 사용 중인 아이디입니다.', 409) from None

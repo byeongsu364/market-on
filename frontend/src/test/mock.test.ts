@@ -1,3 +1,4 @@
+import { saleEnd } from '../utils/sale';
 import { it, expect } from 'vitest';
 import * as api from '../api/mock';
 import type { Item, MarketMap, Price, RecognizeResponse } from '../types/contract';
@@ -43,7 +44,7 @@ it('상인 수정과 마감세일이 지도에 반영된다', async () => {
   const sale = await merchant.createSale({
     item_id: 'item:onion',
     sale_price: 3000,
-    ends_at: new Date(Date.now() + 600000).toISOString(),
+    ends_at: saleEnd(),
   });
   const map = await api.map('market:demo', 'item:onion');
   expect(map.stores[0].active_sale).toBeTruthy();

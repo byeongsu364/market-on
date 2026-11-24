@@ -24,7 +24,24 @@ export const items: Item[] = ids.map((id, i) => ({
   units: i === 0 ? ['unit:bunch', 'kg'] : [i === 1 ? 'kg' : 'each'],
   labels_i18n: { ko: names[i] },
 }));
-export const markets = [{ market_id: 'market:demo', name: '시연 시장', lat: 37.57, lng: 126.99 }];
+export const markets: import('../../types/contract').Market[] = [
+  {
+    status: 'active',
+    distance_m: null,
+    market_id: 'market:demo',
+    name: '시연 시장',
+    lat: 37.57,
+    lng: 126.99,
+  },
+  {
+    status: 'listed',
+    distance_m: null,
+    market_id: 'market:std-sample',
+    name: '미지원 시장 · 샘플',
+    lat: 37.58,
+    lng: 126.99,
+  },
+];
 export const stores: Store[] = Array.from({ length: 24 }, (_, i) => ({
   store_id: `store:A-${String(i + 1).padStart(2, '0')}`,
   name: `점포 A-${String(i + 1).padStart(2, '0')}`,

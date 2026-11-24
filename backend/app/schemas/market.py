@@ -9,6 +9,7 @@ from pydantic import BaseModel
 class Market(BaseModel):
     market_id: str
     name: str
+    status: Literal['listed', 'active'] = 'active'
     lat: float
     lng: float
     distance_m: int | None = None

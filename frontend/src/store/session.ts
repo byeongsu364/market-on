@@ -20,14 +20,21 @@ const write = (key: string, value: unknown) => {
 export const useSessionState = () => {
   const manuallyChosen = useRef(false);
   const [market, updateMarket] = useState<Market | null>(() =>
-    read('market-day', '') === seoulDay() ? read('market', null) : null,
+    read('market-day', '') === seoulDay() &&
+    read<Market | null>('market', null)?.status !== 'listed'
+      ? read('market', null)
+      : null,
   );
   const [marketLoading, setMarketLoading] = useState(true);
+  const [unsupported, setUnsupported] = useState<Market | null>(null);
+  const [nearbyActive, setNearbyActive] = useState<Market | null>(null);
   const [automatic, setAutomatic] = useState(false);
   const [storeContext, setStoreContext] = useState<{ store_id: string; market_id: string } | null>(
     null,
   );
   const setMarket = (value: Market) => {
+    if (value.status === 'listed') return;
+    setUnsupported(null);
     manuallyChosen.current = true;
     updateMarket(value);
     setAutomatic(false);
@@ -40,7 +47,7 @@ export const useSessionState = () => {
     if (requested) {
       void getMarkets()
         .then((markets) => {
-          const selected = markets.find((m) => m.market_id === requested);
+          const selected = markets.find((m) => m.market_id === requested && m.status === 'active');
           if (active && !manuallyChosen.current && selected) {
             setMarket(selected);
           }
@@ -73,7 +80,20 @@ export const useSessionState = () => {
           const nearest = markets
             .filter((m) => m.distance_m !== null)
             .sort((a, b) => a.distance_m! - b.distance_m!)[0];
-          if (active && !manuallyChosen.current && nearest && nearest.distance_m! <= 1000) {
+          if (active && !manuallyChosen.current) {
+            setNearbyActive(markets.find((m) => m.status === 'active') ?? null);
+            if (nearest?.status === 'listed' && nearest.distance_m! <= 1000) {
+              setUnsupported(nearest);
+              return;
+            }
+          }
+          if (
+            active &&
+            !manuallyChosen.current &&
+            nearest?.status === 'active' &&
+            nearest &&
+            nearest.distance_m! <= 1000
+          ) {
             updateMarket(nearest);
             setAutomatic(true);
           }
@@ -126,6 +146,8 @@ export const useSessionState = () => {
   }, [theme]);
   return {
     market,
+    unsupported,
+    nearbyActive,
     setMarket,
     marketLoading,
     automatic,

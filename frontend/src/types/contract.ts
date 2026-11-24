@@ -1,5 +1,6 @@
 export type Language = 'ko' | 'en' | 'zh' | 'ja' | 'vi';
 export type Market = {
+  status: 'listed' | 'active';
   market_id: string;
   name: string;
   distance_m: number | null;
@@ -187,4 +188,36 @@ export type MarketSummary = {
 export type MarketMerchant = Pick<User, 'id' | 'login_id' | 'status'> & {
   created_at: string;
   store: { store_id: string; name: string };
+};
+
+export type MarketDemand = {
+  market_id: string;
+  name: string;
+  status: 'listed' | 'active';
+  nearby_7d: number | null;
+  requests_7d: number | null;
+  low: boolean;
+};
+export type JoinRequest = {
+  market_id: string;
+  manager_org: '상인회' | '관리사무소' | '기타';
+  contact: string;
+  store_count?: number;
+  note?: string;
+  login_id: string;
+  password: string;
+};
+export type MarketApplication = {
+  id: number;
+  market_id: string;
+  manager_org: JoinRequest['manager_org'];
+  contact: string;
+  store_count: number | null;
+  note: string | null;
+  admin_user_id: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  demand: MarketDemand;
 };

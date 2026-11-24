@@ -18,15 +18,38 @@ def distance(lat, lng, market):
     return 2 * asin(sqrt(min(1, max(0, h))))
 
 
-def nearby(conn, lat=None, lng=None):
+def nearby(conn, lat=None, lng=None, device_id=None):
     markets = [
-        Market(market_id=m['id'], name=m['name_ko'], lat=m['lat'], lng=m['lng'])
+        Market(
+            market_id=m['id'],
+            name=m['name_ko'],
+            lat=m['lat'],
+            lng=m['lng'],
+            status=m.get('status', 'active'),
+        )
         for m in store_repo.list_markets(conn)
         if m['lat'] is not None and m['lng'] is not None
     ]
     for market in markets:
         if lat is not None and lng is not None:
             market.distance_m = round(distance(lat, lng, market) * 6_371_000)
+    if device_id:
+        from .price_report_service import hash_device
+        from app.db.repositories import market_request_repo
+
+        try:
+            with conn.transaction():
+                for value in markets:
+                    if (
+                        value.status == 'listed'
+                        and value.distance_m is not None
+                        and value.distance_m <= 1000
+                    ):
+                        market_request_repo.record(
+                            conn, value.market_id, hash_device(device_id), 'nearby'
+                        )
+        except Exception:
+            logger.warning('Nearby demand recording failed')
     return sorted(
         markets,
         key=lambda m: (
@@ -92,3 +115,13 @@ def market_map(conn, market_id, item_id=None, unit=None):
         zones=[Zone(id=z['id'], name=z['name_ko'], x=z['x'], y=z['y']) for z in zones],
         stores=stores,
     )
+
+
+def search(conn, q):
+    from app.db.repositories import market_request_repo
+
+    return [
+        Market(market_id=m['id'], name=m['name_ko'], status=m['status'], lat=m['lat'], lng=m['lng'])
+        for m in market_request_repo.search(conn, q.strip())
+        if m['lat'] is not None and m['lng'] is not None
+    ]

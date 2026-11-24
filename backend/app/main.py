@@ -23,6 +23,7 @@ from app.routers import (
     items,
     markets,
     price_reports,
+    join,
 )
 
 setup_logging()
@@ -41,6 +42,7 @@ routers = [
     items.router,
     markets.router,
     price_reports.router,
+    join.router,
 ]
 
 

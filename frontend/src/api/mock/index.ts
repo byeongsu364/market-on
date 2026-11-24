@@ -6,6 +6,7 @@ import type {
   RecommendRequest,
   RecommendResponse,
 } from '../../types/contract';
+import { record } from './marketRequests';
 import { items, markets, stores, source } from './data';
 import { activeForStore, storePrice } from './merchant';
 import { zones } from '../../constants/zones';
@@ -27,6 +28,11 @@ export const nearby = (lat?: number, lng?: number) =>
             ? null
             : Math.round(Math.hypot(m.lat - lat, m.lng - lng) * 111000),
       }))
+      .map((m) => {
+        if (m.status === 'listed' && m.distance_m !== null && m.distance_m <= 1000)
+          record(m.market_id, 'nearby');
+        return m;
+      })
       .sort((a, b) =>
         lat == null || lng == null
           ? 0
