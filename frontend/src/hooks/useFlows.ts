@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { postPriceReport } from '../api/priceReports';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { searchItems } from '../api/items';
 import { recommend } from '../api/recommend';
@@ -34,18 +35,66 @@ export function useScanFlow() {
 }
 export function useResultFlow() {
   const { itemId = '' } = useParams();
-  const { market } = useSession();
+  const { market, storeContext } = useSession();
+  const location = useLocation();
+  const initial = (location.state ?? {}) as {
+    price?: number;
+    unit?: string;
+    quantity?: number;
+    labels?: string[];
+    method?: 'manual' | 'price_tag_photo';
+    media_id?: string;
+  };
   const item = useItem(itemId);
-  const [value, setValue] = useState('');
-  const [selected, setSelected] = useState('');
-  const unit = selected || item.data?.default_unit || 'kg';
+  const [value, setValue] = useState(initial.price ? String(initial.price) : '');
+  const [selected, setSelected] = useState(initial.unit ?? '');
+  const [storeId, setStoreId] = useState(
+    storeContext?.market_id === market?.market_id ? storeContext?.store_id : undefined,
+  );
+  const unit = selected || item.data?.default_unit || '';
   const price = usePrice({
     item_id: itemId,
-    market_id: market?.market_id ?? 'market:demo',
+    market_id: market?.market_id ?? '',
     unit,
-    seen_price: value ? Number(value) : undefined,
+    seen_price: Number(value) > 0 ? Number(value) / (initial.quantity || 1) : undefined,
   });
-  const location = useLocation();
+  const map = useMarketMap(market?.market_id ?? '', itemId);
+  const submitted = useRef(new Set<string>());
+  useEffect(() => {
+    if (
+      !market ||
+      !item.data ||
+      !unit ||
+      !initial.method ||
+      Number(value) < 10 ||
+      Number(value) > 10000000
+    )
+      return;
+    if (initial.method === 'price_tag_photo' && !initial.media_id) return;
+    const key = storeId ?? 'market';
+    if (submitted.current.has(key)) return;
+    submitted.current.add(key);
+    void postPriceReport({
+      item_id: itemId,
+      market_id: market.market_id,
+      unit,
+      price: Number(value),
+      quantity: initial.quantity || 1,
+      method: initial.method,
+      ...(initial.media_id ? { media_id: initial.media_id } : {}),
+      ...(storeId ? { store_id: storeId } : {}),
+    }).catch((error) => console.info('가격 제보를 저장하지 못했어요', error));
+  }, [
+    market,
+    item.data,
+    unit,
+    value,
+    initial.method,
+    initial.media_id,
+    initial.quantity,
+    itemId,
+    storeId,
+  ]);
   return {
     item,
     price,
@@ -53,17 +102,15 @@ export function useResultFlow() {
     setValue,
     unit,
     setSelected,
-    labels:
-      (
-        location.state as {
-          labels?: string[];
-        } | null
-      )?.labels ?? [],
+    labels: initial.labels ?? [],
     itemId,
+    map,
+    storeId,
+    setStoreId,
   };
 }
 export function useMapFlow() {
-  const { market } = useSession();
+  const { market, setStoreContext } = useSession();
   const [params] = useSearchParams();
   const item = params.get('item') ?? undefined;
   const map = useMarketMap(market?.market_id ?? 'market:demo', item);
@@ -77,6 +124,7 @@ export function useMapFlow() {
     trigger,
     close,
     select: (store: Store, element: Element) => {
+      if (market) setStoreContext({ store_id: store.store_id, market_id: market.market_id });
       setSelected(store);
       setTrigger(element);
     },
@@ -116,12 +164,12 @@ export function useRecommendFlow() {
   };
 }
 export function useRequireMarket() {
-  const { market } = useSession();
+  const { market, marketLoading } = useSession();
   const navigate = useNavigate();
   const location = useLocation();
   useEffect(() => {
-    if (!market)
+    if (!market && !marketLoading)
       navigate('/markets', { replace: true, state: { from: location.pathname + location.search } });
-  }, [market, navigate, location.pathname, location.search]);
+  }, [market, marketLoading, navigate, location.pathname, location.search]);
   return !!market;
 }

@@ -63,5 +63,5 @@ def search(conn, q):
     return (
         [get_item(conn, row['entity_id']) for row in repo.search_items(conn, query)]
         if query
-        else []
+        else [get_item(conn, item_id) for item_id in repo.catalog_ids(conn)]
     )

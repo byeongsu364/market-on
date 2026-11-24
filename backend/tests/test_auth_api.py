@@ -179,6 +179,32 @@ def memory(monkeypatch):
             s for s in sales.values() if s['store_id'] == sid and s['status'] == status
         ],
     )
+    from app.services import item_service
+    from app.schemas.item import Item
+
+    monkeypatch.setattr(
+        item_service,
+        'get_item',
+        lambda c, iid: Item(
+            item_id=iid,
+            name=iid,
+            synonyms=[],
+            vision_labels=[],
+            criteria=[],
+            default_unit='unit:kg',
+            units=['unit:kg'],
+            labels_i18n={},
+        ),
+    )
+    original_active = sale_repo.active
+    monkeypatch.setattr(
+        sale_repo,
+        'active',
+        lambda *args, **kwargs: [
+            s | {'store_name': stores[s['store_id']]['name_ko'], 'item_name': s['item_id']}
+            for s in original_active(*args, **kwargs)
+        ],
+    )
     app.dependency_overrides[get_db] = lambda: conn
     with TestClient(app) as client:
         yield dict(

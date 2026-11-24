@@ -1,12 +1,21 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { usePublicStore } from '../hooks/useSales';
 import Resource from '../components/common/Resource';
 import StoreCard from '../components/domain/StoreCard';
+import { useEffect } from 'react';
+import { useSession } from '../store/session';
 import { useT } from '../i18n';
 export default function StorePage() {
   const { storeId = '' } = useParams();
   const state = usePublicStore(storeId);
   const t = useT();
+  const session = useSession();
+  useEffect(() => {
+    if (state.data)
+      session.setStoreContext({ store_id: storeId, market_id: state.data.store.market_id });
+    // Keep the QR context for the next scan.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.data?.store.market_id, storeId]);
   return (
     <Resource state={state}>
       {state.data && (
@@ -16,12 +25,19 @@ export default function StorePage() {
             {t('hoursPrefix')}
             {state.data.store.hours.open}–{state.data.store.hours.close}
           </p>
+          <Link className="button" to="/scan">
+            이 점포에서 찍기
+          </Link>
           <h2>{t('sells')}</h2>
           <div className="chips">
             {state.data.items.map((i) => (
-              <span className="item-chip" key={i.item_id}>
+              <Link
+                className="item-chip"
+                key={i.item_id}
+                to={`/items/${encodeURIComponent(i.item_id)}`}
+              >
                 {i.name}
-              </span>
+              </Link>
             ))}
           </div>
           {state.data.sales.length > 0 && (

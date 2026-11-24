@@ -50,6 +50,47 @@ export default function Result() {
               {f.price.data && <PriceCompare price={f.price.data} />}
             </Resource>
           </section>
+          <section>
+            <h2>이 시장 판매 점포</h2>
+            <Resource state={f.map}>
+              {f.map.data?.stores
+                .filter((s) => s.highlight)
+                .map((s) => (
+                  <article className="card" key={s.store_id}>
+                    <h3>{s.name}</h3>
+                    <p>{f.map.data?.zones.find((z) => z.id === s.zone_id)?.name}</p>
+                    {s.active_sale && (
+                      <p>마감세일 · {s.active_sale.sale_price.toLocaleString()}원</p>
+                    )}
+                    <p className="caption">가격 정보 준비 중</p>
+                  </article>
+                ))}
+              {f.map.data?.stores.filter((s) => s.highlight).length === 0 && (
+                <p>등록된 판매 점포가 없어요</p>
+              )}
+              <h3>어느 가게예요?</h3>
+              <div className="chips">
+                {f.map.data?.stores
+                  .filter((s) => s.highlight)
+                  .map((s) => (
+                    <button
+                      className="chip"
+                      key={s.store_id}
+                      aria-pressed={f.storeId === s.store_id}
+                      onClick={() => f.setStoreId(s.store_id)}
+                    >
+                      {s.name}
+                    </button>
+                  ))}
+                <button className="secondary" onClick={() => f.setStoreId(undefined)}>
+                  건너뛰기
+                </button>
+              </div>
+            </Resource>
+          </section>
+          {Number(f.value) > 0 && (
+            <p className="caption">이 가격은 시장 가격표에 익명으로 더해져요</p>
+          )}
           <div className="fixed-action">
             <Link className="button" to={`/map?item=${encodeURIComponent(f.itemId)}`}>
               {t('stores')}

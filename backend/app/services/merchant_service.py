@@ -4,7 +4,7 @@ from datetime import datetime, time, timedelta
 from app.core.errors import AppError
 from app.db.repositories import store_repo, merchant_repo, sale_repo, view_repo, user_repo
 from .auth_service import now
-from .sale_service import SEOUL
+from .sale_service import SEOUL, closing_sale
 
 
 def get_store(conn, user):
@@ -12,9 +12,16 @@ def get_store(conn, user):
     store = store_repo.get_store(conn, store_id)
     if not store:
         raise AppError('STORE_NOT_FOUND', '점포를 찾을 수 없습니다.', 404)
-    return store | {
-        'items': merchant_repo.items(conn, store_id),
+    return {
+        'store_id': store['id'],
+        'name': store['name_ko'],
+        'market_id': store['market_id'],
+        'hours': store['hours'] or {'open': '', 'close': ''},
+        'item_ids': [i['item_id'] for i in merchant_repo.items(conn, store_id)],
         'today_views': view_repo.today(conn, store_id, now().astimezone(SEOUL).date()),
+        'sale_views': sum(
+            s.get('views', 0) for s in sale_repo.list_store(conn, store_id, 'active', now())
+        ),
     }
 
 
@@ -32,7 +39,7 @@ def patch_store(conn, user, data):
 
 
 def sales(conn, user, status):
-    return sale_repo.list_store(conn, user['store_id'], status, now())
+    return [closing_sale(s) for s in sale_repo.list_store(conn, user['store_id'], status, now())]
 
 
 def create_sale(conn, user, values):
@@ -51,7 +58,9 @@ def create_sale(conn, user, values):
             raise AppError('ITEM_NOT_SOLD', '내 점포의 취급 품목을 선택하세요.', 422)
         if values.get('unit_id') and not merchant_repo.valid_unit(conn, values['unit_id']):
             raise AppError('INVALID_UNIT', '판매 단위를 확인하세요.', 422)
-        return sale_repo.create(conn, user['store_id'], values | {'starts_at': instant})
+        return closing_sale(
+            sale_repo.create(conn, user['store_id'], values | {'starts_at': instant})
+        )
 
 
 def repost(conn, user, sale_id, ends_at):
@@ -65,14 +74,14 @@ def end(conn, user, sale_id):
     sale = sale_repo.end(conn, sale_id, user['store_id'])
     if not sale:
         raise AppError('SALE_NOT_FOUND', '세일을 찾을 수 없습니다.', 404)
-    return sale
+    return closing_sale(sale)
 
 
 def poster(conn, user, base_url):
     store = get_store(conn, user)
     market = store_repo.get_market(conn, store['market_id'])
     return {
-        'store_name': store['name_ko'],
+        'store_name': store['name'],
         'market_name': market['name_ko'],
-        'url': f'{base_url.rstrip("/")}/s/{store["id"]}',
+        'url': f'{base_url.rstrip("/")}/s/{store["store_id"]}',
     }

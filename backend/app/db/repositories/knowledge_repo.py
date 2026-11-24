@@ -410,3 +410,9 @@ def valid_unit(conn, unit_id):
         conn.execute("select 1 from entities where id=%s and type='unit'", (unit_id,)).fetchone()
         is not None
     )
+
+
+def catalog_ids(conn):
+    return [
+        r[0] for r in conn.execute("select id from entities where type='item' order by name_ko,id")
+    ]

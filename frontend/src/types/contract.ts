@@ -2,6 +2,7 @@ export type Language = 'ko' | 'en' | 'zh' | 'ja' | 'vi';
 export type Market = {
   market_id: string;
   name: string;
+  distance_m: number | null;
   lat: number;
   lng: number;
 };
@@ -21,6 +22,13 @@ export type Item = {
   labels_i18n: Partial<Record<Language, string>>;
 };
 export type RecognizeResponse = {
+  media_id: string | null;
+  price_tag: {
+    price: number;
+    unit_text: string;
+    unit: string | null;
+    quantity: number | null;
+  } | null;
   vision_labels: string[];
   candidates: {
     item_id: string;
@@ -135,3 +143,15 @@ export type MerchantStore = {
 export type PosterInfo = { store_name: string; market_name: string; url: string };
 export type PendingMerchant = User & { created_at: string };
 export type StorePage = { store: MerchantStore; items: Item[]; sales: ActiveSale[] };
+
+export type PriceReportRequest = {
+  item_id: string;
+  market_id: string;
+  store_id?: string;
+  unit?: string;
+  quantity?: number;
+  price: number;
+  method: 'price_tag_photo' | 'manual';
+  media_id?: string;
+};
+export type PriceReportResponse = { id: number; updated: boolean };

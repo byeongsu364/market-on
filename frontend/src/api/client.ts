@@ -1,11 +1,29 @@
 import type { ApiError } from '../types/contract';
-export const isMock = import.meta.env.VITE_API_MODE !== 'live';
+export const isMock = import.meta.env.VITE_API_MODE === 'mock';
+let deviceId: string | undefined;
+export function getDeviceId() {
+  if (deviceId) return deviceId;
+  try {
+    const saved = localStorage.getItem('device-id');
+    if (saved && /^[0-9a-f-]{36}$/i.test(saved)) return (deviceId = saved);
+  } catch {
+    /* unavailable */
+  }
+  deviceId = crypto.randomUUID();
+  try {
+    localStorage.setItem('device-id', deviceId);
+  } catch {
+    /* session memory */
+  }
+  return deviceId;
+}
 export async function request<T>(
   path: string,
   options: RequestInit = {},
   language = 'ko',
 ): Promise<T> {
   const headers = new Headers(options.headers);
+  headers.set('X-Device-Id', getDeviceId());
   headers.set('Accept', 'application/json');
   headers.set('Accept-Language', language);
   if (options.body && !(options.body instanceof FormData))
@@ -22,7 +40,10 @@ export async function request<T>(
     if (response.status === 204) return undefined as T;
     const body = await response.json();
     if (!response.ok)
-      throw body.error ?? { code: `HTTP_${response.status}`, message: '요청에 실패했어요.' };
+      throw {
+        ...(body.error ?? { code: `HTTP_${response.status}`, message: '요청에 실패했어요.' }),
+        status: response.status,
+      };
     return body as T;
   } catch (e) {
     if (e && typeof e === 'object' && 'message' in e) throw e;

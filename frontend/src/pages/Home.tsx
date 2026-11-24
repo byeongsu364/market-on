@@ -1,3 +1,5 @@
+import ManualInput from '../components/domain/ManualInput';
+import { useRequireMarket } from '../hooks/useFlows';
 import { Link } from 'react-router-dom';
 import { useSession } from '../store/session';
 import { useT } from '../i18n';
@@ -32,10 +34,12 @@ function PriceTag({ item }: { item: Item }) {
   );
 }
 export default function Home() {
-  const { market } = useSession();
+  const { market, automatic } = useSession();
+  const ready = useRequireMarket();
   const t = useT();
   const catalog = useItemCatalog();
   const sales = useActiveSales(market?.market_id ?? 'market:demo');
+  if (!ready) return null;
   return (
     <>
       <Link className="market-bar" to="/markets" state={{ from: '/' }}>
@@ -44,7 +48,7 @@ export default function Home() {
             <i key={i} />
           ))}
         </span>
-        {t('market')} · {market?.name ?? t('chooseMarket')}{' '}
+        지금 있는 시장 · {market?.name} {automatic && '(자동)'} 바꾸기
         <span className="market-arrow" aria-hidden="true">
           ›
         </span>
@@ -74,7 +78,9 @@ export default function Home() {
           </svg>
           {t('scan')}
         </Link>
+        <p>가격표가 함께 보이게 찍어 주세요</p>
       </section>
+      <ManualInput />
       <section>
         <h2>{t('prices')}</h2>
         <Resource state={catalog}>

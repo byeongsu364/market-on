@@ -31,3 +31,19 @@ it('401은 세션 해제 이벤트와 계약 오류를 전달한다', async () =
     vi.unstubAllGlobals();
   }
 });
+
+it('모든 요청은 같은 UUID 기기 헤더를 유지한다', async () => {
+  const transport = vi.fn().mockResolvedValue({ status: 204, ok: true });
+  vi.stubGlobal('fetch', transport);
+  try {
+    await request('/markets/nearby');
+    await request('/recognize', { method: 'POST', body: new FormData() });
+    const ids = transport.mock.calls.map((call) => new Headers(call[1].headers).get('X-Device-Id'));
+    expect(ids[0]).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
+    expect(ids[1]).toBe(ids[0]);
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});

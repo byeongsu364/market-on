@@ -52,7 +52,8 @@ def list_store(conn, store_id, status, now):
 def active(conn, now, market_id=None, item_id=None, store_id=None):
     return rows(
         conn,
-        """select c.*,s.name_ko as store_name,s.market_id,e.name_ko as item_name
+        """select c.*,coalesce((select sum(v.count) from store_views v where v.sale_id=c.id),0) as views,
+        s.name_ko as store_name,s.market_id,e.name_ko as item_name
         from closing_sales c join stores s on s.id=c.store_id join entities e on e.id=c.item_id
         where s.active and c.status='active' and %s between c.starts_at and c.ends_at
         and (%s::text is null or s.market_id=%s) and (%s::text is null or c.item_id=%s)

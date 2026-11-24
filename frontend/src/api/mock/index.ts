@@ -19,14 +19,26 @@ export async function mock<T>(work: () => T): Promise<T> {
 }
 export const nearby = (lat?: number, lng?: number) =>
   mock(() =>
-    [...markets].sort((a, b) =>
-      lat == null || lng == null
-        ? 0
-        : Math.hypot(a.lat - lat, a.lng - lng) - Math.hypot(b.lat - lat, b.lng - lng),
-    ),
+    [...markets]
+      .map((m) => ({
+        ...m,
+        distance_m:
+          lat == null || lng == null
+            ? null
+            : Math.round(Math.hypot(m.lat - lat, m.lng - lng) * 111000),
+      }))
+      .sort((a, b) =>
+        lat == null || lng == null
+          ? 0
+          : Math.hypot(a.lat - lat, a.lng - lng) - Math.hypot(b.lat - lat, b.lng - lng),
+      ),
   );
 export const recognize = (file: File): Promise<RecognizeResponse> =>
   mock(() => ({
+    media_id: '00000000-0000-4000-8000-000000000001',
+    price_tag: file.name.includes('price')
+      ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1 }
+      : null,
     vision_labels: ['green onion', 'scallion'],
     candidates: items.slice(0, 3).map((i, j) => ({
       item_id: i.item_id,

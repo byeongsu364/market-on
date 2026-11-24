@@ -138,8 +138,9 @@ def test_search_empty_and_normalized(public, monkeypatch):
     for q in ('파', ' SCALLION ', 'apple'):
         assert set(c.get('/items/search', params={'q': q}).json()[0]) == ITEM_KEYS
     assert calls == ['파', 'scallion', 'apple']
+    monkeypatch.setattr(knowledge_repo, 'catalog_ids', lambda c: ['item:green_onion'])
     for q in ('', ' \t '):
-        assert c.get('/items/search', params={'q': q}).json() == []
+        assert set(c.get('/items/search', params={'q': q}).json()[0]) == ITEM_KEYS
     assert len(calls) == 3
 
 
