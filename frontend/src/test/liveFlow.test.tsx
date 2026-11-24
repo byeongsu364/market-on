@@ -131,3 +131,65 @@ it('시세 404에서도 확인 포인트와 판매 점포를 보여 준다', asy
   expect(await screen.findByText('기준시세가 아직 없어요')).toBeInTheDocument();
   expect(await screen.findByRole('button', { name: '점포 A-05' })).toBeInTheDocument();
 });
+
+it('시장 API 실패도 목록으로 대체한다', async () => {
+  locate();
+  vi.mocked(getMarkets).mockRejectedValue(new Error('offline'));
+  show();
+  expect(await screen.findByRole('heading', { name: '시장 선택' })).toBeInTheDocument();
+});
+it('어제 선택한 시장은 새 위치로 다시 확인한다', async () => {
+  localStorage.setItem('market-day', JSON.stringify('2000-01-01'));
+  Object.defineProperty(navigator, 'geolocation', {
+    configurable: true,
+    value: {
+      getCurrentPosition: (ok: PositionCallback) =>
+        ok({ coords: { latitude: 37.57, longitude: 126.99 } } as GeolocationPosition),
+    },
+  });
+  show();
+  expect(await screen.findByText(/지금 있는 시장 · 가까운 시장/)).toBeInTheDocument();
+});
+it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
+  vi.mocked(postPriceReport).mockRejectedValue(new Error('offline'));
+  const log = vi.spyOn(console, 'info').mockImplementation(() => {});
+  try {
+    show('/items/item:green_onion', { price: 3000, method: 'manual' });
+    expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();
+    await waitFor(() => expect(log).toHaveBeenCalled());
+    expect(screen.getByRole('heading', { name: '이 시장 판매 점포' })).toBeInTheDocument();
+  } finally {
+    log.mockRestore();
+  }
+});
+it('QR에서 고른 점포는 사진 결과의 최초 제보에 포함한다', async () => {
+  vi.mocked(recognize).mockResolvedValue({
+    vision_labels: [],
+    candidates: [{ item_id: 'item:green_onion', name: '대파', confidence: 0.9 }],
+    media_id: '00000000-0000-4000-8000-000000000001',
+    price_tag: { price: 3000, unit_text: '3단', unit: 'unit:bunch', quantity: 3 },
+  });
+  show('/s/store:A-05');
+  fireEvent.click(await screen.findByRole('link', { name: '이 점포에서 찍기' }));
+  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+    target: { files: [new File(['x'], 'photo.jpg')] },
+  });
+  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: '결과 보기' })).toBeEnabled());
+  fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
+  await waitFor(() =>
+    expect(postPriceReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        store_id: 'store:A-05',
+        price: 3000,
+        quantity: 3,
+      }),
+    ),
+  );
+  expect(getPrice).toHaveBeenLastCalledWith(expect.objectContaining({ seen_price: 1000 }));
+});
+it('사진 저장에 실패해 media_id가 없으면 유효하지 않은 사진 제보를 보내지 않는다', async () => {
+  show('/items/item:green_onion', { price: 3000, method: 'price_tag_photo', media_id: null });
+  await screen.findByRole('button', { name: '점포 A-05' });
+  expect(postPriceReport).not.toHaveBeenCalled();
+});

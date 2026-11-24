@@ -47,3 +47,22 @@ it('모든 요청은 같은 UUID 기기 헤더를 유지한다', async () => {
     vi.unstubAllGlobals();
   }
 });
+
+it('저장소를 사용할 수 없어도 세션 동안 기기 ID를 유지한다', async () => {
+  vi.resetModules();
+  const read = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    throw new Error('blocked');
+  });
+  const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new Error('blocked');
+  });
+  try {
+    const client = await import('../api/client');
+    const first = client.getDeviceId();
+    expect(client.getDeviceId()).toBe(first);
+    expect(first).toMatch(/^[0-9a-f-]{36}$/i);
+  } finally {
+    read.mockRestore();
+    write.mockRestore();
+  }
+});

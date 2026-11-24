@@ -34,6 +34,11 @@ export default function Result() {
                 placeholder={t('pricePlaceholder')}
               />
             </label>
+            {f.quantity !== 1 && (
+              <p className="caption">
+                입력한 가격의 수량: {f.quantity} · 기준시세는 1단위로 비교해요
+              </p>
+            )}
             <div className="chips" aria-label={t('saleUnit')}>
               {f.item.data.units.map((u) => (
                 <button
@@ -68,7 +73,7 @@ export default function Result() {
               {f.map.data?.stores.filter((s) => s.highlight).length === 0 && (
                 <p>등록된 판매 점포가 없어요</p>
               )}
-              <h3>어느 가게예요?</h3>
+              <h3>{f.hasStoreContext ? '선택한 점포' : '어느 가게예요?'}</h3>
               <div className="chips">
                 {f.map.data?.stores
                   .filter((s) => s.highlight)

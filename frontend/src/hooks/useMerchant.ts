@@ -56,7 +56,10 @@ export function useStoreEdit() {
   const [hours, setHours] = useState<{ open: string; close: string } | null>(null);
   const [selected, setSelected] = useState<string[] | null>(null);
   const chosen = selected ?? store.data?.item_ids ?? [];
-  const value = hours ?? store.data?.hours ?? { open: '09:00', close: '20:00' };
+  const value = hours ?? {
+    open: store.data?.hours.open || '09:00',
+    close: store.data?.hours.close || '20:00',
+  };
   const action = useAction(api.updateStore);
   return {
     store,

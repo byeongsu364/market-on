@@ -16,7 +16,7 @@ def get_store(conn, user):
         'store_id': store['id'],
         'name': store['name_ko'],
         'market_id': store['market_id'],
-        'hours': store['hours'] or {'open': '', 'close': ''},
+        'hours': {'open': '', 'close': ''} | (store['hours'] or {}),
         'item_ids': [i['item_id'] for i in merchant_repo.items(conn, store_id)],
         'today_views': view_repo.today(conn, store_id, now().astimezone(SEOUL).date()),
         'sale_views': sum(

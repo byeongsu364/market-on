@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { getMarkets } from '../api/markets';
 import { seoulDay } from '../utils/sale';
 import type { Language, Market } from '../types/contract';
@@ -18,6 +18,7 @@ const write = (key: string, value: unknown) => {
   }
 };
 export const useSessionState = () => {
+  const manuallyChosen = useRef(false);
   const [market, updateMarket] = useState<Market | null>(() =>
     read('market-day', '') === seoulDay() ? read('market', null) : null,
   );
@@ -27,6 +28,7 @@ export const useSessionState = () => {
     null,
   );
   const setMarket = (value: Market) => {
+    manuallyChosen.current = true;
     updateMarket(value);
     setAutomatic(false);
     setStoreContext((current) => (current?.market_id === value.market_id ? current : null));
@@ -52,7 +54,7 @@ export const useSessionState = () => {
           const nearest = markets
             .filter((m) => m.distance_m !== null)
             .sort((a, b) => a.distance_m! - b.distance_m!)[0];
-          if (active && nearest && nearest.distance_m! <= 1000) {
+          if (active && !manuallyChosen.current && nearest && nearest.distance_m! <= 1000) {
             updateMarket(nearest);
             setAutomatic(true);
           }

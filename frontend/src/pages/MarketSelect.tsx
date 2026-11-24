@@ -1,3 +1,4 @@
+import { isMock } from '../api/client';
 import { useT } from '../i18n';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useMarkets } from '../hooks/useMarkets';
@@ -18,7 +19,7 @@ export default function MarketSelect() {
         {markets.data?.map((m) => (
           <button className="market-option" key={m.market_id} onClick={() => choose(m)}>
             {m.name}
-            <small>{t('marketSampleCaption')}</small>
+            {isMock && <small>{t('marketSampleCaption')}</small>}
           </button>
         ))}
       </Resource>

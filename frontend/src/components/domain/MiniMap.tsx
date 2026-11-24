@@ -1,4 +1,3 @@
-import { useT } from '../../i18n';
 import type { CSSProperties } from 'react';
 import type { MarketMap, Store } from '../../types/contract';
 import { zoneColors } from '../../constants/zones';
@@ -9,14 +8,13 @@ export default function MiniMap({
   map: MarketMap;
   onStore: (store: Store, trigger: Element) => void;
 }) {
-  const t = useT();
   return (
     <>
       <svg
         className="market-map"
         viewBox="0 0 376 548"
         role="group"
-        aria-label={t('mapLabel')}
+        aria-label="시장 점포 평면도"
         style={Object.fromEntries(zoneColors.map((c, i) => [`--zone-${i}`, c])) as CSSProperties}
       >
         {map.zones.map((z, i) => (
@@ -72,7 +70,7 @@ export default function MiniMap({
                   rx="4"
                 />
                 <text className="sale-map-badge" x={s.map_x + 6} y={s.map_y + 48}>
-                  {t('closingBadge')}
+                  마감세일
                 </text>
               </>
             )}

@@ -32,7 +32,8 @@ def get(conn, sale_id, store_id):
 def end(conn, sale_id, store_id):
     result = rows(
         conn,
-        "update closing_sales set status='ended' where id=%s and store_id=%s returning *",
+        """update closing_sales c set status='ended' where id=%s and store_id=%s
+        returning c.*,coalesce((select sum(v.count) from store_views v where v.sale_id=c.id),0) as views""",
         (sale_id, store_id),
     )
     return result[0] if result else None

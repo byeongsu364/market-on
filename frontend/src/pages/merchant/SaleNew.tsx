@@ -70,6 +70,7 @@ export default function SaleNew() {
                 className="chip"
                 key={n}
                 aria-pressed={f.duration === n}
+                disabled={n === 0 && !f.store.data?.hours.close}
                 onClick={() => f.setDuration(n)}
               >
                 {t(n === 1 ? 'oneHour' : n === 2 ? 'twoHours' : 'businessClose')}

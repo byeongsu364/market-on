@@ -1,3 +1,4 @@
+import { isMock } from '../api/client';
 import { useT } from '../i18n';
 import { useMapFlow, useRequireMarket, useItemCatalog } from '../hooks/useFlows';
 import Resource from '../components/common/Resource';
@@ -21,7 +22,7 @@ export default function MarketMap() {
                 ? `${name} 파는 점포 ${f.map.data.stores.filter((s) => s.highlight).length}곳`
                 : '점포를 눌러 자세히 보세요'}
             </p>
-            <p className="caption">{t('mapSampleCaption')}</p>
+            {isMock && <p className="caption">{t('mapSampleCaption')}</p>}
             <MiniMap map={f.map.data} onStore={f.select} />
             <ul className="store-list">
               {f.map.data.stores

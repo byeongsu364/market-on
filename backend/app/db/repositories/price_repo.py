@@ -145,21 +145,32 @@ def hourly_report_count(conn, device_hash):
 def save_recent_report(conn, values):
     recent = conn.execute(
         """select id from price_reports where device_hash=%s and item_id=%s
-        and market_id=%s and store_id is not distinct from %s
+        and market_id=%s
+        and (store_id is not distinct from %s or (%s::text is not null and store_id is null))
         and reported_at > clock_timestamp() - interval '10 minutes'
-        order by reported_at desc,id desc limit 1 for update""",
-        (values['device_hash'], values['item_id'], values['market_id'], values['store_id']),
+        order by (store_id is not distinct from %s) desc, reported_at desc, id desc
+        limit 1 for update""",
+        # 점포를 나중에 고르면 같은 기기의 시장 단위 제보를 그 점포 제보로 바꿔요 (중복 집계 방지)
+        (
+            values['device_hash'],
+            values['item_id'],
+            values['market_id'],
+            values['store_id'],
+            values['store_id'],
+            values['store_id'],
+        ),
     ).fetchone()
     if recent:
         conn.execute(
             """update price_reports set unit_id=%s,quantity=%s,price=%s,method=%s,
-            media_id=%s,reported_at=clock_timestamp() where id=%s""",
+            media_id=%s,store_id=%s,reported_at=clock_timestamp() where id=%s""",
             (
                 values['unit_id'],
                 values['quantity'],
                 values['price'],
                 values['method'],
                 values['media_id'],
+                values['store_id'],
                 recent[0],
             ),
         )

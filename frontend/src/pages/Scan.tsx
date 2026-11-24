@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
 import { useAction } from '../hooks/useResource';
@@ -17,6 +17,7 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
   const [unit, setUnit] = useState(result.price_tag?.unit ?? '');
   const [quantity, setQuantity] = useState(String(result.price_tag?.quantity ?? 1));
   const [search, setSearch] = useState(false);
+  const effectiveUnit = item.data?.units.includes(unit) ? unit : item.data?.default_unit;
   const navigate = useNavigate();
   return (
     <section>
@@ -63,7 +64,7 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
           <button
             className="chip"
             key={u}
-            aria-pressed={u === (unit || item.data?.default_unit)}
+            aria-pressed={u === effectiveUnit}
             onClick={() => setUnit(u)}
           >
             {unitLabel(u)}
@@ -85,14 +86,15 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
         disabled={
           !item.data ||
           Number(quantity) <= 0 ||
-          (!!price && (Number(price) < 10 || Number(price) > 10000000))
+          (!!price &&
+            (!Number.isInteger(Number(price)) || Number(price) < 10 || Number(price) > 10000000))
         }
         onClick={() =>
           navigate(`/items/${encodeURIComponent(id)}`, {
             state: {
               labels: result.vision_labels,
               price: price ? Number(price) : undefined,
-              unit: unit || item.data?.default_unit,
+              unit: effectiveUnit,
               quantity: Number(quantity),
               method: 'price_tag_photo',
               media_id: result.media_id,
@@ -105,7 +107,6 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
     </section>
   );
 }
-import { useCallback } from 'react';
 import { searchItems } from '../api/items';
 import { useResource } from '../hooks/useResource';
 function PhotoSearch({ choose }: { choose: (id: string) => void }) {
@@ -129,9 +130,12 @@ function PhotoSearch({ choose }: { choose: (id: string) => void }) {
 }
 export default function Scan() {
   const camera = useCamera();
+  const [recognizedFile, setRecognizedFile] = useState<File | null>(null);
   const action = useAction(async (file: File) => {
     try {
-      return await recognize(file);
+      const result = await recognize(file);
+      setRecognizedFile(file);
+      return result;
     } catch (error) {
       if ((error as { status?: number }).status === 503)
         throw new Error('사진 인식이 잠시 안 돼요. 이름으로 찾아 주세요');
@@ -168,7 +172,7 @@ export default function Scan() {
           <ManualInput />
         </>
       )}
-      {action.data && (
+      {action.data && recognizedFile === camera.file && (
         <Confirmation key={camera.preview + action.data.media_id} result={action.data} />
       )}
     </>

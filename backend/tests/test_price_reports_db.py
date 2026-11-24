@@ -56,7 +56,7 @@ def test_report_windows_limit_and_privacy(db):
                 third = client.post('/price-reports', json=BODY, headers=HEADERS)
                 assert third.status_code == 201 and third.json()['updated'] is False
                 assert third.json()['id'] != rid
-                # Store and market reports have separate correction targets.
+                # 점포를 나중에 고르면 같은 기기의 시장 단위 제보를 그 점포 제보로 바꿈.
                 fourth = client.post(
                     '/price-reports',
                     json=BODY
@@ -69,7 +69,17 @@ def test_report_windows_limit_and_privacy(db):
                     },
                     headers=HEADERS,
                 )
-                assert fourth.status_code == 201 and fourth.json()['updated'] is False
+                assert fourth.status_code == 201
+                assert fourth.json() == {'id': third.json()['id'], 'updated': True}
+                assert (
+                    db.execute(
+                        'select store_id from price_reports where id=%s', (third.json()['id'],)
+                    ).fetchone()[0]
+                    == 'store:test-report'
+                )
+                # 점포 제보가 있으면 시장 단위 재제출은 새 행 (점포 제보를 덮지 않음).
+                fifth = client.post('/price-reports', json=BODY, headers=HEADERS)
+                assert fifth.status_code == 201 and fifth.json()['updated'] is False
                 for _ in range(27):
                     db.execute(
                         """insert into price_reports(market_id,item_id,price,method,device_hash,reported_at)

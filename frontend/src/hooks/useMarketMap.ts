@@ -4,6 +4,7 @@ import { useResource } from './useResource';
 export const useMarketMap = (id: string, item?: string) =>
   useResource(
     useCallback(async () => {
+      if (!id) return null;
       const map = await getMarketMap(id, item);
       return {
         ...map,

@@ -18,7 +18,12 @@ export default function ManualInput() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (item && Number(price) >= 10 && Number(price) <= 10000000)
+          if (
+            item &&
+            Number.isInteger(Number(price)) &&
+            Number(price) >= 10 &&
+            Number(price) <= 10000000
+          )
             navigate(`/items/${encodeURIComponent(item.item_id)}`, {
               state: {
                 price: Number(price),
@@ -84,7 +89,15 @@ export default function ManualInput() {
             </button>
           ))}
         </div>
-        <button className="wide" disabled={!item || Number(price) < 10 || Number(price) > 10000000}>
+        <button
+          className="wide"
+          disabled={
+            !item ||
+            !Number.isInteger(Number(price)) ||
+            Number(price) < 10 ||
+            Number(price) > 10000000
+          }
+        >
           확인하기
         </button>
       </form>

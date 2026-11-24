@@ -1,3 +1,4 @@
+import { getMarkets } from '../api/markets';
 import { Link, useParams } from 'react-router-dom';
 import { usePublicStore } from '../hooks/useSales';
 import Resource from '../components/common/Resource';
@@ -11,8 +12,23 @@ export default function StorePage() {
   const t = useT();
   const session = useSession();
   useEffect(() => {
-    if (state.data)
-      session.setStoreContext({ store_id: storeId, market_id: state.data.store.market_id });
+    if (!state.data) return;
+    let active = true;
+    const marketId = state.data.store.market_id;
+    session.setStoreContext({ store_id: storeId, market_id: marketId });
+    if (session.market?.market_id !== marketId) {
+      void getMarkets()
+        .then((markets) => {
+          const market = markets.find((m) => m.market_id === marketId);
+          if (active && market) session.setMarket(market);
+        })
+        .catch(() => {
+          /* market choice remains available */
+        });
+    }
+    return () => {
+      active = false;
+    };
     // Keep the QR context for the next scan.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.data?.store.market_id, storeId]);
