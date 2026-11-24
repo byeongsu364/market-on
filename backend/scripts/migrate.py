@@ -1,4 +1,5 @@
 """SQL 마이그레이션 적용. 연결은 app.db.pool을 재사용합니다."""
+
 import argparse
 from pathlib import Path
 import sys

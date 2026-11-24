@@ -9,7 +9,7 @@
 - `rag_docs/**/*.md`: YAML frontmatter에 `source`, `doc_type`, `lang`, `title`, `entities`, `store_id`, 선택적인 `market_id`, `published`(YYYY-MM-DD)를 두고 뒤에 본문을 씁니다. 파일의 상대 경로가 `doc_key`입니다. 상인 API용 문서 키는 `merchant_tip:<uuid>`입니다.
 
 샘플에는 분류 2개, 품목 5개, 확인 포인트 5개, 저장 조건 2개, 긴 레시피 1개가 있습니다. 모든 본문 첫 줄에 검수 전 표시를 넣었습니다. 시연용 사실 자료로 사용하지 않습니다.
-과일 KAMIS 코드는 제공 CSV에서 이름별 우선순위 1의 첫 행을 선택했습니다. CSV에 단위 열이 없어 샘플 `unit`은 `개`로 명시했습니다. 실제 가격 API의 거래 단위는 검수해야 합니다.
+과일 KAMIS 코드는 제공 CSV에서 이름별 우선순위 1의 첫 행을 선택했습니다. 조사 단위는 aT 소매 코드표의 대표 조사 단위로 채웠습니다.
 
 ```sh
 # 반드시 테스트 DB를 명시합니다. 운영 marketon에는 실행하지 않습니다.
@@ -33,3 +33,7 @@ python -m scripts.search "파 고르는 법" --lang ko --k 5
 
 허용 doc_type: `criterion`, `grade`, `storage`, `prep`, `story`, `season`, `origin`, `safety`, `context`, `specialty`, `guide`, `recipe`, `merchant_tip`.
 검색 intent 대응표는 `knowledge/intents.py`에서 관리합니다. intent와 doc_types를 같이 주면 교집합으로 검색하며 알 수 없는 intent는 오류입니다.
+
+`entities.kamis`는 문자열 필드 `{ctgry_cd, item_cd, vrty_cd, grd_cd, unit, unit_sz}`입니다. 선행 0을 보존합니다. 등급은 상품 `04`, 단위는 원본 단위명과 수량을 분리합니다(사과: `개`, `10`). 사과는 기존 우선순위 1 홍로(07)를 유지합니다. `sync_kamis_codes`는 비어 있는 품목의 이름 후보만 출력합니다.
+`update_prices --days 7 --date 2026-11-24 --item item:green_onion`으로 기간 수집합니다. 실제 API 응답 단위를 관측값에 저장합니다. `PriceView.compare`는 판매 단위당 전통시장 평균(없으면 전체) 대비 백분율이며 음수는 저렴함입니다. 개수 단위는 무게로 환산하지 않습니다.
+온톨로지 prune은 조각 태그만 참조하는 엔터티를 삭제하고 영향 문서 해시를 고유한 `retag:<document id>`로 바꿉니다. 다음 문서 적재에서 다시 태깅합니다. 운영 데이터와 다른 엔터티의 목적어 참조는 삭제를 막습니다.

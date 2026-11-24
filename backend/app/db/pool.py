@@ -1,4 +1,5 @@
 """지연 생성 PostgreSQL 연결 풀. 허용 의존성: core 및 DB 드라이버."""
+
 from __future__ import annotations
 
 from contextlib import contextmanager

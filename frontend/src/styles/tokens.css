@@ -1,0 +1,74 @@
+/* tokens.css */
+:root,
+[data-theme='light'] {
+  /* palette */
+  --olive: #3a5f2b;
+  --olive-deep: #2f4a23;
+  --peach: #ff9f7a;
+  --peach-deep: #d9643c;
+  --cream: #fff8f1;
+
+  /* semantic */
+  --color-bg: var(--cream);
+  --color-card: #ffffff;
+  --color-surface: var(--olive);
+  --color-on-surface: var(--cream);
+  --color-text: var(--olive-deep);
+  --color-text-secondary: #596d4c;
+  --color-accent-text: var(--peach-deep);
+  --color-accent: var(--peach);
+  --color-on-accent: var(--olive-deep);
+  --color-border: #2f4a231f;
+  --color-focus: var(--peach-deep);
+
+  /* type & shape */
+  --font-sans: 'Geist Variable', 'SUIT Variable', system-ui, sans-serif;
+  --radius-card: 8px;
+  --radius-button: 999px;
+  --radius-pill: 999px;
+  --font-heading: 'Geist Variable', 'Wanted Sans Variable', 'SUIT Variable', sans-serif;
+  --radius-icon: 24%;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --color-bg: var(--olive);
+  --color-card: var(--olive-deep);
+  --color-surface: var(--cream);
+  --color-on-surface: var(--olive);
+  --color-text: var(--cream);
+  --color-text-secondary: #d8d9c9;
+  --color-accent-text: var(--peach);
+  --color-accent: var(--peach);
+  --color-on-accent: var(--olive-deep);
+  --color-border: #fff8f129;
+  --color-focus: var(--peach);
+  color-scheme: dark;
+}
+
+/* 사용자가 직접 고르지 않았을 때 기기 설정을 따름 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: var(--olive);
+    --color-card: var(--olive-deep);
+    --color-surface: var(--cream);
+    --color-on-surface: var(--olive);
+    --color-text: var(--cream);
+    --color-text-secondary: #d8d9c9;
+    --color-accent-text: var(--peach);
+    --color-border: #fff8f129;
+    --color-focus: var(--peach);
+    color-scheme: dark;
+  }
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+:root {
+  --color-print-bg: #ffffff;
+  --color-print-text: #2f4a23;
+}

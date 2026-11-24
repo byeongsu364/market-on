@@ -15,3 +15,5 @@ dist/
 data/index/
 data/snapshots/
 *.db
+
+backend/storage/

@@ -1,4 +1,5 @@
 """DB 설정 누락 시 지연 연결 오류 확인."""
+
 import pytest
 from app.core.config import settings
 from app.core.errors import AppError
