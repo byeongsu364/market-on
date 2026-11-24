@@ -1,4 +1,5 @@
 """동기·비동기 HTTP의 타임아웃과 제한된 재시도를 검증해요."""
+
 import asyncio
 from unittest.mock import Mock, AsyncMock
 import httpx
@@ -8,18 +9,32 @@ from app.core import http
 
 @pytest.mark.parametrize('sync', [True, False])
 @pytest.mark.parametrize('method', ['get', 'post'])
-@pytest.mark.parametrize('failure,retries', [
-    (400, 0), (401, 0), (404, 0), (429, 2), (500, 2), (503, 2),
-    ('connect', 2), ('timeout', 2), ('protocol', 0),
-])
+@pytest.mark.parametrize(
+    'failure,retries',
+    [
+        (400, 0),
+        (401, 0),
+        (404, 0),
+        (429, 2),
+        (500, 2),
+        (503, 2),
+        ('connect', 2),
+        ('timeout', 2),
+        ('protocol', 0),
+    ],
+)
 def test_retry_and_timeout(monkeypatch, sync, method, failure, retries):
     request = httpx.Request(method.upper(), 'http://localhost/test')
     if isinstance(failure, int):
-        error = httpx.HTTPStatusError('status', request=request,
-                                      response=httpx.Response(failure, request=request))
+        error = httpx.HTTPStatusError(
+            'status', request=request, response=httpx.Response(failure, request=request)
+        )
     else:
-        cls = {'connect': httpx.ConnectError, 'timeout': httpx.ReadTimeout,
-               'protocol': httpx.RemoteProtocolError}[failure]
+        cls = {
+            'connect': httpx.ConnectError,
+            'timeout': httpx.ReadTimeout,
+            'protocol': httpx.RemoteProtocolError,
+        }[failure]
         error = cls('failure', request=request)
     client = Mock()
     client.request = Mock(side_effect=error) if sync else AsyncMock(side_effect=error)
@@ -57,8 +72,14 @@ def test_recovers_with_default_timeout(monkeypatch, sync):
         manager.__aenter__.return_value = client
     constructor = Mock(return_value=manager)
     monkeypatch.setattr(http.httpx, 'Client' if sync else 'AsyncClient', constructor)
-    monkeypatch.setattr(http.time if sync else http.asyncio, 'sleep', Mock() if sync else AsyncMock())
-    result = http.get_sync('http://localhost/test') if sync else asyncio.run(http.get('http://localhost/test'))
+    monkeypatch.setattr(
+        http.time if sync else http.asyncio, 'sleep', Mock() if sync else AsyncMock()
+    )
+    result = (
+        http.get_sync('http://localhost/test')
+        if sync
+        else asyncio.run(http.get('http://localhost/test'))
+    )
     assert result is response
     constructor.assert_called_once_with(timeout=10.0)
     assert client.request.call_count == 2

@@ -1,2 +1,7 @@
-// stores: 추후 구현할 모듈.
-export {}
+import { isMock, request, query } from './client';
+import * as mock from './mock';
+import type { MarketMap } from '../types/contract';
+export const getMarketMap = (id: string, item_id?: string) =>
+  isMock
+    ? mock.map(id, item_id)
+    : request<MarketMap>(`/markets/${encodeURIComponent(id)}/map?${query({ item_id })}`);

@@ -1,7 +1,9 @@
 """Shared ingestion and retrieval value types."""
+
 from dataclasses import dataclass, field
 from typing import Literal
 from datetime import date
+
 
 @dataclass
 class Document:
@@ -17,17 +19,20 @@ class Document:
     entities: list[str] = field(default_factory=list)
     entity_names: list[str] = field(default_factory=list)
 
+
 @dataclass
 class Chunk:
     chunk_index: int
     content: str
     entity_ids: set[str] = field(default_factory=set)
 
+
 @dataclass
 class UpsertResult:
     status: Literal['added', 'changed', 'skipped']
     document_id: int
     chunks: int = 0
+
 
 @dataclass
 class RetrievedChunk:

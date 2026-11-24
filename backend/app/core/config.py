@@ -1,15 +1,23 @@
 """환경변수 설정. 허용 의존성: 표준 라이브러리 및 pydantic-settings."""
+
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=Path(__file__).resolve().parents[3] / '.env', extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).resolve().parents[3] / '.env', extra='ignore'
+    )
+    COOKIE_SECURE: bool = False
+    SESSION_DAYS: int = 30
     DATABASE_URL: str | None = None
     GEMINI_API_KEY: str | None = None
     GOOGLE_VISION_API_KEY: str | None = None
-    KAMIS_SERVICE_KEY: str | None = None
-    KAKAO_REST_API_KEY: str | None = None
-    KMA_SERVICE_KEY: str | None = None
+    DATA_GO_KR_KEY: str | None = None
+    FOODSAFETY_KEY: str | None = None
+    NAVER_MAP_CLIENT_ID: str | None = None
+    NAVER_MAP_CLIENT_SECRET: str | None = None
+    MEDIA_DIR: Path = Path(__file__).resolve().parents[2] / 'storage'
     LLM_PROVIDER: str = 'gemma'
     EMBEDDING_PROVIDER: str = 'ollama'
     GEMINI_EMBEDDING_MODEL: str = 'gemini-embedding-001'
@@ -18,5 +26,6 @@ class Settings(BaseSettings):
     OLLAMA_CHAT_MODEL: str = 'gemma4:e4b'
     OLLAMA_EMBEDDING_MODEL: str = 'bge-m3:latest'
     CORS_ORIGINS: list[str] = ['http://localhost:5173']
+
 
 settings = Settings()

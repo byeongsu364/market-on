@@ -50,7 +50,7 @@ market-on/
 │  │  │  └─ citation.py          근거 출처 붙이기
 │  │  │
 │  │  ├─ clients/                ④ 외부 API 래퍼 (core/http.py 사용)
-│  │  │  ├─ kamis.py   vision.py   stores.py   weather.py
+│  │  │  ├─ at_price.py   vision.py   stores.py   weather.py
 │  │  │
 │  │  ├─ llm/            ★ J1    ④ LLM 호출은 이 폴더에서만
 │  │  │  ├─ base.py              LLMProvider 인터페이스 (generate, embed)
@@ -64,7 +64,8 @@ market-on/
 │  │  │     ├─ knowledge_repo.py entities·labels·relations·documents·chunks·cache
 │  │  │     ├─ price_repo.py     가격표 기록 (B)
 │  │  │     ├─ store_repo.py     시장·점포 (E)
-│  │  │     └─ stock_repo.py     상인 재고·마감 할인 (F3·I1)
+│  │  │     ├─ merchant_repo.py  상인 오늘 추천 (P1)
+│  │  │     └─ media_repo.py     사진·녹음 메타데이터
 │  │  │
 │  │  ├─ schemas/                Pydantic 요청/응답 모델 (router·service 공용)
 │  │  └─ utils/                  순수 함수: 단위 변환, 가격 포맷, 날짜, 한글 정규화
@@ -128,7 +129,7 @@ market-on/
    - 계산: utils
 
 예: 시세 조회
-`routers/price.py → price_service.get_price() → knowledge/ontology.py(품목명 → KAMIS 코드) + clients/kamis.py`
+`routers/price.py → price_service.get_price() → knowledge/ontology.py(품목명 → KAMIS 코드) + clients/at_price.py`
 스캔 결과 화면과 에이전트도 같은 `get_price()`를 불러요.
 
 ---
@@ -138,7 +139,7 @@ market-on/
 | 영역 | 폴더 |
 |---|---|
 | 지식 | `data/ontology`, `data/rag_docs`, `knowledge/`, `scripts/load_*`, `build_embeddings.py` |
-| 인식·시세 | `llm/`, `clients/kamis.py`·`vision.py`, `scan_service`, `price_service`, `scripts/update_prices.py` |
+| 인식·시세 | `llm/`, `clients/at_price.py`·`vision.py`, `scan_service`, `price_service`, `scripts/update_prices.py` |
 | 지도·상인 | `data/markets`, `clients/stores.py`, `store_service`, `merchant_service` |
 | 프론트 | `frontend/` 전체 |
 | 공용 (먼저 합의) | `schemas/`, `backend/migrations/`, `core/` |

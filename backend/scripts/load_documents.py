@@ -1,4 +1,5 @@
 """Read Markdown frontmatter and ingest by relative file identity."""
+
 import argparse
 from collections import Counter
 import yaml
@@ -8,6 +9,7 @@ from app.knowledge.ingest import upsert_document
 from app.schemas.knowledge import Document
 from ._common import DATA, summary, run
 
+
 def read_document(path, directory):
     text = path.read_text()
     if not text.startswith('---\n'):
@@ -16,10 +18,19 @@ def read_document(path, directory):
     if len(parts) != 3:
         raise ValueError(f'{path}: 닫는 frontmatter 구분자가 필요합니다.')
     meta = yaml.safe_load(parts[1])
-    return Document(doc_key=path.relative_to(directory).as_posix(),
-        source_key=meta['source'], doc_type=meta['doc_type'], lang=meta['lang'],
-        title=meta['title'], body=parts[2].strip(), store_id=meta.get('store_id'),
-        entities=meta.get('entities', []), market_id=meta.get('market_id'), published=meta.get('published'))
+    return Document(
+        doc_key=path.relative_to(directory).as_posix(),
+        source_key=meta['source'],
+        doc_type=meta['doc_type'],
+        lang=meta['lang'],
+        title=meta['title'],
+        body=parts[2].strip(),
+        store_id=meta.get('store_id'),
+        entities=meta.get('entities', []),
+        market_id=meta.get('market_id'),
+        published=meta.get('published'),
+    )
+
 
 def load_documents(conn, directory=DATA / 'rag_docs', *, prune=False):
     counts = Counter()
@@ -32,12 +43,14 @@ def load_documents(conn, directory=DATA / 'rag_docs', *, prune=False):
     summary('documents', counts)
     return counts
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--prune', action='store_true')
     args = parser.parse_args()
     with connection() as conn:
         load_documents(conn, prune=args.prune)
+
 
 if __name__ == '__main__':
     run(main)

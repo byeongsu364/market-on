@@ -1,10 +1,14 @@
 """LLM 인터페이스. 허용 의존성: 표준 라이브러리."""
+
 from abc import ABC, abstractmethod
 from typing import Any, Literal
 
+
 class LLMProvider(ABC):
     @abstractmethod
-    def generate(self, prompt: str, *, images: list[Any] | None = None, system: str | None = None) -> str:
+    def generate(
+        self, prompt: str, *, images: list[Any] | None = None, system: str | None = None
+    ) -> str:
         raise NotImplementedError
 
     @abstractmethod

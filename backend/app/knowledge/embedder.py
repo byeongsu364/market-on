@@ -1,5 +1,7 @@
 """Fill only missing embeddings; batches commit atomically."""
+
 from app.db.repositories import knowledge_repo as repo
+
 
 def embed_pending(conn, embedder, batch=100) -> int:
     if batch <= 0:

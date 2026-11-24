@@ -1,4 +1,5 @@
 """Ollama 요청 계약은 HTTP를 monkeypatch하여 오프라인으로 검증해요."""
+
 import base64
 import os
 from unittest.mock import Mock
@@ -19,9 +20,13 @@ def configured(monkeypatch):
 @pytest.mark.parametrize('task', ['document', 'query'])
 def test_batches(configured, monkeypatch, task):
     calls = []
+
     def post(url, *, json, timeout):
         calls.append((url, json, timeout))
-        return Mock(json=lambda: {'embeddings': [[0.0] * settings.EMBEDDING_DIM for _ in json['input']]})
+        return Mock(
+            json=lambda: {'embeddings': [[0.0] * settings.EMBEDDING_DIM for _ in json['input']]}
+        )
+
     monkeypatch.setattr(http, 'post_sync', post)
     assert len(configured.embed(['x'] * 65, task=task)) == 65
     assert [len(c[1]['input']) for c in calls] == [32, 32, 1]
@@ -31,7 +36,9 @@ def test_batches(configured, monkeypatch, task):
     assert len(calls) == 3
 
 
-@pytest.mark.parametrize('rows,code', [([[1.0]], 'EMBEDDING_DIM_MISMATCH'), ([], 'INVALID_EMBEDDING')])
+@pytest.mark.parametrize(
+    'rows,code', [([[1.0]], 'EMBEDDING_DIM_MISMATCH'), ([], 'INVALID_EMBEDDING')]
+)
 def test_invalid_embeddings(configured, monkeypatch, rows, code):
     monkeypatch.setattr(http, 'post_sync', lambda *a, **k: Mock(json=lambda: {'embeddings': rows}))
     with pytest.raises(AppError) as exc:
@@ -44,12 +51,19 @@ def test_generate(configured, monkeypatch):
     monkeypatch.setattr(http, 'post_sync', post)
     encoded = base64.b64encode(b'image').decode('ascii')
     assert configured.generate('질문', images=[b'image', encoded], system='지침') == '답변'
-    post.assert_called_once_with('http://localhost:11434/api/chat', json={
-        'model': settings.OLLAMA_CHAT_MODEL,
-        'messages': [{'role': 'system', 'content': '지침'},
-                     {'role': 'user', 'content': '질문', 'images': [encoded, encoded]}],
-        'stream': False, 'think': False,
-    }, timeout=180.0)
+    post.assert_called_once_with(
+        'http://localhost:11434/api/chat',
+        json={
+            'model': settings.OLLAMA_CHAT_MODEL,
+            'messages': [
+                {'role': 'system', 'content': '지침'},
+                {'role': 'user', 'content': '질문', 'images': [encoded, encoded]},
+            ],
+            'stream': False,
+            'think': False,
+        },
+        timeout=180.0,
+    )
     configured.generate('짧은 질문')
     assert post.call_args.kwargs['json']['messages'] == [{'role': 'user', 'content': '짧은 질문'}]
 
