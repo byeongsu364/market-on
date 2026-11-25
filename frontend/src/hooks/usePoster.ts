@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
+import type { PosterInfo } from '../types/contract';
 import QRCode from 'qrcode';
 import { getPoster } from '../api/merchant';
+import { getMarketPoster } from '../api/marketAdmin';
 import { useResource } from './useResource';
-export function usePoster() {
-  const info = useResource(getPoster);
+export function usePoster(market = false) {
+  const info = useResource<Omit<PosterInfo, 'store_name'> & { store_name?: string }>(
+    market ? getMarketPoster : getPoster,
+  );
   const [svg, setSvg] = useState('');
   const [error, setError] = useState('');
   useEffect(() => {

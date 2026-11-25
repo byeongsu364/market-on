@@ -1,7 +1,7 @@
 """All knowledge SQL, including file-loader operations, lives here."""
 
-from psycopg.types.json import Jsonb
 from pgvector import Vector
+from psycopg.types.json import Jsonb
 
 
 def source_id(conn, key):
@@ -221,6 +221,7 @@ def _prune_unreferenced(conn, table, key, candidates):
     Row locks also prevent new FK references racing the check and delete.
     """
     import sys
+
     from psycopg import sql
 
     deleted = 0
@@ -295,3 +296,123 @@ def prune_generated_criteria(conn, ids):
         )
     }
     return _prune_unreferenced(conn, 'entities', 'id', candidates)
+
+
+def get_item(conn, item_id):
+    from ._operational import rows
+
+    result = rows(conn, "select * from entities where id=%s and type='item'", (item_id,))
+    return result[0] if result else None
+
+
+def item_labels(conn, entity_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        'select * from entity_labels where entity_id=%s order by lang,kind,label',
+        (entity_id,),
+    )
+
+
+def item_relations(conn, item_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select r.*,e.name_ko,e.type,s.title as source_title
+        from entity_relations r join entities e on e.id=r.object_id
+        left join sources s on s.id=r.source_id
+        where r.subject_id=%s and r.predicate in ('hasCriterion','soldBy') order by r.id""",
+        (item_id,),
+    )
+
+
+def search_items(conn, query):
+    from ._operational import rows
+
+    # strpos treats %, _ and backslashes as literal query characters.
+    return rows(
+        conn,
+        """select entity_id from (
+        select distinct on (l.entity_id) l.entity_id,
+          case when l.label_norm=%s then 0
+               when strpos(l.label_norm,%s)=1 then 1 else 2 end as rank,
+          case when l.kind='preferred' then 0 else 1 end as preferred
+        from entity_labels l join entities e on e.id=l.entity_id
+        where e.type='item' and strpos(l.label_norm,%s)>0
+        order by l.entity_id,rank,preferred
+        ) matches order by rank,preferred,entity_id limit 10""",
+        (query, query, query),
+    )
+
+
+def vision_item_labels(conn):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id,e.name_ko,l.label from entities e
+        join entity_labels l on l.entity_id=e.id
+        where e.type='item' and (l.kind='vision' or
+        (l.lang='en' and l.kind in ('preferred','synonym')))
+        order by e.id,l.label""",
+    )
+
+
+def similar_items(conn, item_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id,e.name_ko from entities e join entities top on top.id=%s
+        where e.type='item' and e.id<>top.id and (
+          (nullif(top.kamis->>'item_cd','') is not null
+           and e.kamis->>'item_cd'=top.kamis->>'item_cd')
+          or exists (select 1 from entity_relations r where r.predicate='substituteFor'
+            and ((r.subject_id=top.id and r.object_id=e.id)
+              or (r.object_id=top.id and r.subject_id=e.id)))) order by e.id""",
+        (item_id,),
+    )
+
+
+def item_vocabulary(conn) -> list[dict]:
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id as item_id, chosen.label as name_en
+        from entities e
+        join lateral (
+          select l.label from entity_labels l where l.entity_id=e.id
+          and ((l.lang='en' and l.kind='preferred') or l.kind='vision')
+          order by case when l.lang='en' and l.kind='preferred' then 0 else 1 end,
+                   l.label limit 1
+        ) chosen on true
+        where e.type='item'
+        order by chosen.label,e.id""",
+    )
+
+
+def unit_labels(conn):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select e.id,l.label from entities e
+        join entity_labels l on l.entity_id=e.id
+        where e.type='unit' and l.lang in ('ko','en') order by e.id,l.label""",
+    )
+
+
+def valid_unit(conn, unit_id):
+    return (
+        conn.execute("select 1 from entities where id=%s and type='unit'", (unit_id,)).fetchone()
+        is not None
+    )
+
+
+def catalog_ids(conn):
+    return [
+        r[0] for r in conn.execute("select id from entities where type='item' order by name_ko,id")
+    ]

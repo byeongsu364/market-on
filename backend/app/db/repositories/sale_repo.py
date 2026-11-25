@@ -32,7 +32,8 @@ def get(conn, sale_id, store_id):
 def end(conn, sale_id, store_id):
     result = rows(
         conn,
-        "update closing_sales set status='ended' where id=%s and store_id=%s returning *",
+        """update closing_sales c set status='ended' where id=%s and store_id=%s
+        returning c.*,coalesce((select sum(v.count) from store_views v where v.sale_id=c.id),0) as views""",
         (sale_id, store_id),
     )
     return result[0] if result else None
@@ -52,7 +53,8 @@ def list_store(conn, store_id, status, now):
 def active(conn, now, market_id=None, item_id=None, store_id=None):
     return rows(
         conn,
-        """select c.*,s.name_ko as store_name,s.market_id,e.name_ko as item_name
+        """select c.*,coalesce((select sum(v.count) from store_views v where v.sale_id=c.id),0) as views,
+        s.name_ko as store_name,s.market_id,e.name_ko as item_name
         from closing_sales c join stores s on s.id=c.store_id join entities e on e.id=c.item_id
         where s.active and c.status='active' and %s between c.starts_at and c.ends_at
         and (%s::text is null or s.market_id=%s) and (%s::text is null or c.item_id=%s)
@@ -68,3 +70,16 @@ def public_get(conn, sale_id):
         (sale_id,),
     )
     return result[0] if result else None
+
+
+def latest_active_by_store(conn, market_id, now):
+    return rows(
+        conn,
+        """select distinct on (c.store_id)
+        c.store_id,c.sale_price,c.regular_price,c.ends_at
+        from closing_sales c join stores s on s.id=c.store_id
+        where s.market_id=%s and s.active and c.status='active'
+        and %s between c.starts_at and c.ends_at
+        order by c.store_id,c.created_at desc,c.id desc""",
+        (market_id, now),
+    )

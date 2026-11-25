@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { getMarkets } from '../api/markets';
+import { seoulDay } from '../utils/sale';
 import type { Language, Market } from '../types/contract';
 type Theme = 'system' | 'light' | 'dark';
 const read = <T>(key: string, fallback: T): T => {
@@ -16,7 +18,100 @@ const write = (key: string, value: unknown) => {
   }
 };
 export const useSessionState = () => {
-  const [market, setMarket] = useState<Market | null>(() => read('market', null));
+  const manuallyChosen = useRef(false);
+  const [market, updateMarket] = useState<Market | null>(() =>
+    read('market-day', '') === seoulDay() &&
+    read<Market | null>('market', null)?.status !== 'listed'
+      ? read('market', null)
+      : null,
+  );
+  const [marketLoading, setMarketLoading] = useState(true);
+  const [unsupported, setUnsupported] = useState<Market | null>(null);
+  const [nearbyActive, setNearbyActive] = useState<Market | null>(null);
+  const [automatic, setAutomatic] = useState(false);
+  const [storeContext, setStoreContext] = useState<{ store_id: string; market_id: string } | null>(
+    null,
+  );
+  const setMarket = (value: Market) => {
+    if (value.status === 'listed') return;
+    setUnsupported(null);
+    manuallyChosen.current = true;
+    updateMarket(value);
+    setAutomatic(false);
+    setStoreContext((current) => (current?.market_id === value.market_id ? current : null));
+    write('market-day', seoulDay());
+  };
+  useEffect(() => {
+    let active = true;
+    const requested = new URLSearchParams(window.location.search).get('market');
+    if (requested) {
+      void getMarkets()
+        .then((markets) => {
+          const selected = markets.find((m) => m.market_id === requested && m.status === 'active');
+          if (active && !manuallyChosen.current && selected) {
+            setMarket(selected);
+          }
+        })
+        .catch(() => {
+          /* market list remains available */
+        })
+        .finally(() => {
+          if (active) setMarketLoading(false);
+        });
+      return () => {
+        active = false;
+      };
+    }
+    if (market) {
+      setMarketLoading(false);
+      return;
+    }
+    const finish = () => {
+      if (active) setMarketLoading(false);
+    };
+    if (!navigator.geolocation) {
+      finish();
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const markets = await getMarkets(coords.latitude, coords.longitude);
+          const nearest = markets
+            .filter((m) => m.distance_m !== null)
+            .sort((a, b) => a.distance_m! - b.distance_m!)[0];
+          if (active && !manuallyChosen.current) {
+            setNearbyActive(markets.find((m) => m.status === 'active') ?? null);
+            if (nearest?.status === 'listed' && nearest.distance_m! <= 1000) {
+              setUnsupported(nearest);
+              return;
+            }
+          }
+          if (
+            active &&
+            !manuallyChosen.current &&
+            nearest?.status === 'active' &&
+            nearest &&
+            nearest.distance_m! <= 1000
+          ) {
+            updateMarket(nearest);
+            setAutomatic(true);
+          }
+        } catch {
+          /* show market list */
+        } finally {
+          finish();
+        }
+      },
+      finish,
+      { timeout: 5000 },
+    );
+    return () => {
+      active = false;
+    };
+    // Startup selection runs once; manual choices take priority afterward.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [language, setLanguage] = useState<Language>(() => read('language', 'ko'));
   const [theme, setTheme] = useState<Theme>(() => {
     try {
@@ -49,7 +144,20 @@ export const useSessionState = () => {
     }
     return () => media.removeEventListener('change', apply);
   }, [theme]);
-  return { market, setMarket, language, setLanguage, theme, setTheme };
+  return {
+    market,
+    unsupported,
+    nearbyActive,
+    setMarket,
+    marketLoading,
+    automatic,
+    storeContext,
+    setStoreContext,
+    language,
+    setLanguage,
+    theme,
+    setTheme,
+  };
 };
 export const SessionContext = createContext<ReturnType<typeof useSessionState> | null>(null);
 export const useSession = () => {

@@ -1,3 +1,5 @@
+import ManualInput from '../components/domain/ManualInput';
+import { isMock } from '../api/client';
 import { useT } from '../i18n';
 import { Link } from 'react-router-dom';
 import { useRecommendFlow, useRequireMarket } from '../hooks/useFlows';
@@ -13,7 +15,7 @@ export default function Recommend() {
   return (
     <>
       <h1>{t('recommendTitle')}</h1>
-      <p>{t('recommendPrompt')}</p>
+      <p>{isMock ? t('recommendPrompt') : '장보기 조건을 골라 주세요.'}</p>
       <ChipGroup
         label={t('purpose')}
         options={['집밥', '선물', '모임']}
@@ -43,7 +45,12 @@ export default function Recommend() {
       <Button className="wide" loading={f.action.loading} onClick={f.submit}>
         {t('viewComposition')}
       </Button>
-      {f.action.error && <ErrorBox message={f.action.error} />}
+      {f.action.error && (
+        <>
+          <ErrorBox message={f.action.error} />
+          <ManualInput />
+        </>
+      )}
       <div aria-live="polite">
         {f.action.data?.items.map((i) => (
           <article className="card" key={i.item_id}>

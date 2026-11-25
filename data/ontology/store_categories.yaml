@@ -1,0 +1,8 @@
+# 시장 안 점포 카테고리 (지도 구역 색·점포 분류). 운영 테이블(zones, stores)이 참조해요.
+entities:
+  - {id: 'store_category:fruit', type: store_category, name_ko: 청과, labels: {ko: [청과], en: [fruit]}}
+  - {id: 'store_category:vegetable', type: store_category, name_ko: 채소, labels: {ko: [채소], en: [vegetables]}}
+  - {id: 'store_category:seafood', type: store_category, name_ko: 수산, labels: {ko: [수산], en: [seafood]}}
+  - {id: 'store_category:meat', type: store_category, name_ko: 정육, labels: {ko: [정육], en: [meat]}}
+  - {id: 'store_category:side_dish', type: store_category, name_ko: 반찬, labels: {ko: [반찬], en: [side dishes]}}
+  - {id: 'store_category:snack', type: store_category, name_ko: 떡·분식, labels: {ko: [떡·분식], en: [rice cakes & snacks]}}

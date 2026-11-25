@@ -102,7 +102,7 @@ def test_store_patch_poster_and_daily_views(merchant, monkeypatch):
             hours={'open': '08:00', 'close': '21:00'},
         ),
     )
-    assert r.status_code == 200 and r.json()['id'] == 'store:a'
+    assert r.status_code == 200 and r.json()['store_id'] == 'store:a'
     assert merchant['stores']['store:b']['hours'] is None
     assert (
         client.patch('/merchant/store', headers=HEADER, json={'item_ids': ['bad']}).status_code

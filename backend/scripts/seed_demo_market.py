@@ -18,8 +18,13 @@ ITEMS = [
     ('onion', '양파'),
     ('apple', '사과'),
     ('pear', '배'),
-    ('persimmon', '단감'),
+    ('sweet_persimmon', '단감'),
 ]
+
+
+# 시연용 좌표: frontend mock과 동일한 고정 위치.
+DEMO_LAT = 37.57
+DEMO_LNG = 126.99
 
 
 def seed_demo_market(conn):
@@ -27,7 +32,14 @@ def seed_demo_market(conn):
         for key, name in ITEMS:
             demo_repo.ensure_entity(conn, f'item:{key}', 'item', name)
         store_repo.upsert_market(
-            conn, id='market:demo', name_ko='시연 시장', lat=37.57, lng=126.99, source='manual'
+            conn,
+            id='market:demo',
+            name_ko='시연 시장',
+            lat=DEMO_LAT,
+            lng=DEMO_LNG,
+            source='manual',
+            at_sgg_nm='서울',
+            at_mrkt_cd=None,
         )
         for index, (key, name) in enumerate(CATEGORIES):
             category_id = f'store_category:{key}'
@@ -38,6 +50,8 @@ def seed_demo_market(conn):
                 market_id='market:demo',
                 store_category_id=category_id,
                 name_ko=name,
+                x=(index % 2) * 180 + 8,
+                y=(index // 2) * 180 + 8,
             )
         for i in range(24):
             zone = i // 4

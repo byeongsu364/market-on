@@ -72,3 +72,12 @@ body {
   --color-print-bg: #ffffff;
   --color-print-text: #2f4a23;
 }
+
+:root {
+  --color-zone-0: #c9b458;
+  --color-zone-1: #7fa36b;
+  --color-zone-2: #6e9bb0;
+  --color-zone-3: #b07a6e;
+  --color-zone-4: #a08bb0;
+  --color-zone-5: #c4a484;
+}

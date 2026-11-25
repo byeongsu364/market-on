@@ -50,6 +50,8 @@ it('홈에서 파일 선택 후 결과와 지도로 이동한다', async () => {
     target: { files: [new File(['sample'], 'onion.jpg', { type: 'image/jpeg' })] },
   });
   fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: '결과 보기' })).toBeEnabled());
+  fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   await screen.findByRole('heading', { name: '대파' });
   fireEvent.click(screen.getByRole('link', { name: '파는 점포 보기' }));
   expect(await screen.findByText('대파 파는 점포 3곳')).toBeInTheDocument();
@@ -92,5 +94,7 @@ it('낮은 신뢰도에서 후보와 동의어 검색으로 확정할 수 있다
   fireEvent.click(screen.getByRole('button', { name: '목록에 없어요' }));
   fireEvent.change(screen.getByRole('searchbox'), { target: { value: '파' } });
   fireEvent.click(await screen.findByRole('button', { name: '대파' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: '결과 보기' })).toBeEnabled());
+  fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();
 });

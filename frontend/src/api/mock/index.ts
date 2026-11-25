@@ -6,8 +6,9 @@ import type {
   RecommendRequest,
   RecommendResponse,
 } from '../../types/contract';
+import { record } from './marketRequests';
 import { items, markets, stores, source } from './data';
-import { activeForStore } from './merchant';
+import { activeForStore, storePrice } from './merchant';
 import { zones } from '../../constants/zones';
 import { convertUnit } from '../../utils/convertUnit';
 import { diffPct } from '../../utils/diffPct';
@@ -19,14 +20,31 @@ export async function mock<T>(work: () => T): Promise<T> {
 }
 export const nearby = (lat?: number, lng?: number) =>
   mock(() =>
-    [...markets].sort((a, b) =>
-      lat == null || lng == null
-        ? 0
-        : Math.hypot(a.lat - lat, a.lng - lng) - Math.hypot(b.lat - lat, b.lng - lng),
-    ),
+    [...markets]
+      .map((m) => ({
+        ...m,
+        distance_m:
+          lat == null || lng == null
+            ? null
+            : Math.round(Math.hypot(m.lat - lat, m.lng - lng) * 111000),
+      }))
+      .map((m) => {
+        if (m.status === 'listed' && m.distance_m !== null && m.distance_m <= 1000)
+          record(m.market_id, 'nearby');
+        return m;
+      })
+      .sort((a, b) =>
+        lat == null || lng == null
+          ? 0
+          : Math.hypot(a.lat - lat, a.lng - lng) - Math.hypot(b.lat - lat, b.lng - lng),
+      ),
   );
 export const recognize = (file: File): Promise<RecognizeResponse> =>
   mock(() => ({
+    media_id: '00000000-0000-4000-8000-000000000001',
+    price_tag: file.name.includes('price')
+      ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1 }
+      : null,
     vision_labels: ['green onion', 'scallion'],
     candidates: items.slice(0, 3).map((i, j) => ({
       item_id: i.item_id,
@@ -69,7 +87,7 @@ export const price = (q: PriceRequest): Promise<Price> =>
       },
     };
   });
-export const map = (market_id: string, item_id?: string): Promise<MarketMap> =>
+export const map = (market_id: string, item_id?: string, unit?: string): Promise<MarketMap> =>
   mock(() => ({
     market_id,
     zones,
@@ -78,8 +96,14 @@ export const map = (market_id: string, item_id?: string): Promise<MarketMap> =>
         ...s,
         highlight: !!item_id && s.sells.includes(item_id),
         active_sale: activeForStore(s.store_id, item_id),
+        price: item_id && s.sells.includes(item_id) ? storePrice(s.store_id, item_id, unit) : null,
       }))
-      .sort((a, b) => Number(!!b.active_sale) - Number(!!a.active_sale)),
+      .sort(
+        (a, b) =>
+          (item_id
+            ? (a.price ? Number(a.price.stale) : 2) - (b.price ? Number(b.price.stale) : 2)
+            : 0) || Number(!!b.active_sale) - Number(!!a.active_sale),
+      ),
   }));
 export const recommend = (q: RecommendRequest): Promise<RecommendResponse> =>
   mock(() => ({

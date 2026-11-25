@@ -105,3 +105,13 @@ def stores_selling(conn, market_id, item_id):
         'select s.* from stores s join store_items i on i.store_id=s.id where s.market_id=%s and i.item_id=%s and s.active order by s.id',
         (market_id, item_id),
     )
+
+
+def market_items(conn, market_id):
+    return rows(
+        conn,
+        """select i.store_id,i.item_id from store_items i
+        join stores s on s.id=i.store_id where s.market_id=%s
+        order by i.store_id,i.item_id""",
+        (market_id,),
+    )

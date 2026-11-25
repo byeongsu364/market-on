@@ -28,7 +28,7 @@ def prices(db, monkeypatch):
         raise Rollback()
 
 
-def test_update_baseline_and_route(prices):
+def test_update_baseline_and_route(prices, monkeypatch):
     conn = prices
     assert (
         update_prices(conn, end=date(2026, 11, 22), item_id='item:green_onion')['item:green_onion'][
@@ -65,11 +65,31 @@ def test_update_baseline_and_route(prices):
     from app.main import app
     from app.deps import get_db
 
+    from app.services import price_service
+    from scripts.seed_demo_market import seed_demo_market
+
+    class Today(date):
+        @classmethod
+        def today(cls):
+            return date(2026, 11, 22)
+
+    monkeypatch.setattr(price_service, 'date', Today)
+    seed_demo_market(conn)
+    assert store_repo.get_market(conn, 'market:demo')['at_sgg_nm'] == '서울'
+    assert store_repo.get_market(conn, 'market:demo')['at_mrkt_cd'] is None
     app.dependency_overrides[get_db] = lambda: conn
     try:
         with TestClient(app) as client:
-            result = client.get('/price/item:green_onion?seen_price=2000')
-        assert result.status_code == 200 and result.json()['converted']
+            result = client.get(
+                '/price',
+                params={
+                    'item_id': 'item:green_onion',
+                    'market_id': 'market:demo',
+                    'unit': 'unit:bunch',
+                    'seen_price': 2000,
+                },
+            )
+        assert result.status_code == 200 and result.json()['unit'] == 'unit:bunch'
     finally:
         app.dependency_overrides.pop(get_db, None)
 

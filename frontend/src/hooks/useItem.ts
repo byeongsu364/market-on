@@ -4,5 +4,7 @@ import { useResource } from './useResource';
 import { useSession } from '../store/session';
 export const useItem = (id: string) => {
   const { language } = useSession();
-  return useResource(useCallback(() => getItem(id, language), [id, language]));
+  return useResource(
+    useCallback(() => (id ? getItem(id, language) : Promise.resolve(null)), [id, language]),
+  );
 };

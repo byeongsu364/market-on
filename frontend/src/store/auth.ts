@@ -4,7 +4,7 @@ export type AuthState = {
   user: User | null;
   loading: boolean;
   me: () => Promise<void>;
-  login: (q: AuthRequest) => Promise<void>;
+  login: (q: AuthRequest) => Promise<User>;
   signup: (q: AuthRequest) => Promise<void>;
   logout: () => Promise<void>;
 };

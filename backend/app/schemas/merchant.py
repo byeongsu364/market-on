@@ -38,3 +38,9 @@ class Repost(BaseModel):
 
 MerchantStatus = Literal['pending', 'approved', 'rejected', 'disabled']
 SaleStatus = Literal['active', 'ended']
+
+
+class PriceConfirm(BaseModel):
+    item_id: str
+    unit: str | None = None
+    price: int = Field(ge=10, le=10000000, strict=True)

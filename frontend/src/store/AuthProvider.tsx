@@ -21,7 +21,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('auth:unauthorized', clear);
   }, []);
   const login = async (q: AuthRequest) => {
-    setUser((await api.login(q)).user);
+    const user = (await api.login(q)).user;
+    if (!user) throw new Error('로그인이 필요해요');
+    setUser(user);
+    return user;
   };
   const signup = async (q: AuthRequest) => {
     setUser((await api.signup(q)).user);

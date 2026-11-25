@@ -23,3 +23,15 @@ export const repostSale = (id: number, ends_at: string) =>
         body: JSON.stringify({ ends_at }),
       });
 export const getPoster = () => (isMock ? mock.poster() : request<PosterInfo>('/merchant/poster'));
+
+export const getPrices = () =>
+  isMock
+    ? mock.getPrices()
+    : request<import('../types/contract').MerchantPriceRow[]>('/merchant/prices');
+export const confirmPrice = (q: import('../types/contract').PriceConfirmRequest) =>
+  isMock
+    ? mock.confirmPrice(q)
+    : request<{ price: number; confirmed_at: string }>('/merchant/prices/confirm', {
+        method: 'POST',
+        body: JSON.stringify(q),
+      });

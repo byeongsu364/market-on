@@ -17,28 +17,24 @@ def test_sample_formats_and_kamis():
         for path in sorted((DATA / 'ontology').glob('*.yaml'))
         for e in yaml.safe_load(path.read_text())['entities']
     ]
-    assert len(entities) == 8
+    # items.yaml 10개 (+ unit:kg, unit:piece) + store_categories.yaml 6개
+    assert len(entities) == 16
     assert sum(e['type'] == 'category' for e in entities) == 2
-    rows = list(
+    assert sum(e['type'] == 'store_category' for e in entities) == 6
+    # 품목 KAMIS 코드는 aT 소매 품목코드표(신태빈 정리, 2026-11-20)에 실제로 있는 조합이어야 해요
+    code_table = list(
         csv.DictReader(
-            io.StringIO(
-                (DATA / 'kamis/n8n_가격조회목록_v1.csv').read_text().replace('\\r\\n', '\n')
-            )
+            io.StringIO((DATA / 'kamis/aT_소매_품목코드표_20261120.csv').read_text('utf-8-sig'))
         )
     )
+    known = {(r['부류코드'], r['품목코드'], r['품종코드']) for r in code_table}
     for entity in entities:
-        if entity['name_ko'] in ('사과', '배', '단감'):
-            row = next(
-                row for row in rows if row['이름'] == entity['name_ko'] and row['우선순위'] == '1'
-            )
-            assert [entity['kamis'][k] for k in ('ctgry_cd', 'item_cd', 'vrty_cd', 'grd_cd')] == [
-                row[k] for k in ('부류', '품목', '품종', '등급')
-            ]
-        elif entity['type'] == 'item':
-            assert entity['kamis']['item_cd'] in ('245', '246')
-            assert entity['kamis']['unit_sz'] == '1'
+        if entity['type'] == 'item':
+            kamis = entity['kamis']
+            assert (kamis['ctgry_cd'], kamis['item_cd'], kamis['vrty_cd']) in known, entity['id']
+            assert kamis['grd_cd'] == '04'
         else:
-            assert entity['kamis'] is None
+            assert entity.get('kamis') is None
     directory = DATA / 'rag_docs'
     docs = [read_document(path, directory) for path in directory.rglob('*.md')]
     assert len(docs) == 8
@@ -95,7 +91,7 @@ def test_criterion_expansion_without_db(monkeypatch):
     monkeypatch.setattr(repo, 'prune_generated_criteria', prune)
     conn = Mock(transaction=nullcontext)
     counts = load_ontology(conn)
-    assert counts['added'] == 11
+    assert counts['added'] == 19  # + store_categories 6
     criterion = saved['crit:green_onion-leaf']
     assert criterion['type'] == 'criterion'
     assert criterion['name_ko'] == '잎 끝이 마르지 않고 누런 잎이 없어요'

@@ -30,6 +30,7 @@ it('로그인한 상인에게 숫자 두 개와 대기 상인에게 승인 안�
   cleanup();
   await login('pending_a08');
   expect(await screen.findByRole('heading', { name: '승인 대기 중이에요' })).toBeInTheDocument();
+  expect(screen.getByText('시장 관리자가 확인하면 열려요')).toBeInTheDocument();
 });
 it('품목·가격·시각을 골라 올리고 소비자에게 보인 뒤 내리면 사라진다', async () => {
   await mock.login(mock.demoCredentials());
