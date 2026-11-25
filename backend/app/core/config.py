@@ -33,6 +33,15 @@ class Settings(BaseSettings):
     NAVER_MAP_CLIENT_SECRET: str | None = None
     MEDIA_DIR: Path = Path(__file__).resolve().parents[2] / 'storage'
     LLM_PROVIDER: str = 'gemma'
+    OPENAI_API_KEY: str | None = None
+    OPENAI_CHAT_MODEL: str | None = None
+    OPENAI_BASE_URL: str = 'https://api.openai.com/v1'
+    LLM_ROUTES: dict[str, list[str]] = {
+        'recognize': ['gemma', 'openai'],
+        'ask': ['gemma', 'openai'],
+        'recommend': ['gemma', 'openai'],
+        'chat': ['openai', 'gemma'],
+    }
     EMBEDDING_PROVIDER: str = 'ollama'
     GEMINI_EMBEDDING_MODEL: str = 'gemini-embedding-001'
     EMBEDDING_DIM: int = 1024

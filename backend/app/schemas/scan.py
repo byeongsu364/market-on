@@ -17,6 +17,7 @@ class PriceTag(BaseModel):
 
 
 class RecognizeResponse(BaseModel):
+    model: str
     vision_labels: list[str]
     candidates: list[RecognizeCandidate]
     media_id: str | None

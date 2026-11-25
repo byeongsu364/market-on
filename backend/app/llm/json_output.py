@@ -1,6 +1,5 @@
 """Image label generation and tolerant JSON parsing with one corrective request."""
 
-import asyncio
 import json
 import math
 from pathlib import Path
@@ -9,7 +8,7 @@ import httpx
 from starlette.concurrency import run_in_threadpool
 
 from app.core.errors import AppError
-from app.llm.factory import get_llm
+from app.llm.router import run
 
 PROMPT = Path(__file__).with_name('prompts').joinpath('recognize.txt')
 
@@ -23,8 +22,7 @@ def parse_recognition(text: str) -> dict:
     return {'labels': labels[:3], 'price_tag': parse_price_tag(value.get('price_tag'))}
 
 
-def _generate_labels(image: bytes, vocabulary: list[str]) -> dict:
-    provider = get_llm()
+def _generate_labels(provider, image: bytes, vocabulary: list[str]) -> dict:
     prompt = PROMPT.read_text(encoding='utf-8')
     if vocabulary:
         prompt = prompt.replace('{vocabulary}', '\n'.join(sorted(set(vocabulary))))
@@ -46,10 +44,10 @@ def _generate_labels(image: bytes, vocabulary: list[str]) -> dict:
     return {'labels': [], 'price_tag': None}
 
 
-async def recognize_labels(image: bytes, vocabulary: list[str]) -> dict:
+async def recognize_labels(image: bytes, vocabulary: list[str], accept=lambda _: None):
     try:
-        return await asyncio.wait_for(
-            run_in_threadpool(_generate_labels, image, vocabulary), timeout=60
+        return await run_in_threadpool(
+            run, 'recognize', lambda provider: _generate_labels(provider, image, vocabulary), accept
         )
     except (TimeoutError, httpx.HTTPError, AppError) as exc:
         raise AppError(

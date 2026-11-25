@@ -23,6 +23,7 @@ export type Item = {
   labels_i18n: Partial<Record<Language, string>>;
 };
 export type RecognizeResponse = {
+  model: string;
   media_id: string | null;
   price_tag: {
     price: number;

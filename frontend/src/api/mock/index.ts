@@ -45,6 +45,7 @@ export const recognize = (file: File): Promise<RecognizeResponse> =>
     price_tag: file.name.includes('price')
       ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1 }
       : null,
+    model: 'gemma4:e4b',
     vision_labels: ['green onion', 'scallion'],
     candidates: items.slice(0, 3).map((i, j) => ({
       item_id: i.item_id,

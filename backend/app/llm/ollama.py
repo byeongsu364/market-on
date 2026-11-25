@@ -6,6 +6,7 @@ from app.core import http
 from app.core.config import settings
 from app.core.errors import AppError
 from .base import LLMProvider
+from .limits import http_timeout
 
 
 class OllamaProvider(LLMProvider):
@@ -57,5 +58,5 @@ class OllamaProvider(LLMProvider):
                 'stream': False,
                 'think': False,
             },
-            timeout=180.0,
+            timeout=http_timeout('gemma'),
         ).json()['message']['content']

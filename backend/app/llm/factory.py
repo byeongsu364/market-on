@@ -6,6 +6,7 @@ from .base import LLMProvider
 from .gemini import GeminiProvider
 from .ollama import OllamaProvider
 from .fake import FakeProvider
+from .openai import OpenAIProvider
 
 
 def _provider(name: str) -> LLMProvider:
@@ -14,6 +15,7 @@ def _provider(name: str) -> LLMProvider:
         'ollama': OllamaProvider,
         'gemma': OllamaProvider,
         'fake': FakeProvider,
+        'openai': OpenAIProvider,
     }
     if name not in providers:
         raise AppError('INVALID_LLM_PROVIDER', f'지원하지 않는 공급자: {name}')

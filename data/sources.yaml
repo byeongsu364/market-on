@@ -5,3 +5,94 @@ src:team-draft:
   license: 팀 자체 작성
   kind: team_written
   retrieved_at: 2026-11-22
+src:nongsaro-month-food-list:
+  title: 농식품종합정보시스템 이달의 식재료 (월별 목록)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/list?menuId=PS03924&tabCode=1&dtlCode=3&month=11
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-green-onion:
+  title: 이달의 식재료 - 움파(대파)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=208287&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-onion:
+  title: 이달의 식재료 - 양파 (2018)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=208518&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-onion-2:
+  title: 이달의 식재료 - 양파
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=98665&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-apple:
+  title: 이달의 식재료 - 사과 (10월)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=207734&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-apple-2:
+  title: 이달의 식재료 - 사과 (9월)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=98818&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-pear:
+  title: 이달의 식재료 - 배 (9월)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=213098&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-pear-2:
+  title: 이달의 식재료 - 배 (10월)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=203100&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:nongsaro-month-food-persimmon:
+  title: 이달의 식재료 - 감 (11월)
+  publisher: 농촌진흥청 농사로
+  url: https://www.nongsaro.go.kr/mfood/kfi/foodMonth/view?menuId=PS03924&cntntsNo=215555&dtlCode=2&tabCode=1
+  license: 확인 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:rda-fruit-veg-storage-2023:
+  title: '‘더 오래 신선하게’ 똑똑한 과일, 채소 보관법 (보도자료, 2023-09-27)'
+  publisher: 농촌진흥청 국립원예특작과학원
+  url: https://www.rda.go.kr/board/board.do?mode=view&prgId=day_farmprmninfoEntry&dataNo=100000790713
+  license: 공공누리 제1유형(출처표시)
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:rda-chuseok-storage-2025:
+  title: '긴 추석 연휴 “과일, 채소 신선하게 보관하려면?” (보도자료, 2025-09-30)'
+  publisher: 농촌진흥청 국립원예특작과학원
+  url: https://www.rda.go.kr/board/board.do?mode=view&prgId=day_farmprmninfoEntry&dataNo=100000805469
+  license: 공공누리 제1유형(출처표시)
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:rda-persimmon-postharvest:
+  title: 단감 수확 후 관리 요령 (이달의 농업기술)
+  publisher: 농촌진흥청 국립원예특작과학원
+  url: https://www.rda.go.kr/middlePopOpenPopNongsaroDBView.do?no=1996
+  license: 공공누리 제2유형(출처표시+상업적 이용금지) — 대회용 비상업 사용 중, 상업화 전 제1유형 자료로 교체 필요
+  kind: public_doc
+  retrieved_at: 2026-11-25
+src:rda-fruit-choose-store-2007:
+  title: 과일 맛있고 신선하게 고르고 보관하는 방법 (보도자료, 2007-09-21)
+  publisher: 농촌진흥청 원예연구소
+  url: https://rda.go.kr/board/board.do?dataNo=100000062825&mode=view&prgId=day_farmprmninfoEntry
+  license: 공공누리 제1유형(출처표시)
+  kind: public_doc
+  retrieved_at: 2026-11-25

@@ -1,3 +1,5 @@
+from app.llm.limits import http_timeout
+
 """Ollama 요청 계약은 HTTP를 monkeypatch하여 오프라인으로 검증해요."""
 
 import base64
@@ -62,7 +64,7 @@ def test_generate(configured, monkeypatch):
             'stream': False,
             'think': False,
         },
-        timeout=180.0,
+        timeout=http_timeout('gemma'),
     )
     configured.generate('짧은 질문')
     assert post.call_args.kwargs['json']['messages'] == [{'role': 'user', 'content': '짧은 질문'}]

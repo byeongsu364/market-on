@@ -74,6 +74,20 @@ class _MaskServiceKey(logging.Filter):
         record.msg = re.sub(
             r'(serviceKey(?:=|%3D))[^&\s\"\']+', r'\1***', record.getMessage(), flags=re.I
         )
+        from app.core.config import settings
+        import traceback
+
+        def redact(text):
+            if settings.OPENAI_API_KEY:
+                text = text.replace(settings.OPENAI_API_KEY, '***')
+            return re.sub(r'(Bearer\s+)[^\s\"\']+', r'\1***', text, flags=re.I)
+
+        record.msg = redact(record.msg)
+        if record.exc_info:
+            record.exc_text = redact(''.join(traceback.format_exception(*record.exc_info)))
+            record.exc_info = None
+        elif record.exc_text:
+            record.exc_text = redact(record.exc_text)
         record.args = ()
         return True
 

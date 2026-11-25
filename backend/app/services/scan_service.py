@@ -52,7 +52,20 @@ async def recognize(conn, image: bytes) -> dict:
     media_id = await run_in_threadpool(save_photo, conn, image, ext, mime)
     items = await run_in_threadpool(knowledge_repo.item_vocabulary, conn)
     vocabulary = sorted({item['name_en'] for item in items})
-    result = await recognize_labels(image, vocabulary)
+
+    def accept(value):
+        labels = value['labels']
+        if not labels:
+            return 'no_labels'
+        candidates = match_vision_labels(conn, labels)
+        if labels[0].strip().lower().startswith('other:') or not candidates:
+            return 'unknown_item'
+        if candidates[0]['confidence'] < 0.6:
+            return 'low_confidence'
+        return None
+
+    routed = await recognize_labels(image, vocabulary, accept)
+    result = routed.value
     labels = result['labels']
     price_tag = result['price_tag']
     if price_tag is not None:
@@ -63,6 +76,7 @@ async def recognize(conn, image: bytes) -> dict:
                 price_tag['quantity'] = float(number[0])
     candidates = await run_in_threadpool(match_vision_labels, conn, labels)
     return {
+        'model': routed.model,
         'vision_labels': labels,
         'candidates': candidates,
         'media_id': media_id,
