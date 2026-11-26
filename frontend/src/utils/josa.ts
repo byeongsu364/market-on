@@ -11,3 +11,10 @@ export function euro(word: string) {
   const f = final(word);
   return word + (f && f !== 8 ? '으로' : '로');
 }
+const PAIRS = { '은/는': ['은', '는'], '이/가': ['이', '가'], '을/를': ['을', '를'] } as const;
+/** 이름 뒤 조사 쌍으로 고르기 */
+export const josaPair = (word: string, pair: keyof typeof PAIRS) =>
+  josa(word, PAIRS[pair][0], PAIRS[pair][1]);
+/** "{name}"처럼 적은 문구에 값을 채움 */
+export const fill = (text: string, values: Record<string, string | number>) =>
+  text.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''));

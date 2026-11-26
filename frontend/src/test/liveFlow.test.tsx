@@ -7,7 +7,12 @@ import { recognize } from '../api/scan';
 import { getPrice } from '../api/price';
 import { postPriceReport } from '../api/priceReports';
 import * as mock from '../api/mock';
-vi.mock('../api/markets', () => ({ getMarkets: vi.fn() }));
+vi.mock('../api/markets', () => ({
+  getMarkets: vi.fn(),
+  // 지도(MapView)와 시장 품목은 mock 그대로
+  getPublicConfig: vi.fn(() => Promise.resolve({ naver_map_client_id: null })),
+  getMarketItems: vi.fn(() => Promise.resolve([])),
+}));
 vi.mock('../api/scan', () => ({ recognize: vi.fn() }));
 // live처럼: 최근 4주 시세는 백엔드에 없어 null
 vi.mock('../api/price', () => ({ getPrice: vi.fn(), getPriceHistory: vi.fn(async () => null) }));
@@ -47,23 +52,47 @@ function locate(denied = false) {
     },
   });
 }
-it('1km 이내 시장을 자동으로 선택한다', async () => {
+it('1km 이내 시장을 자동으로 선택해 지도 홈에서 그 시장 안을 보인다', async () => {
   locate();
   show();
-  expect(await screen.findByText(/지금 있는 시장 · 가까운 시장/)).toHaveTextContent('(자동)');
+  expect(await screen.findByRole('heading', { name: '가까운 시장', level: 1 })).toBeInTheDocument();
   expect(getMarkets).toHaveBeenCalledWith(37.57, 126.99);
 });
-it.each([false, true])('1km 밖 또는 권한 거부면 목록으로 이동한다 (%s)', async (denied) => {
-  locate(denied);
-  vi.mocked(getMarkets).mockResolvedValue([{ ...market, distance_m: 1001 }]);
-  show();
-  expect(await screen.findByRole('heading', { name: '시장 선택' })).toBeInTheDocument();
-});
+it.each([false, true])(
+  '1km 밖이면 주변 시장 카드, 권한 거부면 시장 목록으로 안내한다 (%s)',
+  async (denied) => {
+    locate(denied);
+    vi.mocked(getMarkets).mockResolvedValue([{ ...market, distance_m: 1001 }]);
+    show();
+    if (!denied) {
+      // 위치로 주변 시장을 이미 찾았으면 첫 방문 안내 없이 가까운 시장 카드
+      expect(await screen.findByRole('link', { name: '둘러보기' })).toHaveAttribute(
+        'href',
+        '/?market=market%3Ademo',
+      );
+      return;
+    }
+    fireEvent.click(await screen.findByRole('button', { name: '현재 위치 사용하기' }));
+    expect(
+      await screen.findByRole('heading', { name: '위치를 확인하지 못했어요' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '시장 목록으로 보기' })).toHaveAttribute(
+      'href',
+      '/markets',
+    );
+  },
+);
 it('오늘 사용자가 선택한 시장을 위치보다 우선한다', async () => {
-  show();
-  await screen.findByRole('heading', { name: '직접 입력' });
-  expect(screen.getByText(/지금 있는 시장 · 시연 시장/)).toBeInTheDocument();
-  expect(getMarkets).not.toHaveBeenCalled();
+  Object.defineProperty(navigator, 'geolocation', {
+    configurable: true,
+    value: {
+      getCurrentPosition: (ok: PositionCallback) =>
+        ok({ coords: { latitude: 37.6, longitude: 127.1 } } as GeolocationPosition),
+    },
+  });
+  show('/search');
+  expect(await screen.findByLabelText('시연 시장에서 품목 검색')).toBeInTheDocument();
+  expect(getMarkets).not.toHaveBeenCalledWith(37.6, 127.1);
 });
 it('직접 입력은 가격을 넣으면 결과 진입과 점포 선택 때 제보한다', async () => {
   show('/scan?mode=manual');
@@ -156,11 +185,16 @@ it('시세 404에서도 확인 포인트와 판매 점포를 보여 준다', asy
   );
 });
 
-it('시장 API 실패도 목록으로 대체한다', async () => {
+it('시장 API 실패면 오류와 시장 목록 링크를 보인다', async () => {
   locate();
   vi.mocked(getMarkets).mockRejectedValue(new Error('offline'));
   show();
-  expect(await screen.findByRole('heading', { name: '시장 선택' })).toBeInTheDocument();
+  fireEvent.click(await screen.findByRole('button', { name: '현재 위치 사용하기' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('offline');
+  expect(screen.getByRole('link', { name: '시장 목록으로 보기' })).toHaveAttribute(
+    'href',
+    '/markets',
+  );
 });
 it('어제 선택한 시장은 새 위치로 다시 확인한다', async () => {
   localStorage.setItem('market-day', JSON.stringify('2000-01-01'));
@@ -172,7 +206,7 @@ it('어제 선택한 시장은 새 위치로 다시 확인한다', async () => {
     },
   });
   show();
-  expect(await screen.findByText(/지금 있는 시장 · 가까운 시장/)).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: '가까운 시장', level: 1 })).toBeInTheDocument();
 });
 it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
   vi.mocked(postPriceReport).mockRejectedValue(new Error('offline'));
@@ -198,7 +232,7 @@ it('QR에서 고른 점포는 사진 결과의 최초 제보에 포함한다', a
     price_tag: { price: 3000, variety_id: null, unit_text: '3단', unit: 'unit:bunch', quantity: 3 },
   });
   show('/s/store:A-05');
-  fireEvent.click(await screen.findByRole('link', { name: '이 점포에서 찍기' }));
+  fireEvent.click(await screen.findByRole('link', { name: '이 가게에서 찍기' }));
   fireEvent.change(await screen.findByLabelText('사진 찍기'), {
     target: { files: [new File(['x'], 'photo.jpg')] },
   });

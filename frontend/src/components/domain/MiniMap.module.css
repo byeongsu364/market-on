@@ -1,0 +1,76 @@
+/* 점포 좌표가 없는 시장(지금의 live)에서 지도 자리에 넣는 구역 평면도. 새 토큰으로 다시 칠함(지시서 030 6장). */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.map {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.map text {
+  fill: var(--color-ink);
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.zone {
+  fill-opacity: 0.16;
+}
+.store {
+  fill: var(--color-surface-card);
+  stroke: var(--color-hairline-strong);
+  stroke-width: 1;
+}
+.map g[role='button'] {
+  cursor: pointer;
+}
+.map g[role='button']:hover .store,
+.map g[role='button']:focus-visible .store {
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+.map g[role='button']:focus-visible {
+  outline: none;
+}
+.highlighted {
+  fill: var(--color-ink);
+  stroke: var(--color-ink);
+}
+.map text.onInk {
+  fill: var(--color-canvas);
+}
+.selected {
+  fill: var(--color-signal);
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+.map text.onSignal {
+  fill: var(--color-on-signal);
+}
+.saleBg {
+  fill: var(--color-signal-soft);
+}
+.map text.sale {
+  fill: var(--color-signal-text);
+  font-size: 11px;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--color-body);
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.legend span {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  opacity: 0.4;
+}
