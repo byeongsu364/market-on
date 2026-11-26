@@ -35,7 +35,7 @@ import {
   StoreLinkRow,
   StoreResultRow,
 } from './parts';
-import { priceWho, storeBand, type StoreView } from './helpers';
+import { examplePositions, priceWho, storeBand, type StoreView } from './helpers';
 import { InfoTab, SalesTab } from './MarketTabs';
 import s from './map.module.css';
 
@@ -210,16 +210,30 @@ function MarketView({ market }: { market: Market }) {
     });
   const marketOnly = `/?market=${encodeURIComponent(market.market_id)}`;
 
-  const pins: MapPin[] = hasCoords
+  // 위치를 확인한 점포는 실제 좌표, 나머지는 업종별 예시 자리(helpers.examplePositions)
+  const example = useMemo(
+    () =>
+      market.lat != null && market.lng != null
+        ? examplePositions(views, { lat: market.lat, lng: market.lng })
+        : new Map<string, { lat: number; lng: number }>(),
+    [views, market.lat, market.lng],
+  );
+  const pinAt = (v: StoreView) =>
+    v.store.lat != null && v.store.lng != null
+      ? { lat: v.store.lat, lng: v.store.lng }
+      : example.get(v.store.store_id);
+  const onMap = hasCoords || example.size > 0;
+  const pins: MapPin[] = onMap
     ? views
-        .filter((v) => v.store.lat != null && v.store.lng != null)
+        .filter((v) => pinAt(v))
         .map((v) => {
           const isSelected = v.store.store_id === ctx.storeId;
+          const at = pinAt(v)!;
           return {
             id: v.store.store_id,
             name: v.store.name,
-            lat: v.store.lat!,
-            lng: v.store.lng!,
+            lat: at.lat,
+            lng: at.lng,
             category: v.category,
             sale: !!v.store.active_sale,
             state: isSelected ? 'selected' : matches(v) ? 'default' : 'dim',
@@ -497,7 +511,7 @@ function MarketView({ market }: { market: Market }) {
 
   const boundary = map.data?.boundary ?? market.boundary;
   const mapNode =
-    !map.data || hasCoords ? (
+    !map.data || onMap ? (
       <MapView
         key={attempt}
         label={fill(t('mapMarketLabel'), { name: market.name })}
@@ -507,7 +521,7 @@ function MarketView({ market }: { market: Market }) {
         pins={pins}
         me={position ?? null}
         center={market}
-        sample={hasCoords && map.data?.layout === 'schematic'}
+        sample={example.size > 0 || (hasCoords && map.data?.layout === 'schematic')}
         onSelect={(id, type) => type === 'pin' && select(id)}
         topInset={desktop ? 0 : 120}
         bottomInset={desktop ? 0 : 300}

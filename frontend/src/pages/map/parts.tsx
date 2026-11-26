@@ -96,8 +96,9 @@ export function SearchPill({
           <Icon name="back" />
         </Link>
       ) : (
-        <span className={s.pillIcon} aria-hidden="true">
-          <Icon name="search" />
+        // 시안: 지도 위 검색창 왼쪽은 Market-On 로고(막대 네 개)
+        <span className={s.pillIcon}>
+          <img src="/brand/mark-tight.svg" alt="Market-On" className={s.pillLogo} />
         </span>
       )}
       <Link to={to} className={value ? s.pillValue : s.pillText}>

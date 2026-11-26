@@ -119,7 +119,7 @@ export default function Login() {
       <AppHeader back="/me" />
       <div className={s.main}>
         <div className={s.intro}>
-          <img className={s.mark} src="/brand/mark.svg" alt="Market-On" />
+          <img className={s.mark} src="/brand/mark-tight.svg" alt="Market-On" />
           <div className={s.heading}>
             <h1 className={s.title}>{t('login')}</h1>
             <p className={s.lead}>{t('meLoginLead')}</p>

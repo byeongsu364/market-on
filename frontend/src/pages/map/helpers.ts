@@ -73,3 +73,50 @@ export function parseSearch(text: string) {
     price: Number.isInteger(price) && price >= 10 && price <= 10000000 ? price : null,
   };
 }
+
+/**
+ * 위치를 확인하지 않은 점포의 예시 핀 자리(2026-11-27, 시안 MarketInside처럼 실제 지도에 점포별 핀).
+ * 공공데이터 좌표는 건물 하나의 위치라(경동 108곳 중 101곳이 같은 점) 쓰지 않고, 시장 중심 둘레에
+ * 업종별 묶음으로 모아 고정된 자리에 둠. 화면에는 "핀 위치는 예시"를 표시하고 거리 계산에는 쓰지 않음.
+ */
+export function examplePositions(
+  views: StoreView[],
+  center: { lat: number; lng: number },
+): Map<string, { lat: number; lng: number }> {
+  const M_LAT = 1 / 111000;
+  const M_LNG = 1 / (111000 * Math.cos((center.lat * Math.PI) / 180));
+  const groups = new Map<string, StoreView[]>();
+  for (const v of views) {
+    if (v.store.lat != null && v.store.lng != null) continue;
+    const key = v.category ?? 'other';
+    groups.set(key, [...(groups.get(key) ?? []), v]);
+  }
+  // 묶음 자리: 3열 2행, 동서 80m·남북 70m 간격. 큰 묶음부터 가운데 줄에
+  const slots: [number, number][] = [
+    [0, 35],
+    [-80, 35],
+    [80, 35],
+    [0, -35],
+    [-80, -35],
+    [80, -35],
+    [160, 0],
+    [-160, 0],
+  ];
+  const ordered = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
+  const out = new Map<string, { lat: number; lng: number }>();
+  ordered.forEach(([, list], gi) => {
+    const [cx, cy] = slots[gi % slots.length];
+    const cols = Math.ceil(Math.sqrt(list.length * 1.4));
+    const rows = Math.ceil(list.length / cols);
+    const gap = 9; // m
+    list.forEach((v, i) => {
+      const east = cx + ((i % cols) - (cols - 1) / 2) * gap;
+      const north = cy - (Math.floor(i / cols) - (rows - 1) / 2) * gap;
+      out.set(v.store.store_id, {
+        lat: +(center.lat + north * M_LAT).toFixed(6),
+        lng: +(center.lng + east * M_LNG).toFixed(6),
+      });
+    });
+  });
+  return out;
+}

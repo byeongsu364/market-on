@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { PriceBand, StoreCategory } from '../../types/contract';
 import { BAND_LABELS } from '../../utils/priceBand';
 import { categoryColor } from '../../utils/category';
-import { itemImage } from '../../utils/itemImage';
+import { itemImage, itemTint } from '../../utils/itemImage';
 import Icon, { CategoryGlyph } from './Icon';
 import s from './ui.module.css';
 
@@ -336,7 +336,11 @@ export function ItemTile({
 }) {
   const src = itemImage(itemId, varietyId);
   return (
-    <span className={s.itemTile} style={{ width: size, height: size }} aria-hidden="true">
+    <span
+      className={s.itemTile}
+      style={{ width: size, height: size, background: itemTint(itemId, varietyId) }}
+      aria-hidden="true"
+    >
       {src && <img src={src} alt="" width={size / 1.5} height={size / 1.5} />}
     </span>
   );

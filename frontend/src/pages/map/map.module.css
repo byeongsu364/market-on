@@ -84,6 +84,10 @@
 }
 
 /* 지도 위 검색창(흰 면 54px, 모서리 16) -------------------------------- */
+.pillLogo {
+  width: 32px; /* 시안 Main: 막대 로고 32×18 (여백 없는 mark-tight.svg) */
+  height: 18px;
+}
 .pill {
   display: flex;
   align-items: center;

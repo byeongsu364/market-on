@@ -271,7 +271,7 @@ it('준비 중 시장은 요청 화면과 지금 쓸 수 있는 시장을 보인
   );
 });
 
-it('점포에 좌표가 없으면(live) 지도 자리에 평면도와 안내 문구를 두고 시장 위치로 안내한다', async () => {
+it('점포에 좌표가 없으면(live) 실제 지도에 업종별 예시 핀을 찍고 길 안내는 시장 위치로 한다', async () => {
   vi.spyOn(storesApi, 'getMarketMap').mockImplementation(async (id, item, unit) => {
     const map = await mock.map(id, item, unit);
     return {
@@ -287,12 +287,19 @@ it('점포에 좌표가 없으면(live) 지도 자리에 평면도와 안내 문
     };
   });
   const { container } = show('/?market=market:demo&item=item:green_onion');
+  // 평면도 대신 지도(테스트는 약도)에 핀을 찍고 "핀 위치는 예시"를 표시
+  expect(await screen.findByText('핀 위치는 예시')).toBeInTheDocument();
+  expect(container.querySelector('[data-map]')).not.toBeNull();
   expect(
-    await screen.findByText('배치는 업종별 예시예요 · 실제 위치는 현장에서 확인해 주세요'),
-  ).toBeInTheDocument();
-  expect(container.querySelector('[data-map]')).toBeNull();
-  expect(container.querySelectorAll('[data-highlight="true"]')).toHaveLength(3);
-  fireEvent.click(screen.getByRole('button', { name: '점포 A-05 · 판매 점포' }));
+    screen.queryByText('배치는 업종별 예시예요 · 실제 위치는 현장에서 확인해 주세요'),
+  ).toBeNull();
+  const pinsOnMap = container.querySelectorAll('[data-map] button');
+  expect(pinsOnMap.length).toBeGreaterThanOrEqual(3);
+  fireEvent.click(
+    within(container.querySelector('[data-map]') as HTMLElement).getAllByRole('button', {
+      name: /점포 A-05/,
+    })[0],
+  );
   const card = await screen.findByRole('region', { name: '고른 점포 점포 A-05' });
   fireEvent.click(within(card).getByRole('button', { name: '길 안내' }));
   const dialog = screen.getByRole('dialog');

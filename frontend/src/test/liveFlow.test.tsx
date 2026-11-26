@@ -54,10 +54,13 @@ function locate(denied = false) {
     },
   });
 }
-it('1km 이내 시장을 자동으로 선택해 지도 홈에서 그 시장 안을 보인다', async () => {
+it('1km 이내 시장을 자동으로 골라도 첫 화면은 지도 홈(시장 카드와 둘러보기)이다', async () => {
   locate();
   show();
-  expect(await screen.findByRole('heading', { name: '가까운 시장', level: 1 })).toBeInTheDocument();
+  expect(await screen.findByRole('link', { name: '둘러보기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
   expect(getMarkets).toHaveBeenCalledWith(37.57, 126.99);
 });
 it.each([false, true])(
@@ -208,7 +211,11 @@ it('어제 선택한 시장은 새 위치로 다시 확인한다', async () => {
     },
   });
   show();
-  expect(await screen.findByRole('heading', { name: '가까운 시장', level: 1 })).toBeInTheDocument();
+  // 새 위치로 다시 고른 시장이 지도 홈의 가까운 시장 카드로 나옴(첫 화면은 시장 안으로 바로 들어가지 않음)
+  expect(await screen.findByRole('link', { name: '둘러보기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
 });
 it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
   vi.mocked(postPriceReport).mockRejectedValue(new Error('offline'));
