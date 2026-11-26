@@ -1,6 +1,6 @@
 # 외부 데이터·API 목록 (Water 관리)
 
-마지막 갱신: 2026-11-27 00:30 · 신청하거나 확인할 때마다 상태 칸을 갱신한다. 키는 전부 저장소 루트 `.env`에만 둔다.
+마지막 갱신: 2026-11-27 01:50 · 신청하거나 확인할 때마다 상태 칸을 갱신한다. 키는 전부 저장소 루트 `.env`에만 둔다.
 
 ## 1. 키가 필요한 API
 
@@ -18,9 +18,11 @@
 | 10 | 식품안전나라 레시피 DB ([COOKRCP01](https://www.foodsafetykorea.go.kr/api/openApiInfo.do?svc_no=COOKRCP01)) | F1·F2 | 식품안전나라 별도 키 | `FOODSAFETY_KEY` | 한 번 전부 | ✅ 호출 확인 · 레시피 11개 적재 (11/26) · 이용허락범위 제한 없음(공공데이터포털 15060073) |
 | 11 | 네이버 지도 (Maps · Web Dynamic Map) | 시장 위치 지도 | 네이버 클라우드 플랫폼 콘솔 | `NAVER_MAP_CLIENT_ID` / `NAVER_MAP_CLIENT_SECRET` | 화면 (지도 스크립트) | ✅ 발급·지도 표시 확인, 시장 지도 화면에 연결됨 (11/26) |
 | 20 | Google Cloud Vision | (예정) 사진 속 글자·물체 인식 보조 | Google Cloud 콘솔 프로젝트 `market-on` | `GOOGLE_VISION_API_KEY` | 서버 | 🔑 키 발급 (11/26) · 아직 코드에서 안 씀 · 키 제한(Cloud Vision API만) 확인 필요 |
+| 21 | 카카오맵 (지도 JavaScript SDK · 로컬 REST API) | (예비) 네이버 지도를 못 쓸 때 지도 표시, 주소→좌표 | 카카오 디벨로퍼스 앱 `Market-On` (ID 1668225) | `KAKAO_JS_KEY` / `KAKAO_REST_API_KEY` | 화면 (지도 스크립트) / 서버 | 🔑 키 발급·카카오맵 사용 ON (11/27) · 아직 코드에서 안 씀 |
 
 - 공공데이터포털 API(1~9번)는 **계정당 인증키 하나**로 모두 쓴다. API마다 활용신청만 따로 한다.
-- 카카오맵은 쓰지 않는다 (지도는 네이버로 결정). `KAKAO_REST_API_KEY`는 빈 값으로만 둔다.
+- 지도는 네이버가 기본이고, 카카오맵(21번)은 예비로 키만 받아 둔다 (11/27). JavaScript 키의 SDK 도메인은 `https://marketon.laea.io`(배포), `http://localhost:5173`, `http://127.0.0.1:5173`.
+- 카카오맵 무료 쿼터는 계정에서 처음 카카오맵을 켠 앱(`Market-On`)에만 준다. 다른 앱에서 카카오맵을 켜지 않는다. JavaScript 키는 브라우저에 보이는 값, REST 키는 서버 전용이다.
 - `KAMIS_SERVICE_KEY`·`KMA_SERVICE_KEY`는 `DATA_GO_KR_KEY`와 같은 값이고, 지금 코드는 `DATA_GO_KR_KEY`만 읽는다 (예전 이름을 지우지 않고 둠).
 - 이용 조건(라이선스)은 `data/sources.yaml`의 `license`에 적고, 답변 밑 출처 표시에 그대로 나간다. 새 출처는 공공누리 1유형·이용허락범위 제한 없음을 우선한다.
 - 네이버 지도(11번): Application `market-on`에 **Dynamic Map만** 켬. Web 서비스 URL은 `http://localhost:5173`, `http://localhost:5174`, `http://127.0.0.1:5173` (배포 주소는 정해지면 추가). 대표 계정 월 600만 건 무료, 콘솔 [한도 및 알림 설정]으로 사용량 상한을 걸어 둔다.
