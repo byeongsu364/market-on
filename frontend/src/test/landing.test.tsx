@@ -97,19 +97,20 @@ describe('홈', () => {
       'src',
       '/landing/map.webp',
     );
-    expect(
-      screen.getByRole('img', { name: /^경동시장 지도에서 사과 파는 점포 52곳/ }),
-    ).toHaveAttribute('src', '/landing/market.webp');
+    // 오른쪽 폰: 노지 귤 가격표로 만든 안심On 화면(2026-11-27 요청)
+    expect(screen.getAllByRole('img', { name: /^안심On 카드 화면: 노지 귤/ })[0]).toHaveAttribute(
+      'src',
+      '/landing/anshimon-mandarin.webp',
+    );
     expect(screen.getAllByText('79,509원').length).toBeGreaterThan(0);
   });
 
-  it('가격 눈금은 숫자만 말하고, 칸 이름은 많이 낮음 · 낮음 · 조금 높음 · 높음', async () => {
+  it('홈의 안심On 카드도 같은 노지 귤 화면이고, 판정어(살 만)는 쓰지 않는다', async () => {
     asDesktop(true);
     show('/');
-    const gauge = await screen.findByRole('img', { name: /기준시세보다 9% 낮아요/ });
-    expect(within(gauge).getByText('기준시세보다 9% 낮아요')).toBeInTheDocument();
-    for (const label of ['많이 낮음', '낮음', '조금 높음', '높음'])
-      expect(within(gauge).getByText(label)).toBeInTheDocument();
+    const shots = await screen.findAllByRole('img', { name: /^안심On 카드 화면: 노지 귤/ });
+    // 히어로 오른쪽 폰 + 솔루션의 안심On 카드
+    expect(shots.length).toBeGreaterThanOrEqual(2);
     expect(pageText()).not.toMatch(/살 만/);
   });
 
@@ -228,17 +229,14 @@ describe('기능', () => {
     expect(text).not.toContain('교체 예정');
   });
 
-  it('영상 자리: 영상이 오기 전에는 실제 화면 캡처를 폰 틀에', async () => {
+  it('기능 영상: 모바일 실제 서비스를 녹화한 MP4·WebM과 포스터 8개', async () => {
     show('/intro/features');
-    expect(await screen.findByRole('img', { name: /^안심On 카드 화면/ })).toHaveAttribute(
-      'src',
-      '/landing/card.webp',
-    );
-    expect(screen.getByRole('img', { name: /^오늘 기준시세 화면/ })).toHaveAttribute(
-      'src',
-      '/landing/prices.webp',
-    );
-    expect(screen.getByRole('img', { name: '손질법을 물어보는 장면' })).toBeInTheDocument();
+    const video = await screen.findByLabelText(/^가게에서 노지 귤과 가격표를 찍으면/);
+    expect(video.tagName).toBe('VIDEO');
+    expect(video).toHaveAttribute('poster', '/landing/video/anshimon.webp');
+    expect(video).toHaveProperty('muted', true);
+    expect(document.querySelectorAll('video source[type="video/mp4"]')).toHaveLength(8);
+    expect(document.querySelectorAll('video source[type="video/webm"]')).toHaveLength(8);
     expect(document.querySelector('img[src="/landing/result.webp"]')).toBeNull();
   });
 

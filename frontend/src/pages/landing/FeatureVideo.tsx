@@ -34,6 +34,10 @@ type Props = {
   tone?: 'surface' | 'card';
   /** 영상도 캡처도 없을 때 자리 안내 글 */
   placeholder?: string;
+  /** panel 안의 세로 영상을 폰 틀에 넣어 보여 줌(위가 보이고 아래는 잘림) */
+  frame?: boolean;
+  /** 가로 영상을 자르지 않고 면 안에 다 보이게 */
+  fit?: 'cover' | 'contain';
   className?: string;
 };
 
@@ -75,6 +79,8 @@ export default function FeatureVideo({
   height,
   tone = 'surface',
   placeholder,
+  frame,
+  fit = 'cover',
   className,
 }: Props) {
   const posters = poster == null ? [] : typeof poster === 'string' ? [poster] : [...poster];
@@ -105,6 +111,7 @@ export default function FeatureVideo({
       <video
         ref={ref}
         className={v.video}
+        data-fit={fit}
         muted
         loop
         playsInline
@@ -152,7 +159,14 @@ export default function FeatureVideo({
         role={showShots ? 'img' : undefined}
         aria-label={showShots ? (alt ?? label) : undefined}
       >
-        {video ??
+        {video && frame ? (
+          <div className={v.peekRow} data-count={1}>
+            <div className={v.peekPhone}>{video}</div>
+          </div>
+        ) : (
+          video
+        )}
+        {!video &&
           (showShots ? (
             <div className={v.peekRow} data-count={posters.length}>
               {posters.map((p) => (

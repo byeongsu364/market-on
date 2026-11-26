@@ -291,9 +291,11 @@ function Features() {
             {/* 영상: /landing/video/anshimon.mp4 (+ .webm), 세로 720×1800 약 10초 */}
             <FeatureVideo
               shape="phoneLg"
-              poster="/landing/card.webp"
-              label="사과와 가격표를 찍으면 품종 칩, 안심On 카드, 가격 눈금, 비교 근거 4가지가 차례로 열리는 장면"
-              alt="안심On 카드 화면: 사과 후지 현장 가격 1,500원과 기준시세 1,690원, 비교 근거 4가지, 내가 확인한 것"
+              src="/landing/video/anshimon.mp4"
+              webm="/landing/video/anshimon.webm"
+              poster="/landing/video/anshimon.webp"
+              label="가게에서 노지 귤과 가격표를 찍으면 귤을 알아보고, 기준시세보다 10% 낮다는 결과와 안심On 카드가 열리는 장면"
+              alt="안심On 카드 화면: 노지 귤 현장 가격 250원과 기준시세 279원, 비교 근거 4가지"
             />
           </figure>
         </article>
@@ -307,8 +309,10 @@ function Features() {
           <figure className={`${f.figure} ${m.reveal}`}>
             {/* 영상: /landing/video/before.mp4 (+ .webm), 세로 약 6초 */}
             <FeatureVideo
-              poster="/landing/prices.webp"
-              label="시장을 고르고 오늘의 기준시세와 제철 품목을 먼저 보는 장면"
+              src="/landing/video/before.mp4"
+              webm="/landing/video/before.webm"
+              poster="/landing/video/before.webp"
+              label="가까운 경동시장을 둘러보고 제철과 시세 탭에서 오늘의 기준시세를 보는 장면"
               alt="오늘 기준시세 화면: 귤·배·단감·대파·사과의 전통시장과 대형마트 가격"
             />
           </figure>
@@ -351,8 +355,10 @@ function Features() {
           <figure className={`${f.figure} ${m.reveal}`}>
             {/* 영상: /landing/video/store.mp4 (+ .webm), 세로 약 6초 */}
             <FeatureVideo
-              poster="/landing/market.webp"
-              label={`파는 가게 보기를 누르면 지도에 ${FACTS.appleStores}곳이 남고, 점포를 골라 길을 안내하는 장면`}
+              src="/landing/video/store.mp4"
+              webm="/landing/video/store.webm"
+              poster="/landing/video/store.webp"
+              label={`사과를 검색하면 지도에 사과 파는 점포 ${FACTS.appleStores}곳이 남고, 점포를 고르는 장면`}
               alt={`경동시장 지도에서 사과 파는 점포 ${FACTS.appleStores}곳을 핀과 목록으로 보여 주는 화면`}
             />
           </figure>
@@ -395,10 +401,12 @@ function Features() {
             {/* 영상: /landing/video/merchant.mp4 (+ .webm), 가로 1280×960 */}
             <FeatureVideo
               shape="panel"
-              tone="card"
-              ratio="21 / 9"
-              poster={['/landing/card.webp', '/landing/store.webp']}
-              label="손님이 안심On을 공유하면 가게가 함께 표시되는 장면"
+              ratio="16 / 9"
+              fit="contain"
+              src="/landing/video/merchant.mp4"
+              webm="/landing/video/merchant.webm"
+              poster="/landing/video/merchant.webp"
+              label="안심On 카드에 가게 이름이 함께 담기고, 그 가게 화면에서 파는 품목과 길 안내를 보는 장면"
               alt="안심On 카드와 그 가게의 점포 화면"
             />
           </figure>
@@ -423,10 +431,13 @@ function Features() {
               {/* 영상: /landing/video/tools.mp4 (+ .webm), 가로 1280×960 */}
               <FeatureVideo
                 shape="panel"
-                ratio="16 / 10"
-                poster="/landing/market.webp"
-                label="상인이 바겐세일 정보를 올리면 손님 화면의 파는 가게 목록과 지도에 표시되는 장면"
-                alt="손님 화면: 시장 지도와 파는 점포 목록"
+                ratio="4 / 3"
+                fit="contain"
+                src="/landing/video/tools.mp4"
+                webm="/landing/video/tools.webm"
+                poster="/landing/video/tools.webp"
+                label="상인 화면에서 양파 바겐세일 정보를 올리는 장면(시연 모드)"
+                alt="상인 홈: 바겐세일 정보 올리기와 오늘 올린 세일"
               />
             </figure>
             <div className={`${f.copy} ${f.copyHalf} ${m.reveal}`}>
@@ -472,8 +483,11 @@ function Features() {
                 <FeatureVideo
                   shape="panel"
                   height={360}
-                  poster="/landing/recipes.webp"
-                  label="레시피 보기를 펼치는 장면"
+                  frame
+                  src="/landing/video/recipe.mp4"
+                  webm="/landing/video/recipe.webm"
+                  poster="/landing/video/recipe.webp"
+                  label="사과 결과 화면에서 이 재료로 만드는 요리를 골라 재료와 만드는 법을 보는 장면"
                   alt="레시피 화면: 이달 제철 재료로 만드는 요리와 재료를 파는 이 시장 점포 수"
                 />
                 <figcaption>
@@ -489,8 +503,11 @@ function Features() {
                 <FeatureVideo
                   shape="panel"
                   height={360}
-                  label="손질법을 물어보는 장면"
-                  placeholder="영상 · 손질법 물어보기"
+                  frame
+                  src="/landing/video/prep.mp4"
+                  webm="/landing/video/prep.webm"
+                  poster="/landing/video/prep.webp"
+                  label="대파 결과 화면에서 손질을 누르면 근거 문서와 출처가 붙은 손질법이 나오는 장면"
                 />
                 <figcaption>
                   <strong>손질법</strong>
@@ -502,9 +519,12 @@ function Features() {
                 <FeatureVideo
                   shape="panel"
                   height={360}
-                  poster="/landing/shop.webp"
-                  label='"대파 냉동해도 돼요?" 질문과 답'
-                  alt="장보기 도우미 화면: 대파 보관 방법과 출처(농촌진흥청 이달의 식재료)"
+                  frame
+                  src="/landing/video/storage.mp4"
+                  webm="/landing/video/storage.webm"
+                  poster="/landing/video/storage.webp"
+                  label='"대파 냉동해도 돼요?" 질문과 근거가 붙은 답'
+                  alt="물어보기 화면: 대파 보관 방법과 출처(농촌진흥청 이달의 식재료)"
                 />
                 <figcaption>
                   <strong>보관법</strong>

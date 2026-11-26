@@ -126,6 +126,18 @@ export default function BrandLayout({ page, children }: { page: Page; children: 
               <span>Market-On</span>
             </span>
             <span className={s.footerTag}>전통시장에 불을 켜다 · 경복대학교 Market-On 팀</span>
+            {/* 영상·안심On 화면 속 귤 사진의 출처(CC BY-SA 2.0, 가격표는 팀이 덧붙임) */}
+            <span className={s.footerTag}>
+              화면 속 귤 사진: Tamago Moffle,{' '}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Citrus_shop_-Nara.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Citrus shop -Nara
+              </a>{' '}
+              (CC BY-SA 2.0, 가격표 합성)
+            </span>
           </div>
           <nav aria-label="아래 메뉴" className={s.footerNav}>
             {TABS.map((t) => (

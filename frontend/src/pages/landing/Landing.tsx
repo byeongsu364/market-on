@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import BrandLayout from './BrandLayout';
 import CountUp from './CountUp';
 import FeatureVideo from './FeatureVideo';
-import PriceGauge from './PriceGauge';
 import { APP_START, FACTS } from './facts';
 import { useStartWeb } from './motion';
 import b from './brand.module.css';
@@ -34,6 +33,9 @@ const BASES = [
 ];
 
 const NOT_SAID = ['신선', '등급', '별점', '사지 마세요'];
+
+const ANSHIMON_ALT =
+  '안심On 카드 화면: 노지 귤 현장 가격 250원과 기준시세 279원, 기준시세보다 10% 낮아요, 비교 근거 4가지';
 
 export default function Landing() {
   const startWeb = useStartWeb();
@@ -78,9 +80,10 @@ export default function Landing() {
               />
             </div>
             <div className={`${s.phoneFront} ${m.floatLate}`}>
+              {/* 안심On을 쓰는 화면(노지 귤 가격표를 찍은 실제 서비스 화면, 2026-11-27 요청) */}
               <img
-                src="/landing/market.webp"
-                alt={`경동시장 지도에서 사과 파는 점포 ${FACTS.appleStores}곳을 보여 주는 화면`}
+                src="/landing/anshimon-mandarin.webp"
+                alt={ANSHIMON_ALT}
                 width={780}
                 height={1688}
               />
@@ -225,9 +228,12 @@ export default function Landing() {
               </p>
             </li>
             <li>
-              <div className={s.gaugeBox}>
-                <PriceGauge />
-              </div>
+              <FeatureVideo
+                shape="panel"
+                className={s.shot}
+                poster="/landing/anshimon-mandarin.webp"
+                label={ANSHIMON_ALT}
+              />
               <span className={`${s.cardLabel} ${s.cardLabelSignal}`}>시장 안 · 핵심 기능</span>
               <h3 className={s.cardTitle}>안심On</h3>
               <p className={s.cardBody}>

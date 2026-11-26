@@ -50,6 +50,19 @@
   position: absolute;
   inset: 0;
 }
+.video[data-fit='contain'] {
+  object-fit: contain;
+  object-position: center;
+}
+/* 세로 영상을 폰 틀에(panel + frame) */
+.peekPhone {
+  position: relative;
+}
+.peekPhone .video {
+  position: static;
+  height: auto;
+  aspect-ratio: 720 / 1477;
+}
 
 /* 영상이 없을 때: 실제 화면 캡처를 폰 틀에 넣어 아래가 잘려 보이게 */
 .peekRow {
