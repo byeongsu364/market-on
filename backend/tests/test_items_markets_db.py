@@ -28,8 +28,8 @@ def test_public_sql_contract(db):
             with TestClient(app) as c:
                 item = c.get('/items/item:green_onion').json()
                 assert set(item) == ITEM_KEYS
-                assert item['default_unit'] == 'unit:bunch' and len(item['criteria']) == 3
-                assert all(v['source'] == 'Market-On 팀 작성 초안' for v in item['criteria'])
+                assert item['default_unit'] == 'unit:bunch' and len(item['criteria']) == 4
+                assert all(v['source'] == '이달의 식재료 - 움파(대파)' for v in item['criteria'])
                 for q, eid in [
                     ('파', 'item:green_onion'),
                     ('scallion', 'item:green_onion'),

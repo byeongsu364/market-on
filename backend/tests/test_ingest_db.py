@@ -53,7 +53,7 @@ def test_load_replace_search_cache_and_prune(db, tmp_path):
     data = tmp_path / 'data'
     fake = FakeProvider()
     first = load_all(db, data_dir=data, embedder=fake)
-    assert first['added'] == 61  # 14 sources + 23 explicit/3 generated entities + 21 documents
+    assert first['added'] == 78  # 14 sources + 23 explicit/20 generated entities + 21 documents
     ids = db.execute('select id from chunks order by id').fetchall()
     second = load_all(db, data_dir=data, embedder=fake)
     assert second['added'] == second['changed'] == second['deleted'] == 0
@@ -145,13 +145,13 @@ def test_alignment(db, tmp_path):
         db.execute(
             "select count(*) from entities where type='criterion' and source_id is not null"
         ).fetchone()[0]
-        == 3
+        == 20  # 5품목 × 확인 포인트 4개 (2026-11-26 출처 있는 값으로 채움)
     )
     assert (
         db.execute(
             "select count(*) from entity_relations where predicate='hasCriterion' and source_id is not null"
         ).fetchone()[0]
-        == 3
+        == 20
     )
     assert db.execute("select props from entity_relations where predicate='soldBy'").fetchone()[
         0

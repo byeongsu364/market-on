@@ -100,7 +100,7 @@ def test_criterion_expansion_without_db(monkeypatch):
     monkeypatch.setattr(repo, 'prune_generated_criteria', prune)
     conn = Mock(transaction=nullcontext)
     counts = load_ontology(conn)
-    assert counts['added'] == 26  # 품종 7개 + 자동 확인 포인트 3개 포함
+    assert counts['added'] == 43  # 품종 7개 + 자동 확인 포인트 20개 포함
     assert saved['variety:apple-hongro']['type'] == 'variety'
     assert ('hasGrade', 'variety:apple-fuji', None, None, {'default': True}) in relations[
         'item:apple'
@@ -108,8 +108,8 @@ def test_criterion_expansion_without_db(monkeypatch):
     assert ('hasGrade', 'variety:apple-hongro', None, None, None) in relations['item:apple']
     criterion = saved['crit:green_onion-leaf']
     assert criterion['type'] == 'criterion'
-    assert criterion['name_ko'] == '잎 끝이 마르지 않고 누런 잎이 없어요'
-    assert criterion['source'] == 'src:team-draft'
+    assert criterion['name_ko'] == '잎 끝까지 탄력 있어 보이고 마른 잎이 섞여 있지 않아요'
+    assert criterion['source'] == 'src:nongsaro-month-food-green-onion'
     assert criterion['labels']['en'] == ['Healthy leaves']
     assert ('hasCriterion', 'crit:green_onion-leaf', None, 42, None) in relations[
         'item:green_onion'
@@ -117,4 +117,4 @@ def test_criterion_expansion_without_db(monkeypatch):
     assert ('soldBy', 'unit:bunch', None, 42, {'factor_kg': 0.8, 'default': True}) in relations[
         'item:green_onion'
     ]
-    assert len(prune.call_args.args[1]) == 3
+    assert len(prune.call_args.args[1]) == 20  # 5품목 × 확인 포인트 4개
