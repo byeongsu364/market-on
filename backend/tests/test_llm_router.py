@@ -124,3 +124,14 @@ def test_role_and_task_are_recorded(routing):
     assert (kwargs['role'], kwargs['task']) == ('write', 'ask')
     router.run('write', lambda p: p)
     assert routing[1].call_args.kwargs['task'] == 'write'
+
+
+def test_failure_reason_logged_without_content(routing, caplog):
+    def call(provider):
+        if provider == 'gemma':
+            raise TimeoutError('질문 내용이 들어 있는 오류')
+        return 'ok'
+
+    router.run('write', call)
+    assert 'write 역할 gemma 실패: TimeoutError' in caplog.text
+    assert '질문 내용' not in caplog.text
