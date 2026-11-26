@@ -9,7 +9,8 @@ import { postPriceReport } from '../api/priceReports';
 import * as mock from '../api/mock';
 vi.mock('../api/markets', () => ({ getMarkets: vi.fn() }));
 vi.mock('../api/scan', () => ({ recognize: vi.fn() }));
-vi.mock('../api/price', () => ({ getPrice: vi.fn() }));
+// live처럼: 최근 4주 시세는 백엔드에 없어 null
+vi.mock('../api/price', () => ({ getPrice: vi.fn(), getPriceHistory: vi.fn(async () => null) }));
 vi.mock('../api/priceReports', () => ({ postPriceReport: vi.fn() }));
 const market = {
   status: 'active' as const,
@@ -20,8 +21,9 @@ const market = {
   distance_m: 500,
 };
 function show(path = '/', state?: object) {
+  const [pathname, search = ''] = path.split('?');
   return render(
-    <MemoryRouter initialEntries={[{ pathname: path, state }]}>
+    <MemoryRouter initialEntries={[{ pathname, search: search && `?${search}`, state }]}>
       <App />
     </MemoryRouter>,
   );
@@ -63,13 +65,13 @@ it('오늘 사용자가 선택한 시장을 위치보다 우선한다', async ()
   expect(screen.getByText(/지금 있는 시장 · 시연 시장/)).toBeInTheDocument();
   expect(getMarkets).not.toHaveBeenCalled();
 });
-it('직접 입력은 가격이 필수이며 결과 진입과 점포 선택 때 제보한다', async () => {
-  show();
-  fireEvent.change(screen.getByRole('searchbox'), { target: { value: '대파' } });
-  fireEvent.click(await screen.findByRole('button', { name: '대파' }));
-  expect(screen.getByRole('button', { name: '확인하기' })).toBeDisabled();
-  fireEvent.change(screen.getByLabelText('가격 (필수)'), { target: { value: '3000' } });
-  fireEvent.click(screen.getByRole('button', { name: '확인하기' }));
+it('직접 입력은 가격을 넣으면 결과 진입과 점포 선택 때 제보한다', async () => {
+  show('/scan?mode=manual');
+  fireEvent.change(await screen.findByLabelText('품목'), { target: { value: '대파' } });
+  expect(screen.getByRole('button', { name: '결과 보기' })).toBeDisabled();
+  fireEvent.click(await screen.findByRole('radio', { name: '대파' }));
+  fireEvent.change(screen.getByLabelText('가격 (선택)'), { target: { value: '3000' } });
+  fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   await screen.findByRole('heading', { name: '대파' });
   await waitFor(() => expect(postPriceReport).toHaveBeenCalledTimes(1));
   expect(postPriceReport).toHaveBeenLastCalledWith(
@@ -80,6 +82,17 @@ it('직접 입력은 가격이 필수이며 결과 진입과 점포 선택 때 �
   expect(postPriceReport).toHaveBeenLastCalledWith(
     expect.objectContaining({ store_id: 'store:A-05' }),
   );
+});
+it('직접 입력에서 가격을 비우면 제보하지 않고 확인 포인트만 보여 준다', async () => {
+  show('/scan?mode=manual');
+  fireEvent.change(await screen.findByLabelText('품목'), { target: { value: '대파' } });
+  fireEvent.click(await screen.findByRole('radio', { name: '대파' }));
+  fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
+  expect(
+    await screen.findByRole('heading', { name: '가격을 넣으면 시세와 견줘 드려요' }),
+  ).toBeInTheDocument();
+  expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
+  expect(postPriceReport).not.toHaveBeenCalled();
 });
 async function photo(tag: boolean) {
   vi.mocked(recognize).mockResolvedValue({
@@ -92,16 +105,22 @@ async function photo(tag: boolean) {
       : null,
   });
   show('/scan');
-  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+  fireEvent.change(await screen.findByLabelText('사진 찍기'), {
     target: { files: [new File(['x'], 'photo.jpg', { type: 'image/jpeg' })] },
   });
-  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
   await waitFor(() => expect(screen.getByRole('button', { name: '결과 보기' })).toBeEnabled());
 }
 it.each([false, true])('가격표 유무에 따라 확인·제보한다 (%s)', async (tag) => {
   await photo(tag);
-  if (tag) expect(screen.getByLabelText('가격 (선택)')).toHaveValue(3000);
-  else expect(screen.queryByLabelText('가격 (선택)')).not.toBeInTheDocument();
+  if (tag) {
+    expect(screen.getByText('3,000원')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '고치기' }));
+    expect(screen.getByLabelText('가격 (선택)')).toHaveValue(3000);
+  } else {
+    // 가격표가 없으면 가격과 품종을 묻지 않음
+    expect(screen.queryByText('가격표에서 읽은 값')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('가격 (선택)')).not.toBeInTheDocument();
+  }
   fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   await screen.findByRole('heading', { name: '대파' });
   await screen.findByRole('heading', { name: '어느 가게예요?' });
@@ -120,14 +139,13 @@ it.each([false, true])('가격표 유무에 따라 확인·제보한다 (%s)', a
 it('503 인식 실패를 직접 입력으로 대체한다', async () => {
   vi.mocked(recognize).mockRejectedValue({ status: 503, message: 'unavailable' });
   show('/scan');
-  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+  fireEvent.change(await screen.findByLabelText('사진 찍기'), {
     target: { files: [new File(['x'], 'x.jpg')] },
   });
-  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
   expect(await screen.findByRole('alert')).toHaveTextContent(
     '사진 인식이 잠시 안 돼요. 이름으로 찾아 주세요',
   );
-  expect(screen.getByLabelText('가격 (필수)')).toBeInTheDocument();
+  expect(await screen.findByLabelText('가격 (선택)')).toBeInTheDocument();
 });
 it('시세 404에서도 확인 포인트와 판매 점포를 보여 준다', async () => {
   vi.mocked(getPrice).mockRejectedValue({ status: 404 });
@@ -163,7 +181,9 @@ it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
     show('/items/item:green_onion', { price: 3000, method: 'manual' });
     expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();
     await waitFor(() => expect(log).toHaveBeenCalled());
-    expect(screen.getByRole('heading', { name: '이 시장 판매 점포' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: '이 시장에서 대파 파는 곳' }),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/인식 라벨/)).not.toBeInTheDocument();
   } finally {
     log.mockRestore();
@@ -179,10 +199,9 @@ it('QR에서 고른 점포는 사진 결과의 최초 제보에 포함한다', a
   });
   show('/s/store:A-05');
   fireEvent.click(await screen.findByRole('link', { name: '이 점포에서 찍기' }));
-  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+  fireEvent.change(await screen.findByLabelText('사진 찍기'), {
     target: { files: [new File(['x'], 'photo.jpg')] },
   });
-  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
   await waitFor(() => expect(screen.getByRole('button', { name: '결과 보기' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   await waitFor(() =>
@@ -231,19 +250,20 @@ it('결과 판매 점포에 손님·상인·미등록 가격을 표시한다', a
 
 it('기본 품종 칩을 표시하고 선택한 품종으로 시세를 다시 요청한다', async () => {
   show('/items/item:apple');
-  const fuji = await screen.findByRole('button', { name: /후지 ·/ });
+  const fuji = await screen.findByRole('button', { name: '후지' });
   expect(fuji).toHaveAttribute('aria-pressed', 'true');
-  fireEvent.click(screen.getByRole('button', { name: /홍로 ·/ }));
+  expect(screen.getByText('품종은 가격표나 상인에게 확인해 주세요')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '홍로' }));
   await waitFor(() =>
     expect(getPrice).toHaveBeenLastCalledWith(
       expect.objectContaining({ variety_id: 'variety:apple-hongro' }),
     ),
   );
-  expect(await screen.findByRole('button', { name: /홍로 ·/ })).toHaveAttribute(
+  expect(await screen.findByRole('button', { name: '홍로' })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
-  expect(screen.getByText('품종은 가격표나 상인에게 확인해 주세요')).toBeInTheDocument();
+  expect(screen.getByText('품종을 바꾸면 결론과 기준시세가 함께 바뀌어요.')).toBeInTheDocument();
 });
 
 it('가격표 품종을 확인·수정하고 결과의 기본 품종보다 우선한다', async () => {
@@ -261,11 +281,10 @@ it('가격표 품종을 확인·수정하고 결과의 기본 품종보다 우�
     },
   });
   show('/scan');
-  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+  fireEvent.change(await screen.findByLabelText('사진 찍기'), {
     target: { files: [new File(['x'], 'apple.jpg')] },
   });
-  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
-  expect(await screen.findByText('품종: 홍로 (가격표에서 읽었어요)')).toBeInTheDocument();
+  expect(await screen.findByText('가격표에서 홍로로 읽었어요.')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '홍로' })).toHaveAttribute('aria-pressed', 'true');
   fireEvent.click(screen.getByRole('button', { name: '후지' }));
   expect(screen.getByRole('button', { name: '후지' })).toHaveAttribute('aria-pressed', 'true');
@@ -276,10 +295,12 @@ it('가격표 품종을 확인·수정하고 결과의 기본 품종보다 우�
       expect.objectContaining({ variety_id: 'variety:apple-hongro' }),
     ),
   );
-  expect(await screen.findByRole('button', { name: /홍로 ·/ })).toHaveAttribute(
+  expect(await screen.findByRole('button', { name: '홍로' })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
+  // 손님이 다시 고른 품종이라 가격표 문구 대신 바꾸는 안내
+  expect(screen.getByText('품종을 바꾸면 결론과 기준시세가 함께 바뀌어요.')).toBeInTheDocument();
 });
 
 it('단일 품종은 칩을 표시하지 않는다', async () => {
@@ -303,10 +324,10 @@ it('판매 점포는 5곳부터 펼치고 추정 품목을 표시한다', async 
   try {
     const { container } = show('/items/item:green_onion', { method: 'manual' });
     const more = await screen.findByRole('button', { name: '더 보기' });
-    expect(container.querySelectorAll('#selling-stores article')).toHaveLength(5);
+    expect(container.querySelectorAll('#selling-stores li')).toHaveLength(5);
     expect(screen.getAllByText('업종 기준 · 상인 확인 전')).toHaveLength(5);
     fireEvent.click(more);
-    expect(container.querySelectorAll('#selling-stores article')).toHaveLength(8);
+    expect(container.querySelectorAll('#selling-stores li')).toHaveLength(8);
   } finally {
     spy.mockRestore();
   }

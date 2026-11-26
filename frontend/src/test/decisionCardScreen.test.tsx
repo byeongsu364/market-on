@@ -129,10 +129,9 @@ it('생성 중 로딩과 생성 실패를 표시한다', async () => {
 it('촬영 File을 결과로 전달해 기기 안의 카드 데이터에 담는다', async () => {
   show('/scan');
   const photo = new File(['sample'], 'local-photo.jpg', { type: 'image/jpeg' });
-  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+  fireEvent.change(await screen.findByLabelText('사진 찍기'), {
     target: { files: [photo] },
   });
-  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
   const result = await screen.findByRole('button', { name: '결과 보기' });
   await waitFor(() => expect(result).toBeEnabled());
   fireEvent.click(result);

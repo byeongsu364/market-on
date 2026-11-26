@@ -1,0 +1,475 @@
+/* 결과(시안 Result, ResultHigh, ResultNoPrice, WebResult)와 품종 견줘 보기(Variety, WebVariety) */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 8px var(--space-5) 120px;
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+.asidePhoto,
+.asideMap {
+  display: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.thumb {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-photo-placeholder);
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.headBody {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.title {
+  font-size: 26px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.7px;
+}
+.sub {
+  font-size: 15px;
+  color: var(--color-body);
+}
+.group {
+  display: flex;
+  flex-direction: column;
+}
+.groupHead {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+}
+.groupLabel {
+  flex: 1 1 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.smallLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.inkLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+.ruled {
+  padding-top: 10px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+/* 결론 한 줄과 눈금 */
+.verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.verdictText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.conclusion {
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -1px;
+}
+.conclusionSub {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--color-body);
+}
+
+/* 현장 가격과 기준시세 표 */
+.table {
+  display: flex;
+  flex-direction: column;
+}
+.tableRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+}
+.tableRow + .tableRow {
+  border-top: 1px solid var(--color-hairline);
+}
+.rowLabel {
+  flex: 1 1 0;
+  font-size: 15px;
+  color: var(--color-body);
+}
+.amount {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.price {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  font-variant-numeric: tabular-nums;
+}
+.priceSm {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  font-variant-numeric: tabular-nums;
+}
+.unit {
+  font-size: 14px;
+  color: var(--color-body);
+}
+.diff {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--color-signal-text);
+  font-variant-numeric: tabular-nums;
+}
+.empty {
+  font-size: 15px;
+  color: var(--color-body);
+}
+.editRow {
+  padding: 8px 0 12px;
+}
+
+/* 품종 칸 줄 */
+.bandCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.bandOff {
+  font-size: 14px;
+  color: var(--color-body);
+}
+
+/* 최근 4주 */
+.chart {
+  width: 100%;
+  height: 160px;
+  overflow: visible;
+}
+.chartLine {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+.chartDot {
+  fill: var(--color-ink);
+}
+.chartSeen {
+  stroke: var(--color-signal);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+.chartGrid {
+  stroke: var(--color-hairline);
+}
+.chartLabel {
+  fill: var(--color-muted);
+  font-size: 12px;
+}
+
+/* 확인 포인트 */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  border-top: 1px solid var(--color-hairline);
+  font-size: 16px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.check input {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--color-ink);
+}
+.details > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+.details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 판매 점포 */
+.storeSub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--color-body);
+}
+.sale {
+  font-weight: 600;
+  color: var(--color-signal-text);
+}
+.storeEnd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 아래 고정 버튼 */
+.actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 12px 20px calc(var(--safe-bottom) + 26px);
+  background: var(--color-canvas);
+  border-top: 1px solid var(--color-hairline);
+}
+.actionsInner {
+  width: 100%;
+  max-width: calc(var(--app-max) - 40px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.actionRow {
+  display: flex;
+  gap: 8px;
+}
+.center {
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 48px 64px;
+    padding: 40px 0 72px;
+  }
+  .main {
+    flex: 3 1 460px;
+    gap: 36px;
+  }
+  .aside {
+    flex: 2 1 320px;
+    position: sticky;
+    top: 96px;
+  }
+  .asidePhoto {
+    display: block;
+    height: 260px;
+    overflow: hidden;
+    border-radius: var(--radius-xxl);
+    background: var(--color-photo-placeholder);
+  }
+  .asidePhoto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .asideMap {
+    display: block;
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+  }
+  .title {
+    font-size: 32px;
+    letter-spacing: -1px;
+  }
+  .conclusion {
+    font-size: 44px;
+    line-height: 1.15;
+    letter-spacing: -1.6px;
+  }
+  .price {
+    font-size: 22px;
+  }
+  .actions {
+    position: static;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+}
+
+/* 품종 견줘 보기 */
+.varietyPage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px var(--space-5) 120px;
+}
+.varietyIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lead {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-body);
+}
+.varieties {
+  display: flex;
+  flex-direction: column;
+}
+.variety {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 0;
+}
+.variety + .variety {
+  border-top: 1px solid var(--color-hairline);
+}
+.varietyHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.varietyName {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.body {
+  font-size: 15px;
+  line-height: 1.55;
+}
+.harvestHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.harvestLabel {
+  flex: 1 1 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.harvestValue {
+  font-size: 14px;
+  font-weight: 600;
+}
+.months {
+  display: flex;
+  gap: 3px;
+}
+.month {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-muted);
+}
+.month > span:first-child {
+  align-self: stretch;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-hairline);
+}
+.month[data-on='true'] {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.month[data-on='true'] > span:first-child {
+  background: var(--color-ink);
+}
+.ifRow {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+}
+.ifRow > :first-child {
+  flex: 1 1 0;
+  font-size: 14px;
+  color: var(--color-body);
+}
+
+@media (min-width: 1024px) {
+  .varietyPage {
+    gap: 36px;
+    padding: 40px 0 72px;
+  }
+  .varieties {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 40px 48px;
+  }
+  .variety {
+    padding: 0;
+  }
+  .variety + .variety {
+    border-top: 0;
+  }
+  .varietyName {
+    font-size: 24px;
+    letter-spacing: -0.6px;
+  }
+  .lead {
+    font-size: 17px;
+    max-width: 620px;
+  }
+}

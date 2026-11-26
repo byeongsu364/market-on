@@ -3,12 +3,12 @@ import { Route, Routes, Link, Navigate, Outlet, useLocation } from 'react-router
 import { SessionProvider } from './store/SessionProvider';
 import PageLayout from './components/layout/PageLayout';
 import Join from './pages/Join';
-import Scan from './pages/Scan';
-import Result from './pages/Result';
+import Scan from './pages/scan/Scan';
+import Result from './pages/scan/Result';
 import MarketMap from './pages/MarketMap';
 import MarketSelect from './pages/MarketSelect';
-import Recommend from './pages/Recommend';
-import Chat from './pages/Chat';
+import Shop from './pages/shop/Shop';
+import Chat from './pages/shop/Chat';
 import Search from './pages/Search';
 import Variety from './pages/scan/Variety';
 import ShopRoute from './pages/shop/ShopRoute';
@@ -69,7 +69,7 @@ function AppRoutes() {
         <Route path="scan" element={<Scan />} />
         <Route path="items/:itemId" element={<Result />} />
         <Route path="items/:itemId/varieties" element={<Variety />} />
-        <Route path="shop" element={<Recommend />} />
+        <Route path="shop" element={<Shop />} />
         <Route path="shop/route" element={<ShopRoute />} />
         <Route path="chat" element={<Chat />} />
         <Route path="me" element={<My />} />
