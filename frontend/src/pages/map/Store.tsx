@@ -265,17 +265,23 @@ export default function Store() {
       </section>
       {(mapStore?.intro || data.store.intro) && <p>{mapStore?.intro || data.store.intro}</p>}
       <ul className={s.infoList}>
-        <li>
-          <Icon name="clock" />
-          <span className={s.rowBody}>
-            <span className={s.infoTitle}>
-              {fill(t('mapHours'), { open: data.store.hours.open, close: data.store.hours.close })}
+        {/* 영업시간이 비어 있으면(공공데이터에 없음) "부터 까지"만 남지 않게 줄을 뺌 */}
+        {data.store.hours.open && data.store.hours.close && (
+          <li>
+            <Icon name="clock" />
+            <span className={s.rowBody}>
+              <span className={s.infoTitle}>
+                {fill(t('mapHours'), {
+                  open: data.store.hours.open,
+                  close: data.store.hours.close,
+                })}
+              </span>
+              <span className={s.rowSub}>
+                {data.source === 'sbiz' ? t('mapHoursPublic') : t('mapHoursMerchant')}
+              </span>
             </span>
-            <span className={s.rowSub}>
-              {data.source === 'sbiz' ? t('mapHoursPublic') : t('mapHoursMerchant')}
-            </span>
-          </span>
-        </li>
+          </li>
+        )}
         {mapStore?.payments?.includes('onnuri') && (
           <li>
             <Icon name="card" />

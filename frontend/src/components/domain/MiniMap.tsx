@@ -3,6 +3,10 @@ import type { MarketMap, Store } from '../../types/contract';
 import { zoneColors } from '../../constants/zones';
 import s from './MiniMap.module.css';
 
+/** 칸(72) 안에 들어가게 긴 상호는 앞 네 글자 + 말줄임. 전체 이름은 aria-label과 title에 둠 */
+const shortName = (name: string) =>
+  [...name].length > 5 ? [...name].slice(0, 4).join('') + '…' : name;
+
 // 구역 평면도. 점포에 좌표가 없는 응답(지금의 live)에서 지도 자리에 넣고 안내 문구는 그대로 둠(지시서 030 6장).
 export default function MiniMap({
   map,
@@ -24,10 +28,11 @@ export default function MiniMap({
         )
         .find((z) => map.stores.some((s) => s.highlight && s.zone_id === z.id))
     : undefined;
-  const focusedStores = map.stores.filter((s) => s.zone_id === focused?.id);
-  const viewBox = focused
-    ? `${Math.max(0, focused.x - 8)} ${Math.max(0, focused.y - 8)} 188 ${Math.max(188, ...focusedStores.map((s) => s.map_y - focused.y + 72))}`
-    : `0 0 376 ${Math.max(548, ...map.stores.map((s) => s.map_y + 64))}`;
+  // 판매 점포가 많은 구역의 줄부터 보여 주되, 폭은 평면도 전체(376) 그대로 둠.
+  // 폭을 구역 하나(188)로 줄이면 화면 폭에 맞춰 2~5배로 커져 점포 칸이 화면 반을 차지했음(2026-11-27).
+  const bottom = Math.max(548, ...map.stores.map((s) => s.map_y + 64));
+  const top = focused ? Math.max(0, focused.y - 8) : 0;
+  const viewBox = `0 ${top} 376 ${Math.max(188, bottom - top)}`;
   const zoneVars = Object.fromEntries(
     zoneColors.map((c, i) => [`--zone-${i}`, c]),
   ) as CSSProperties;
@@ -76,7 +81,9 @@ export default function MiniMap({
             <g
               key={store.store_id}
               role={onStore ? 'button' : undefined}
-              tabIndex={onStore ? 0 : undefined}
+              // 평면도 칸은 Tab 순서에서 뺌: 같은 점포가 아래 목록에 버튼으로 있고,
+              // 칸이 먼저 오면 검색창·목록까지 점포 수만큼 Tab을 눌러야 했음(지시서 030 8장 키보드 확인)
+              tabIndex={onStore ? -1 : undefined}
               aria-label={`${store.name}${store.highlight ? ' · 판매 점포' : ''}${selected ? ' · 선택됨' : ''}`}
               data-highlight={store.highlight}
               onClick={(e) => onStore?.(store, e.currentTarget)}
@@ -103,8 +110,9 @@ export default function MiniMap({
                 x={store.map_x + 8}
                 y={store.map_y + 32}
               >
-                {store.source === 'sbiz' ? store.name : store.name.slice(3)}
+                {shortName(store.source === 'sbiz' ? store.name : store.name.slice(3))}
               </text>
+              <title>{store.name}</title>
               {store.active_sale && (
                 <>
                   <rect

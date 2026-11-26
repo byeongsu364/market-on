@@ -305,7 +305,7 @@ it('점포에 좌표가 없으면(live) 지도 자리에 평면도와 안내 문
   );
 });
 
-it('강조 점포가 가장 많은 구역으로 viewBox를 맞추고 구역별 개수를 표시한다', async () => {
+it('강조 점포가 가장 많은 구역의 줄부터 보여 주되 평면도 폭은 줄이지 않는다', async () => {
   const map = await mock.map('market:demo', 'item:green_onion');
   const target = map.zones[3];
   map.stores.slice(0, 5).forEach((s) => {
@@ -314,8 +314,15 @@ it('강조 점포가 가장 많은 구역으로 viewBox를 맞추고 구역별 �
   });
   const { container } = render(<MiniMap map={map} itemName="대파" />);
   expect(container.querySelector('svg')).toHaveAttribute('data-focused-zone', target.id);
-  expect(container.querySelector('svg')?.getAttribute('viewBox')).not.toMatch(/^0 0 376/);
+  const [x, y, w] = (container.querySelector('svg')?.getAttribute('viewBox') ?? '')
+    .split(' ')
+    .map(Number);
+  expect([x, w]).toEqual([0, 376]);
+  expect(y).toBe(Math.max(0, target.y - 8));
   expect(screen.getByText('대파 5곳')).toBeInTheDocument();
+  // 평면도 칸은 Tab 순서에서 빠짐(아래 목록이 같은 점포 버튼)
+  const clickable = render(<MiniMap map={map} onStore={() => {}} />);
+  expect(within(clickable.container).getAllByRole('button')[0]).toHaveAttribute('tabindex', '-1');
 });
 
 it('길 안내는 목적지 이름을 인코딩하고 출발 위치를 받지 않는다', () => {

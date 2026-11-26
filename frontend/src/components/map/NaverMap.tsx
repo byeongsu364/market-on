@@ -32,8 +32,9 @@ export default function NaverMap({ maps, ...props }: MapViewProps & { maps: Nave
     if (!m) return;
     const overlays: { setMap: (map: null) => void }[] = [];
     const listeners: object[] = [];
-    const bounds = new maps.LatLngBounds(new maps.LatLng(90, 180), new maps.LatLng(-90, -180));
-    let fitted = 0;
+    // 범위는 실제 표시물 좌표로만 만듦. (90,180)~(-90,-180) 같은 뒤집힌 상자에서 시작하면
+    // 네이버 지도가 엉뚱한 범위로 맞춰 타일을 하나도 그리지 않았음(2026-11-27, 휴대폰에서 지도 빈 화면)
+    const points: object[] = [];
     if (props.boundary?.length && maps.Polygon) {
       const ring = props.boundary.map((p) => new maps.LatLng(p.lat, p.lng));
       const world = [
@@ -60,8 +61,7 @@ export default function NaverMap({ maps, ...props }: MapViewProps & { maps: Nave
           clickable: false,
         }),
       );
-      ring.forEach((p) => bounds.extend(p));
-      fitted += ring.length;
+      points.push(...ring);
     }
     if (props.route && props.route.length > 1 && maps.Polyline) {
       overlays.push(
@@ -92,18 +92,18 @@ export default function NaverMap({ maps, ...props }: MapViewProps & { maps: Nave
         listeners.push(
           maps.Event.addListener(marker, 'click', () => props.onSelect?.(mk.id, mk.type)),
         );
-      if (mk.type !== 'me' || markers.length < 3) {
-        bounds.extend(position);
-        fitted += 1;
-      }
+      if (mk.type !== 'me' || markers.length < 3) points.push(position);
     }
-    if (fitted > 1)
+    if (points.length > 1) {
+      const bounds = new maps.LatLngBounds(points[0], points[0]);
+      points.slice(1).forEach((p) => bounds.extend(p));
       m.fitBounds(bounds, {
         top: (props.topInset ?? 0) + 40,
         bottom: (props.bottomInset ?? 0) + 40,
         left: 32,
         right: 32,
       });
+    }
     return () => {
       listeners.forEach((l) => maps.Event.removeListener(l));
       overlays.forEach((o) => o.setMap(null));

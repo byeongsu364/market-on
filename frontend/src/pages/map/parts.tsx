@@ -205,7 +205,7 @@ export function StoreResultRow({
           )}
         </span>
         {(sale || store.price) && (
-          <span className={s.rowPrice}>
+          <span className={s.rowPriceStack}>
             <span className={s.price16}>
               {formatPrice(sale ? sale.sale_price : store.price!.price)}
             </span>

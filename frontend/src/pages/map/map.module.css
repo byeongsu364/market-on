@@ -401,6 +401,17 @@
   align-items: baseline;
   gap: 6px;
 }
+/* 검색 결과 줄의 가격: 가격 아래에 단위·출처를 쌓고 폭을 40%까지만 씀.
+   가로로 두면 "사과 1개 · 시장 평균 · aT 11월 25일 조사"가 폭을 다 차지해 점포 이름이 한 글자씩 꺾였음(2026-11-27) */
+.rowPriceStack {
+  flex: 0 1 auto;
+  max-width: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
 .rowUnit {
   font-size: 13px;
   color: var(--color-body);
