@@ -1,6 +1,6 @@
 # 공공데이터 API 발급·데이터 확인 (Water)
 
-작성일: 2026-11-22 · 담당: Water 브랜치 · 마지막 갱신: 2026-11-26 16:40
+작성일: 2026-11-22 · 담당: Water 브랜치 · 마지막 갱신: 2026-11-27 00:30
 
 ## 1. 결론
 
@@ -9,6 +9,8 @@
 - 상가(상권)정보로 시장 점포 **목록·업종은 받을 수 있지만, 시장 안 위치는 없음** → E2 미니맵 위치는 현장 조사로 배치. CONTEXT 5장 [확인 필요] 해결.
 - 실제로 조회되는 소매 품목: **83품목 / 108품종** (`docs/data/aT_소매_품목코드표_20261120.csv`).
 - 네이버 지도 키 발급, 개발 주소(`localhost:5173`)에서 지도 표시 확인 (11/26). 전국전통시장표준데이터 활용신청 승인·호출 확인 (11/25).
+- 이달의 식재료 API를 농사로 화면 대신 근거 문서 출처로 씀 (같은 농촌진흥청 글, 이용허락범위 제한 없음, 11/26).
+- 모델: Gemma(학교 서버) → Gemini(무료 키) → GPT 순서. Gemini 키 발급·연결 확인 (11/26). Google Cloud Vision 키 발급 (11/26, 아직 코드에서 안 씀).
 - 남은 것: 원재료성식품 영양성분 파일 다운로드, 배포 주소가 정해지면 네이버 지도에 등록.
 
 전체 목록과 상태: `docs/data/API_목록.md`
@@ -140,9 +142,13 @@ aT API 5개는 요청·응답 형식이 같다.
 ## 5. 농식품 이달의 식재료 (15168024)
 
 - Endpoint: `https://apis.data.go.kr/1390803/allbaroFoodMonth/` + `foodList` · `foodCont` · `recipeList` · `recipeCont` · `mealList`
-- 파라미터: `srchMonth`(월, 필수), `srchFdmtNm`(식재료명), `format=json`
-- 확인 결과 (11월): 잣, 유자, 배추, 무, 메밀, 대추, 늙은 호박, 감, 쌀, 사과
-- 홈 화면 "11월 제철", D2 제철(inSeason) 관계, 보조 레시피(`recipeList`)에 사용
+- 파라미터: `foodList`는 `srchMonth`(월, 필수)·`srchFdmtNm`(식재료명), `foodCont`는 `srchFdmtSn`(식재료 번호, 필수). 공통 `format=json`
+- 확인 결과 (11월 목록): 잣, 유자, 배추, 무, 메밀, 대추, 늙은 호박, 감, 쌀, 사과
+- 우리 품목의 식재료 번호(`fdmtSn`)와 목록에 나오는 달: 움파(대파) 36·3월, 양파 74·6월, 배 107·10월, 사과 123·11월, 감 132·11월
+- `foodCont` 응답 항목: `ctvtIndcDtl`(재배·특성), `prchCheatDtl`(품종 특성·구입 요령), `cstdyMthDtl`(보관법·손질법), `etcInfoDtl`(기타), `ntkMthDtl`(먹는 법), `ntrIrdntEfcyDtl`(영양·효능), `rltRsrchInfoDtl`(관련 연구), `cnsmpqyDtl`(소비량), `connRecipeList`(연결 레시피)
+- 내용이 농사로 「이달의 식재료」 화면과 같은 글이라서, 공공누리 표시가 없는 농사로 화면 대신 이 API를 출처로 씀 (11/26). 품목마다 글이 1편이라 농사로 예전 호에만 있던 문장은 뺐음
+- 이용허락범위: 제한 없음 (활용신청 상세에서 확인)
+- 홈 화면 "11월 제철", D2 제철(inSeason) 관계, 근거 문서·확인 포인트 출처, 보조 레시피(`recipeList`)에 사용
 
 ---
 
@@ -179,11 +185,33 @@ aT API 5개는 요청·응답 형식이 같다.
 - 지도 스크립트: `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId={Client ID}` (예전 이름 `ncpClientId`는 바뀜)
 - 요금: 대표 계정 1개에 한해 Dynamic Map 월 600만 건 무료. 대표 계정이 아니면 과금되므로 콘솔에서 대표 계정 여부 확인, [한도 및 알림 설정]으로 상한 설정
 - 확인 결과 (11/26): `http://localhost:5173`에서 경동시장 좌표(37.5803, 127.0393) 중심 지도와 마커 표시 성공, 인증 실패 없음
-- 아직 앱 화면에는 연결 안 됨 (지도 연결은 별도 작업)
+- 시장 지도 화면에 연결됨 (11/26, 병수). 등록 안 된 주소(예: Cloudflare 임시 주소)에서는 네이버 인증이 실패해 지도 대신 시장 목록을 보여 줌
 
 ---
 
-## 9. 확인 방법
+## 9. Google Cloud Vision
+
+- 신청처: Google Cloud 콘솔 → 프로젝트 `market-on` → API 및 서비스 → Cloud Vision API 사용 설정 → 사용자 인증 정보 → API 키 (11/26)
+- 키: `GOOGLE_VISION_API_KEY` (`.env`에만). **키 제한을 Cloud Vision API만으로** 걸어 둘 것 (키가 새도 다른 API에 못 쓰게)
+- 결제 계정이 연결된 프로젝트는 쓴 만큼 요금이 나올 수 있음 → 콘솔에서 예산 알림 설정
+- 아직 코드에서 쓰지 않음 (사진 인식은 Gemma → Gemini → GPT)
+
+---
+
+## 10. Google Gemini (AI Studio)
+
+- 신청처: Google AI Studio(aistudio.google.com) → Get API key → 프로젝트 `Default Gemini Project`(결제 연결 없음 = 무료) (11/26)
+- 키: `GEMINI_API_KEY`, 모델: `GEMINI_CHAT_MODEL` (기본 `gemini-flash-lite-latest`)
+- 주소: `https://generativelanguage.googleapis.com/v1beta/models/{모델}:generateContent`, 키는 주소가 아니라 `x-goog-api-key` 헤더로 보냄
+  - **`v1beta`여야 함**: SDK 기본값 `v1`에는 `-latest` 모델 이름이 없어 404 (11/26 노트북 실연결에서 확인 후 코드 수정)
+- 확인 결과 (11/26): 이 키로 쓸 수 있는 모델 49개. `gemini-flash-latest`는 사용량이 몰려 503이 자주 나고, `gemini-flash-lite-latest`(현재 `gemini-3.5-flash-lite`)는 정상. 텍스트 답, 사진 인식(빨간 사진 → "빨간색"), 채팅 도구 호출 2단계 모두 성공
+- 제미나이 3은 도구 호출에 붙여 준 서명(`thoughtSignature`)을 다음 턴에 그대로 돌려줘야 함 (없으면 400) → 코드에서 처리
+- **무료 키 주의**: 보낸 내용과 답이 Google 제품 개선(학습)에 쓰일 수 있음 → 손님 개인정보를 보내지 않기. 사진 위치정보는 서버가 지우고 보냄. 결제가 연결된 프로젝트의 키로 바꾸면 학습에 안 쓰임
+- 무료는 사용량 제한이 낮음 → 막히면 GPT로 넘어가게 순서를 둠. 우리 쪽 상한은 `EXTERNAL_LLM_DAILY_LIMIT`·`EXTERNAL_LLM_HOURLY_PER_CLIENT`
+
+---
+
+## 11. 확인 방법
 
 - 위 내용은 개인 확인용 스크립트와 브라우저 호출로 실제 확인했다. **서약서(사전 제작 결과물 금지)에 따라 그 스크립트는 저장소에 올리지 않고**, 수집 코드는 대회 현장에서 새로 작성한다.
 - 현장에서 다시 확인할 때는 각 API 페이지의 [데이터조회하기] 또는 아래처럼 브라우저로 호출한다 (키는 직접 입력, 문서에 적지 않음).
@@ -194,7 +222,7 @@ https://apis.data.go.kr/B552845/periodRetail/price?serviceKey=키&pageNo=1&numOf
 
 ---
 
-## 10. 다음 할 일
+## 12. 다음 할 일
 
 - [x] 전국전통시장표준데이터 활용신청 승인·호출 확인 (11/25)
 - [ ] 원재료성식품 영양성분 파일 다운로드
@@ -205,4 +233,8 @@ https://apis.data.go.kr/B552845/periodRetail/price?serviceKey=키&pageNo=1&numOf
 - [ ] 복조리 정체 확인 (KAMIS 061-930-9971)
 - [x] 네이버 지도 키 발급·지도 표시 확인 (11/26)
 - [ ] 배포 주소 정해지면 네이버 지도 Web 서비스 URL에 추가
-- [ ] 앱 화면에 네이버 지도 연결
+- [x] 앱 화면에 네이버 지도 연결 (11/26, 병수)
+- [x] Gemini 키 발급·연결 확인 (11/26)
+- [x] Google Cloud Vision 키 발급 (11/26)
+- [ ] Vision 키 제한(Cloud Vision API만) 확인
+- [ ] 대회 후 공공데이터포털·식품안전나라·Gemini 키 재발급 (채팅·단톡에 노출된 키)
