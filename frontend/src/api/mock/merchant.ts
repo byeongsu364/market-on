@@ -262,7 +262,14 @@ export async function view(id: number) {
   if (s) s.view_count++;
 }
 
+/** 030 mock(merchant030.ts)이 같은 계정 목록과 지금 로그인을 읽음 */
+export const mockUsers = () => users;
+export const currentMockUser = () => current;
+const resetHooks: (() => void)[] = [];
+export const onMockReset = (fn: () => void) => resetHooks.push(fn);
+
 export function resetMock() {
+  resetHooks.forEach((fn) => fn());
   current = null;
   confirmations.clear();
   users.splice(0, users.length, ...structuredClone(initialUsers));

@@ -257,6 +257,8 @@ export type JoinRequest = {
   note?: string;
   login_id: string;
   password: string;
+  captcha_id?: string;
+  captcha_answer?: string;
 };
 export type MarketApplication = {
   id: number;
@@ -370,3 +372,10 @@ export type PriceHistory = {
 };
 export type Favorite = { store_id: string; name: string; market_id: string; notify: boolean };
 export type MultiItemMap = MarketMap & { item_ids: string[] };
+/** 030 상인 화면의 mock 전용 값(백엔드 없음: 단골 수, 오늘 품절, 가게 위치 확인) */
+export type MerchantExtras = {
+  favorites: number;
+  sold_out_item_ids: string[];
+  location: LatLng | null;
+  location_confirmed: boolean;
+};

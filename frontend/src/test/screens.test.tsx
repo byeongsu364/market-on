@@ -88,9 +88,9 @@ it('선물 구성은 과일 품목과 출처를 표시한다', async () => {
   expect(screen.getAllByRole('link', { name: '점포 보기' })).toHaveLength(2);
   expect(screen.getAllByText(/팀 구성 예시 · 샘플/)).toHaveLength(2);
 });
-it('비로그인 상인은 보호된 화면에서 상인 시작으로 이동한다', async () => {
+it('비로그인 상인은 보호된 화면에서 상인 시작을 거쳐 로그인으로 이동한다', async () => {
   show('/merchant/sale/new');
-  expect(await screen.findByRole('heading', { name: '상인이신가요?' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: '로그인' })).toBeInTheDocument();
   expect(screen.queryByLabelText('할인가')).not.toBeInTheDocument();
 });
 it('화면 오류를 설명하고 재시도 버튼을 표시한다', async () => {

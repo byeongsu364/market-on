@@ -1,5 +1,5 @@
 import { it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor, renderHook } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, renderHook, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import * as auth from '../api/auth';
@@ -55,6 +55,8 @@ it('시장 관리자는 승인하고 거절 전에 확인한다', async () => {
   await waitFor(() => expect(screen.getByRole('button', { name: '승인' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: '승인' }));
   await waitFor(() => expect(decide).toHaveBeenCalledWith('one', 'approve'));
+  // 화면을 먼저 내려야 matchMedia 가짜 함수가 풀린 뒤 다시 그리지 않음
+  cleanup();
   vi.restoreAllMocks();
 });
 it('QR 시장은 저장된 시장보다 우선하고 그날 유지된다', async () => {
