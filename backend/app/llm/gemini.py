@@ -44,6 +44,8 @@ def _config(system: str | None = None, tools: list[dict] | None = None):
         else None,
         automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         http_options=types.HttpOptions(
+            # SDK 기본(v1)에는 '-latest' 모델 이름이 없어 404 → v1beta (2026-11-26 노트북 실연결에서 확인)
+            api_version='v1beta',
             timeout=int(PROVIDER_TIMEOUTS['gemini'] * 1000),
             retry_options=types.HttpRetryOptions(
                 attempts=2, http_status_codes=[429, 500, 502, 503, 504]

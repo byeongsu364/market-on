@@ -66,7 +66,8 @@ def test_generate_text_and_photo(wire):
     png = b'\x89PNG\r\n\x1a\nimage'
     assert GeminiProvider().generate('무엇?', images=[png], system='규칙') == '대파'
     (request,) = sent
-    assert 'gemini-test:generateContent' in request['url'] and KEY not in request['url']
+    assert '/v1beta/models/gemini-test:generateContent' in request['url']
+    assert KEY not in request['url']
     assert request['key'] == KEY
     body = request['body']
     assert body['systemInstruction']['parts'] == [{'text': '규칙'}]
@@ -130,6 +131,7 @@ def test_chat_tool_loop_returns_signature(wire, monkeypatch):
     )
     assert result == '잎이 싱싱한 걸 골라요.'
     assert calls == [('search_items', {'query': '대파'})]
+    assert all('/v1beta/' in r['url'] for r in sent)
     first, second = (r['body'] for r in sent)
     assert first['tools'][0]['functionDeclarations'][0]['name'] == 'search_items'
     assert 'systemInstruction' in first
