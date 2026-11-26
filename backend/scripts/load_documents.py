@@ -2,12 +2,15 @@
 
 import argparse
 from collections import Counter
+
 import yaml
+
 from app.db.pool import connection
 from app.db.repositories import knowledge_repo as repo
 from app.knowledge.ingest import upsert_document
 from app.schemas.knowledge import Document
-from ._common import DATA, summary, run
+
+from ._common import DATA, run, summary
 
 
 def read_document(path, directory):
@@ -29,12 +32,22 @@ def read_document(path, directory):
         entities=meta.get('entities', []),
         market_id=meta.get('market_id'),
         published=meta.get('published'),
+        review_status=meta.get('review_status', 'draft'),
+        varieties=meta.get('varieties', []),
+        main_item=meta.get('main_item'),
+        main_items=meta.get('main_items', []),
+        dish_type=meta.get('dish_type', ''),
+        cook_method=meta.get('cook_method', ''),
     )
 
 
-def load_documents(conn, directory=DATA / 'rag_docs', *, prune=False):
+def load_documents(conn, directory=DATA / 'rag_docs', *, prune=False, documents=None):
     counts = Counter()
-    docs = [read_document(path, directory) for path in sorted(directory.rglob('*.md'))]
+    docs = (
+        documents
+        if documents is not None
+        else [read_document(path, directory) for path in sorted(directory.rglob('*.md'))]
+    )
     with conn.transaction():
         for doc in docs:
             counts[upsert_document(conn, doc).status] += 1

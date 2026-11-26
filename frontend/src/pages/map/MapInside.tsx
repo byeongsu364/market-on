@@ -131,7 +131,12 @@ function MarketView({ market }: { market: Market }) {
   const catalog = useItemCatalog();
   const item = catalog.data?.find((i) => i.item_id === itemId);
   const itemName = item?.name ?? t('item');
-  const [category, setCategory] = useState<StoreCategory | 'all'>('all');
+  const requestedCategory = ctx.params.get('category');
+  const [category, setCategory] = useState<StoreCategory | 'all'>(() =>
+    requestedCategory && Object.hasOwn(CATEGORY_LABELS, requestedCategory)
+      ? (requestedCategory as StoreCategory)
+      : 'all',
+  );
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [near, setNear] = useState(true);
   const [expanded, setExpanded] = useState(false);
@@ -572,6 +577,7 @@ function MarketView({ market }: { market: Market }) {
       />
       {route && (
         <RouteSheet
+          storeId={route.store.store_id}
           destination={{ ...storeDestination(route.store, market), label: route.store.name }}
           approximate={storeDestination(route.store, market).approximate}
           kind="store"

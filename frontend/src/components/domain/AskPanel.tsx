@@ -8,6 +8,7 @@ import Card from '../common/Card';
 import ChipGroup from '../common/ChipGroup';
 import ErrorBox from '../common/ErrorBox';
 import Loading from '../common/Loading';
+import { useWaitSteps } from '../../hooks/useWaitSteps';
 import AskAnswer from './AskAnswer';
 import { Field, SectionHeader } from '../common/parts';
 import s from './domain.module.css';
@@ -26,6 +27,8 @@ export default function AskPanel({ itemId }: { itemId: string }) {
   const [question, setQuestion] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(false);
+  const waitLabels = [t('waitSearch'), t('waitOrganize'), t('waitWrite')];
+  const waitStep = useWaitSteps(loading, waitLabels.length);
   const [error, setError] = useState<{ message: string; retry: boolean } | null>(null);
   const [selected, setSelected] = useState<AskIntent | ''>('');
   const busy = useRef(false);
@@ -108,7 +111,7 @@ export default function AskPanel({ itemId }: { itemId: string }) {
       {loading && (
         <Card>
           <div aria-live="polite">
-            <Loading message={t('askLoading')} />
+            <Loading message={waitLabels[waitStep]} />
           </div>
         </Card>
       )}

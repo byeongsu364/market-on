@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_valid
 
 from app.schemas.price import PriceResponse
 
-AskIntent = Literal['select', 'store', 'prep', 'season', 'story', 'price', 'where']
+AskIntent = Literal['select', 'store', 'prep', 'season', 'story', 'price', 'where', 'recipe']
 
 
 class AskRequest(BaseModel):
@@ -42,7 +42,7 @@ class Candidate(BaseModel):
 
 class AskResponse(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
-    kind: Literal['answer', 'no_evidence', 'need_item', 'price', 'where', 'out_of_scope']
+    kind: Literal['answer', 'no_evidence', 'need_item', 'price', 'where', 'recipes', 'out_of_scope']
     intent: AskIntent | None = None
     item_id: str | None = None
     item_name: str | None = None
@@ -50,10 +50,13 @@ class AskResponse(BaseModel):
     citations: list[Citation] = Field(default_factory=list)
     candidates: list[Candidate] | None = None
     price: PriceResponse | None = None
+    recipes: list[dict] | None = None
     stores: list[CandidateStore] | None = None
     model: str | None = None
     cached: bool = False
     removed: int = 0
+    # 040: 실제로 거친 단계 (search·extract·write·check). 화면의 단계 표시용
+    steps: list[str] = Field(default_factory=list)
 
     @model_serializer(mode='wrap')
     def serialize(self, handler):
@@ -61,7 +64,7 @@ class AskResponse(BaseModel):
         return {
             k: v
             for k, v in result.items()
-            if k not in ('candidates', 'price', 'stores') or v is not None
+            if k not in ('candidates', 'price', 'stores', 'recipes') or v is not None
         }
 
 

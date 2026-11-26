@@ -23,7 +23,14 @@ export function categoryOfZone(zoneName: string | undefined): StoreCategory | nu
 }
 export function storeCategory(store: Pick<Store, 'category'>, zoneName?: string) {
   const value = store.category?.replace('store_category:', '');
-  const category = value === 'side_dish' ? 'side' : value === 'snack' ? 'ricecake' : value;
+  const category =
+    value === 'side_dish'
+      ? 'side'
+      : value === 'snack'
+        ? 'ricecake'
+        : value === 'fruit' || value === 'vegetable'
+          ? 'produce'
+          : value;
   return (category as StoreCategory | undefined) ?? categoryOfZone(zoneName);
 }
 export const categoryColor = (c: StoreCategory | null) =>

@@ -1,3 +1,6 @@
+import PipelineReport from './PipelineReport';
+import { useResource } from '../../hooks/useResource';
+import { getListedMarkets, getActiveMarkets } from '../../api/admin';
 import { Navigate } from 'react-router-dom';
 import Applications from '../../components/domain/Applications';
 import { useAuth } from '../../hooks/useAuth';
@@ -54,8 +57,41 @@ function Pending() {
   );
 }
 
+function MarketLists() {
+  const listed = useResource(getListedMarkets);
+  const active = useResource(getActiveMarkets);
+  return (
+    <>
+      {listed.data && (
+        <Section title="신청은 없고 요청만 있는 시장">
+          <DataTable
+            head={['시장', '최근 7일 요청', '전체 요청']}
+            rows={listed.data
+              .filter((m) => m.application === null && m.requests_total > 0)
+              .map((m) => ({
+                key: m.market_id,
+                cells: [m.name, m.requests_week, m.requests_total],
+              }))}
+          />
+        </Section>
+      )}
+      {active.data && (
+        <Section title="이용 중인 시장">
+          <DataTable
+            head={['시장', '활성 점포', '승인 상인', '최근 7일 조회']}
+            rows={active.data.map((m) => ({
+              key: m.market_id,
+              cells: [m.name, m.stores, m.merchants_approved, m.views_week],
+            }))}
+          />
+        </Section>
+      )}
+    </>
+  );
+}
+
 // WebAdmin: 운영자. 시장 입점 신청과 상인 승인(기능은 그대로, 디자인만 새로).
-// 시안의 "신청은 없고 요청만 있는 시장", "이용 중인 시장" 표는 운영자용 목록 API가 없어 넣지 않음.
+// 요청만 있는 시장과 이용 중인 시장은 운영자 통계 API로 표시.
 export default function AdminHome() {
   const auth = useAuth();
   const t = useT();
@@ -88,6 +124,8 @@ export default function AdminHome() {
         <h1 className={s.webTitle}>{t('adminTitle')}</h1>
         <Applications />
         <Pending />
+        <MarketLists />
+        <PipelineReport />
       </div>
     </>
   );

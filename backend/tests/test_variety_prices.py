@@ -30,7 +30,7 @@ def choices():
 def test_variety_ontology():
     entities = yaml.safe_load((DATA / 'ontology/items.yaml').read_text())['entities']
     varieties = [e for e in entities if e['type'] == 'variety']
-    assert len(varieties) == 7
+    assert len(varieties) == 9
     for item in (e for e in entities if e['type'] == 'item'):
         edges = [r for r in item['relations'] if r['p'] == 'hasGrade']
         defaults = [r for r in edges if r.get('props', {}).get('default')]
@@ -43,6 +43,9 @@ def test_variety_ontology():
 
 @pytest.fixture
 def prices(monkeypatch):
+    monkeypatch.setattr(knowledge_repo, 'source_title', lambda c, key: key)
+    monkeypatch.setattr(knowledge_repo, 'item_labels', lambda *a: [])
+    monkeypatch.setattr(knowledge_repo, 'season_relations', lambda *a: [])
     monkeypatch.setattr(knowledge_repo, 'get_item', lambda *a: {'id': 'item:apple'})
     monkeypatch.setattr(
         store_repo, 'get_market', lambda *a: {'at_sgg_nm': '서울', 'at_mrkt_cd': None}
@@ -99,6 +102,10 @@ def test_default_explicit_fallback_and_contract(prices, monkeypatch):
         'observed_on',
         'count',
         'default',
+        'description',
+        'description_source',
+        'harvest',
+        'synonyms',
     }
     assert [v.reference_price for v in default.varieties] == [2000, 3000, None]
     assert default.varieties[2].count == 0
@@ -112,7 +119,7 @@ def test_default_explicit_fallback_and_contract(prices, monkeypatch):
         get(variety_id='variety:pear-shingo')
     assert exc.value.status_code == 422
     monkeypatch.setattr(price_repo, 'varieties', lambda *a: choices()[:1])
-    assert get().varieties == []
+    assert len(get().varieties) == 1
 
 
 def test_collection_parent_and_every_variety(monkeypatch):
@@ -136,6 +143,7 @@ def test_collection_parent_and_every_variety(monkeypatch):
     )
     collector.update_prices(None)
     assert fetch.call_count == 3
+    assert {c.kwargs['grd_cd'] for c in fetch.call_args_list} == {'04'}
     assert {r['variety_id'] for r in saved} == {v['id'] for v in children}
     assert {r['item_id'] for r in saved} == {'item:apple'}
 
@@ -181,3 +189,22 @@ def test_price_tag_labels(monkeypatch, text, expected):
         ),
     )
     assert ontology.match_variety(None, 'item:apple', text) == expected
+
+
+def test_mandarin_collection_targets_without_network(monkeypatch):
+    entities = yaml.safe_load((DATA / 'ontology/items.yaml').read_text())['entities']
+    parent = next(e for e in entities if e['id'] == 'item:mandarin')
+    children = [
+        e | {'item_id': parent['id']} for e in entities if e['id'].startswith('variety:mandarin-')
+    ]
+    monkeypatch.setattr(collector.at_price, 'require_key', lambda: None)
+    monkeypatch.setattr(price_repo, 'kamis_entities', lambda *a: [parent])
+    monkeypatch.setattr(price_repo, 'varieties', lambda *a: children)
+    fetch = Mock(return_value=[])
+    monkeypatch.setattr(collector.at_price, 'fetch_period_retail', fetch)
+    monkeypatch.setattr(price_repo, 'upsert_observations', lambda *a: (0, 0))
+    collector.update_prices(None, item_id=parent['id'])
+    assert [call.args for call in fetch.call_args_list] == [
+        ('400', '415', '01'),
+        ('400', '415', '02'),
+    ]

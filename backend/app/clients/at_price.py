@@ -18,7 +18,9 @@ def require_key():
         raise AppError('AT_NOT_CONFIGURED', 'AT_NOT_CONFIGURED: DATA_GO_KR_KEY가 필요합니다.', 503)
 
 
-def fetch_period_retail(ctgry_cd, item_cd, vrty_cd=None, *, start: date, end: date) -> list[dict]:
+def fetch_period_retail(
+    ctgry_cd, item_cd, vrty_cd=None, *, start: date, end: date, grd_cd: str = '04'
+) -> list[dict]:
     require_key()
     if start > end:
         raise ValueError('시작일은 종료일 이하여야 합니다.')
@@ -32,7 +34,8 @@ def fetch_period_retail(ctgry_cd, item_cd, vrty_cd=None, *, start: date, end: da
         'cond[ctgry_cd::EQ]': ctgry_cd,
         'cond[item_cd::EQ]': item_cd,
         'cond[se_cd::EQ]': '01',
-        'cond[grd_cd::EQ]': '04',
+        # 대부분 상품(04), 감귤은 M과(15)처럼 품목마다 다른 등급을 온톨로지 kamis.grd_cd로
+        'cond[grd_cd::EQ]': grd_cd,
     }
     if vrty_cd is not None:
         params['cond[vrty_cd::EQ]'] = vrty_cd

@@ -1,3 +1,4 @@
+import * as merchantMock from './mock/merchant';
 import { isMock, request, query } from './client';
 import * as mock from './mock';
 import type { MarketMap, MultiItemMap } from '../types/contract';
@@ -28,3 +29,11 @@ export const getMultiItemMap = async (id: string, item_ids: string[]): Promise<M
     })),
   };
 };
+
+export const recordDirections = (id: string) =>
+  isMock
+    ? merchantMock.direction(id)
+    : request<void>(`/stores/${encodeURIComponent(id)}/directions`, {
+        method: 'POST',
+        keepalive: true,
+      });

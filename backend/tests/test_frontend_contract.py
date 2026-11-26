@@ -5,6 +5,7 @@ from tests.test_auth_api import memory, signup, operator, HEADER
 
 USER = {'id', 'login_id', 'role', 'status', 'store', 'market', 'created_at'}
 STORE = {
+    'varieties',
     'store_id',
     'name',
     'market_id',
@@ -17,8 +18,20 @@ STORE = {
     'location',
     'location_confirmed',
 }
-SALE = {'id', 'store_id', 'item_id', 'sale_price', 'starts_at', 'ends_at', 'status', 'view_count'}
+SALE = {
+    'id',
+    'store_id',
+    'item_id',
+    'sale_price',
+    'starts_at',
+    'ends_at',
+    'status',
+    'view_count',
+    'variety_id',
+    'variety_name',
+}
 ITEM = {
+    'variety_id',
     'item_id',
     'name',
     'synonyms',

@@ -1,17 +1,19 @@
 """Destructive integration setup is restricted to the explicitly named test database."""
 
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 from urllib.parse import urlparse
+
 import pytest
+
 from app.core.config import settings
 from app.db.pool import close_pool, connection
 from app.db.repositories import knowledge_repo as repo
-from app.llm.fake import FakeProvider
-from app.knowledge.ontology import normalize
 from app.knowledge.ingest import upsert_document
+from app.knowledge.ontology import normalize
 from app.knowledge.retriever import search
+from app.llm.fake import FakeProvider
 
 pytestmark = pytest.mark.skipif(
     not os.getenv('TEST_DATABASE_URL'), reason='TEST_DATABASE_URL is not set'
@@ -44,9 +46,9 @@ def db():
 
 
 def test_load_replace_search_cache_and_prune(db, tmp_path):
-    from scripts.load_all import load_all
-    from scripts.load_documents import read_document, load_documents
     from app.knowledge.embedder import embed_pending
+    from scripts.load_all import load_all
+    from scripts.load_documents import load_documents, read_document
 
     source = Path(__file__).resolve().parents[2] / 'data'
     shutil.copytree(source, tmp_path / 'data')
@@ -55,8 +57,8 @@ def test_load_replace_search_cache_and_prune(db, tmp_path):
     first = load_all(db, data_dir=data, embedder=fake)
     # 식품안전나라 레시피(scripts.import_recipes 생성)는 받은 만큼 늘어나서 따로 셈
     recipes = len(list((data / 'rag_docs' / 'recipes').glob('foodsafety-*.md')))
-    # 16 sources + 41 explicit/20 generated entities + 21 documents + 레시피
-    assert first['added'] == 97 + recipes  # 출처 1개 줄어듦(농사로 9개 → 공공데이터포털 API 6개 + 1유형 보도자료 2개)
+    # 16 sources + 44 explicit/24 generated entities + 25 documents + 레시피
+    assert first['added'] == 109 + recipes * 2
     ids = db.execute('select id from chunks order by id').fetchall()
     second = load_all(db, data_dir=data, embedder=fake)
     assert second['added'] == second['changed'] == second['deleted'] == 0
@@ -128,8 +130,10 @@ def test_missing_relation_reports_line_and_rolls_back(db, tmp_path):
 
 
 def test_alignment(db, tmp_path):
-    import yaml
     from datetime import date
+
+    import yaml
+
     from app.knowledge.ontology import resolve_entities
     from app.schemas.knowledge import Document
     from scripts.load_all import load_all
@@ -148,13 +152,13 @@ def test_alignment(db, tmp_path):
         db.execute(
             "select count(*) from entities where type='criterion' and source_id is not null"
         ).fetchone()[0]
-        == 20  # 5품목 × 확인 포인트 4개 (2026-11-26 출처 있는 값으로 채움)
+        == 24  # 6품목 × 확인 포인트 4개 (2026-11-26 출처 있는 값으로 채움)
     )
     assert (
         db.execute(
             "select count(*) from entity_relations where predicate='hasCriterion' and source_id is not null"
         ).fetchone()[0]
-        == 20
+        == 24
     )
     assert db.execute("select props from entity_relations where predicate='soldBy'").fetchone()[
         0
@@ -198,9 +202,61 @@ def test_alignment(db, tmp_path):
 def test_alignment_rejects_predicate(db, predicate):
     from psycopg.errors import CheckViolation
 
-    with pytest.raises(CheckViolation):
-        with db.transaction():
-            db.execute(
-                "insert into entity_relations(subject_id,predicate,object_value) values('item:green_onion',%s,'{}')",
-                (predicate,),
-            )
+    with pytest.raises(CheckViolation), db.transaction():
+        db.execute(
+            "insert into entity_relations(subject_id,predicate,object_value) values('item:green_onion',%s,'{}')",
+            (predicate,),
+        )
+
+
+def test_recipe_ontology_chunks_and_candidate_sql(db, tmp_path):
+    """Exercise migration 0024 and recipe-scoped SQL with a local import fixture."""
+    from pgvector import Vector
+
+    from app.services import recipe_service
+    from scripts import import_recipes as ir
+    from scripts.load_all import load_all
+    from scripts.load_documents import read_document
+
+    data = Path(__file__).resolve().parents[2] / 'data'
+    load_all(db, data_dir=data, embed=False)
+    row = {
+        'RCP_SEQ': '999999',
+        'RCP_NM': '테스트 대파 요리',
+        'RCP_PARTS_DTLS': '대파 1대, 양파 1/2개, 소금 약간',
+        'RCP_PAT2': '국&찌개',
+        'RCP_WAY2': '끓이기',
+        'INFO_ENG': '100',
+        'MANUAL01': '1. 테스트 원문 그대로.',
+        'RCP_NA_TIP': '제외할 팁',
+    }
+    chosen = ir.select([row], ir.item_labels())
+    ir.write_docs(chosen, tmp_path)
+    ontology = tmp_path / 'ontology'
+    ontology.mkdir()
+    shutil.copy(data / 'ontology/items.yaml', ontology / 'items.yaml')
+    ir.write_ontology(chosen, ontology / 'recipes.yaml')
+    from scripts.load_ontology import load_ontology
+
+    load_ontology(db, ontology, cleanup=False)
+    doc = read_document(tmp_path / 'foodsafety-999999.md', tmp_path)
+    doc.doc_key = 'recipes/foodsafety-999999.md'
+    upsert_document(db, doc)
+    values = db.execute(
+        'select main_item_id,dish_type,season_months,weather_tags,quote_only from rag_chunk where document_id=(select id from documents where doc_key=%s)',
+        (doc.doc_key,),
+    ).fetchall()
+    assert len(values) == 2
+    assert all(v == ('item:green_onion', '국&찌개', [3], ['cold', 'snow'], True) for v in values)
+    db.execute(
+        'update chunks set embedding=%s where document_id=(select id from documents where doc_key=%s)',
+        (Vector([1.0] * 1024), doc.doc_key),
+    )
+    fake = FakeProvider()
+    cards = recipe_service.find_recipes(
+        db, item_id='item:green_onion', month=3, q='요리', embedder=fake
+    )
+    assert cards[0]['recipe_id'] == 'recipe:foodsafety-999999'
+    detail = recipe_service.get_recipe(db, 'recipe:foodsafety-999999')
+    assert detail['steps'] == '1. 테스트 원문 그대로.' and '팁' not in str(detail)
+    assert recipe_service.find_recipes(db, item_id='item:onion') == []

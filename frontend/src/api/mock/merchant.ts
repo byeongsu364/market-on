@@ -8,6 +8,7 @@ import type {
   ActiveSale,
 } from '../../types/contract';
 import { items, stores, markets } from './data';
+import { mockVarieties } from './varieties';
 import { saleEnd, seoulDay } from '../../utils/sale';
 const password = 'market-on-demo';
 export const demoCredentials = (login_id = 'demo_a05') => ({ login_id, password });
@@ -45,8 +46,37 @@ const passwords = new Map(users.map((u) => [u.login_id, password]));
 let current: User | null = null;
 const hours = new Map<string, { open: string; close: string }>();
 const views = new Map<string, number>();
-const details = new Map<string, Pick<MerchantStore, 'payments' | 'intro'>>();
-export const storeDetails = (id: string) => details.get(id) ?? {};
+const saleDays = new Map<string, number>();
+const directionDays = new Map<string, number>();
+const directionSeen = new Map<string, number>();
+export const dailyViews = (id: string, day: string) =>
+  (views.get(`${day}:${id}`) ?? 0) + (saleDays.get(`${day}:${id}`) ?? 0);
+export async function direction(id: string) {
+  if (!stores.some((s) => s.store_id === id)) throw new Error('점포를 찾을 수 없어요.');
+  const instant = Date.now();
+  if (instant - (directionSeen.get(id) ?? -Infinity) < 600000) return;
+  directionSeen.set(id, instant);
+  const key = `${seoulDay()}:${id}`;
+  directionDays.set(key, (directionDays.get(key) ?? 0) + 1);
+}
+export async function stats(days = 7): Promise<import('../../types/contract').MerchantStats> {
+  const id = merchant().store_id;
+  const series = Array.from({ length: days }, (_, i) => {
+    const day = seoulDay(new Date(Date.now() - (days - 1 - i) * 86400000));
+    return { day, views: dailyViews(id, day), directions: directionDays.get(`${day}:${id}`) ?? 0 };
+  });
+  const today = series[series.length - 1];
+  return {
+    today: { views: today.views, directions: today.directions },
+    days: series,
+    favorites: null,
+  };
+}
+const details = new Map<string, Pick<MerchantStore, 'payments' | 'intro' | 'varieties'>>();
+export const storeDetails = (id: string) => {
+  const d = details.get(id);
+  return d ? { ...d, varieties: Object.values(d.varieties ?? {}).flat() } : {};
+};
 export const sales: ClosingSale[] = [
   {
     id: 1,
@@ -171,19 +201,35 @@ export async function getStore() {
   return info(merchant().store_id);
 }
 export async function updateStore(
-  q: Partial<Pick<MerchantStore, 'hours' | 'item_ids' | 'payments' | 'intro'>>,
+  q: Partial<Pick<MerchantStore, 'hours' | 'item_ids' | 'payments' | 'intro' | 'varieties'>>,
 ) {
   const id = merchant().store_id;
   if (q.intro != null && q.intro.length > 80) throw new Error('소개는 80자 이내로 입력하세요.');
   if (q.payments?.some((p) => !['card', 'cash', 'transfer', 'onnuri'].includes(p)))
     throw new Error('결제 수단을 확인하세요.');
+  for (const [item, ids] of Object.entries(q.varieties ?? {})) {
+    const choices = mockVarieties(item);
+    if (
+      !(q.item_ids ?? info(id).item_ids).includes(item) ||
+      ids.some((id) => !choices.some((v) => v.variety_id === id))
+    )
+      throw new Error('판매 품목의 품종을 선택하세요.');
+  }
   details.set(id, {
     ...details.get(id),
     ...('intro' in q ? { intro: q.intro } : {}),
     ...(q.payments ? { payments: q.payments } : {}),
+    ...(q.varieties ? { varieties: q.varieties } : {}),
   });
   if (q.hours) hours.set(id, q.hours);
-  if (q.item_ids) stores.find((s) => s.store_id === id)!.sells = q.item_ids;
+  if (q.item_ids) {
+    stores.find((s) => s.store_id === id)!.sells = q.item_ids;
+    const d = details.get(id)!;
+    if (d.varieties)
+      d.varieties = Object.fromEntries(
+        Object.entries(d.varieties).filter(([item]) => q.item_ids!.includes(item)),
+      );
+  }
   return info(id);
 }
 export async function getSales(status: 'active' | 'ended') {
@@ -208,7 +254,11 @@ export async function createSale(q: SaleRequest) {
     Date.parse(q.ends_at) > Date.parse(`${seoulDay()}T23:59:59+09:00`)
   )
     throw new Error('품목·가격·끝나는 시각을 확인해 주세요.');
+  const choices = mockVarieties(q.item_id);
+  const variety = choices.find((v) => v.variety_id === q.variety_id);
+  if (q.variety_id && !variety) throw new Error('이 품목의 품종이 아닙니다.');
   const sale: ClosingSale = {
+    variety_name: variety?.name ?? null,
     ...q,
     id: Math.max(...sales.map((s) => s.id)) + 1,
     store_id: s.store_id,
@@ -274,7 +324,11 @@ export async function publicStore(id: string) {
 }
 export async function view(id: number) {
   const s = sales.find((s) => s.id === id);
-  if (s) s.view_count++;
+  if (s) {
+    s.view_count++;
+    const key = `${seoulDay()}:${s.store_id}`;
+    saleDays.set(key, (saleDays.get(key) ?? 0) + 1);
+  }
 }
 
 /** 030 mock(merchant030.ts)이 같은 계정 목록과 지금 로그인을 읽음 */
@@ -293,6 +347,9 @@ export function resetMock() {
   hours.clear();
   details.clear();
   views.clear();
+  saleDays.clear();
+  directionDays.clear();
+  directionSeen.clear();
   sales.splice(1);
   sales[0].status = 'active';
   sales[0].view_count = 0;

@@ -6,7 +6,9 @@ import type { MerchantStore, ClosingSale, SaleRequest, PosterInfo } from '../typ
 export const getStore = () =>
   isMock ? mock.getStore() : request<MerchantStore>('/merchant/store');
 export const updateStore = (
-  q: Partial<Pick<MerchantStore, 'hours' | 'item_ids' | 'payments' | 'intro'>>,
+  q: Partial<
+    Pick<MerchantStore, 'hours' | 'item_ids' | 'payments' | 'intro' | 'varieties' | 'varieties'>
+  >,
 ) =>
   isMock
     ? mock.updateStore(q)
@@ -61,3 +63,8 @@ export const saveLocation = (point: LatLng): Promise<MerchantExtras> =>
         location: s.location ?? null,
         location_confirmed: s.location_confirmed ?? false,
       }));
+
+export const getStats = () =>
+  isMock
+    ? mock.stats()
+    : request<import('../types/contract').MerchantStats>('/merchant/stats?days=7');

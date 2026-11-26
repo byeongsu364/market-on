@@ -22,3 +22,10 @@ def in_season(month: int | None = Query(default=None, ge=1, le=12), conn=Depends
 @router.get('/{item_id}', response_model=Item)
 def get_item(item_id: str, lang: str = 'ko', conn=Depends(get_db)):
     return item_service.get_item(conn, item_id, lang)
+
+
+@router.get('/{item_id}/varieties')
+def varieties(item_id: str, conn=Depends(get_db)):
+    from app.services.price_service import list_varieties
+
+    return list_varieties(conn, item_id)

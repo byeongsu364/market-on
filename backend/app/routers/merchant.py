@@ -1,6 +1,6 @@
 """Approved merchant endpoints."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from app.deps import get_db, require_merchant, require_csrf
 from app.core.config import settings
 from app.schemas.merchant import (
@@ -64,3 +64,10 @@ def confirm_price(data: PriceConfirm, user=Depends(require_merchant), conn=Depen
 @router.put('/store/location')
 def location(data: StoreLocation, user=Depends(require_merchant), conn=Depends(get_db)):
     return service.save_location(conn, user, data)
+
+
+@router.get('/stats')
+def stats(days: int = Query(7, ge=1, le=28), user=Depends(require_merchant), conn=Depends(get_db)):
+    from app.services import stats_service
+
+    return stats_service.merchant(conn, user, days)

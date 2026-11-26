@@ -43,6 +43,8 @@ def test_pages_single_item_and_spacing(configured, monkeypatch):
     monkeypatch.setattr(http, 'get_sync', call)
     assert len(fetch()) == 10
     assert [c.kwargs['params']['pageNo'] for c in call.call_args_list] == [1, 2]
+    assert call.call_args.kwargs['params']['cond[grd_cd::EQ]'] == '04'
+
     assert call.call_args.kwargs['params']['cond[exmn_ymd::GTE]'] == '20261120'
     assert at_price.time.sleep.call_args.args[0] > 1
 
@@ -164,3 +166,13 @@ def test_candidate_output_only(tmp_path):
     rows = list(candidates(tmp_path))
     assert rows[0][2]['item_cd'] == '246' and rows[0][2]['vrty_cd'] == '00'
     assert path.read_text() == text
+
+
+def test_grade_code_per_item(configured, monkeypatch):
+    # 감귤은 상품(04) 대신 M과(15)로 조사돼요
+    call = Mock(return_value=Mock(json=lambda: {'response': {'body': {'items': {'item': []}}}}))
+    monkeypatch.setattr(http, 'get_sync', call)
+    at_price.fetch_period_retail(
+        '400', '415', '01', start=date(2026, 11, 20), end=date(2026, 11, 22), grd_cd='15'
+    )
+    assert call.call_args.kwargs['params']['cond[grd_cd::EQ]'] == '15'

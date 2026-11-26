@@ -23,9 +23,10 @@ async function login(id = 'demo_a05') {
 it('로그인한 상인에게 조회 수와 대기 상인에게 승인 안내를 보여 준다', async () => {
   await login();
   await screen.findByRole('heading', { name: '점포 A-05' });
-  expect(await screen.findByText('오늘 내 점포를 본 사람')).toBeInTheDocument();
-  expect(screen.getByText('이 세일을 본 사람')).toBeInTheDocument();
-  expect(screen.getAllByText('0명')).toHaveLength(2);
+  expect(await screen.findByText('오늘 조회 수')).toBeInTheDocument();
+  expect(screen.getByText('오늘 길 안내')).toBeInTheDocument();
+  expect(screen.getByText('오늘 0번 조회')).toBeInTheDocument();
+  expect(screen.getByRole('img', { name: '날짜별 조회 수와 길 안내 횟수' })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '로그아웃' }));
   await screen.findByRole('heading', { name: '로그인' });
   cleanup();
@@ -96,7 +97,7 @@ it('승인된 상인은 품목별 오늘 품절을 바꾼다(mock)', async () =>
   show('/merchant');
   const toggle = await screen.findByRole('switch', { name: '대파 판매 중' });
   expect(toggle).toHaveAttribute('aria-checked', 'true');
-  expect(screen.getByText('단골 수는 예시 값이에요.')).toBeInTheDocument();
+  expect(screen.queryByText('단골 수는 예시 값이에요.')).not.toBeInTheDocument();
   fireEvent.click(toggle);
   await waitFor(() =>
     expect(screen.getByRole('switch', { name: '대파 판매 중' })).toHaveAttribute(
@@ -209,5 +210,27 @@ it('점포 정보에서 결제 수단과 한 줄 소개를 저장한다', async 
     const store = await mock.getStore();
     expect(store.payments).toEqual(['card', 'onnuri']);
     expect(store.intro).toBe('매일 신선하게 준비해요');
+  });
+});
+it('세일 품종을 선택해 저장하고 품목을 바꾸면 선택을 비운다', async () => {
+  await mock.login(mock.demoCredentials());
+  await mock.updateStore({ item_ids: ['item:apple', 'item:onion'] });
+  show('/merchant/sale/new');
+  fireEvent.click(await screen.findByRole('button', { name: '사과' }));
+  fireEvent.click(await screen.findByRole('button', { name: '홍로' }));
+  expect(screen.getByRole('button', { name: '홍로' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: '양파' }));
+  fireEvent.click(await screen.findByRole('button', { name: '사과' }));
+  expect(await screen.findByRole('button', { name: '홍로' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
+  fireEvent.click(screen.getByRole('button', { name: '홍로' }));
+  fireEvent.change(screen.getByLabelText('할인가'), { target: { value: '2300' } });
+  fireEvent.click(screen.getByRole('button', { name: '올리기' }));
+  await screen.findByRole('heading', { name: '진행 중 세일' });
+  expect(mock.sales.at(-1)).toMatchObject({
+    variety_id: 'variety:apple-hongro',
+    variety_name: '홍로',
   });
 });

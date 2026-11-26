@@ -1,0 +1,392 @@
+[
+  {
+    "recipe_id": "recipe:foodsafety-137",
+    "name": "된장 두부찌개",
+    "dish_type": "국&찌개",
+    "cook_method": "끓이기",
+    "kcal": "77.3",
+    "main_item_id": null,
+    "reason": "두부로 만드는 국&찌개",
+    "coverage": {
+      "total": 9,
+      "in_market": 0,
+      "stores": 0
+    },
+    "ingredients": [
+      {
+        "text": "두부 320g(1모)",
+        "item_id": null,
+        "store_category": "반찬",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "쌀뜨물 300g(1½컵)",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      },
+      {
+        "text": "돼지고기 100g",
+        "item_id": null,
+        "store_category": "정육",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "김치 140g",
+        "item_id": null,
+        "store_category": "반찬",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "된장 20g(1½큰술)",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      },
+      {
+        "text": "청양고추 10g(1/2개)",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "홍고추 5g(1/4개)",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "대파 10g(2cm)",
+        "item_id": "item:green_onion",
+        "store_category": null,
+        "role": "부재료",
+        "where": "item",
+        "stores": 0
+      },
+      {
+        "text": "고춧가루 5g(1작은술)",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      }
+    ],
+    "source": {
+      "title": "식품의약품안전처 조리식품 레시피 DB",
+      "publisher": "식품의약품안전처",
+      "url": "https://www.foodsafetykorea.go.kr/api/openApiInfo.do?svc_no=COOKRCP01",
+      "license": "제한 없음"
+    },
+    "steps": "1. 두부에 쌀뜨물을 넣고 갈아준다.\n2. 돼지고기는 썰고 김치는 물에 씻어 양념을 제거하고 3×3cm로 썬다.\n3. 냄비에 돼지고기와 김치를 함께 볶은 후, 망에 거른 된장과 1의 두부, 고춧가루, 청양고추, 홍고추를 넣어 끓이다가 대파를 넣어 완성한다.",
+    "ingredient_lines": [
+      "두부 320g(1모)",
+      "쌀뜨물 300g(1½컵)",
+      "돼지고기 100g",
+      "김치 140g",
+      "된장 20g(1½큰술)",
+      "청양고추 10g(1/2개)",
+      "홍고추 5g(1/4개)",
+      "대파 10g(2cm)",
+      "고춧가루 5g(1작은술)"
+    ]
+  },
+  {
+    "recipe_id": "recipe:foodsafety-138",
+    "name": "부대된장찌개",
+    "dish_type": "국&찌개",
+    "cook_method": "끓이기",
+    "kcal": "72.6",
+    "main_item_id": null,
+    "reason": "다시마로 만드는 국&찌개",
+    "coverage": {
+      "total": 15,
+      "in_market": 0,
+      "stores": 0
+    },
+    "ingredients": [
+      {
+        "text": "다시마 1g",
+        "item_id": null,
+        "store_category": "건어물",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "두부 10g",
+        "item_id": null,
+        "store_category": "반찬",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "떡국 떡 10g",
+        "item_id": null,
+        "store_category": "떡",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "스팸(마일드) 10g",
+        "item_id": null,
+        "store_category": "정육",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "다진 마늘 5g",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "무 20g",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      },
+      {
+        "text": "김치 15g",
+        "item_id": null,
+        "store_category": "반찬",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "소시지 10g(1/2개)",
+        "item_id": null,
+        "store_category": "정육",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "우민찌 5g(1작은술)",
+        "item_id": null,
+        "store_category": "정육",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "양파 5g",
+        "item_id": "item:onion",
+        "store_category": null,
+        "role": "부재료",
+        "where": "item",
+        "stores": 0
+      },
+      {
+        "text": "저염된장 15g(1큰술)",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      },
+      {
+        "text": "베이컨 5g",
+        "item_id": null,
+        "store_category": "정육",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "대파 5g",
+        "item_id": "item:green_onion",
+        "store_category": null,
+        "role": "부재료",
+        "where": "item",
+        "stores": 0
+      },
+      {
+        "text": "청양고추 5g",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "홍고추 1g",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      }
+    ],
+    "source": {
+      "title": "식품의약품안전처 조리식품 레시피 DB",
+      "publisher": "식품의약품안전처",
+      "url": "https://www.foodsafetykorea.go.kr/api/openApiInfo.do?svc_no=COOKRCP01",
+      "license": "제한 없음"
+    },
+    "steps": "1. 김치, 베이컨, 스팸, 소시지, 양파, 두부, 무는 두께 0.5cm로 썬다.\n2. 다시마와 물을 끓여 다시마물을 만든다.\n3. 냄비에 소시지, 베이컨, 두부, 스팸, 무, 우민찌, 김치, 다시마물 300g을 넣어 끓인 후 저염된장, 양파, 대파, 다진 마늘, 떡국 떡을 넣고 재료가 다 익으면 홍고추와 청양고추를 넣어 완성한다.",
+    "ingredient_lines": [
+      "다시마 1g",
+      "두부 10g",
+      "떡국 떡 10g",
+      "스팸(마일드) 10g",
+      "다진 마늘 5g",
+      "무 20g",
+      "김치 15g",
+      "소시지 10g(1/2개)",
+      "우민찌 5g(1작은술)",
+      "양파 5g",
+      "저염된장 15g(1큰술)",
+      "베이컨 5g",
+      "대파 5g",
+      "청양고추 5g",
+      "홍고추 1g"
+    ]
+  },
+  {
+    "recipe_id": "recipe:foodsafety-161",
+    "name": "유자 대구조림",
+    "dish_type": "반찬",
+    "cook_method": "끓이기",
+    "kcal": "84",
+    "main_item_id": null,
+    "reason": "주재료로 만드는 반찬",
+    "coverage": {
+      "total": 11,
+      "in_market": 0,
+      "stores": 0
+    },
+    "ingredients": [
+      {
+        "text": "주재료 : 대구살 120g",
+        "item_id": null,
+        "store_category": "수산",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "홍파프리카 10g(1/10개)",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "황파프리카 10g(1/10개)",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "청파프리카 10g(1/10개)",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "황금팽이버섯 10g",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "미나리 20g",
+        "item_id": null,
+        "store_category": "채소",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "밀가루 25g(2큰술)",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      },
+      {
+        "text": "소스 : 유자청 20g(1⅓큰술)",
+        "item_id": null,
+        "store_category": "과일",
+        "role": "부재료",
+        "where": "category",
+        "stores": 0
+      },
+      {
+        "text": "발사믹식초 10g(2작은술)",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      },
+      {
+        "text": "화이트와인 10g(2작은술)",
+        "item_id": null,
+        "store_category": null,
+        "role": "부재료",
+        "where": "outside",
+        "stores": 0
+      },
+      {
+        "text": "장식 : 대파 30g(1개)",
+        "item_id": "item:green_onion",
+        "store_category": null,
+        "role": "부재료",
+        "where": "item",
+        "stores": 0
+      }
+    ],
+    "source": {
+      "title": "식품의약품안전처 조리식품 레시피 DB",
+      "publisher": "식품의약품안전처",
+      "url": "https://www.foodsafetykorea.go.kr/api/openApiInfo.do?svc_no=COOKRCP01",
+      "license": "제한 없음"
+    },
+    "steps": "1. 발사믹 식초, 화이트와인, 다진 유자청 건더기를 넣고 졸여 소스를 만들고 대구를 손질하여 포를 뜬다.\n2. 대파, 청파프리카, 홍파프리카, 황파프리카를 채 썬다.\n3. 대구포에 밀가루를 묻혀 청파프리카, 홍파프리카, 황파프리카, 황금팽이버섯을 넣고 말아 미나리로 묶어 찐 후 소스를 뿌리고 썬 대파를 올려 완성한다.",
+    "ingredient_lines": [
+      "주재료 : 대구살 120g",
+      "홍파프리카 10g(1/10개)",
+      "황파프리카 10g(1/10개)",
+      "청파프리카 10g(1/10개)",
+      "황금팽이버섯 10g",
+      "미나리 20g",
+      "밀가루 25g(2큰술)",
+      "소스 : 유자청 20g(1⅓큰술)",
+      "발사믹식초 10g(2작은술)",
+      "화이트와인 10g(2작은술)",
+      "장식 : 대파 30g(1개)"
+    ]
+  }
+]

@@ -1,5 +1,6 @@
 // 품목 그림(public/items). 품목 id와 사과 품종 id로 고름. 그림이 없는 품목은 null(연한 면만 둠).
 const items: Record<string, string> = {
+  'item:mandarin': 'mandarin',
   'item:apple': 'apple',
   'item:pear': 'pear',
   'item:sweet_persimmon': 'persimmon',
@@ -7,6 +8,8 @@ const items: Record<string, string> = {
   'item:onion': 'onion',
 };
 const varieties: Record<string, string> = {
+  'variety:mandarin-open': 'mandarin',
+  'variety:mandarin-greenhouse': 'mandarin',
   'variety:apple-fuji': 'apple',
   'variety:apple-hongro': 'apple-hongro',
   'variety:apple-shinano-gold': 'apple-shinano-gold',

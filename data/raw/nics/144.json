@@ -1,0 +1,83 @@
+{
+ "response": {
+  "header": {
+   "resultCode": "200",
+   "resultMsg": "정상"
+  },
+  "body": {
+   "stdInfo": {
+    "fdmtSn": "144",
+    "fdmtNm": "귤",
+    "ctvtIndcDtl": "■ 감귤은 감귤나무아과 중 상록수로서 감귤·금감·탱자나무에 속하는 나무의 열매를 총칭■ 감귤류는 열대, 아열대, 지중해 연안의 세계 100개 이상의 나라에서 약 1,000여 품종 재배 중■ 감귤의 시조(始祖)는 만다린, 시트론, 문단류로 수 세기 전부터 온난한 지역인 인도에서 자생하다가 세계 전역으로 전파■ 세계 여러 지역으로 전파되면서 다양하게 분화된 오렌지와 밀감류는 서로 간의 교잡을 통해 또 다른 품종을 탄생■ 우리나라에서 ‘감귤, 귤’이라 부르는 것은 감귤류 중 만다린 계통의 온주밀감으로 밀감(蜜柑)류의 대표적 품종■ 전 세계에서 사랑받는 과일이자 국내 소비량 제 1위인 감귤은 우리나라 겨울철 대표 과일■ 우리나라의 감귤 증식사업은 65년부터 본격적으로 시작되어 70년대초에 급격히 증가했으며 제주도에서 감귤은 생명산업이라고 불릴 만큼 지역경제의 비중 높은 산업으로 성장",
+    "prchCheatDtl": "■ 구입요령- 껍질이 얇고 껍질과 육질 사이에 공간이 없이 밀착된 것이 좋다- 꼭지부분이 튀어나온 것보다 좌우로 둥글고 납작한 것이 당도가 높다- 감귤의 색깔은 짙은 주황색, 꼭지는 녹색이면서 단단하게 붙어 있는 것이 싱싱하다- 껍질에 지나치게 윤이 나는 것은 인공적으로 숙성시킨 후 코팅한 것이므로 피하는 것이 좋다",
+    "cstdyMthDtl": "■ 보관법- 수분을 제거한 귤은 박스에 신문지와 귤의 순서로 쌓아두고 바람이 잘 드는 서늘한 곳에 보관하는 것이 좋다- 귤이 서로 맞닿지 않게 하나씩 떨어뜨려 보관해야 상하지 않고 오래 보관할 수 있다■ 손질법- 물 1L에 소금 2큰술과 희석시켜 3~5분간 씻은 다음 물기를 제거하면 농약도 없앨 수 있고 신선도를 유지할 수 있다",
+    "etcInfoDtl": "■ 알맹이부터 껍질까지 다양한 생활용품 및 살균제 등의 소재로 활용■ 풍부한 보습효과를 지닌 화장품과 발모제 및 바이오 소재로 사용■ 자연 환경 보전과 아름다운 경관 제공의 다양한 공익적 가치■ 감귤을 소재로 한 지역 축제와 관광산업, 감귤 체험농장 등 문화관광산업 소재로서의 가치(‘제주 감귤축제’는 격년제로 짝수해 거행)"
+   },
+   "ntkInfo": {
+    "ntkMthDtl": "■ 생과 외에도 주스와 과자, 초콜릿, 아이스크림 등 다양한 가공식품의 원료로 활용",
+    "ntrIrdntEfcyDtl": "■ 비타민의 보고로 알려진 감귤류는 전세계 인류의 건강을 책임지는 영양 과일이자 천연 건강식품■ 감귤에는 비타민C가 풍부하여 하늘이 내린 종합 감기약으로도 불리며 감귤 두 개면 성인의 하루 비타민C 요구량을 충족■ 과일 중 감귤에만 들어 있는 비타민P는 모세혈관을 튼튼하게 해주고 혈액순환을 촉진하여 뇌졸중, 고혈압, 동맥경화에 효과■ 감귤 색소에 포함된 베타카로틴은 항암 및 성인병 억제 등의 효과를 지니며 체내로 흡수되면 비타민A로 변함■ 감귤은 특히 껍질에 많은 영양소가 함유되어 한의학에서는 ‘진피(陳皮)’라는 약재로 활용■ 귤껍질 안쪽의 흰 부분과 알맹이를 싸고 있는 속껍질에는 식이섬유인 펙틴 성분이 다량 함유되어 변비 해소와 설사 억제 효과가 있으며 포만감을 느끼게 해 식품 섭취량 조절에도 효과적",
+    "rltRsrchInfoDtl": "■ 감귤의 발효와 발효산물의 기능적 특성 문상욱, 강신해, 진영준, 박지권, 이영돈, 이영기, 박덕배, 김세재. 한국식품과학회지 제36권 제4호, 2004.- 젖산균과 효모에 의해 발효 처리한 감귤의 기능적 특성을 파악하고자 함- 발효감귤 추출물의 항산화도는 발효하지 않은 감귤 추출물과 비교할 때 뚜렷하게 증가- 또한, 대조구와 비교할 때 발효처리한 감귤 추출물에서 플라보노이드 조성변화가 나타났으며, 각각 naringenin, hesperetin의 농도가 증가- 감귤은 발효처리와 상관없이 HepG2 세포의 세포사멸 보호효과를 나타냈으나, 발효처리구에서 세포사멸 보호효과와 ROS(Reactive oxygen species) 생성 감소효과가 더욱 차별적으로 나타남- 수컷의 Sprague-Dawley rat에 감귤 추출물과 발효감귤 추출물을 경구 투여했더니 체중은 다른 실험군에 비해 발효감귤 추출물의 고농도 투여(100 mg/kg 체중)에서 유의적으로 감소하였고 혈장 콜레스테롤 함량은 다소 감소하였으나 다른 실험구에 비하여 유의적인 차이는 없음- 고지방 식이에 의해 유도된 지방간 형성은 발효 감귤 추출물 투여에 의해 유의하게 감소- 본 연구 결과로 발효 감귤 추출물은 세포수준에서 감귤추출물에 비해 증강된 세포 사멸 보호효과와 항산화 효과를 나타내며, 동물실험에서는 고지방 식이에 의해 유도된 지방간 형성을 저해하는 효과를 보임■ 추출방법에 따른 감귤과피 추출물의 항균효과 장세영, 최현경, 하나영, 김옥미, 정용진. 한국식품저장유통학회지 제11권 제3호, 2004.- 감귤과피의 열수, 에탄올 및 설탕 추출방법에 따른 항균활성을 비교 조사함¶- 그 결과 감귤껍질의 열수 및 에탄올 추출물에서는 항균활성이 나타나지 않았으나, 설탕추출물에서는 높은 항균활성을 나타냄- 10%(w/v) 설탕용액에서 9일간 추출했을 때 8종의 균주 모두 항균활성이 가장 높았음- 또한 최소저해농도는 S. aureus에서 0.5%(v/v), B. subtilis, M. luteus 및 E. coli는 1.5%(viv), S. mutans는 각각 2.0%(v/v)로 나타남- 감귤 껍질 추출물은 40~100°C, 1시간 처리범위에서 항균성은 매우 안정적이었으나, pH의 변화에서는 불안정하게 나타남- 이상의 결과로 감귤껍질 추출물은 열안정성이 높은 항균성 소재로 개발이 기대됨",
+    "cnsmpqyDtl": "■ 감귤은 수익성이 좋아 ’98년까지 재배면적이 지속적으로 증가하여 남국(南國)을 대표하는 이미지의 하나로까지 확대되면서 초고속 성장세를 보였으나 최근 들어 수입개방 등으로 대체과일이 늘어남에 따라 감귤의 과잉생산 문제가 대두되어 소비자의 관심이 필요 *생산액(억원) : (’80)545→(’96)6,079→(’02)3,164→(’10)6,684"
+   },
+   "connRecipeList": {
+    "recipeInfo": [
+     {
+      "recipeSn": "32",
+      "recipeNm": "멸치귤피튀김",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002521&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "33",
+      "recipeNm": "매콤한 귤피쇠고기볶음",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002523&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "34",
+      "recipeNm": "삼치스테이크",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002525&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "38",
+      "recipeNm": "귤백김치",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002533&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "47",
+      "recipeNm": "귤전",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002551&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "48",
+      "recipeNm": "귤소스샐러드",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002553&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "49",
+      "recipeNm": "귤소스 & 생선스테이크",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002555&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "50",
+      "recipeNm": "귤 프리저브",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000002557&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "577",
+      "recipeNm": "귤라이스페이퍼쌈",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000003583&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "580",
+      "recipeNm": "귤젤리",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000003589&atchmnflSn=0"
+     },
+     {
+      "recipeSn": "581",
+      "recipeNm": "귤껍질채소튀김",
+      "recipeImgUrl": "https://www.nics.go.kr/food/bsFileDownload.do?atchmnflGroupEsntlCode=KF000000003591&atchmnflSn=0"
+     }
+    ]
+   }
+  }
+ }
+}

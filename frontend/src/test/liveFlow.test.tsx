@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import { getMarket, getMarkets } from '../api/markets';
 import { recognize } from '../api/scan';
-import { getPrice } from '../api/price';
+import { getPrice, getPriceHistory } from '../api/price';
 import { postPriceReport } from '../api/priceReports';
 import * as mock from '../api/mock';
 vi.mock('../api/markets', () => ({
@@ -15,7 +15,7 @@ vi.mock('../api/markets', () => ({
   getMarketItems: vi.fn(() => Promise.resolve([])),
 }));
 vi.mock('../api/scan', () => ({ recognize: vi.fn() }));
-// live처럼: 최근 4주 시세는 백엔드에 없어 null
+// live 응답의 빈 시세는 숨긴다.
 vi.mock('../api/price', () => ({ getPrice: vi.fn(), getPriceHistory: vi.fn(async () => null) }));
 vi.mock('../api/priceReports', () => ({ postPriceReport: vi.fn() }));
 const market = {
@@ -38,7 +38,8 @@ beforeEach(() => {
   vi.mocked(getMarkets).mockReset().mockResolvedValue([market]);
   vi.mocked(getMarket).mockReset().mockResolvedValue(market);
   vi.mocked(getPrice).mockImplementation(mock.price);
-  vi.mocked(postPriceReport).mockReset().mockResolvedValue({ id: 1, updated: false });
+  vi.mocked(getPriceHistory).mockReset().mockResolvedValue(null);
+  vi.mocked(postPriceReport).mockReset().mockResolvedValue({ id: 1, updated: false, held: false });
   vi.mocked(recognize).mockReset();
   Object.defineProperty(navigator, 'geolocation', { configurable: true, value: undefined });
 });
@@ -375,4 +376,37 @@ it('판매 점포는 5곳부터 펼치고 추정 품목을 표시한다', async 
   } finally {
     spy.mockRestore();
   }
+});
+
+it('서버 품종 설명·수확 시기·최근 4주 그래프를 결과에 표시한다', async () => {
+  vi.mocked(getPriceHistory).mockResolvedValue({
+    item_id: 'item:apple',
+    variety_id: 'variety:apple-fuji',
+    unit: 'unit:piece',
+    source: 'aT 주별 평균',
+    points: [
+      { week_start: '2026-11-02', price: 3000 },
+      { week_start: '2026-11-09', price: null },
+      { week_start: '2026-11-16', price: 3200 },
+      { week_start: '2026-11-23', price: 3100 },
+    ],
+  });
+  show('/items/item:apple?market=market:demo', { price: 2300, quantity: 1 });
+  expect(
+    await screen.findByText(/완전히 익으면 과육 속에 꿀이 생기고 저장성이 좋아요/),
+  ).toBeInTheDocument();
+  expect(screen.getByText('수확 시기 · 10월 하순 이후')).toBeInTheDocument();
+  expect(await screen.findByText('aT 주별 평균')).toBeInTheDocument();
+  expect(getPriceHistory).toHaveBeenCalledWith(
+    'item:apple',
+    'variety:apple-fuji',
+    'each',
+    'market:demo',
+  );
+});
+
+it('보류된 제보는 기준시세 차이 안내를 표시한다', async () => {
+  vi.mocked(postPriceReport).mockResolvedValue({ id: 1, updated: false, held: true });
+  show('/items/item:green_onion?market=market:demo', { price: 3000, method: 'manual' });
+  expect(await screen.findByText('기준시세와 차이가 커서 확인 후 반영돼요')).toBeInTheDocument();
 });

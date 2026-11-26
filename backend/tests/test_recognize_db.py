@@ -7,12 +7,13 @@ import pytest
 from fastapi.testclient import TestClient
 from psycopg import Rollback
 
+from app.clients import vision
 from app.core.config import settings
 from app.db.repositories import knowledge_repo, media_repo
 from app.deps import get_db
 from app.knowledge.ontology import match_vision_labels
-from app.llm import router
 from app.main import app
+from app.services import vision_usage
 from scripts.load_ontology import load_ontology
 from scripts.load_sources import load_sources
 from tests.test_ingest_db import db as database_fixture
@@ -43,9 +44,11 @@ def test_recognition_sql_and_media(db, monkeypatch, tmp_path):
         assert {r['item_id'] for r in result[1:]} == {'item:test-similar', 'item:test-substitute'}
         assert all(r['confidence'] == 0.6 for r in result[1:])
         monkeypatch.setattr(settings, 'MEDIA_DIR', tmp_path)
-        monkeypatch.setattr(settings, 'OLLAMA_BASE_URL', 'http://offline.invalid')
-        provider = type('Provider', (), {'generate': lambda *a, **k: '{"labels": ["scallion"]}'})()
-        monkeypatch.setattr(router, '_provider', lambda name: provider)
+        monkeypatch.setattr(settings, 'GOOGLE_VISION_API_KEY', 'test-vision')
+        monkeypatch.setattr(
+            vision, 'annotate', lambda image: {'labels': [('Scallion', 0.9)], 'text': ''}
+        )
+        monkeypatch.setattr(vision_usage, 'take', lambda: None)
         app.dependency_overrides[get_db] = lambda: db
         try:
             with TestClient(app) as client:
@@ -70,33 +73,67 @@ def test_recognition_sql_and_media(db, monkeypatch, tmp_path):
         raise Rollback()
 
 
-@pytest.mark.skipif(os.getenv('RUN_OLLAMA_TESTS') != '1', reason='RUN_OLLAMA_TESTS=1 required')
-def test_real_ollama_photos(db, monkeypatch, tmp_path):
+@pytest.mark.skipif(os.getenv('RUN_VISION_TESTS') != '1', reason='RUN_VISION_TESTS=1 required')
+def test_real_vision_photos(db, monkeypatch, tmp_path):
+    """실제 구글 비전으로 사진 폴더를 돌려 보고, 응답을 픽스처로 저장해요 (지시서 1-2).
+
+    RUN_VISION_TESTS=1 RECOGNIZE_SAMPLE_DIR=사진폴더 python -m pytest tests/test_recognize_db.py -k real
+    결과: tests/fixtures/vision/<사진이름>.json (라벨·글자만, 사진·키는 저장하지 않음)
+    """
+    import json
+
     sample_dir = os.getenv('RECOGNIZE_SAMPLE_DIR')
     assert sample_dir, 'RECOGNIZE_SAMPLE_DIR is required'
-    samples = [
+    samples = sorted(
         p
         for p in Path(sample_dir).iterdir()
         if p.suffix.lower() in ('.jpg', '.jpeg', '.png', '.webp')
-    ]
+    )
     assert samples, 'No sample photos found'
+    out = Path(__file__).with_name('fixtures') / 'vision'
+    out.mkdir(parents=True, exist_ok=True)
     data = Path(__file__).resolve().parents[2] / 'data'
+    rows = []
     with db.transaction():
         load_sources(db, data / 'sources.yaml')
         load_ontology(db, data / 'ontology')
-        monkeypatch.setattr(settings, 'LLM_PROVIDER', 'gemma')
         monkeypatch.setattr(settings, 'MEDIA_DIR', tmp_path)
+        real = vision.annotate
+        captured = {}
+
+        def keep(image):
+            captured['last'] = real(image)
+            return captured['last']
+
+        monkeypatch.setattr(vision, 'annotate', keep)
         app.dependency_overrides[get_db] = lambda: db
         try:
             with TestClient(app) as client:
                 for path in samples:
+                    captured.clear()
                     response = client.post(
                         '/recognize', files={'photo': (path.name, path.read_bytes())}
                     )
                     assert response.status_code == 200, response.text
-                    assert response.json()['candidates'], path.name
+                    body = response.json()
+                    result = captured.get('last') or {'labels': [], 'text': ''}
+                    (out / f'{path.stem}.json').write_text(
+                        json.dumps(
+                            {'labels': result['labels'], 'text': result['text']},
+                            ensure_ascii=False,
+                            indent=2,
+                        ),
+                        encoding='utf-8',
+                    )
+                    top = body['candidates'][0]['name'] if body['candidates'] else '-'
+                    rows.append(
+                        f'| {path.name} | {", ".join(body["vision_labels"])} | {top} | '
+                        f'{body["price_tag"]} |'
+                    )
         finally:
             app.dependency_overrides.pop(get_db, None)
+        print('\n| 사진 | 비전 라벨(앞 3개) | 1순위 후보 | 가격표 |\n|---|---|---|---|')
+        print('\n'.join(rows))
         raise Rollback()
 
 
@@ -132,7 +169,8 @@ def test_llm_call_metadata(db):
     with db.transaction():
         insert(
             db,
-            task='recognize',
+            task='ask',
+            role='write',
             provider='openai',
             model='openai:test',
             ms=123,
@@ -141,9 +179,9 @@ def test_llm_call_metadata(db):
             ok=True,
         )
         row = db.execute(
-            'select task, provider, model, ms, escalated, reason, ok, created_at '
+            'select task, provider, model, ms, escalated, reason, ok, created_at, role '
             'from llm_calls order by id desc limit 1'
         ).fetchone()
-        assert row[:7] == ('recognize', 'openai', 'openai:test', 123, True, 'unknown_item', True)
-        assert row[7] is not None
+        assert row[:7] == ('ask', 'openai', 'openai:test', 123, True, 'unknown_item', True)
+        assert row[7] is not None and row[8] == 'write'
         raise Rollback()

@@ -45,6 +45,8 @@ def record_view(conn, sale_id):
 
 def closing_sale(s):
     result = {k: s[k] for k in ('id', 'store_id', 'item_id', 'sale_price', 'starts_at', 'ends_at')}
+    result['variety_id'] = s.get('variety_id')
+    result['variety_name'] = s.get('variety_name')
     result['status'] = 'ended' if s['ends_at'] < now() else s['status']
     result['view_count'] = s.get('views', 0)
     for key in ('regular_price', 'unit_id'):

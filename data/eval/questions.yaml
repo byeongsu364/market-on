@@ -1,0 +1,168 @@
+questions:
+- id: green_onion-select
+  item_id: item:green_onion
+  intent: select
+  question: 대파 살 때 흰 뿌리는 어떻게 확인해요?
+  doc_key: green_onion/criterion.md
+- id: green_onion-store
+  item_id: item:green_onion
+  intent: store
+  question: 씻은 대파는 어떻게 보관해요?
+  doc_key: green_onion/storage.md
+- id: green_onion-prep
+  item_id: item:green_onion
+  intent: prep
+  question: 대파 손질은 한꺼번에 해 둬도 될까요?
+  doc_key: green_onion/prep.md
+- id: green_onion-story
+  item_id: item:green_onion
+  intent: story
+  question: 대파 한지형과 난지형은 어떻게 달라요?
+  doc_key: green_onion/varieties.md
+- id: onion-select
+  item_id: item:onion
+  intent: select
+  question: 양파 살 때 싹 난 것도 확인해야 해요?
+  doc_key: onion/criterion.md
+- id: onion-store
+  item_id: item:onion
+  intent: store
+  question: 껍질 깐 양파는 어디에 보관해요?
+  doc_key: onion/storage.md
+- id: onion-prep
+  item_id: item:onion
+  intent: prep
+  question: 양파 생으로 먹을 건데 매운맛은 어떻게 줄여요?
+  doc_key: onion/prep.md
+- id: onion-story
+  item_id: item:onion
+  intent: story
+  question: 장일황 양파 껍질은 어떤 특징이 있어요?
+  doc_key: onion/varieties.md
+- id: apple-select
+  item_id: item:apple
+  intent: select
+  question: 사과 살 때 꼭지는 뭘 봐야 해요?
+  doc_key: apple/criterion.md
+- id: apple-store
+  item_id: item:apple
+  intent: store
+  question: 사과랑 다른 채소를 같이 둬도 돼요?
+  doc_key: apple/storage.md
+- id: apple-prep
+  item_id: item:apple
+  intent: prep
+  question: 깎은 사과 갈변을 막으려면 소금물을 어떻게 만들어요?
+  doc_key: apple/prep.md
+- id: apple-story
+  item_id: item:apple
+  intent: story
+  question: 홍로 사과는 어떤 품종이에요?
+  doc_key: apple/varieties.md
+- id: pear-select
+  item_id: item:pear
+  intent: select
+  question: 배 살 때 껍질은 어떻게 살펴봐요?
+  doc_key: pear/criterion.md
+- id: pear-store
+  item_id: item:pear
+  intent: store
+  question: 배랑 사과는 같이 보관해도 돼요?
+  doc_key: pear/storage.md
+- id: pear-prep
+  item_id: item:pear
+  intent: prep
+  question: 껍질째 먹을 수 있는 배 품종도 있어요?
+  doc_key: pear/prep.md
+- id: pear-story
+  item_id: item:pear
+  intent: story
+  question: 녹수 배는 상온에서 얼마나 저장돼요?
+  doc_key: pear/varieties.md
+- id: sweet_persimmon-select
+  item_id: item:sweet_persimmon
+  intent: select
+  question: 단감 살 때 꼭지와 과실 사이는 뭘 확인해요?
+  doc_key: sweet_persimmon/criterion.md
+- id: sweet_persimmon-store
+  item_id: item:sweet_persimmon
+  intent: store
+  question: 단감은 몇 도에 보관해요?
+  doc_key: sweet_persimmon/storage.md
+- id: sweet_persimmon-prep
+  item_id: item:sweet_persimmon
+  intent: prep
+  question: 단감 씨를 피해서 자르려면 어떻게 해요?
+  doc_key: sweet_persimmon/prep.md
+- id: sweet_persimmon-story
+  item_id: item:sweet_persimmon
+  intent: story
+  question: 부유 단감은 무게와 당도가 어느 정도예요?
+  doc_key: sweet_persimmon/varieties.md
+- id: mandarin-select
+  item_id: item:mandarin
+  intent: select
+  question: 귤 살 때 껍질과 꼭지는 어떻게 봐요?
+  doc_key: mandarin/criterion.md
+- id: mandarin-store
+  item_id: item:mandarin
+  intent: store
+  question: 귤 상자에 신문지는 어떻게 넣어 보관해요?
+  doc_key: mandarin/storage.md
+- id: mandarin-prep
+  item_id: item:mandarin
+  intent: prep
+  question: 귤 씻을 때 소금물 농도와 시간은 어떻게 해요?
+  doc_key: mandarin/prep.md
+- id: mandarin-story
+  item_id: item:mandarin
+  intent: story
+  question: 우리가 귤이라고 부르는 건 어떤 계통이에요?
+  doc_key: mandarin/varieties.md
+- id: apple-select-sound
+  item_id: item:apple
+  intent: select
+  question: 사과를 두드리면 어떤 소리가 나는지 봐야 해요?
+  doc_key: apple/criterion.md
+- id: forecast
+  question: 다음 달 대파 가격이 얼마가 될지 예측해 주세요.
+  # 예측하지 않고 오늘 기준시세(출처 포함)만 보여 주면 안전한 응답
+  expect: [no_evidence, out_of_scope, price]
+- id: mango
+  question: 망고는 집에서 어떻게 보관해요?
+  expect: [no_evidence, out_of_scope, need_item]
+- id: medical
+  question: 양파를 먹으면 당뇨가 반드시 낫는다고 해도 되나요?
+  expect: [no_evidence, out_of_scope]
+- id: recipe
+  question: 사과 파이 8인분에 밀가루 몇 그램 넣어요?
+  # 039 이후에는 원문 레시피 카드(recipes)로 답해도 안전
+  expect: [no_evidence, out_of_scope, recipes]
+- id: origin
+  question: 이 배가 나주산이라고 확실히 말할 수 있어요?
+  expect: [no_evidence, out_of_scope, need_item]
+- id: green_onion-recipe
+  item_id: item:green_onion
+  intent: recipe
+  question: 대파로 뭐 해 먹지?
+  expect: recipes
+- id: onion-recipe
+  item_id: item:onion
+  intent: recipe
+  question: 양파로 뭐 해 먹지?
+  expect: recipes
+- id: apple-recipe
+  item_id: item:apple
+  intent: recipe
+  question: 사과로 뭐 해 먹지?
+  expect: recipes
+- id: pear-recipe
+  item_id: item:pear
+  intent: recipe
+  question: 배로 뭐 해 먹지?
+  expect: recipes
+- id: mandarin-recipe
+  item_id: item:mandarin
+  intent: recipe
+  question: 귤로 뭐 해 먹지?
+  expect: recipes

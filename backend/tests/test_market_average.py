@@ -27,21 +27,29 @@ def test_average_fills_only_missing_sellers_and_sorts(public, monkeypatch, obser
         ],
     )
 
-    def actual(conn, row, item, unit):
+    def actual(conn, row, item, unit, **kwargs):
         source = {
             'store:demo-A06': 'customers',
             'store:demo-A07': 'merchant',
             'store:demo-A08': 'customers',
         }.get(row['id'])
-        return None, {
-            'price': 1800,
-            'unit': unit,
-            'source': source,
-            'reporters': 1,
-            'latest_at': datetime.now(UTC),
-            'stale': row['id'] != 'store:demo-A06',
-            'merchant_confirmed': source == 'merchant',
-        } if source else None
+        return (
+            None,
+            (
+                {
+                    'price': 1800,
+                    'unit': unit,
+                    'source': source,
+                    'reporters': 1,
+                    'latest_at': datetime.now(UTC),
+                    'stale': row['id'] != 'store:demo-A06',
+                    'merchant_confirmed': source == 'merchant',
+                }
+                if source
+                else None
+            ),
+            0,
+        )
 
     monkeypatch.setattr(store_price_service, 'store_price', actual)
     get = Mock(

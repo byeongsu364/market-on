@@ -113,3 +113,11 @@ src:foodsafety-cookrcp01:
   license: 공공데이터포털 이용허락범위 제한 없음
   kind: public_api
   retrieved_at: 2026-11-26
+# fdmtSn 144
+src:nics-month-food-mandarin:
+  title: 농식품 이달의 식재료 - 귤
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27

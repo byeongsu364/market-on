@@ -13,6 +13,7 @@ export type Criterion = {
   source: string;
 };
 export type Item = {
+  variety_id?: string | null;
   item_id: string;
   name: string;
   synonyms: string[];
@@ -96,6 +97,7 @@ export type Store = {
   items_basis: 'merchant' | 'sbiz_guess' | 'mixed';
   guessed_item_ids: string[];
   price: StorePrice;
+  pending_reporters?: number;
   store_id: string;
   name: string;
   zone_id: string;
@@ -168,6 +170,7 @@ export type AuthRequest = {
 };
 export type Captcha = { captcha_id: string; image: string; expires_in: number };
 export type SaleRequest = {
+  variety_id?: string | null;
   item_id: string;
   sale_price: number;
   regular_price?: number;
@@ -175,6 +178,7 @@ export type SaleRequest = {
   ends_at: string;
 };
 export type ClosingSale = SaleRequest & {
+  variety_name?: string | null;
   id: number;
   store_id: string;
   starts_at: string;
@@ -183,6 +187,7 @@ export type ClosingSale = SaleRequest & {
 };
 export type ActiveSale = ClosingSale & { store_name: string; item_name: string };
 export type MerchantStore = {
+  varieties?: Record<string, string[]>;
   payments?: PaymentMethod[];
   intro?: string | null;
   location?: LatLng | null;
@@ -216,7 +221,7 @@ export type PriceReportRequest = {
   method: 'price_tag_photo' | 'manual';
   media_id?: string;
 };
-export type PriceReportResponse = { id: number; updated: boolean };
+export type PriceReportResponse = { id: number; updated: boolean; held: boolean };
 
 export type StorePrice = {
   price: number;
@@ -284,7 +289,8 @@ export type MarketApplication = {
   demand: MarketDemand;
 };
 
-export type AskIntent = 'select' | 'store' | 'prep' | 'season' | 'story' | 'price' | 'where';
+export type AskIntent =
+  'select' | 'store' | 'prep' | 'season' | 'story' | 'price' | 'where' | 'recipe';
 export type AskRequest = {
   question?: string;
   intent?: AskIntent;
@@ -301,18 +307,21 @@ export type Citation = {
 };
 export type PriceView = Price;
 export type AskResponse = {
-  kind: 'answer' | 'no_evidence' | 'need_item' | 'price' | 'where' | 'out_of_scope';
+  kind: 'answer' | 'no_evidence' | 'need_item' | 'price' | 'where' | 'recipes' | 'out_of_scope';
   intent: AskIntent | null;
   item_id: string | null;
   item_name: string | null;
   answer: string | null;
   citations: Citation[];
+  recipes?: Recipe[];
   candidates?: { item_id: string; name: string }[];
   price?: PriceView;
   stores?: { store_id: string; name: string }[];
   model: string | null;
   cached: boolean;
   removed: number;
+  // 040: 서버가 실제로 거친 단계 (search·extract·write·check)
+  steps?: string[];
 };
 
 // 도우미 메시지는 서버가 준 reply_sig를 sig로 그대로 돌려줘요 (없으면 서버가 그 메시지를 빼요)
@@ -326,6 +335,8 @@ export type ChatResponse = {
   model: string | null;
   removed: number;
   reply_sig?: string | null;
+  // 040: 서버가 실제로 거친 단계 (plan·tools·write·check)
+  steps?: string[];
 };
 
 export type MarketItem = { item_id: string; name: string; store_count: number };
@@ -356,7 +367,7 @@ export type StoreExtra = {
   lng?: number | null;
   category?:
     | StoreCategory
-    | `store_category:${'produce' | 'dried' | 'seafood' | 'side_dish' | 'meat' | 'snack'}`
+    | `store_category:${'produce' | 'fruit' | 'vegetable' | 'dried' | 'seafood' | 'side_dish' | 'meat' | 'snack'}`
     | null;
   naver_name?: string;
   verified?: boolean;
@@ -375,6 +386,7 @@ export type StoreExtra = {
 };
 export type VarietyHarvest = { label: string; from?: string; to?: string };
 export type VarietyExtra = {
+  synonyms?: string[];
   description?: string | null;
   description_source?: string | null;
   harvest?: VarietyHarvest | null;
@@ -409,3 +421,59 @@ export type StoreReview = {
 };
 export type StoreReviews = { average: number | null; count: number; items: StoreReview[] };
 export type ReviewWrite = { rating: number; body: string };
+
+export type MerchantStats = {
+  today: { views: number; directions: number };
+  days: { day: string; views: number; directions: number }[];
+  favorites: null;
+};
+export type MarketAdminStats = {
+  stores: number;
+  merchants_approved: number;
+  merchants_pending: number;
+  views_week: number;
+  recent: {
+    user_id: string;
+    login_id: string;
+    store_id: string;
+    store_name: string;
+    last_sale_at: string | null;
+    sales_week: number;
+  }[];
+};
+export type ListedMarketStats = {
+  market_id: string;
+  name: string;
+  requests_week: number;
+  requests_total: number;
+  application: Pick<MarketApplication, 'status' | 'created_at'> | null;
+};
+export type ActiveMarketStats = {
+  market_id: string;
+  name: string;
+  stores: number;
+  merchants_approved: number;
+  views_week: number;
+};
+
+export type RecipeIngredient = {
+  text: string;
+  item_id: string | null;
+  store_category: string | null;
+  role: '주재료' | '부재료';
+  where: 'item' | 'category' | 'outside';
+  stores: number;
+};
+export type Recipe = {
+  recipe_id: string;
+  name: string;
+  dish_type: string;
+  cook_method: string;
+  kcal: string | null;
+  main_item_id: string | null;
+  reason: string;
+  coverage: { total: number; in_market: number; stores: number };
+  ingredients: RecipeIngredient[];
+  source: Omit<Citation, 'draft'>;
+};
+export type RecipeDetail = Recipe & { steps: string; ingredient_lines: string[] };

@@ -1,0 +1,415 @@
+entities:
+- id: recipe:foodsafety-32
+  type: recipe
+  name_ko: 순두부 사과 소스 오이무침
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '75'
+    doc_key: recipes/foodsafety-32.md
+- id: recipe:foodsafety-33
+  type: recipe
+  name_ko: 사과 새우 북엇국
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 국&찌개
+    cook_method: 끓이기
+    kcal: '65'
+    doc_key: recipes/foodsafety-33.md
+- id: recipe:foodsafety-150
+  type: recipe
+  name_ko: 감귤 김치
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '21.2'
+    doc_key: recipes/foodsafety-150.md
+- id: recipe:foodsafety-261
+  type: recipe
+  name_ko: 타콤소스닭조림
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 끓이기
+    kcal: '302.9'
+    doc_key: recipes/foodsafety-261.md
+- id: recipe:foodsafety-268
+  type: recipe
+  name_ko: 토마토돼지고기해장국
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 국&찌개
+    cook_method: 끓이기
+    kcal: '171.1'
+    doc_key: recipes/foodsafety-268.md
+- id: recipe:foodsafety-306
+  type: recipe
+  name_ko: 오색볶음면
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 일품
+    cook_method: 볶기
+    kcal: '466.8'
+    doc_key: recipes/foodsafety-306.md
+- id: recipe:foodsafety-360
+  type: recipe
+  name_ko: 비트양파김치
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '28'
+    doc_key: recipes/foodsafety-360.md
+- id: recipe:foodsafety-388
+  type: recipe
+  name_ko: 배숙구이
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 후식
+    cook_method: 굽기
+    kcal: '196.3'
+    doc_key: recipes/foodsafety-388.md
+- id: recipe:foodsafety-422
+  type: recipe
+  name_ko: 사과장아찌
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '291.2'
+    doc_key: recipes/foodsafety-422.md
+- id: recipe:foodsafety-479
+  type: recipe
+  name_ko: 밥크로켓
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 밥
+    cook_method: 튀기기
+    kcal: '731.8'
+    doc_key: recipes/foodsafety-479.md
+- id: recipe:foodsafety-483
+  type: recipe
+  name_ko: 과일겉절이
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '227.6'
+    doc_key: recipes/foodsafety-483.md
+- id: recipe:foodsafety-597
+  type: recipe
+  name_ko: 배차와 주악
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 후식
+    cook_method: 끓이기
+    kcal: '246.8'
+    doc_key: recipes/foodsafety-597.md
+- id: recipe:foodsafety-718
+  type: recipe
+  name_ko: 사과소스폭찹
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 굽기
+    kcal: '184.2'
+    doc_key: recipes/foodsafety-718.md
+- id: recipe:foodsafety-853
+  type: recipe
+  name_ko: 등심 배구이
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 굽기
+    kcal: '97.2'
+    doc_key: recipes/foodsafety-853.md
+- id: recipe:foodsafety-923
+  type: recipe
+  name_ko: 시금치 배 미음
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 밥
+    cook_method: 끓이기
+    kcal: '137'
+    doc_key: recipes/foodsafety-923.md
+- id: recipe:foodsafety-1129
+  type: recipe
+  name_ko: 와인배숙
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 후식
+    cook_method: 기타
+    kcal: '107.5'
+    doc_key: recipes/foodsafety-1129.md
+- id: recipe:foodsafety-2953
+  type: recipe
+  name_ko: 제주도 빙떡, 귤간장소스
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '94.02'
+    doc_key: recipes/foodsafety-2953.md
+- id: recipe:foodsafety-3089
+  type: recipe
+  name_ko: 고사리파전&단감전
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 굽기
+    kcal: '423.3'
+    doc_key: recipes/foodsafety-3089.md
+- id: recipe:foodsafety-3172
+  type: recipe
+  name_ko: 단감피클
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '148.51'
+    doc_key: recipes/foodsafety-3172.md
+- id: recipe:foodsafety-3175
+  type: recipe
+  name_ko: 감귤콩샐러드
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 반찬
+    cook_method: 기타
+    kcal: '145.7'
+    doc_key: recipes/foodsafety-3175.md
+- id: recipe:foodsafety-3285
+  type: recipe
+  name_ko: 시금치 후무스
+  source: src:foodsafety-cookrcp01
+  attrs:
+    dish_type: 기타
+    cook_method: 끓이기
+    kcal: '195.8'
+    doc_key: recipes/foodsafety-3285.md
+relations:
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-32
+  props:
+    role: 주재료
+    amount_text: 사과 50g(1/3개)
+  source: src:foodsafety-cookrcp01
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-33
+  props:
+    role: 주재료
+    amount_text: 사과 30g(1/5개)
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-33
+  props:
+    role: 부재료
+    amount_text: 양파 40g(1/4개)
+  source: src:foodsafety-cookrcp01
+- s: item:mandarin
+  p: usedIn
+  o: recipe:foodsafety-150
+  props:
+    role: 주재료
+    amount_text: 귤 100g(1개)
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-261
+  props:
+    role: 주재료
+    amount_text: 재료 양파(80g)
+  source: src:foodsafety-cookrcp01
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-261
+  props:
+    role: 부재료
+    amount_text: 사과(30g)
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-268
+  props:
+    role: 주재료
+    amount_text: 재료 양파(40g)
+  source: src:foodsafety-cookrcp01
+- s: item:green_onion
+  p: usedIn
+  o: recipe:foodsafety-268
+  props:
+    role: 부재료
+    amount_text: 다시마(3g) 대파(10g)
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-268
+  props:
+    role: 주재료
+    amount_text: 양파(30g)
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-306
+  props:
+    role: 주재료
+    amount_text: 재료 양파(40g)
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-360
+  props:
+    role: 주재료
+    amount_text: 양파 150g
+  source: src:foodsafety-cookrcp01
+- s: item:pear
+  p: usedIn
+  o: recipe:foodsafety-388
+  props:
+    role: 주재료
+    amount_text: 배 750g
+  source: src:foodsafety-cookrcp01
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-422
+  props:
+    role: 주재료
+    amount_text: 풋사과 200g
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-422
+  props:
+    role: 부재료
+    amount_text: 양파 80g
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-479
+  props:
+    role: 주재료
+    amount_text: 양파(20g)
+  source: src:foodsafety-cookrcp01
+- s: item:green_onion
+  p: usedIn
+  o: recipe:foodsafety-479
+  props:
+    role: 부재료
+    amount_text: 대파(10g)
+  source: src:foodsafety-cookrcp01
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-483
+  props:
+    role: 주재료
+    amount_text: 사과(50g)
+  source: src:foodsafety-cookrcp01
+- s: item:pear
+  p: usedIn
+  o: recipe:foodsafety-483
+  props:
+    role: 부재료
+    amount_text: 배(30g)
+  source: src:foodsafety-cookrcp01
+- s: item:pear
+  p: usedIn
+  o: recipe:foodsafety-597
+  props:
+    role: 주재료
+    amount_text: 배(1/2개)
+  source: src:foodsafety-cookrcp01
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-718
+  props:
+    role: 주재료
+    amount_text: 사과 50g
+  source: src:foodsafety-cookrcp01
+- s: item:onion
+  p: usedIn
+  o: recipe:foodsafety-718
+  props:
+    role: 부재료
+    amount_text: 양파 25g
+  source: src:foodsafety-cookrcp01
+- s: item:pear
+  p: usedIn
+  o: recipe:foodsafety-853
+  props:
+    role: 주재료
+    amount_text: 배 12g
+  source: src:foodsafety-cookrcp01
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-853
+  props:
+    role: 부재료
+    amount_text: 사과주스 3.8g
+  source: src:foodsafety-cookrcp01
+- s: item:pear
+  p: usedIn
+  o: recipe:foodsafety-923
+  props:
+    role: 주재료
+    amount_text: 배 25g
+  source: src:foodsafety-cookrcp01
+- s: item:pear
+  p: usedIn
+  o: recipe:foodsafety-1129
+  props:
+    role: 주재료
+    amount_text: 배(1/2개)
+  source: src:foodsafety-cookrcp01
+- s: item:apple
+  p: usedIn
+  o: recipe:foodsafety-1129
+  props:
+    role: 부재료
+    amount_text: 사과(1/2개)
+  source: src:foodsafety-cookrcp01
+- s: item:green_onion
+  p: usedIn
+  o: recipe:foodsafety-2953
+  props:
+    role: 부재료
+    amount_text: 다진 파 5g
+  source: src:foodsafety-cookrcp01
+- s: item:mandarin
+  p: usedIn
+  o: recipe:foodsafety-2953
+  props:
+    role: 주재료
+    amount_text: 귤 즙 10g
+  source: src:foodsafety-cookrcp01
+- s: item:sweet_persimmon
+  p: usedIn
+  o: recipe:foodsafety-3089
+  props:
+    role: 주재료
+    amount_text: 단감 13g
+  source: src:foodsafety-cookrcp01
+- s: item:sweet_persimmon
+  p: usedIn
+  o: recipe:foodsafety-3172
+  props:
+    role: 주재료
+    amount_text: 단감 60g
+  source: src:foodsafety-cookrcp01
+- s: item:mandarin
+  p: usedIn
+  o: recipe:foodsafety-3175
+  props:
+    role: 주재료
+    amount_text: 감귤 20g
+  source: src:foodsafety-cookrcp01
+- s: item:green_onion
+  p: usedIn
+  o: recipe:foodsafety-3285
+  props:
+    role: 주재료
+    amount_text: '[ 2인분 ] 대파(15cm)'
+  source: src:foodsafety-cookrcp01

@@ -23,6 +23,7 @@ export default function MarketAdmin() {
   const auth = useAuth();
   const desktop = useIsDesktop();
   const market = useResource(api.getMarket);
+  const stats = useResource(api.getStats);
   const pending = useResource(useCallback(() => api.getMerchants('pending'), []));
   const approved = useResource(useCallback(() => api.getMerchants('approved'), []));
   const marketId = auth.user?.market?.market_id ?? market.data?.market_id ?? '';
@@ -41,6 +42,7 @@ export default function MarketAdmin() {
     pending.retry();
     approved.retry();
     market.retry();
+    stats.retry();
     return true;
   });
   const name = auth.user?.market?.name ?? market.data?.name ?? '';
@@ -184,24 +186,24 @@ export default function MarketAdmin() {
             {t('adminMarketPoster')}
           </ButtonLink>
         </div>
-        <Resource state={market}>
-          {market.data && (
+        <Resource state={stats}>
+          {stats.data && (
             <div className={s.webStats}>
               <Stat
-                value={fill(t('adminCountPlaces'), { n: market.data.stores_total })}
+                value={fill(t('adminCountPlaces'), { n: stats.data.stores })}
                 label={t('adminStores')}
               />
               <Stat
-                value={fill(t('adminCountPeople'), { n: market.data.merchants_approved })}
+                value={fill(t('adminCountPeople'), { n: stats.data.merchants_approved })}
                 label={t('adminMerchantsApproved')}
               />
               <Stat
-                value={fill(t('adminCountPeople'), { n: market.data.merchants_pending })}
+                value={fill(t('adminCountPeople'), { n: stats.data.merchants_pending })}
                 label={t('adminMerchantsPending')}
               />
               <Stat
                 value={fill(t('adminCountTimes'), {
-                  n: market.data.views_7d.toLocaleString('ko-KR'),
+                  n: stats.data.views_week.toLocaleString('ko-KR'),
                 })}
                 label={t('adminViews')}
               />
@@ -210,6 +212,22 @@ export default function MarketAdmin() {
         </Resource>
         <div className={s.cols}>
           <div className={`${s.colMain} ${s.gap36}`}>
+            {stats.data && (
+              <Section title="상인 최근 활동">
+                <DataTable
+                  head={['아이디', '점포', '최근 세일', '최근 7일 세일']}
+                  rows={stats.data.recent.map((r) => ({
+                    key: r.user_id,
+                    cells: [
+                      r.login_id,
+                      r.store_name,
+                      r.last_sale_at ? monthDay(r.last_sale_at) : '—',
+                      r.sales_week,
+                    ],
+                  }))}
+                />
+              </Section>
+            )}
             {tables}
             {action.error && <ErrorBox message={action.error} />}
           </div>

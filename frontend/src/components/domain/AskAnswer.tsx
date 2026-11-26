@@ -1,3 +1,4 @@
+import { RecipeCards } from './Recipes';
 import type { AskResponse } from '../../types/contract';
 import { useT } from '../../i18n';
 import { unitLabel } from '../../utils/convertUnit';
@@ -16,6 +17,7 @@ export default function AskAnswer({
   return (
     <Card as="div" className={s.answer}>
       <h3>{question}</h3>
+      {response.kind === 'recipes' && <RecipeCards recipes={response.recipes ?? []} />}
       {response.kind === 'answer' && (
         <>
           <p>{response.answer}</p>

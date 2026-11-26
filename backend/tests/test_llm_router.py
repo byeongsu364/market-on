@@ -8,7 +8,7 @@ from app.llm import router
 
 @pytest.fixture
 def routing(monkeypatch):
-    monkeypatch.setattr(settings, 'LLM_ROUTES', {'recognize': ['gemma', 'openai']})
+    monkeypatch.setattr(settings, 'LLM_ROUTES', {'write': ['gemma', 'openai']})
     monkeypatch.setattr(settings, 'OPENAI_API_KEY', 'test-secret')
     monkeypatch.setattr(settings, 'OLLAMA_BASE_URL', 'http://offline.invalid')
     monkeypatch.setattr(settings, 'OPENAI_CHAT_MODEL', 'test-model')
@@ -20,7 +20,7 @@ def routing(monkeypatch):
 
 
 def test_first_success(routing):
-    result = router.run('recognize', lambda p: p)
+    result = router.run('write', lambda p: p)
     assert result.value == 'gemma'
     assert result.provider == 'gemma'
     assert not result.escalated and result.reason is None
@@ -33,7 +33,7 @@ def test_error_falls_back(routing):
             raise TimeoutError('offline')
         return 'answer'
 
-    result = router.run('recognize', call)
+    result = router.run('write', call)
     assert (result.value, result.provider, result.model, result.escalated, result.reason) == (
         'answer',
         'openai',
@@ -46,14 +46,14 @@ def test_error_falls_back(routing):
 
 @pytest.mark.parametrize('reason', ['no_labels', 'unknown_item', 'low_confidence'])
 def test_rejection_and_last_value(routing, reason):
-    result = router.run('recognize', lambda p: p, lambda v: reason)
+    result = router.run('write', lambda p: p, lambda v: reason)
     assert result.value == 'openai' and result.escalated and result.reason == reason
 
 
 @pytest.mark.parametrize('missing', ['OPENAI_API_KEY', 'OPENAI_CHAT_MODEL'])
 def test_unconfigured_skip(routing, monkeypatch, missing):
     monkeypatch.setattr(settings, missing, '')
-    result = router.run('recognize', lambda p: p, lambda v: 'unknown_item')
+    result = router.run('write', lambda p: p, lambda v: 'unknown_item')
     assert result.value == 'gemma' and not result.escalated
     routing[0].assert_called_once_with('gemma')
 
@@ -61,7 +61,7 @@ def test_unconfigured_skip(routing, monkeypatch, missing):
 def test_all_fail_last_exception(routing):
     error = RuntimeError('last')
     with pytest.raises(RuntimeError) as caught:
-        router.run('recognize', Mock(side_effect=[ValueError('first'), error]))
+        router.run('write', Mock(side_effect=[ValueError('first'), error]))
     assert caught.value is error
 
 
@@ -71,7 +71,7 @@ def test_deadline(routing, monkeypatch):
     event = Event()
     monkeypatch.setitem(router.PROVIDER_TIMEOUTS, 'gemma', 0.01)
     try:
-        result = router.run('recognize', lambda p: event.wait(1) if p == 'gemma' else 'ok')
+        result = router.run('write', lambda p: event.wait(1) if p == 'gemma' else 'ok')
         assert result.value == 'ok' and result.reason == 'error'
     finally:
         event.set()
@@ -85,9 +85,9 @@ def test_record_failure_is_ignored(monkeypatch):
 
 
 def test_unconfigured_first_is_not_escalation(routing, monkeypatch):
-    monkeypatch.setattr(settings, 'LLM_ROUTES', {'recognize': ['openai', 'gemma']})
+    monkeypatch.setattr(settings, 'LLM_ROUTES', {'write': ['openai', 'gemma']})
     monkeypatch.setattr(settings, 'OPENAI_API_KEY', None)
-    result = router.run('recognize', lambda p: p)
+    result = router.run('write', lambda p: p)
     assert result.provider == 'gemma' and not result.escalated
 
 
@@ -97,7 +97,7 @@ def test_no_configured_providers(routing, monkeypatch):
     monkeypatch.setattr(settings, 'OPENAI_API_KEY', None)
     monkeypatch.setattr(settings, 'OLLAMA_BASE_URL', None)
     with pytest.raises(AppError) as error:
-        router.run('recognize', lambda p: p)
+        router.run('write', lambda p: p)
     assert error.value.code == 'LLM_NOT_CONFIGURED'
     routing[0].assert_not_called()
 
@@ -109,9 +109,18 @@ def test_rejected_value_survives_later_errors(routing):
             raise RuntimeError('insufficient_quota')
         return 'gemma-labels'
 
-    result = router.run('recognize', call, lambda v: 'unknown_item')
+    result = router.run('write', call, lambda v: 'unknown_item')
     assert (result.value, result.provider, result.reason) == (
         'gemma-labels',
         'gemma',
         'unknown_item',
     )
+
+
+def test_role_and_task_are_recorded(routing):
+    """040: llm_calls에 역할(role)과 요청 이름(task)을 같이 남겨요."""
+    router.run('write', lambda p: p, task='ask')
+    kwargs = routing[1].call_args.kwargs
+    assert (kwargs['role'], kwargs['task']) == ('write', 'ask')
+    router.run('write', lambda p: p)
+    assert routing[1].call_args.kwargs['task'] == 'write'

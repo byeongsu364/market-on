@@ -32,6 +32,7 @@ class Hours(BaseModel):
 
 
 class StorePatch(BaseModel):
+    varieties: dict[str, list[str]] | None = None
     hours: Hours | None = None
     item_ids: list[str] | None = None
     payments: list[Literal['card', 'cash', 'transfer', 'onnuri']] | None = None
@@ -44,6 +45,7 @@ class StoreLocation(BaseModel):
 
 
 class SaleCreate(BaseModel):
+    variety_id: str | None = None
     item_id: str
     sale_price: int = Field(gt=0, le=2147483647, strict=True)
     regular_price: int | None = Field(default=None, gt=0, le=2147483647, strict=True)

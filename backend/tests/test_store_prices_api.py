@@ -88,12 +88,13 @@ def test_map_price_order_unit_and_keys(public, monkeypatch):
             dict(
                 id=1,
                 store_id='store:demo-A06',
-                device_hash='a',
+                device_hash=d,
                 price=5000,
                 quantity=1,
                 unit_id='unit:kg',
                 reported_at=datetime.now(UTC),
             )
+            for d in 'abc'
         ],
     )
     monkeypatch.setattr(

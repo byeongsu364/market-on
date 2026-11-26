@@ -54,6 +54,7 @@ it('live 결제 수단과 소개를 표시하고 PATCH로 저장한다', async (
         item_ids: store.item_ids,
         payments: ['card', 'cash'],
         intro: '바꾼 소개',
+        varieties: {},
       }),
     }),
   );
@@ -102,4 +103,32 @@ it('시장 상세와 손님 좌표가 있는 지도 응답을 유지한다', asy
 it('서버 카테고리 id를 지도 카테고리로 바꾼다', () => {
   expect(storeCategory({ category: 'store_category:side_dish' })).toBe('side');
   expect(storeCategory({ category: 'store_category:snack' })).toBe('ricecake');
+});
+it('live 점포 품종을 품목별로 고르고 저장한다', async () => {
+  vi.mocked(request).mockImplementation(async (path) => {
+    if (path === '/items/search?q=') return [{ item_id: 'item:apple', name: '사과' }];
+    if (path === '/items/item%3Aapple/varieties')
+      return [{ variety_id: 'variety:apple-fuji', name: '후지' }];
+    return store;
+  });
+  render(
+    <MemoryRouter>
+      <StoreEdit />
+    </MemoryRouter>,
+  );
+  fireEvent.click(await screen.findByRole('button', { name: '후지' }));
+  expect(screen.getByRole('button', { name: '후지' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: '저장' }));
+  await waitFor(() =>
+    expect(request).toHaveBeenCalledWith('/merchant/store', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        hours: store.hours,
+        item_ids: store.item_ids,
+        payments: store.payments,
+        intro: store.intro,
+        varieties: { 'item:apple': ['variety:apple-fuji'] },
+      }),
+    }),
+  );
 });

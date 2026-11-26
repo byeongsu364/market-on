@@ -61,11 +61,11 @@ def test_data_and_facts(catalog):
         for r in e.get('relations', [])
         if r['p'] in ('inSeason', 'harvestPeriod', 'producedIn')
     ]
-    # 사과·배 제철 달을 공공데이터포털 API 기준으로 (사과 9·10월 → 11월, 배 9·10월 → 10월): 16 → 14
-    assert len(edges) == 14
+    # 기존 제철·수확·산지 관계 14개 + 귤 12월 제철 관계 1개
+    assert len(edges) == 15
     assert all(r.get('source') for r in edges)
     assert not list((DATA / 'rag_docs').glob('*/season.md'))
-    assert len(list((DATA / 'rag_docs').glob('*/varieties.md'))) == 5
+    assert len(list((DATA / 'rag_docs').glob('*/varieties.md'))) == 6
     facts = season.season_facts(None, 'item:sweet_persimmon')
     assert facts['featured_months'] == [11]
     assert facts['harvest'][0]['variety_name'] == '부유'
@@ -176,3 +176,28 @@ def test_variety_only_question_resolves_parent(catalog, monkeypatch):
     result = ask_service.ask(None, AskRequest(question='후지 언제 수확해'), 'd', consume=False)
     assert result.kind == 'answer' and result.item_id == 'item:apple'
     assert result.answer == '후지는 10월 하순 이후에 수확해요(만생종).'
+
+
+def test_mandarin_december_api(catalog, monkeypatch):
+    assert season.season_facts(None, 'item:mandarin')['featured_months'] == [12]
+
+    def in_season(conn, month):
+        return [
+            {'item_id': e['id'], 'name': e['name_ko']}
+            for e in catalog.values()
+            if e['type'] == 'item'
+            and any(
+                r['p'] == 'inSeason' and r.get('o') == f'season:{month:02}'
+                for r in e.get('relations', [])
+            )
+        ]
+
+    monkeypatch.setattr(knowledge_repo, 'in_season', in_season)
+    app.dependency_overrides[get_db] = lambda: object()
+    try:
+        with TestClient(app) as client:
+            assert client.get('/items/in-season?month=12').json() == [
+                {'item_id': 'item:mandarin', 'name': '귤', 'label': '12월 식재료'}
+            ]
+    finally:
+        app.dependency_overrides.pop(get_db)

@@ -7,17 +7,30 @@ import { priceTime } from '../../utils/priceTime';
 export default function StorePriceDisplay({
   price,
   showConfirmation = true,
+  pendingReporters = 0,
 }: {
   price: StorePrice;
   showConfirmation?: boolean;
+  pendingReporters?: number;
 }) {
-  if (!price) return <p className="caption">가격 정보 준비 중</p>;
+  const pending =
+    pendingReporters > 0 && pendingReporters < 3 ? (
+      <small>손님 {pendingReporters}명 확인 중 · 3명이 되면 보여요</small>
+    ) : null;
+  if (!price)
+    return (
+      <div>
+        <p className="caption">가격 정보 준비 중</p>
+        {pending}
+      </div>
+    );
   const marketAvg = price.source === 'market_avg';
   const surveyDate = price.observed_on?.split('-');
   return (
     <div
       className={`${s.price} store-price${price.stale && !marketAvg ? ` ${s.stale} stale` : ''}`}
     >
+      {pending}
       <p>
         {price.price.toLocaleString()}원 / {unitLabel(price.unit)}
       </p>

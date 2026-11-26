@@ -1,12 +1,16 @@
 """Shared atomic document ingestion for CLI and future merchant APIs."""
 
-from dataclasses import replace
 import hashlib
 import json
 import re
+from dataclasses import replace
+
 from app.db.repositories import knowledge_repo as repo
 from app.schemas.knowledge import Chunk, Document, UpsertResult
-from .ontology import normalize, load_label_dictionary
+
+from .fact_check import extract_numbers
+from .ontology import load_label_dictionary, normalize
+from .recipes import metadata, without_tips
 
 TOPICS = {
     'criterion': '확인 포인트',
@@ -62,10 +66,15 @@ def chunk_document(doc: Document) -> list[Chunk]:
     topic = TOPICS[doc.doc_type]
     names = ', '.join(doc.entity_names)
     prefix = f'[{names + " · " if names else ""}{topic}] '
-    if doc.doc_type in WHOLE or len(doc.body) <= 600:
-        pieces = [doc.body]
+    body = without_tips(doc.body) if doc.doc_type == 'recipe' else doc.body
+    overview, separator, steps = body.partition('## 만드는 법')
+    if doc.doc_type == 'recipe' and separator and steps.strip():
+        # 레시피 = 개요·재료 1 + 만드는 법 1. 만드는 법 단락이 없으면 아래 일반 규칙(길면 나눔)
+        pieces = [doc.title + '\n' + overview.strip(), separator + steps]
+    elif doc.doc_type in WHOLE or len(body) <= 600:
+        pieces = [body]
     else:
-        sections = re.split(r'(?m)(?=^##\s+)', doc.body)
+        sections = re.split(r'(?m)(?=^##\s+)', body)
         pieces = [
             piece
             for section in sections
@@ -82,7 +91,17 @@ def _hash(*values):
 
 
 def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
+    if doc.review_status not in {'draft', 'reviewed', 'rejected'}:
+        raise ValueError('알 수 없는 review_status')
+    recipe_props = {}
+    if doc.doc_type == 'recipe':
+        from app.db.repositories.recipe_repo import seasons
+
+        recipe_props = metadata(doc, seasons(conn))
+        doc = replace(doc, body=without_tips(doc.body))
     digest = _hash(
+        doc.review_status,
+        doc.varieties,
         doc.source_key,
         doc.doc_type,
         doc.lang,
@@ -92,6 +111,8 @@ def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
         doc.market_id,
         str(doc.published) if doc.published else None,
     )
+    if recipe_props:
+        digest = _hash(digest, recipe_props)
     with conn.transaction():
         # Serialize writers for the same stable key, including first insertion.
         repo.lock_document(conn, doc.doc_key)
@@ -100,14 +121,36 @@ def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
             return UpsertResult('skipped', old[0])
         affected = repo.document_entities(conn, old[0]) if old else set()
         names = repo.entity_names(conn, doc.entities)
+        allowed = repo.document_varieties(conn, doc.entities)
+        if set(doc.varieties) - allowed:
+            raise ValueError('varieties는 문서 품목에 속한 품종 ID여야 합니다.')
         chunks = chunk_document(replace(doc, entity_names=names))
         dictionary = load_label_dictionary(conn)
+        variety_labels = repo.ko_variety_labels(conn)
         if old:
             repo.delete_document(conn, old[0])
         did = repo.insert_document(conn, doc, digest)
         ids = []
         for chunk in chunks:
+            chunk.props = recipe_props
             chunk.entity_ids |= tag_entities(chunk.content, dictionary)
+            chunk.numbers = extract_numbers(chunk.content)
+            if doc.varieties:
+                # A scalar chunk field cannot represent several explicit varieties.
+                matches = set(doc.varieties)
+                if len(matches) > 1:
+                    matches &= {
+                        eid
+                        for label, eid, original in variety_labels
+                        if tag_entities(chunk.content, [(label, eid, original)])
+                    }
+            else:
+                matches = allowed & {
+                    eid
+                    for label, eid, original in variety_labels
+                    if tag_entities(chunk.content, [(label, eid, original)])
+                }
+            chunk.variety_id = next(iter(matches)) if len(matches) == 1 else None
             affected |= chunk.entity_ids
             ids.append(
                 repo.insert_chunk(

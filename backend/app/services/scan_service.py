@@ -1,25 +1,33 @@
-"""Validate and persist photos, then resolve generated labels to ontology items."""
+"""사진을 확인·저장하고, 구글 비전 라벨을 온톨로지 품목으로, 가격표 글자를 가격·단위·품종으로 바꿔요.
+
+작업 지시서 040: 품목 인식은 구글 비전만 써요. 젬마·제미나이·GPT에는 사진을 보내지 않아요.
+"""
 
 import logging
-import math
-import re
 from datetime import datetime
+from time import monotonic
 from types import SimpleNamespace
 from uuid import uuid4
 
 from starlette.concurrency import run_in_threadpool
 
+from app.clients import vision
 from app.core.config import settings
 from app.core.errors import AppError
 from app.core.photo_meta import PhotoMetaError, read_gps, strip_metadata
-from app.db.repositories import knowledge_repo, media_repo, store_repo
-from app.knowledge.ontology import match_unit, match_variety, match_vision_labels
-from app.llm.json_output import recognize_labels
+from app.db.repositories import llm_call_repo, media_repo, store_repo
+from app.knowledge.ontology import match_vision_labels
+
+from . import price_tag as price_tag_reader
+from . import vision_usage
 
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
 # 촬영 위치를 줄이는 기준: 이 거리 안의 가장 가까운 시장 ID, 좌표는 소수 둘째 자리(약 1km)
 PHOTO_MARKET_RADIUS_M = 1000
 PHOTO_COORD_DIGITS = 2
+VISION_MODEL = 'google-vision'
+# 매칭에 쓰는 비전 라벨 수 (점수 높은 순). match_vision_labels가 앞 3개에 가중치를 줘요
+VISION_LABELS_USED = 3
 logger = logging.getLogger(__name__)
 
 
@@ -94,9 +102,44 @@ def save_photo(conn, image: bytes, ext: str, mime: str, location: dict | None = 
         return None
 
 
+def call_vision(image: bytes) -> dict | None:
+    """비전 호출 + 한도 + 기록. 키가 없거나, 한도에 걸리거나, 실패하면 None (화면은 직접 고르기로)."""
+    if not vision.configured():
+        return None
+    limited = vision_usage.take()
+    record = {
+        'task': 'recognize',
+        'role': 'vision',
+        'provider': 'vision',
+        'model': VISION_MODEL,
+        'escalated': False,
+    }
+    if limited:
+        llm_call_repo.record(**record, ms=0, reason=limited, ok=False)
+        return None
+    start = monotonic()
+    try:
+        result = vision.annotate(image)
+    except Exception:  # noqa: BLE001 - 인식 실패는 '모르는 품목'으로 처리
+        llm_call_repo.record(
+            **record, ms=int((monotonic() - start) * 1000), reason='error', ok=False
+        )
+        logger.warning('구글 비전 호출 실패; 직접 고르기로 넘어갑니다.')
+        return None
+    llm_call_repo.record(**record, ms=int((monotonic() - start) * 1000), reason=None, ok=True)
+    return result
+
+
+def labels_from(result: dict | None) -> list[str]:
+    if not result:
+        return []
+    ranked = sorted(result['labels'], key=lambda pair: -pair[1])
+    return [label.lower() for label, _ in ranked]
+
+
 async def recognize(conn, image: bytes, use_location: bool = False) -> dict:
     ext, mime = image_format(image)
-    # 저장·모델 전송 전에 메타데이터(위치·기기·시각)를 지움. 위치는 동의했을 때만 대략값으로 남김
+    # 저장·비전 전송 전에 메타데이터(위치·기기·시각)를 지움. 위치는 동의했을 때만 대략값으로 남김
     image, gps = clean_photo(image, ext)
     location = None
     if use_location and gps:
@@ -106,45 +149,30 @@ async def recognize(conn, image: bytes, use_location: bool = False) -> dict:
             logger.warning('촬영 위치 처리 실패; 위치 없이 계속합니다.')
     gps = None  # 원래 좌표는 여기서 버림
     media_id = await run_in_threadpool(save_photo, conn, image, ext, mime, location)
-    items = await run_in_threadpool(knowledge_repo.item_vocabulary, conn)
-    vocabulary = sorted({item['name_en'] for item in items})
-
-    def accept(value):
-        labels = value['labels']
-        if not labels:
-            return 'no_labels'
-        candidates = match_vision_labels(conn, labels)
-        if labels[0].strip().lower().startswith('other:') or not candidates:
-            return 'unknown_item'
-        if candidates[0]['confidence'] < 0.6:
-            return 'low_confidence'
-        return None
-
-    routed = await recognize_labels(image, vocabulary, accept)
-    result = routed.value
-    labels = result['labels']
-    candidates = await run_in_threadpool(match_vision_labels, conn, labels)
-    price_tag = result['price_tag']
-    if price_tag is not None:
-        text = ' '.join(
-            [price_tag['unit_text'], price_tag.pop('variety_text', None) or '', *labels]
-        )
-        price_tag['variety_id'] = (
-            await run_in_threadpool(match_variety, conn, candidates[0]['item_id'], text)
-            if candidates
-            else None
-        )
-        price_tag['unit'] = await run_in_threadpool(match_unit, conn, price_tag['unit_text'])
-        if price_tag['quantity'] is None:
-            number = re.search(r'\d+(?:\.\d+)?', price_tag['unit_text'])
-            if number and math.isfinite(float(number[0])) and float(number[0]) > 0:
-                price_tag['quantity'] = float(number[0])
-    candidates = await run_in_threadpool(match_vision_labels, conn, labels)
+    result = await run_in_threadpool(call_vision, image)
+    labels = labels_from(result)
+    # 비전은 "Food", "Fruit"처럼 넓은 라벨을 먼저 줄 때가 많아요. 사전에 있는 라벨을 앞으로 당겨서 매칭
+    candidates = await run_in_threadpool(match_vision_labels, conn, labels[:VISION_LABELS_USED])
+    if not candidates and labels:
+        known = await run_in_threadpool(_known_labels, conn, labels)
+        candidates = await run_in_threadpool(match_vision_labels, conn, known[:VISION_LABELS_USED])
+    tag = None
+    if result and result['text'].strip():
+        item_id = candidates[0]['item_id'] if candidates else None
+        tag = await run_in_threadpool(price_tag_reader.parse, conn, result['text'], item_id)
     return {
-        'model': routed.model,
-        'vision_labels': labels,
+        'model': VISION_MODEL,
+        'vision_labels': labels[:VISION_LABELS_USED],
         'candidates': candidates,
         'media_id': media_id,
-        'price_tag': price_tag,
+        'price_tag': tag,
         'photo_location': location,
     }
+
+
+def _known_labels(conn, labels: list[str]) -> list[str]:
+    """온톨로지 비전 라벨 사전에 있는 라벨만 (비전 점수 순서 유지)."""
+    from app.db.repositories import knowledge_repo
+
+    dictionary = {row['label'].strip().lower() for row in knowledge_repo.vision_item_labels(conn)}
+    return [label for label in labels if label in dictionary]

@@ -64,6 +64,7 @@ entities:
       - {key: surface, text: 흠집이나 병·벌레 자국이 없어요, source: 'src:nics-month-food-apple'}
       - {key: tap, text: 가볍게 두드리면 탄력 있고 꽉 찬 느낌이 나요, source: 'src:nics-month-food-apple'}
     relations:
+      - {p: storedAs, source: 'src:rda-fruit-veg-storage-2023', v: {temp_c: [0, 0], humidity_pct: [90, 95], label: "0℃ · 상대습도 90~95%"}}
       - {p: hasGrade, o: 'variety:apple-fuji', props: {default: true}}
       - {p: hasGrade, o: 'variety:apple-hongro'}
       - {p: hasGrade, o: 'variety:apple-shinano-gold'}
@@ -82,6 +83,7 @@ entities:
       - {key: bottom, text: 꼭지 반대쪽이 튀어나와 있지 않고 검은 잔금이 없어요, source: 'src:nics-month-food-pear'}
       - {key: calyx, text: 꽃받침 부위가 파랗지 않고 노랗게 변해 있어요, source: 'src:rda-fruit-choose-store-2007'}
     relations:
+      - {p: storedAs, source: 'src:rda-fruit-veg-storage-2023', v: {temp_c: [0, 0], humidity_pct: [90, 95], label: "0℃ · 상대습도 90~95%"}}
       - {p: hasGrade, o: 'variety:pear-shingo', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
@@ -98,10 +100,29 @@ entities:
       - {key: firm, text: 만져 보면 과육이 단단해요, source: 'src:nics-month-food-persimmon'}
       - {key: color, text: 껍질의 90% 이상이 황색으로 물들어 있어요, source: 'src:nics-month-food-persimmon'}
     relations:
+      - {p: storedAs, source: 'src:nics-month-food-persimmon', v: {temp_c: [0, 2], humidity_pct: null, label: "0~2℃"}}
+      - {p: storedAs, source: 'src:nics-month-food-persimmon', v: {temp_c: [0, 0], humidity_pct: null, label: "0℃", note: "부유 품종은", period_label: "1~3개월"}}
       - {p: hasGrade, o: 'variety:sweet_persimmon-fuyu', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
       - {o: 'season:11', p: inSeason, source: 'src:nics-month-food-list'}
+  - id: item:mandarin
+    type: "item"
+    name_ko: "귤"
+    kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "01", grd_cd: "15", unit: 개, unit_sz: "10"}
+    attrs: {}
+    labels: {ko: [귤, 감귤, 밀감], en: [mandarin, tangerine]}
+    criteria:
+      - {key: skin, text: 껍질이 얇고 껍질과 과육 사이에 빈 공간 없이 붙어 있어요, source: 'src:nics-month-food-mandarin'}
+      - {key: shape, text: 꼭지 부분이 튀어나오지 않고 좌우로 둥글고 납작해요, source: 'src:nics-month-food-mandarin'}
+      - {key: stem, text: 색이 짙은 주황색이고 꼭지는 녹색으로 단단히 붙어 있어요, source: 'src:nics-month-food-mandarin'}
+      - {key: gloss, text: 껍질에 지나치게 윤이 나지 않아요, source: 'src:nics-month-food-mandarin'}
+    relations:
+      - {p: hasGrade, o: 'variety:mandarin-open', props: {default: true}}
+      - {p: hasGrade, o: 'variety:mandarin-greenhouse'}
+      - {p: isA, o: 'cat:fruit'}
+      - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
+      - {o: 'season:12', p: inSeason, source: 'src:nics-month-food-list'}
   - id: unit:bunch
     type: unit
     name_ko: 단
@@ -125,7 +146,7 @@ entities:
     name_ko: 후지
     labels: {ko: [후지, 부사], en: [fuji]}
     kamis: {ctgry_cd: "400", item_cd: "411", vrty_cd: "05", grd_cd: "04", unit: 개, unit_sz: "10"}
-    attrs: {}
+    attrs: {description: '완전히 익으면 과육 속에 꿀이 생기고 저장성이 좋아요.', description_source: 'src:nics-month-food-apple'}
     relations:
       - {p: harvestPeriod, source: 'src:nics-month-food-apple', v: {from: '10', label: 10월 하순 이후, note: 만생종}}
   - id: variety:apple-hongro
@@ -153,7 +174,7 @@ entities:
     name_ko: 부유
     labels: {ko: [부유]}
     kamis: {ctgry_cd: "400", item_cd: "416", vrty_cd: "00", grd_cd: "04", unit: 개, unit_sz: "5"}
-    attrs: {}
+    attrs: {description: '한 개 220~230g 정도, 껍질은 등황색, 당도는 15~16°Bx 정도예요.', description_source: 'src:nics-month-food-persimmon'}
     relations:
       - {p: harvestPeriod, source: 'src:rda-persimmon-postharvest', v: {from: '10', label: 10월 하순~11월 상순, note: 남부 주산지는 대개 11월 상순, to: '11'}}
   - id: variety:green_onion-daepa
@@ -167,4 +188,16 @@ entities:
     name_ko: 양파
     labels: {}
     kamis: {ctgry_cd: "200", item_cd: "245", vrty_cd: "00", grd_cd: "04", unit: kg, unit_sz: "1"}
+    attrs: {}
+  - id: variety:mandarin-open
+    type: variety
+    name_ko: 노지
+    labels: {ko: [노지, 노지감귤]}
+    kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "01", grd_cd: "15", unit: 개, unit_sz: "10"}
+    attrs: {}
+  - id: variety:mandarin-greenhouse
+    type: variety
+    name_ko: 시설
+    labels: {ko: [시설, 하우스감귤]}
+    kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "02", grd_cd: "15", unit: 개, unit_sz: "10"}
     attrs: {}

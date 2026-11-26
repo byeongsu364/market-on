@@ -114,3 +114,12 @@ it('시장 평균은 지도와 판매 점포의 가격 눈금에 사용하지 �
   expect(container.textContent).toContain('시장 평균');
   expect(container.querySelector('[data-on="true"]')).toBeNull();
 });
+
+it('가격이 없거나 시장 평균이어도 확인 중인 손님 수를 표시한다', () => {
+  const { rerender } = render(<StorePriceDisplay price={null} pendingReporters={2} />);
+  expect(screen.getByText('손님 2명 확인 중 · 3명이 되면 보여요')).toBeInTheDocument();
+  rerender(<StorePriceDisplay price={{ ...price, source: 'market_avg' }} pendingReporters={1} />);
+  expect(screen.getByText('손님 1명 확인 중 · 3명이 되면 보여요')).toBeInTheDocument();
+  rerender(<StorePriceDisplay price={price} />);
+  expect(screen.queryByText(/확인 중/)).not.toBeInTheDocument();
+});

@@ -13,6 +13,7 @@ from app.main import app
 from scripts import seed_demo_market as seed
 
 ITEM_KEYS = {
+    'variety_id',
     'item_id',
     'name',
     'synonyms',
@@ -26,6 +27,9 @@ ITEM_KEYS = {
 
 @pytest.fixture
 def public(monkeypatch):
+    from app.db.repositories import merchant_repo
+
+    monkeypatch.setattr(merchant_repo, 'varieties', lambda *a: {})
     monkeypatch.setattr(price_repo, 'list_reports', lambda *a, **kw: [])
     monkeypatch.setattr(price_repo, 'store_confirmations', lambda *a: [])
     monkeypatch.setattr(price_repo, 'sale_units', lambda *a: [])
@@ -205,6 +209,7 @@ def test_markets_contract(public, caplog):
     ]
     for i, s in enumerate(result['stores']):
         assert set(s) == {
+            'varieties',
             'source',
             'items_basis',
             'guessed_item_ids',
@@ -225,6 +230,7 @@ def test_markets_contract(public, caplog):
             'verified',
             'location_source',
             'open_now',
+            'pending_reporters',
             'payments',
             'intro',
             'distance_m',

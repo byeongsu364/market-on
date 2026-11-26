@@ -62,11 +62,15 @@ def _configured(name):
 
 
 def run(
-    task: str,
+    role: str,
     call: Callable[[LLMProvider], T],
     accept: Callable[[T], str | None] = lambda _: None,
+    *,
+    task: str | None = None,
 ) -> Routed[T]:
-    names = [name for name in settings.LLM_ROUTES.get(task, []) if _configured(name)]
+    """role(route·plan·extract·write·reason)의 모델 순서대로 부름. task는 기록용 요청 이름(ask·chat…)."""
+    names = [name for name in settings.LLM_ROUTES.get(role, []) if _configured(name)]
+    task = task or role
     last_error = AppError('LLM_NOT_CONFIGURED', '사용 가능한 모델이 없습니다.', 503)
     reason = None
     fallback = None
@@ -77,6 +81,7 @@ def run(
                 # 외부 AI 사용 규칙에 걸리면 부르지 않고 다음 모델로 (젬마 답이 있으면 그걸 돌려줌)
                 llm_call_repo.record(
                     task=task,
+                    role=role,
                     provider=name,
                     model=model_name(name),
                     ms=0,
@@ -100,6 +105,7 @@ def run(
         finally:
             llm_call_repo.record(
                 task=task,
+                role=role,
                 provider=name,
                 model=model_name(name),
                 ms=int((monotonic() - start) * 1000),

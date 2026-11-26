@@ -234,7 +234,9 @@ def test_api_validation_and_contract(env, monkeypatch):
         'model',
         'cached',
         'removed',
+        'steps',
     }
+    assert response.json()['steps'] == ['search', 'write', 'check']
     assert set(response.json()['citations'][0]) == {'title', 'publisher', 'url', 'license', 'draft'}
     monkeypatch.setattr(svc.ask_repo, 'consume_quota', lambda *a: False)
     response = env.client.post('/ask', json={'intent': 'store'}, headers=HEADERS)
@@ -245,7 +247,7 @@ def test_real_router_retries_invalid_and_unsupported(monkeypatch):
     from app.core.config import settings
     from app.llm import router
 
-    monkeypatch.setattr(settings, 'LLM_ROUTES', {'ask': ['fake', 'openai']})
+    monkeypatch.setattr(settings, 'LLM_ROUTES', {'write': ['fake', 'openai']})
     monkeypatch.setattr(router, '_configured', lambda name: True)
     monkeypatch.setattr(router.llm_call_repo, 'record', Mock())
     providers = [
@@ -316,7 +318,7 @@ def test_classifier_closed_result(monkeypatch, text, expected):
     from app.core.config import settings
     from app.llm import router
 
-    monkeypatch.setattr(settings, 'LLM_ROUTES', {'ask': ['fake']})
+    monkeypatch.setattr(settings, 'LLM_ROUTES', {'route': ['fake']})
     monkeypatch.setattr(router.llm_call_repo, 'record', Mock())
     monkeypatch.setattr(router, '_provider', lambda *a: Mock(generate=Mock(return_value=text)))
     assert llm.classify('설명해 줘') == expected
@@ -349,7 +351,16 @@ def test_citation_document_marker(monkeypatch, body, draft):
     monkeypatch.setattr(
         svc.ask_repo,
         'sources',
-        lambda *a: [dict(title='출처', publisher=None, url=None, license=None, body=body)],
+        lambda *a: [
+            dict(
+                title='출처',
+                publisher=None,
+                url=None,
+                license=None,
+                body=body,
+                review_status='reviewed',
+            )
+        ],
     )
     assert attach_citations(Mock(), [SimpleNamespace(chunk_id=1)])[0]['draft'] is draft
 
@@ -423,3 +434,47 @@ def test_story_uses_existing_retrieval_path(env):
     assert result.intent == 'story'
     assert env.search.call_args.kwargs['intent'] == 'story'
     assert env.calls
+
+
+def test_long_evidence_goes_through_extract_and_checks_against_original(env, monkeypatch):
+    """040: 근거가 4개 이상이면 extract가 사실만 뽑고, write는 뽑은 것을 받아요.
+    답 확인은 원래 근거로 해요 (뽑기 모델이 숫자를 바꿔도 통과 못 함)."""
+    chunks = [
+        RetrievedChunk(
+            i, f'대파는 {i}℃에서 보관해요.', 0.9, 'storage', '보관', None, '출처', None, None
+        )
+        for i in range(1, 5)
+    ]
+    env.search.return_value = chunks
+    seen = []
+
+    def extract(question, cleaned):
+        seen.append(cleaned)
+        return ['대파는 1℃에서 보관해요.', '', '', '대파는 99℃에서 보관해요.']
+
+    monkeypatch.setattr(svc.ask_llm, 'extract', extract)
+    env.outputs[:] = [{'answer': '대파는 1℃에서 보관해요. 99℃에서도 돼요.', 'used': [1, 4]}]
+    result = ask(env)
+    assert len(seen[0]) == 4
+    assert env.calls[-1] == ['대파는 1℃에서 보관해요.', '', '', '대파는 99℃에서 보관해요.']
+    assert result.steps == ['search', 'extract', 'write', 'check']
+    assert result.answer == '대파는 1℃에서 보관해요.' and result.removed == 1
+
+
+def test_extract_keeps_numbering_and_falls_back(monkeypatch):
+    from app.llm import router
+
+    def fake(value):
+        return lambda role, call, accept, task=None: Routed(value, 'gemini', 'g', False, None)
+
+    chunks = ['a', 'b', 'c', 'd']
+    monkeypatch.setattr(
+        llm, 'run', fake({'facts': [{'n': 2, 'text': 'B'}, {'n': 2, 'text': 'B2'}]})
+    )
+    assert llm.extract('질문', chunks) == ['', 'B B2', '', '']
+    monkeypatch.setattr(llm, 'run', fake({'facts': [{'n': 9, 'text': 'x'}]}))
+    assert llm.extract('질문', chunks) == chunks
+    monkeypatch.setattr(llm, 'run', Mock(side_effect=router.AppError('X', 'x', 503)))
+    assert llm.extract('질문', chunks) == chunks
+    assert llm.needs_extract(chunks) and not llm.needs_extract(['짧아요'] * 3)
+    assert llm.needs_extract(['가' * 2000])

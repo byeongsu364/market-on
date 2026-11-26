@@ -121,15 +121,26 @@ def test_chat_tool_loop_returns_signature(wire, monkeypatch):
         ]
     )
     provider = GeminiProvider()
-    monkeypatch.setattr(chat_llm, 'run', lambda task, call, accept: call(provider))
+    from types import SimpleNamespace
+
+    from app.core.errors import AppError
+    from app.llm.router import Routed
+
+    def run(role, call, accept=lambda _: None, *, task=None):
+        # 040: 제미나이는 plan(도구 고르기)만, write는 여기서 실패시켜 plan 답으로 확인
+        if role != 'plan':
+            raise AppError('LLM_NOT_CONFIGURED', '없음', 503)
+        return Routed(call(provider), 'gemini', 'gemini:x', False, None)
+
+    monkeypatch.setattr(chat_llm, 'run', run)
     calls = []
     result = chat_llm.generate(
         [{'role': 'user', 'content': '대파 어떻게 골라?'}],
         TOOLS,
         lambda name, args: calls.append((name, args)) or [{'item_id': 'item:green_onion'}],
-        lambda text, results: text,
+        lambda text, results: SimpleNamespace(reply=text),
     )
-    assert result == '잎이 싱싱한 걸 골라요.'
+    assert result.value.reply == '잎이 싱싱한 걸 골라요.'
     assert calls == [('search_items', {'query': '대파'})]
     assert all('/v1beta/' in r['url'] for r in sent)
     first, second = (r['body'] for r in sent)

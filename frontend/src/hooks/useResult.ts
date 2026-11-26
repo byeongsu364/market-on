@@ -71,6 +71,7 @@ export function useResult() {
   );
 
   // 가격 제보: 결과에 들어올 때 한 번, 점포를 고르면 그 점포로 한 번 더(지시서 009)
+  const [reportHeld, setReportHeld] = useState(false);
   const submitted = useRef(new Set<string>());
   useEffect(() => {
     if (!marketId || !item.data || !unit || !nav.method) return;
@@ -88,13 +89,16 @@ export function useResult() {
       method: nav.method,
       ...(nav.media_id ? { media_id: nav.media_id } : {}),
       ...(storeId ? { store_id: storeId } : {}),
-    }).catch((error) => console.info('가격 제보를 저장하지 못했어요', error));
+    })
+      .then((result) => setReportHeld(result?.held ?? false))
+      .catch((error) => console.info('가격 제보를 저장하지 못했어요', error));
   }, [marketId, item.data, unit, value, nav.method, nav.media_id, quantity, itemId, storeId]);
 
   // 주소의 시장은 PageLayout이 세션에 맞춰 줌. 이름은 세션 시장에서 가져옴
   const market = session.market;
   return {
     itemId,
+    reportHeld,
     item,
     marketId,
     market,

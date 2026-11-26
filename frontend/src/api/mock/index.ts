@@ -1,8 +1,9 @@
+import { getRecipes } from './recipes';
+import { mockVarieties } from './varieties';
 import type {
   MarketMap,
   MultiItemMap,
   PriceHistory,
-  VarietyExtra,
   Price,
   PriceRequest,
   RecognizeResponse,
@@ -67,59 +68,45 @@ export const getItem = (id: string) =>
     return item;
   });
 export const search = (q: string) =>
-  mock(() =>
-    items.filter((i) =>
-      [...i.synonyms, ...i.vision_labels].some((n) => n.toLowerCase().includes(q.toLowerCase())),
-    ),
-  );
-// 품종 설명은 data/rag_docs/apple/varieties.md 문장만, 수확 시기는 data/ontology/items.yaml harvestPeriod 값만 씀.
-// 문장이나 값이 없는 품종(시나노골드)은 비워 둠(지시서 030 2장).
-const varietyExtra: Record<string, VarietyExtra> = {
-  'variety:apple-fuji': {
-    description:
-      '후지는 전국에서 재배할 수 있는 품종이고, 완전히 익으면 과육 속에 꿀이 생기고 저장성이 좋아요.',
-    description_source: '농촌진흥청 · 농식품 이달의 식재료 사과',
-    harvest: { label: '10월 하순 이후', from: '10' },
-  },
-  'variety:apple-hongro': {
-    description: '홍로는 국내에서 처음 육성한 품종이에요.',
-    description_source: '농촌진흥청 · 농식품 이달의 식재료 사과',
-    harvest: { label: '9월 상·중순', from: '09', to: '09' },
-  },
-  'variety:apple-shinano-gold': { description: null, description_source: null, harvest: null },
-};
+  mock(() => {
+    const variety = [
+      ['노지', 'variety:mandarin-open', 'item:mandarin'],
+      ['노지감귤', 'variety:mandarin-open', 'item:mandarin'],
+      ['시설', 'variety:mandarin-greenhouse', 'item:mandarin'],
+      ['하우스감귤', 'variety:mandarin-greenhouse', 'item:mandarin'],
+      ['후지', 'variety:apple-fuji', 'item:apple'],
+      ['부사', 'variety:apple-fuji', 'item:apple'],
+      ['홍로', 'variety:apple-hongro', 'item:apple'],
+      ['신고', 'variety:pear-shingo', 'item:pear'],
+    ].find(([name]) => name.includes(q) && q);
+    return items
+      .filter(
+        (i) =>
+          i.item_id === variety?.[2] ||
+          [i.name, ...i.synonyms, ...i.vision_labels].some((n) =>
+            n.toLowerCase().includes(q.toLowerCase()),
+          ),
+      )
+      .map((i) => ({ ...i, ...(i.item_id === variety?.[2] ? { variety_id: variety[1] } : {}) }));
+  });
 export const price = (q: PriceRequest): Promise<Price> =>
   mock(() => {
+    // 귤을 포함한 시세는 실제 관측값이 아닌 팀 작성 예시 값이에요.
     const base = q.item_id === 'item:green_onion' ? 2576 : q.item_id === 'item:onion' ? 2100 : 3200;
-    const varieties =
-      q.item_id === 'item:apple'
-        ? [
-            {
-              variety_id: 'variety:apple-fuji',
-              name: '후지',
-              reference_price: 3200,
-              default: true,
-            },
-            {
-              variety_id: 'variety:apple-hongro',
-              name: '홍로',
-              reference_price: 3500,
-              default: false,
-            },
-            {
-              variety_id: 'variety:apple-shinano-gold',
-              name: '시나노골드',
-              reference_price: null,
-              default: false,
-            },
-          ].map((v) => ({
-            ...v,
-            ...varietyExtra[v.variety_id],
-            unit: q.unit,
-            observed_on: v.reference_price === null ? null : '2026-11-20',
-            count: v.reference_price === null ? 0 : 15,
-          }))
-        : [];
+    const varieties = mockVarieties(q.item_id).map((v, i) => ({
+      ...v,
+      reference_price: v.variety_id.endsWith('shinano-gold')
+        ? null
+        : q.item_id === 'item:mandarin'
+          ? [800, 1200][i]
+          : q.item_id === 'item:apple'
+            ? [3200, 3500][i]
+            : Math.round(convertUnit(base, 'kg', q.unit)),
+      default: i === 0,
+      unit: q.unit,
+      observed_on: v.variety_id.endsWith('shinano-gold') ? null : '2026-11-20',
+      count: v.variety_id.endsWith('shinano-gold') ? 0 : 15,
+    }));
     const selected = varieties.find((v) => v.variety_id === q.variety_id) ?? varieties[0];
     const reference_price =
       selected?.reference_price ?? Math.round(convertUnit(base, 'kg', q.unit));
@@ -243,13 +230,15 @@ export async function ask(
 ): Promise<import('../../types/contract').AskResponse> {
   const intent =
     data.intent ??
-    (['제철', '언제', '철', '품종', '산지'].some((w) => data.question?.includes(w))
-      ? 'season'
-      : ['특징', '종류', '맛이 어때', '차이'].some((w) => data.question?.includes(w))
-        ? 'story'
-        : data.question?.includes('가격')
-          ? 'price'
-          : 'store');
+    (['뭐 해 먹', '요리', '레시피'].some((w) => data.question?.includes(w))
+      ? 'recipe'
+      : ['제철', '언제', '철', '품종', '산지'].some((w) => data.question?.includes(w))
+        ? 'season'
+        : ['특징', '종류', '맛이 어때', '차이'].some((w) => data.question?.includes(w))
+          ? 'story'
+          : data.question?.includes('가격')
+            ? 'price'
+            : 'store');
   const item = items.find((i) => i.item_id === data.item_id || data.question?.includes(i.name));
   const base: import('../../types/contract').AskResponse = {
     kind: 'need_item',
@@ -267,6 +256,15 @@ export async function ask(
       ...base,
       candidates: items.slice(0, 5).map((i) => ({ item_id: i.item_id, name: i.name })),
     }));
+  if (intent === 'recipe') {
+    const recipes = await getRecipes({ item_id: item.item_id, market_id: data.market_id });
+    return {
+      ...base,
+      kind: 'recipes',
+      recipes,
+      citations: recipes.map((r) => ({ ...r.source, draft: false })),
+    };
+  }
   if (intent === 'price')
     return {
       ...base,
@@ -300,6 +298,7 @@ export async function ask(
           ['홍로', '9월 상·중순', '중생종 추석용 품종', 'apple'],
         ],
       },
+      'item:mandarin': { months: [12], harvest: [] },
       'item:pear': { months: [10], harvest: [] },
       'item:sweet_persimmon': {
         months: [11],
@@ -416,6 +415,7 @@ export const priceHistory = (
 ): Promise<PriceHistory> =>
   price({ item_id, variety_id, unit, market_id: 'market:demo' }).then((p) => {
     const selected = p.varieties.find((v) => v.variety_id === p.variety_id);
+    // 귤을 포함한 시세는 실제 관측값이 아닌 팀 작성 예시 값이에요.
     const base = selected ? selected.reference_price : p.reference_price;
     const steps = [1.06, 1.03, 0.98, 1];
     return {
@@ -462,6 +462,7 @@ export async function getInSeason(
   ),
 ) {
   const featured = [
+    { item_id: 'item:mandarin', name: '귤', months: [12] },
     { item_id: 'item:apple', name: '사과', months: [11] },
     { item_id: 'item:pear', name: '배', months: [10] },
     { item_id: 'item:sweet_persimmon', name: '단감', months: [11] },

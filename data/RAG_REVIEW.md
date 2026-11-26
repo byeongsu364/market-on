@@ -3,7 +3,7 @@
 AI 답변(`/ask`)은 제철은 온톨로지 관계로, 그 밖의 근거 답변은 **`data/rag_docs/` 문서로** 답해요. 문서가 틀리면 답도 틀려요. 그래서 사람이 한 번씩 출처와 맞춰 봐야 해요.
 
 ## 지금 있는 문서 (2026-11-25, Claude 초안)
-품목 5개 × 4종류 = 20개. 각 품목 폴더(`green_onion`, `onion`, `apple`, `pear`, `sweet_persimmon`)에 있어요.
+품목 6개 × 4종류 = 24개. 각 품목 폴더(`green_onion`, `onion`, `apple`, `pear`, `sweet_persimmon`, `mandarin`)에 있어요.
 
 | 파일 | 내용 |
 |---|---|
@@ -11,6 +11,10 @@ AI 답변(`/ask`)은 제철은 온톨로지 관계로, 그 밖의 근거 답변�
 | `storage.md` | 집에서 보관하는 법 |
 | `prep.md` | 씻기·손질하는 법 |
 | `varieties.md` | 품종과 특징 |
+| `mandarin/criterion.md` | 귤 고를 때 확인할 점 |
+| `mandarin/storage.md` | 귤 집에서 보관하는 법 |
+| `mandarin/prep.md` | 귤 씻고 손질하는 법 |
+| `mandarin/varieties.md` | 귤 품종과 특징 |
 
 출처는 문서 맨 아래 `출처:` 줄과 `data/sources.yaml`에 있어요. 주 출처는 공공데이터포털 「농식품 이달의 식재료 목록정보」 API(농촌진흥청)와 농촌진흥청 보도자료예요.
 
@@ -18,7 +22,7 @@ AI 답변(`/ask`)은 제철은 온톨로지 관계로, 그 밖의 근거 답변�
 1. 문서 아래 `출처:`의 페이지를 열어요 (주소는 `data/sources.yaml`의 `url`)
 2. 문서의 문장마다 **출처에 실제로 있는 내용인지** 확인해요. 숫자(온도·기간·달)는 특히 꼭
 3. 틀리거나 출처에 없는 문장은 **지우거나 고쳐요**. 출처에 있는데 빠진 중요한 내용은 더해도 돼요 (출처에 있는 것만)
-4. 다 맞으면 첫 줄의 `> 초안 · 검수 전 ...`을 지우고, 맨 아래에 한 줄 추가해요: `검수: <이름> 2026-11-xx`
+4. 다 맞으면 YAML frontmatter에 `review_status: reviewed`를 적어요 (생략하면 `draft`, 사용하지 않을 문서는 `rejected` — 적재는 되지만 검색에서 제외). 첫 줄의 `> 초안 · 검수 전 ...`을 지우고, 맨 아래에 한 줄 추가해요: `검수: <이름> 2026-11-xx`
 5. 커밋할 때 메시지에 "검수: 대파 storage" 처럼 적어요
 
 ## 쓰면 안 되는 말
@@ -45,3 +49,5 @@ cd backend
 - 출처끼리 다른 곳: 양파 보관 온도(가정용 15~25℃ 서늘한 곳 vs 저장고 0℃) → 문서에는 가정용 기준만 넣었어요
 
 제철·품종·산지는 온톨로지(`data/ontology/items.yaml`, `seasons.yaml`)에서 검수
+
+자동 숫자 대조: [청크별 원문 대조표](build/review.md) (`python -m scripts.pipeline --offline --to review`로 생성).

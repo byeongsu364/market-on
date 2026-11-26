@@ -19,7 +19,9 @@ def attach_citations(conn, chunks):
         source = dict(source)
         body = source.pop('body', '')
         first_line = body.split('\n', 1)[0]
-        draft = first_line.startswith(('> 초안', '> 샘플'))
+        draft = source.pop('review_status', 'draft') != 'reviewed' or first_line.startswith(
+            ('> 초안', '> 샘플')
+        )
         key = tuple(source.get(k) for k in ('title', 'publisher', 'url', 'license'))
         if key in citations:
             citations[key]['draft'] |= draft

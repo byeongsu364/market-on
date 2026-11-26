@@ -1,0 +1,11 @@
+# 팀 작성: 재료를 점포 업종에 연결하는 장보기 규칙 (재고 보장 아님)
+source: src:team-draft
+entities: []
+rules:
+  - {keywords: [소고기, 쇠고기, 돼지고기, 닭고기, 소불고기, 우민찌, 베이컨, 소시지, 스팸, 달걀, 계란], store_category: 정육}
+  - {keywords: [대구살, 주꾸미, 고등어, 오징어, 새우, 조개, 생선], store_category: 수산}
+  - {keywords: [두부, 김치, 동치미, 피클], store_category: 반찬}
+  - {keywords: [다시마, 멸치, 건새우, 미역, 마른 표고], store_category: 건어물}
+  - {keywords: [부추, 마늘, 고추, 버섯, 고구마, 감자, 당근, 오이, 더덕, 깻잎, 배추, 단호박, 죽순, 미나리, 파프리카], store_category: 채소}
+  - {keywords: [레몬, 오렌지, 대추, 유자], store_category: 과일}
+  - {keywords: [떡], store_category: 떡}

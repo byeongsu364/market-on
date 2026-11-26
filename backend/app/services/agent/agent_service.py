@@ -14,7 +14,6 @@ from app.services import ask_service, item_service
 
 from . import tools
 
-
 UNIT_LABELS = {'unit:piece': '개', 'unit:bunch': '단', 'unit:kg': 'kg', 'unit:g': 'g'}
 
 
@@ -42,6 +41,12 @@ def chat(conn, data, device_id):
             if not isinstance(value, dict) or 'error' in value:
                 return ''
             lines = []
+            if {'total', 'in_market', 'stores'} <= value.keys():
+                lines.extend(
+                    [f'{value["total"]}개', f'{value["in_market"]}개', f'{value["stores"]}곳']
+                )
+            if isinstance(value.get('stores'), int):
+                lines.append(f'{value["stores"]}곳')
             # 가격의 기준 단위("1개", "1단")도 근거로: 답에 "1개 1,540원"처럼 쓰기 때문
             label = (
                 UNIT_LABELS.get(value.get('unit')) if isinstance(value.get('unit'), str) else None
@@ -132,6 +137,14 @@ def chat(conn, data, device_id):
                     citations[key] = source | {
                         'draft': source.get('draft', False) or old.get('draft', False)
                     }
+
+            if name == 'find_recipes' and isinstance(value, list):
+                for recipe in value:
+                    source = recipe.get('source')
+                    if source:
+                        citations[
+                            tuple(source.get(k) for k in ('title', 'publisher', 'url', 'license'))
+                        ] = source
 
             def collect(v):
                 if isinstance(v, dict):

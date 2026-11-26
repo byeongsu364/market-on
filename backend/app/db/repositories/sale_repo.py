@@ -6,8 +6,8 @@ from ._operational import rows
 def create(conn, store_id, values):
     result = rows(
         conn,
-        """insert into closing_sales(store_id,item_id,sale_price,regular_price,unit_id,note,starts_at,ends_at)
-        values(%s,%s,%s,%s,%s,%s,%s,%s) returning *""",
+        """insert into closing_sales(store_id,item_id,sale_price,regular_price,unit_id,note,starts_at,ends_at,variety_id)
+        values(%s,%s,%s,%s,%s,%s,%s,%s,%s) returning *""",
         (
             store_id,
             values['item_id'],
@@ -17,6 +17,7 @@ def create(conn, store_id, values):
             values.get('note'),
             values['starts_at'],
             values['ends_at'],
+            values.get('variety_id'),
         ),
     )
     return result[0]
@@ -54,7 +55,8 @@ def active(conn, now, market_id=None, item_id=None, store_id=None):
     return rows(
         conn,
         """select c.*,coalesce((select sum(v.count) from store_views v where v.sale_id=c.id),0) as views,
-        s.name_ko as store_name,s.market_id,e.name_ko as item_name
+        s.name_ko as store_name,s.market_id,e.name_ko as item_name,
+        (select name_ko from entities where id=c.variety_id) as variety_name
         from closing_sales c join stores s on s.id=c.store_id join entities e on e.id=c.item_id
         where s.active and c.status='active' and %s between c.starts_at and c.ends_at
         and (%s::text is null or s.market_id=%s) and (%s::text is null or c.item_id=%s)

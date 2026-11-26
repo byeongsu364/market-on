@@ -11,6 +11,7 @@ import Icon from '../../components/common/Icon';
 import ModelLabel from '../../components/domain/ModelLabel';
 import { routeHref } from '../../hooks/useShopRoute';
 import s from './shop.module.css';
+import { useWaitSteps } from '../../hooks/useWaitSteps';
 
 const examples = ['대파 냉동해도 돼요?', '4명 선물 3만원으로 구성해 줘', '사과 어디서 팔아요?'];
 
@@ -18,6 +19,8 @@ function Conversation({ marketId, itemId }: { marketId: string; itemId?: string 
   const t = useT();
   const ctx = useShoppingContext();
   const f = useChat(marketId, itemId);
+  const waitLabels = [t('waitSearch'), t('waitOrganize'), t('waitWrite')];
+  const waitStep = useWaitSteps(f.loading, waitLabels.length);
   return (
     <>
       <AppHeader
@@ -103,7 +106,7 @@ function Conversation({ marketId, itemId }: { marketId: string; itemId?: string 
             </article>
           ),
         )}
-        {f.loading && <p role="status">{t('shopChecking')}</p>}
+        {f.loading && <p role="status">{waitLabels[waitStep]}</p>}
         {f.error && <ErrorBox message={f.error} />}
       </div>
       <form

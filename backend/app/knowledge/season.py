@@ -29,6 +29,7 @@ def _facts(rows, item_id, month):
                     variety_id=row['subject_id'] if row['subject_id'] != item_id else None,
                     variety_name=row['subject_name'] if row['subject_id'] != item_id else None,
                     label=value['label'],
+                    **{k: value[k] for k in ('from', 'to') if k in value},
                     note=value.get('note'),
                     source=source,
                 )

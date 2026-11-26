@@ -1,14 +1,17 @@
 """Offline unit checks for matching, chunking and provider contracts."""
 
+import itertools
 import math
 from unittest.mock import MagicMock
+
 import pytest
-from app.knowledge.ingest import chunk_document, tag_entities, _hash
-from app.knowledge.ontology import normalize
-from app.llm.fake import FakeProvider
-from app.llm.factory import get_embedder, get_llm
+
 from app.core.config import settings
 from app.core.errors import AppError
+from app.knowledge.ingest import _hash, chunk_document, tag_entities
+from app.knowledge.ontology import normalize
+from app.llm.factory import get_embedder, get_llm
+from app.llm.fake import FakeProvider
 from app.schemas.knowledge import Document
 
 DICTIONARY = [
@@ -19,16 +22,16 @@ DICTIONARY = [
 
 
 def doc(**kwargs):
-    values = dict(
-        doc_key='a.md',
-        source_key='team',
-        doc_type='recipe',
-        lang='ko',
-        title='연습',
-        body='짧은 문서',
-        entities=['item:green_onion'],
-        entity_names=['대파'],
-    )
+    values = {
+        'doc_key': 'a.md',
+        'source_key': 'team',
+        'doc_type': 'story',
+        'lang': 'ko',
+        'title': '연습',
+        'body': '짧은 문서',
+        'entities': ['item:green_onion'],
+        'entity_names': ['대파'],
+    }
     return Document(**(values | kwargs))
 
 
@@ -51,7 +54,7 @@ def test_tagging(text, expected):
 def test_short_document():
     chunks = chunk_document(doc())
     assert len(chunks) == 1
-    assert chunks[0].content == '[대파 · 레시피] 짧은 문서'
+    assert chunks[0].content == '[대파 · 시장 이야기] 짧은 문서'
     assert chunks[0].entity_ids == {'item:green_onion'}
 
 
@@ -63,11 +66,11 @@ def test_whole_topics(kind):
 def test_windows_overlap_and_prefix():
     body = '## 준비\n' + ''.join(str(i % 10) for i in range(1550))
     chunks = chunk_document(doc(body=body))
-    prefix = '[대파 · 레시피] '
+    prefix = '[대파 · 시장 이야기] '
     pieces = [c.content.removeprefix(prefix) for c in chunks]
     assert len(pieces) >= 3
     assert all(c.content.startswith(prefix) for c in chunks)
-    assert all(a[-50:] == b[:50] for a, b in zip(pieces, pieces[1:]))
+    assert all(a[-50:] == b[:50] for a, b in itertools.pairwise(pieces))
     assert pieces[0] + ''.join(p[50:] for p in pieces[1:]) == body
     assert all(len(p) <= 500 for p in pieces)
 
@@ -158,16 +161,17 @@ def test_new_topic_prefix(kind, topic):
 
 
 def test_intent_mapping_and_search(monkeypatch):
-    from app.knowledge.intents import doc_types_for_intent, DOC_TYPE_TO_INTENT
-    from app.knowledge.retriever import search
     from app.db.repositories import knowledge_repo as repo
     from app.knowledge.ingest import TOPICS
+    from app.knowledge.intents import DOC_TYPE_TO_INTENT, doc_types_for_intent
+    from app.knowledge.retriever import search
 
     assert set(DOC_TYPE_TO_INTENT) == set(TOPICS) - {'season'}
     assert doc_types_for_intent('select') == ['criterion', 'grade', 'merchant_tip']
     assert doc_types_for_intent('origin') == ['origin', 'specialty']
     with pytest.raises(ValueError):
         doc_types_for_intent('unknown')
+    monkeypatch.setattr('app.knowledge.retriever.match_variety', lambda *args: None)
     match = MagicMock(return_value=[])
     monkeypatch.setattr(repo, 'match_chunks', match)
     search(None, FakeProvider(), '대파', entity_ids=['item:green_onion'], intent='store')

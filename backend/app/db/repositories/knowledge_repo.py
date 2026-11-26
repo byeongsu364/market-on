@@ -14,6 +14,8 @@ def source_id(conn, key):
 def upsert_source(conn, key, value):
     fields = ('title', 'publisher', 'url', 'license', 'kind', 'retrieved_at', 'quote_only')
     value = {'quote_only': False, **value}
+    if key == 'src:foodsafety-cookrcp01':
+        value['quote_only'] = True
     values = tuple(value.get(k) for k in fields)
     old = conn.execute(
         'select title,publisher,url,license,kind,retrieved_at,quote_only from sources where source_key=%s',
@@ -141,8 +143,8 @@ def delete_document(conn, did):
 
 def insert_document(conn, doc, digest):
     return conn.execute(
-        """insert into documents(doc_key,source_id,doc_type,lang,title,store_id,body,content_hash,market_id,published)
-        values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id""",
+        """insert into documents(doc_key,source_id,doc_type,lang,title,store_id,body,content_hash,market_id,published,review_status)
+        values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id""",
         (
             doc.doc_key,
             source_id(conn, doc.source_key),
@@ -154,14 +156,25 @@ def insert_document(conn, doc, digest):
             digest,
             doc.market_id,
             doc.published,
+            doc.review_status,
         ),
     ).fetchone()[0]
 
 
 def insert_chunk(conn, did, doc, chunk, digest):
     cid = conn.execute(
-        'insert into chunks(document_id,chunk_index,content,doc_type,lang,content_hash) values(%s,%s,%s,%s,%s,%s) returning id',
-        (did, chunk.chunk_index, chunk.content, doc.doc_type, doc.lang, digest),
+        'insert into chunks(document_id,chunk_index,content,doc_type,lang,content_hash,variety_id,numbers,props) values(%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id',
+        (
+            did,
+            chunk.chunk_index,
+            chunk.content,
+            doc.doc_type,
+            doc.lang,
+            digest,
+            chunk.variety_id,
+            chunk.numbers,
+            Jsonb(chunk.props),
+        ),
     ).fetchone()[0]
     for eid in sorted(chunk.entity_ids):
         conn.execute('insert into chunk_entities(chunk_id,entity_id) values(%s,%s)', (cid, eid))
@@ -182,14 +195,58 @@ def update_embeddings(conn, ids, vectors):
         conn.execute('update chunks set embedding=%s where id=%s', (Vector(vector), cid))
 
 
-def match_chunks(conn, vector, entity_ids, doc_types, lang, k, minimum):
+def match_chunks(conn, vector, entity_ids, doc_types, lang, k, minimum, variety_id=None):
+    if variety_id is None:
+        # Keep the existing HNSW iterative-scan path for ordinary vector searches.
+        return conn.execute(
+            """select m.chunk_id,m.content,m.similarity,m.doc_type,m.document_title,
+            m.store_id,m.source_title,m.source_url,m.license,(s.quote_only or d.doc_type='recipe'),d.published,d.market_id
+            from match_chunks(%s,%s,%s,%s,%s,%s) with ordinality as m
+            join chunks c on c.id=m.chunk_id
+            join documents d on d.id=c.document_id
+            join sources s on s.id=d.source_id order by m.ordinality""",
+            (Vector(vector), entity_ids, doc_types, lang, k, minimum),
+        ).fetchall()
     return conn.execute(
-        """select m.chunk_id,m.content,m.similarity,m.doc_type,m.document_title,m.store_id,m.source_title,m.source_url,m.license, s.quote_only, d.published, d.market_id
-        from match_chunks(%s,%s,%s,%s,%s,%s) with ordinality as m
-        join chunks c on c.id=m.chunk_id
-        join documents d on d.id=c.document_id
-        join sources s on s.id=d.source_id order by m.ordinality""",
-        (Vector(vector), entity_ids, doc_types, lang, k, minimum),
+        """select c.id,c.content,1-(c.embedding <=> %(vector)s),c.doc_type,
+        d.title,d.store_id,s.title,s.url,s.license,(s.quote_only or d.doc_type='recipe'),d.published,d.market_id
+        from chunks c join documents d on d.id=c.document_id
+        join sources s on s.id=d.source_id
+        where d.review_status <> 'rejected' and c.embedding is not null
+        and (%(entities)s::text[] is null or cardinality(%(entities)s::text[])=0 or exists (
+          select 1 from chunk_entities ce where ce.chunk_id=c.id and ce.entity_id=any(%(entities)s)))
+        and (%(types)s::text[] is null or c.doc_type=any(%(types)s))
+        and (%(lang)s::text is null or c.lang=%(lang)s)
+        and 1-(c.embedding <=> %(vector)s) >= %(minimum)s
+        order by coalesce(c.variety_id=%(variety)s,false) desc,
+        c.embedding <=> %(vector)s,c.id limit %(k)s""",
+        {
+            'vector': Vector(vector),
+            'entities': entity_ids,
+            'types': doc_types,
+            'lang': lang,
+            'minimum': minimum,
+            'variety': variety_id,
+            'k': k,
+        },
+    ).fetchall()
+
+
+def document_varieties(conn, item_ids):
+    return {
+        r[0]
+        for r in conn.execute(
+            """select e.id from entity_relations r join entities e on e.id=r.object_id
+        where r.subject_id=any(%s) and r.predicate='hasGrade' and e.type='variety'""",
+            (item_ids,),
+        )
+    }
+
+
+def ko_variety_labels(conn):
+    return conn.execute(
+        """select l.label_norm,l.entity_id,l.label from entity_labels l
+        join entities e on e.id=l.entity_id where e.type='variety' and l.lang='ko'"""
     ).fetchall()
 
 
@@ -334,14 +391,16 @@ def search_items(conn, query):
     # strpos treats %, _ and backslashes as literal query characters.
     return rows(
         conn,
-        """select entity_id from (
-        select distinct on (l.entity_id) l.entity_id,
+        """select entity_id, variety_id from (
+        select distinct on (coalesce(r.subject_id,l.entity_id)) coalesce(r.subject_id,l.entity_id) as entity_id,
+          case when e.type='variety' then e.id else null end as variety_id,
           case when l.label_norm=%s then 0
                when strpos(l.label_norm,%s)=1 then 1 else 2 end as rank,
           case when l.kind='preferred' then 0 else 1 end as preferred
         from entity_labels l join entities e on e.id=l.entity_id
-        where e.type='item' and strpos(l.label_norm,%s)>0
-        order by l.entity_id,rank,preferred
+        left join entity_relations r on r.object_id=e.id and r.predicate='hasGrade'
+        where (e.type='item' or (e.type='variety' and r.subject_id is not null)) and strpos(l.label_norm,%s)>0
+        order by coalesce(r.subject_id,l.entity_id),rank,preferred
         ) matches order by rank,preferred,entity_id limit 10""",
         (query, query, query),
     )
@@ -458,3 +517,20 @@ def variety_items(conn, variety_ids):
             (variety_ids,),
         )
     ]
+
+
+def source_title(conn, key):
+    row = conn.execute('select title from sources where source_key=%s', (key,)).fetchone()
+    return row[0] if row else None
+
+
+def storage_relations(conn, item_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select r.object_value, s.source_key, s.title, s.publisher, s.url, s.license
+        from entity_relations r join sources s on s.id=r.source_id
+        where r.subject_id=%s and r.predicate='storedAs' order by r.id""",
+        (item_id,),
+    )

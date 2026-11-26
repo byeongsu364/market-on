@@ -44,6 +44,7 @@ class StorePrice(BaseModel):
 
 
 class Store(BaseModel):
+    varieties: list[str] = []
     lat: float | None = None
     lng: float | None = None
     category: str | None = None
@@ -68,6 +69,7 @@ class Store(BaseModel):
     highlight: bool
     active_sale: ActiveSale | None
     price: StorePrice | None = None
+    pending_reporters: int = 0
 
 
 class MarketMap(BaseModel):

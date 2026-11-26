@@ -39,3 +39,5 @@ class ChatResponse(BaseModel):
     model: str | None = None
     removed: int = 0
     reply_sig: str | None = None
+    # 040: 실제로 거친 단계 (plan·tools·write·check). 화면의 단계 표시용
+    steps: list[str] = Field(default_factory=list)

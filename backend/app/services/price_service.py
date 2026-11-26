@@ -49,28 +49,7 @@ def get_price(
         if unit_id
         else next((u for u in units if (u['props'] or {}).get('default')), None)
     )
-    multiplier = 1
-    # Preserve the complete survey denomination when no existing unit ID represents it.
-    raw_unit = baseline['unit'] or ''
-    size = baseline['unit_sz'] or '1'
-    unit = f'{size}{raw_unit}'
-    represented = price_repo.observation_unit_id(conn, raw_unit, size)
-    if represented:
-        unit = represented
-    if target:
-        try:
-            survey_size = float(size)
-        except (TypeError, ValueError):
-            survey_size = 0
-        props = {}
-        if raw_unit in ('kg', 'g'):
-            props['factor_kg'] = survey_size * (0.001 if raw_unit == 'g' else 1)
-        elif raw_unit in ('개', '포기', '마리', '송이', '손'):
-            props['count'] = survey_size
-        factor = unit_multiplier({'id': 'survey', 'props': props}, target)
-        if factor is not None:
-            multiplier = factor
-            unit = target['id']
+    unit, multiplier = baseline_unit(conn, baseline, target)
     reference = baseline['traditional'] or baseline['all']
     reference_price = round(reference['avg'] * multiplier)
     fallback = (
@@ -110,7 +89,7 @@ def get_price(
         values['this_market'] = MarketPrice(
             price=round(baseline['this_market']['price'] * multiplier), name=market['name_ko']
         )
-    if _include_varieties and len(choices) >= 2:
+    if _include_varieties:
         for choice in choices:
             try:
                 view = get_price(
@@ -128,6 +107,7 @@ def get_price(
                 view = None
             values['varieties'].append(
                 {
+                    **variety_metadata(conn, item_id, choice),
                     'variety_id': choice['id'],
                     'name': choice['name_ko'],
                     'reference_price': view.reference_price if view else None,
@@ -159,3 +139,128 @@ def unit_multiplier(source, target):
         if a > 0 and b > 0:
             return b / a
     return None
+
+
+def variety_metadata(conn, item_id, choice):
+    from app.knowledge.season import season_facts
+
+    attrs = choice.get('attrs') or {}
+    source = knowledge_repo.source_title(conn, attrs.get('description_source'))
+    harvest = next(
+        (h for h in season_facts(conn, item_id)['harvest'] if h['variety_id'] == choice['id']), None
+    )
+    return dict(
+        description=attrs.get('description'),
+        description_source=source,
+        harvest={k: harvest[k] for k in ('label', 'from', 'to') if k in harvest}
+        if harvest
+        else None,
+        synonyms=[
+            l['label']
+            for l in knowledge_repo.item_labels(conn, choice['id'])
+            if l['lang'] == 'ko' and l['label'] != choice['name_ko']
+        ],
+    )
+
+
+def list_varieties(conn, item_id):
+    if knowledge_repo.get_item(conn, item_id) is None:
+        raise AppError('ITEM_NOT_FOUND', '품목을 찾을 수 없습니다.', 404)
+    return [
+        dict(variety_id=v['id'], name=v['name_ko'], **variety_metadata(conn, item_id, v))
+        for v in price_repo.varieties(conn, item_id)
+    ]
+
+
+def get_history(
+    conn, item_id, *, variety_id=None, market_id=None, weeks=4, unit_id=None, on_date=None
+):
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+
+    today = on_date or datetime.now(ZoneInfo('Asia/Seoul')).date()
+    if not 1 <= weeks <= 8:
+        raise AppError('INVALID_WEEKS', '주 수는 1~8입니다.', 422)
+    if knowledge_repo.get_item(conn, item_id) is None:
+        raise AppError('ITEM_NOT_FOUND', '품목을 찾을 수 없습니다.', 404)
+    if market_id and store_repo.get_market(conn, market_id) is None:
+        raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
+    choices = price_repo.varieties(conn, item_id)
+    selected = (
+        next((v for v in choices if v['id'] == variety_id), None)
+        if variety_id
+        else next((v for v in choices if (v['props'] or {}).get('default')), None)
+    )
+    if variety_id and selected is None:
+        raise AppError('INVALID_VARIETY', '이 품목의 품종이 아닙니다.', 422)
+    variety_id = selected['id'] if selected else None
+    units = price_repo.sale_units(conn, item_id)
+    unit = unit_id or next((u['id'] for u in units if (u['props'] or {}).get('default')), '')
+    monday = today - timedelta(days=today.weekday())
+    points = []
+    for offset in reversed(range(weeks)):
+        start = monday - timedelta(weeks=offset)
+        values = []
+        market = store_repo.get_market(conn, market_id) if market_id else None
+        for day in price_repo.observation_dates(
+            conn, item_id, variety_id, start, min(start + timedelta(days=6), today)
+        ):
+            baseline = price_repo.baseline(
+                conn,
+                item_id,
+                variety_id=variety_id,
+                on_date=day,
+                sgg_nm=market.get('at_sgg_nm') if market else None,
+                lookback_days=0,
+            )
+            if baseline is None:
+                continue
+            target = next((u for u in units if u['id'] == unit), None)
+            observed_unit, multiplier = baseline_unit(conn, baseline, target)
+            if observed_unit == unit:
+                stat = baseline['traditional'] or baseline['all']
+                values.append((stat['avg'] * multiplier, stat['n']))
+        points.append(
+            dict(
+                week_start=start,
+                price=round(
+                    sum(value * count for value, count in values)
+                    / sum(count for _, count in values)
+                )
+                if values
+                else None,
+            )
+        )
+    return dict(
+        item_id=item_id,
+        variety_id=variety_id,
+        unit=unit,
+        points=points,
+        source='aT 기간별 소매가격 · 주별 평균',
+    )
+
+
+def baseline_unit(conn, baseline, target):
+    multiplier = 1
+    # Preserve the complete survey denomination when no existing unit ID represents it.
+    raw_unit = baseline['unit'] or ''
+    size = baseline['unit_sz'] or '1'
+    unit = f'{size}{raw_unit}'
+    represented = price_repo.observation_unit_id(conn, raw_unit, size)
+    if represented:
+        unit = represented
+    if target:
+        try:
+            survey_size = float(size)
+        except (TypeError, ValueError):
+            survey_size = 0
+        props = {}
+        if raw_unit in ('kg', 'g'):
+            props['factor_kg'] = survey_size * (0.001 if raw_unit == 'g' else 1)
+        elif raw_unit in ('개', '포기', '마리', '송이', '손'):
+            props['count'] = survey_size
+        factor = unit_multiplier({'id': 'survey', 'props': props}, target)
+        if factor is not None:
+            multiplier = factor
+            unit = target['id']
+    return unit, multiplier

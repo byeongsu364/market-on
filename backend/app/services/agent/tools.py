@@ -10,6 +10,7 @@ from app.services import (
     item_service,
     market_service,
     price_service,
+    recipe_service,
     recommend_service,
     sale_service,
 )
@@ -21,6 +22,10 @@ class Search(BaseModel):
 
 class ItemArg(BaseModel):
     item_id: str
+
+
+class RecipeArg(ItemArg):
+    q: str | None = Field(default=None, max_length=200)
 
 
 class PriceArg(ItemArg):
@@ -37,6 +42,7 @@ class AskArg(ItemArg):
 
 
 LABELS = {
+    'find_recipes': '레시피로 장보기',
     'search_items': '품목 찾기',
     'reference_price': '기준시세 확인',
     'find_stores': '판매 점포 찾기',
@@ -45,6 +51,7 @@ LABELS = {
     'compose_shopping': '장보기 구성',
 }
 MODELS = {
+    'find_recipes': RecipeArg,
     'search_items': Search,
     'reference_price': PriceArg,
     'find_stores': ItemArg,
@@ -76,6 +83,10 @@ def execute(conn, market_id, device_id, name, arguments):
         data = MODELS[name].model_validate(arguments | {'market_id': market_id})
         if getattr(data, 'item_id', None):
             item_service.get_item(conn, data.item_id)
+        if name == 'find_recipes':
+            return recipe_service.find_recipes(
+                conn, item_id=data.item_id, market_id=market_id, q=data.q
+            )
         if name == 'search_items':
             return [
                 {'item_id': i.item_id, 'name': i.name}

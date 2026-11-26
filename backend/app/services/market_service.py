@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from types import SimpleNamespace
 
 from app.core.errors import AppError
-from app.db.repositories import sale_repo, store_repo
+from app.db.repositories import merchant_repo, sale_repo, store_repo
 from app.schemas.market import ActiveSale, Market, MarketMap, Store, StorePrice, Zone
 
 from .price_service import get_price
@@ -141,6 +141,10 @@ def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
         hours = row['hours'] or {}
         sells = assortment.get(row['id'], [])
         sale = sales.get(row['id'])
+        shown, pending = None, 0
+        if item_id and item_id in sells:
+            _, shown, pending = store_price(conn, row, item_id, unit, with_pending=True)
+            shown = shown or market_avg
         stores.append(
             Store(
                 # 상가정보 좌표는 건물 단위(경동 108곳 중 101곳이 같은 점)라 지도 핀으로는
@@ -152,6 +156,9 @@ def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
                 naver_name=row['name_ko'],
                 verified=row.get('location_verified', False),
                 open_now=open_now(hours),
+                varieties=[
+                    v for ids in merchant_repo.varieties(conn, row['id']).values() for v in ids
+                ],
                 payments=row.get('payments', []),
                 intro=row.get('intro'),
                 distance_m=round(distance(lat, lng, SimpleNamespace(**row)) * 6_371_000)
@@ -178,9 +185,8 @@ def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
                 else '',
                 highlight=item_id is not None and item_id in sells,
                 active_sale=ActiveSale(**sale) if sale else None,
-                price=store_price(conn, row, item_id, unit)[1] or market_avg
-                if item_id and item_id in sells
-                else None,
+                price=shown,
+                pending_reporters=pending,
             )
         )
     logger.info('Market %s: omitted %d stores without map coordinates', market_id, omitted)

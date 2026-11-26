@@ -14,12 +14,13 @@ from app.knowledge import (
     ontology,
     retriever,
     season,
+    storage,
 )
 from app.llm import ask as ask_llm
 from app.llm.factory import get_embedder
 from app.schemas.ask import AskResponse
 
-from . import item_service, market_service, price_service
+from . import item_service, market_service, price_service, recipe_service
 from .price_report_service import hash_device
 
 TOPICS = {
@@ -31,7 +32,9 @@ TOPICS = {
 }
 
 
-def ask(conn, data, device_id, *, embedder=None, consume=True):
+def ask(
+    conn, data, device_id, *, embedder=None, consume=True, use_cache=True, raise_unavailable=False
+):
     if consume:
         consume_quota(conn, device_id)
     intent = data.intent or ask_intent.rule_intent(data.question) or ask_llm.classify(data.question)
@@ -46,6 +49,15 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
         varieties = [eid for eid in resolved if eid.startswith('variety:')]
         if not ids and varieties:
             ids = knowledge_repo.variety_items(conn, varieties)
+    if intent == 'recipe' and not ids:
+        result.kind = 'recipes'
+        result.recipes = recipe_service.find_recipes(
+            conn, market_id=data.market_id, q=data.question, embedder=embedder
+        )
+        result.citations = list(
+            {r['source']['title']: r['source'] for r in result.recipes}.values()
+        )
+        return result
     if len(ids) != 1:
         candidates = {}
         for query in [data.question or '', *re.findall(r'[가-힣A-Za-z]+', data.question or '')]:
@@ -57,6 +69,15 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
     if not item:
         raise AppError('ITEM_NOT_FOUND', '품목을 찾을 수 없습니다.', 404)
     result.item_id, result.item_name = ids[0], item['name_ko']
+    if intent == 'recipe':
+        result.kind = 'recipes'
+        result.recipes = recipe_service.find_recipes(
+            conn, item_id=ids[0], market_id=data.market_id, q=data.question, embedder=embedder
+        )
+        result.citations = list(
+            {r['source']['title']: r['source'] for r in result.recipes}.values()
+        )
+        return result
     if intent == 'price':
         result.kind = 'price'
         result.price = price_service.get_price(conn, ids[0], market_id=data.market_id)
@@ -78,8 +99,15 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
         )
         result.citations = season.statement_citations(statements)
         return result
+    if intent == 'store' and storage.is_fact_question(data.question):
+        statements = storage.storage_statements(conn, ids[0], item['name_ko'])
+        if statements:
+            result.kind = 'answer'
+            result.answer = ' '.join(text for text, _ in statements)
+            result.citations = season.statement_citations(statements)
+            return result
     key = answer_cache.cache_key(conn, ids[0], intent, data.lang, data.question)
-    cached = answer_cache.get_cached_answer(conn, key)
+    cached = answer_cache.get_cached_answer(conn, key) if use_cache else None
     if cached:
         return AskResponse(**(cached | {'cached': True, 'model': None}))
     result.kind = 'no_evidence'
@@ -130,13 +158,21 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
         checked.update(answer=answer, removed=removed, used=sorted(set(used)))
         return None if answer else 'unsupported'
 
+    question = data.question or f'{item["name_ko"]} {TOPICS[intent]} 방법을 알려 주세요.'
+    # 040: 근거가 길거나 많으면 제미나이→GPT가 필요한 사실만 뽑고, 젬마가 최종 답을 써요
+    # 답 확인(accept)은 언제나 원래 근거(cleaned)로 해요
+    steps = ['search']
+    evidence = cleaned
+    if ask_llm.needs_extract(cleaned):
+        evidence = ask_llm.extract(question, cleaned)
+        steps.append('extract')
+    steps += ['write', 'check']
+    result.steps = steps
     try:
-        routed = ask_llm.generate(
-            data.question or f'{item["name_ko"]} {TOPICS[intent]} 방법을 알려 주세요.',
-            cleaned,
-            accept,
-        )
+        routed = ask_llm.generate(question, evidence, accept)
     except (AppError, httpx.HTTPError, TimeoutError):
+        if raise_unavailable:
+            raise
         return result
     # Router may return the last rejected result or a rejected fallback.
     rejection = accept(routed.value)
