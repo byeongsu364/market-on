@@ -58,3 +58,22 @@ it('내 확인 가격이 있으면 상인 확인 줄은 한 번만 보여 준다
   expect(screen.queryByText('· 상인 확인')).not.toBeInTheDocument();
   vi.restoreAllMocks();
 });
+it('시장 평균은 조사일을 표시하고 오래된 점포 가격 스타일을 쓰지 않는다', () => {
+  render(
+    <StorePriceDisplay
+      price={{
+        ...price,
+        price: 2000,
+        source: 'market_avg',
+        observed_on: '2026-11-25',
+        stale: true,
+        merchant_confirmed: false,
+      }}
+    />,
+  );
+  expect(screen.getByText('2,000원 / 1개')).toBeInTheDocument();
+  expect(screen.getByText('시장 평균 · aT 11월 25일 조사').closest('.store-price')).not.toHaveClass(
+    'stale',
+  );
+  expect(screen.queryByText(/손님|상인 확인/)).not.toBeInTheDocument();
+});

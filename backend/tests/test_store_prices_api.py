@@ -115,5 +115,6 @@ def test_map_price_order_unit_and_keys(public, monkeypatch):
         'latest_at',
         'stale',
         'merchant_confirmed',
+        'observed_on',
     }
     assert all(s['price'] is None for s in client.get('/markets/market:demo/map').json()['stores'])

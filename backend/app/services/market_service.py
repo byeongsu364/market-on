@@ -1,12 +1,15 @@
 """Public market distance ordering and floorplan assembly."""
 
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, datetime, time
 from math import asin, cos, radians, sin, sqrt
+from zoneinfo import ZoneInfo
 
 from app.core.errors import AppError
 from app.db.repositories import sale_repo, store_repo
-from app.schemas.market import ActiveSale, Market, MarketMap, Store, Zone
+from app.schemas.market import ActiveSale, Market, MarketMap, Store, StorePrice, Zone
+
+from .price_service import get_price
 
 logger = logging.getLogger(__name__)
 ZONE_ORDER = ('청과', '채소', '수산', '정육', '반찬', '떡·분식')
@@ -93,6 +96,28 @@ def market_map(conn, market_id, item_id=None, unit=None):
         s['store_id']: s
         for s in sale_repo.latest_active_by_store(conn, market_id, datetime.now(UTC))
     }
+    market_avg = None
+    if item_id:
+        try:
+            reference = get_price(
+                conn, item_id, market_id=market_id, unit_id=unit, _include_varieties=False
+            )
+        except AppError as exc:
+            if exc.code != 'PRICE_NOT_FOUND':
+                raise
+        else:
+            if reference.this_market is not None:
+                seoul = ZoneInfo('Asia/Seoul')
+                market_avg = StorePrice(
+                    price=reference.this_market.price,
+                    unit=reference.unit,
+                    source='market_avg',
+                    reporters=0,
+                    latest_at=datetime.combine(reference.observed_on, time.min, tzinfo=seoul),
+                    observed_on=reference.observed_on,
+                    stale=reference.observed_on < datetime.now(seoul).date(),
+                    merchant_confirmed=False,
+                )
     stores, omitted = [], 0
     for row in store_repo.list_stores(conn, market_id):
         if not row['active']:
@@ -123,14 +148,22 @@ def market_map(conn, market_id, item_id=None, unit=None):
                 else '',
                 highlight=item_id is not None and item_id in sells,
                 active_sale=ActiveSale(**sale) if sale else None,
-                price=store_price(conn, row, item_id, unit)[1]
+                price=store_price(conn, row, item_id, unit)[1] or market_avg
                 if item_id and item_id in sells
                 else None,
             )
         )
     logger.info('Market %s: omitted %d stores without map coordinates', market_id, omitted)
     if item_id:
-        stores.sort(key=lambda s: 2 if s.price is None else int(s.price.stale))
+        stores.sort(
+            key=lambda s: (
+                3
+                if s.price is None
+                else 2
+                if s.price.source == 'market_avg'
+                else int(s.price.stale)
+            )
+        )
     return MarketMap(
         market_id=market_id,
         layout='schematic',

@@ -111,6 +111,7 @@ export const price = (q: PriceRequest): Promise<Price> =>
       observed_on: '2026-11-20',
       fallback: null,
       source: q.item_id === 'item:green_onion' ? source : '팀 작성 예시 가격 · 2026-11-20 · 샘플',
+      this_market: q.market_id ? { price: reference_price, name: '시연 시장' } : undefined,
       by_market_type: {
         traditional: { price: reference_price, count: 15 },
         large_retail: {
@@ -122,8 +123,35 @@ export const price = (q: PriceRequest): Promise<Price> =>
       },
     };
   });
-export const map = (market_id: string, item_id?: string, unit?: string): Promise<MarketMap> =>
-  mock(() => ({
+export const map = async (
+  market_id: string,
+  item_id?: string,
+  unit?: string,
+): Promise<MarketMap> => {
+  const reference = item_id
+    ? await price({
+        item_id,
+        market_id,
+        unit: unit ?? items.find((i) => i.item_id === item_id)!.default_unit,
+      })
+    : null;
+  const average: import('../../types/contract').StorePrice = reference?.this_market
+    ? {
+        price: reference.this_market.price,
+        unit: reference.unit,
+        source: 'market_avg',
+        observed_on: reference.observed_on,
+        reporters: 0,
+        latest_at: `${reference.observed_on}T00:00:00+09:00`,
+        stale:
+          reference.observed_on <
+          new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date()),
+        merchant_confirmed: false,
+      }
+    : null;
+  const rank = (p: import('../../types/contract').StorePrice) =>
+    !p ? 3 : p.source === 'market_avg' ? 2 : Number(p.stale);
+  return mock(() => ({
     market_id,
     layout: 'schematic',
     source_note: '시연용 예시 배치',
@@ -133,15 +161,18 @@ export const map = (market_id: string, item_id?: string, unit?: string): Promise
         ...s,
         highlight: !!item_id && s.sells.includes(item_id),
         active_sale: activeForStore(s.store_id, item_id),
-        price: item_id && s.sells.includes(item_id) ? storePrice(s.store_id, item_id, unit) : null,
+        price:
+          item_id && s.sells.includes(item_id)
+            ? (storePrice(s.store_id, item_id, unit) ?? average)
+            : null,
       }))
       .sort(
         (a, b) =>
-          (item_id
-            ? (a.price ? Number(a.price.stale) : 2) - (b.price ? Number(b.price.stale) : 2)
-            : 0) || Number(!!b.active_sale) - Number(!!a.active_sale),
+          (item_id ? rank(a.price) - rank(b.price) : 0) ||
+          Number(!!b.active_sale) - Number(!!a.active_sale),
       ),
   }));
+};
 export const recommend = (q: RecommendRequest): Promise<RecommendResponse> =>
   mock(() => {
     const chosen = items

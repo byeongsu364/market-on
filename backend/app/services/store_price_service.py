@@ -58,8 +58,7 @@ def aggregate(reports, confirmations, units, target_id, *, now=None):
         if values
         else None
     )
-    newest_report = max((t for _, t in latest.values()), default=None)
-    if confirmation and (newest_report is None or confirmation['confirmed_at'] > newest_report):
+    if confirmation:
         value = converted(confirmation)
         if value is not None:
             return customers, result(value, confirmation['confirmed_at'], 'merchant', 0)

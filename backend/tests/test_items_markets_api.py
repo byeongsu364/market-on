@@ -2,6 +2,7 @@
 
 from contextlib import nullcontext
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -28,6 +29,11 @@ def public(monkeypatch):
     monkeypatch.setattr(price_repo, 'list_reports', lambda *a, **kw: [])
     monkeypatch.setattr(price_repo, 'store_confirmations', lambda *a: [])
     monkeypatch.setattr(price_repo, 'sale_units', lambda *a: [])
+    from app.services import market_service
+
+    monkeypatch.setattr(
+        market_service, 'get_price', lambda *a, **kw: SimpleNamespace(this_market=None)
+    )
     markets, zones, stores, items = {}, {}, {}, {}
     for name, target in [
         ('upsert_market', markets),

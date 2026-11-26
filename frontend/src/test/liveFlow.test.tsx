@@ -216,6 +216,7 @@ it('결과 판매 점포에 손님·상인·미등록 가격을 표시한다', a
   const sellers = map.stores.filter((s) => s.highlight);
   sellers[0].price = { ...base, source: 'customers' };
   sellers[1].price = { ...base, price: 2000, source: 'merchant', reporters: 0, stale: true };
+  sellers[2].price = null;
   const spy = vi.spyOn(storesApi, 'getMarketMap').mockResolvedValue(map);
   try {
     show('/items/item:green_onion', { method: 'manual' });

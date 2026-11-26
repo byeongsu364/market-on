@@ -83,6 +83,7 @@ it('상인 가격 확인과 지도 가격의 계약 키를 유지한다', async 
   expect(Object.keys(map.stores[0].price!).sort()).toEqual([
     'latest_at',
     'merchant_confirmed',
+    'observed_on',
     'price',
     'reporters',
     'source',

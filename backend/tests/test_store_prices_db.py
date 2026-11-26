@@ -58,5 +58,5 @@ def test_confirmation_and_map(auth_db):
         reported_at=datetime.now(UTC),
     )
     price = client.get(path).json()['stores'][0]['price']
-    assert price['merchant_confirmed'] and price['source'] == 'customers'
+    assert price['merchant_confirmed'] and price['source'] == 'merchant'
     assert all(s['price'] is None for s in client.get('/markets/market:demo/map').json()['stores'])

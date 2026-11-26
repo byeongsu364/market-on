@@ -72,12 +72,17 @@ def test_confirmation_precedence_and_expiry():
     confirmation = dict(price=2000, unit_id='unit:piece', confirmed_at=NOW - timedelta(hours=1))
     assert run([report(hours=2)], [confirmation])[1]['source'] == 'merchant'
     customers, shown = run([report()], [confirmation])
-    assert shown['source'] == 'customers' and customers['merchant_confirmed']
+    assert shown['source'] == 'merchant' and customers['merchant_confirmed']
     assert run([], [confirmation])[1]['reporters'] == 0
     assert run([], [confirmation | {'confirmed_at': NOW - timedelta(days=8)}])[1] is None
-    # A filtered outlier is still the latest customer report for precedence.
+    # Even a newer customer outlier does not override a recent confirmation.
     rows = [report(1800, 'a', 2), report(1800, 'b', 2), report(9000, 'c')]
-    assert run(rows, [confirmation])[1]['source'] == 'customers'
+    assert run(rows, [confirmation])[1]['source'] == 'merchant'
+    confirmation['confirmed_at'] = NOW - timedelta(days=3)
+    customers, shown = run([report(hours=24)], [confirmation])
+    assert shown['source'] == 'merchant' and customers['price'] == 1800
+    confirmation['confirmed_at'] = NOW - timedelta(days=8)
+    assert run([report(hours=24)], [confirmation])[1]['source'] == 'customers'
 
 
 def test_missing_quantity_counts_as_one_unit():

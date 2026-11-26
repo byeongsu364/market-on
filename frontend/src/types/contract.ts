@@ -201,7 +201,8 @@ export type PriceReportResponse = { id: number; updated: boolean };
 export type StorePrice = {
   price: number;
   unit: string;
-  source: 'customers' | 'merchant';
+  source: 'customers' | 'merchant' | 'market_avg';
+  observed_on?: string | null;
   reporters: number;
   latest_at: string;
   stale: boolean;

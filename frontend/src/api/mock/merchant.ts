@@ -278,6 +278,7 @@ export function storePrice(
     price: c.price,
     unit: c.unit,
     source: 'merchant',
+    observed_on: null,
     reporters: 0,
     latest_at: c.confirmed_at,
     stale:

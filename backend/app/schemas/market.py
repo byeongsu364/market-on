@@ -1,6 +1,6 @@
 """Public market and map contracts."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel
@@ -31,7 +31,8 @@ class ActiveSale(BaseModel):
 class StorePrice(BaseModel):
     price: int
     unit: str
-    source: Literal['customers', 'merchant']
+    source: Literal['customers', 'merchant', 'market_avg']
+    observed_on: date | None = None
     reporters: int
     latest_at: datetime
     stale: bool
