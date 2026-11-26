@@ -1,3 +1,4 @@
+import StoreReviews from '../components/domain/StoreReviews';
 import { useSearchParams } from 'react-router-dom';
 import { useMarketMap } from '../hooks/useMarketMap';
 import StorePriceDisplay from '../components/domain/StorePriceDisplay';
@@ -62,6 +63,7 @@ export default function StorePage() {
               />
             </Resource>
           )}
+          <StoreReviews key={storeId} storeId={storeId} />
           <h2>{t('sells')}</h2>
           <div className="chips">
             {state.data.items.map((i) => (

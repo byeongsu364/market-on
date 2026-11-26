@@ -27,7 +27,7 @@ def get_llm_dep() -> LLMProvider:
 
 def require_csrf(request: Request):
     if (
-        request.method in ('POST', 'PATCH', 'DELETE')
+        request.method in ('POST', 'PUT', 'PATCH', 'DELETE')
         and request.headers.get('X-Requested-With') != 'market-on'
     ):
         raise AppError('CSRF_REQUIRED', '요청 헤더를 확인하세요.', 403)
@@ -52,4 +52,21 @@ def require_operator(user=Depends(current_user)):
 def require_market_admin(user=Depends(current_user)):
     if user['role'] != 'market_admin' or user['status'] != 'approved':
         raise AppError('FORBIDDEN', '시장 관리자 권한이 필요합니다.', 403)
+    return user
+
+
+def optional_user(request: Request, conn=Depends(get_db)):
+    if not request.cookies.get('mo_session'):
+        return None
+    try:
+        return auth_service.current(conn, request.cookies.get('mo_session'))
+    except AppError as error:
+        if error.status_code != 401:
+            raise
+        return None
+
+
+def require_customer(user=Depends(current_user)):
+    if user['role'] != 'customer' or user['status'] != 'approved':
+        raise AppError('FORBIDDEN', '리뷰는 손님 계정으로 쓸 수 있어요', 403)
     return user

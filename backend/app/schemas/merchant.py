@@ -1,7 +1,7 @@
 """Validated merchant/auth request contracts. Extra store_id fields are ignored."""
 
 from typing import Literal
-from pydantic import BaseModel, Field, SecretStr, AwareDatetime
+from pydantic import BaseModel, Field, SecretStr, AwareDatetime, model_validator
 
 
 class Credentials(BaseModel):
@@ -14,7 +14,16 @@ class Credentials(BaseModel):
 
 
 class Signup(Credentials):
-    store_id: str = Field(max_length=100)
+    role: Literal['merchant', 'customer'] = 'merchant'
+    store_id: str | None = Field(default=None, max_length=100)
+
+    @model_validator(mode='after')
+    def signup_role(self):
+        if self.role == 'customer' and 'store_id' in self.model_fields_set:
+            raise ValueError('손님은 점포를 지정할 수 없습니다.')
+        if self.role == 'merchant' and not self.store_id:
+            raise ValueError('점포를 선택하세요.')
+        return self
 
 
 class Hours(BaseModel):

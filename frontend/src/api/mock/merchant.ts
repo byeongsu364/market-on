@@ -1,3 +1,4 @@
+import { resetReviews } from './reviews';
 import type {
   AuthRequest,
   User,
@@ -88,6 +89,21 @@ export async function logout() {
 }
 export async function signup(q: AuthRequest) {
   validateSignup(q.login_id, q.password);
+  if (q.role === 'customer') {
+    if (q.store_id !== undefined) throw new Error('손님은 점포를 지정할 수 없어요.');
+    const u: PendingMerchant = {
+      id: q.login_id,
+      login_id: q.login_id,
+      role: 'customer',
+      status: 'approved',
+      store: null,
+      market: null,
+      created_at: new Date().toISOString(),
+    };
+    users.push(u);
+    passwords.set(u.login_id, q.password);
+    return session(u);
+  }
   if (users.some((u) => u.store?.store_id === q.store_id && u.status === 'approved'))
     throw new Error('이미 승인된 상인이 있는 점포예요.');
   const s = stores.find((s) => s.store_id === q.store_id);
@@ -247,6 +263,7 @@ export async function view(id: number) {
 }
 
 export function resetMock() {
+  resetReviews();
   current = null;
   confirmations.clear();
   users.splice(0, users.length, ...structuredClone(initialUsers));

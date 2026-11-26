@@ -3,6 +3,7 @@ import { Route, Routes, Link, Navigate, Outlet } from 'react-router-dom';
 import { SessionProvider } from './store/SessionProvider';
 import PageLayout from './components/layout/PageLayout';
 import Join from './pages/Join';
+import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Scan from './pages/Scan';
 import Result from './pages/Result';
@@ -52,6 +53,7 @@ function AppRoutes() {
         <Route path="scan" element={<Scan />} />
         <Route path="items/:itemId" element={<Result />} />
         <Route path="map" element={<MarketMap />} />
+        <Route path="signup" element={<Signup />} />
         <Route path="join" element={<Join />} />
         <Route path="markets" element={<MarketSelect />} />
         <Route path="chat" element={<Chat />} />

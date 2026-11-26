@@ -1,3 +1,4 @@
+import StoreReviews from './StoreReviews';
 import { useT } from '../../i18n';
 import { useEffect, useRef } from 'react';
 import type { Store } from '../../types/contract';
@@ -28,7 +29,7 @@ export default function StoreSheet({
       if (e.key === 'Escape') onClose();
       if (e.key === 'Tab') {
         const nodes = ref.current?.querySelectorAll<HTMLElement>(
-          'button,a,input,select,[tabindex="0"]',
+          'button,a,input,textarea,select,[tabindex="0"]',
         );
         if (!nodes?.length) return;
         const first = nodes[0],
@@ -72,6 +73,7 @@ export default function StoreSheet({
         {store.source === 'sbiz' && <p className="caption">공공데이터 상호명</p>}
         <p>{zone}</p>
         {store.highlight && <StorePriceDisplay price={store.price} />}
+        <StoreReviews key={store.store_id} storeId={store.store_id} />
         <h3>{t('sells')}</h3>
         <Resource state={catalog}>
           <div className="chips">

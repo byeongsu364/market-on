@@ -74,6 +74,9 @@ def signup(conn, data):
     password_hash = security.hash_password(data.password.get_secret_value())
     try:
         with conn.transaction():
+            if data.role == 'customer':
+                user = user_repo.create(conn, login_id, password_hash, role='customer')
+                return session(conn, user)
             if not user_repo.lock_store(conn, data.store_id):
                 raise AppError('STORE_NOT_FOUND', '점포를 찾을 수 없습니다.', 404)
             if user_repo.store_taken(conn, data.store_id):

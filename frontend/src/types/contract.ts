@@ -145,12 +145,19 @@ export type ApiError = {
 export type User = {
   id: string;
   login_id: string;
-  role: 'merchant' | 'operator' | 'market_admin';
+  role: 'merchant' | 'operator' | 'market_admin' | 'customer';
   market: { market_id: string; name: string } | null;
   status: 'pending' | 'approved' | 'rejected' | 'disabled';
   store: { store_id: string; name: string; market_id: string } | null;
 };
-export type AuthRequest = { login_id: string; password: string; store_id?: string };
+export type AuthRequest = {
+  role?: 'merchant' | 'customer';
+  captcha_id?: string;
+  captcha_answer?: string;
+  login_id: string;
+  password: string;
+  store_id?: string;
+};
 export type SaleRequest = {
   item_id: string;
   sale_price: number;
@@ -308,3 +315,15 @@ export type MarketItem = { item_id: string; name: string; store_count: number };
 export type PublicConfig = { naver_map_client_id: string | null };
 
 export type InSeasonItem = { item_id: string; name: string; label: string };
+
+export type StoreReview = {
+  id: number;
+  rating: number;
+  body: string;
+  author: string;
+  created_at: string;
+  updated_at: string;
+  mine: boolean;
+};
+export type StoreReviews = { average: number | null; count: number; items: StoreReview[] };
+export type ReviewWrite = { rating: number; body: string };
