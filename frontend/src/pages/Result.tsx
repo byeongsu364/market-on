@@ -58,7 +58,9 @@ export default function Result() {
               ))}
             </div>
             <Resource state={f.price}>
-              {f.price.data && <PriceCompare price={f.price.data} />}
+              {f.price.data && (
+                <PriceCompare price={f.price.data} onVarietyChange={f.setVarietyId} />
+              )}
             </Resource>
           </section>
           <section id="selling-stores">

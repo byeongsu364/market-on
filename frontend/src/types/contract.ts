@@ -27,6 +27,7 @@ export type RecognizeResponse = {
   media_id: string | null;
   price_tag: {
     price: number;
+    variety_id: string | null;
     unit_text: string;
     unit: string | null;
     quantity: number | null;
@@ -42,7 +43,19 @@ export type Stat = {
   price: number;
   count: number;
 };
+export type VarietyPrice = {
+  variety_id: string;
+  name: string;
+  reference_price: number | null;
+  unit: string;
+  observed_on: string | null;
+  count: number;
+  default: boolean;
+};
 export type Price = {
+  variety_id: string | null;
+  variety_name: string | null;
+  varieties: VarietyPrice[];
   item_id: string;
   unit: string;
   reference_price: number;
@@ -62,6 +75,7 @@ export type Price = {
   };
 };
 export type PriceRequest = {
+  variety_id?: string;
   item_id: string;
   market_id: string;
   unit: string;

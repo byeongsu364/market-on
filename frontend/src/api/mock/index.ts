@@ -43,7 +43,7 @@ export const recognize = (file: File): Promise<RecognizeResponse> =>
   mock(() => ({
     media_id: '00000000-0000-4000-8000-000000000001',
     price_tag: file.name.includes('price')
-      ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1 }
+      ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1, variety_id: null }
       : null,
     model: 'gemma4:e4b',
     vision_labels: ['green onion', 'scallion'],
@@ -68,9 +68,42 @@ export const search = (q: string) =>
 export const price = (q: PriceRequest): Promise<Price> =>
   mock(() => {
     const base = q.item_id === 'item:green_onion' ? 2576 : q.item_id === 'item:onion' ? 2100 : 3200;
-    const reference_price = Math.round(convertUnit(base, 'kg', q.unit));
+    const varieties =
+      q.item_id === 'item:apple'
+        ? [
+            {
+              variety_id: 'variety:apple-fuji',
+              name: '후지',
+              reference_price: 3200,
+              default: true,
+            },
+            {
+              variety_id: 'variety:apple-hongro',
+              name: '홍로',
+              reference_price: 3500,
+              default: false,
+            },
+            {
+              variety_id: 'variety:apple-shinano-gold',
+              name: '시나노골드',
+              reference_price: null,
+              default: false,
+            },
+          ].map((v) => ({
+            ...v,
+            unit: q.unit,
+            observed_on: v.reference_price === null ? null : '2026-11-20',
+            count: v.reference_price === null ? 0 : 15,
+          }))
+        : [];
+    const selected = varieties.find((v) => v.variety_id === q.variety_id) ?? varieties[0];
+    const reference_price =
+      selected?.reference_price ?? Math.round(convertUnit(base, 'kg', q.unit));
     return {
       ...q,
+      variety_id: selected?.variety_id ?? null,
+      variety_name: selected?.name ?? null,
+      varieties,
       reference_price,
       diff_pct: q.seen_price == null ? null : diffPct(q.seen_price, reference_price),
       region: '서울',

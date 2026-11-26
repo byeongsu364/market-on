@@ -87,7 +87,9 @@ async function photo(tag: boolean) {
     vision_labels: ['green onion'],
     candidates: [{ item_id: 'item:green_onion', name: '대파', confidence: 0.94 }],
     media_id: '00000000-0000-4000-8000-000000000001',
-    price_tag: tag ? { price: 3000, unit_text: '1단', unit: null, quantity: 1 } : null,
+    price_tag: tag
+      ? { price: 3000, variety_id: null, unit_text: '1단', unit: null, quantity: 1 }
+      : null,
   });
   show('/scan');
   fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
@@ -173,7 +175,7 @@ it('QR에서 고른 점포는 사진 결과의 최초 제보에 포함한다', a
     vision_labels: [],
     candidates: [{ item_id: 'item:green_onion', name: '대파', confidence: 0.9 }],
     media_id: '00000000-0000-4000-8000-000000000001',
-    price_tag: { price: 3000, unit_text: '3단', unit: 'unit:bunch', quantity: 3 },
+    price_tag: { price: 3000, variety_id: null, unit_text: '3단', unit: 'unit:bunch', quantity: 3 },
   });
   show('/s/store:A-05');
   fireEvent.click(await screen.findByRole('link', { name: '이 점포에서 찍기' }));
@@ -225,4 +227,64 @@ it('결과 판매 점포에 손님·상인·미등록 가격을 표시한다', a
   } finally {
     spy.mockRestore();
   }
+});
+
+it('기본 품종 칩을 표시하고 선택한 품종으로 시세를 다시 요청한다', async () => {
+  show('/items/item:apple');
+  const fuji = await screen.findByRole('button', { name: /후지 ·/ });
+  expect(fuji).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: /홍로 ·/ }));
+  await waitFor(() =>
+    expect(getPrice).toHaveBeenLastCalledWith(
+      expect.objectContaining({ variety_id: 'variety:apple-hongro' }),
+    ),
+  );
+  expect(await screen.findByRole('button', { name: /홍로 ·/ })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  expect(screen.getByText('품종은 가격표나 상인에게 확인해 주세요')).toBeInTheDocument();
+});
+
+it('가격표 품종을 확인·수정하고 결과의 기본 품종보다 우선한다', async () => {
+  vi.mocked(recognize).mockResolvedValue({
+    model: 'fake',
+    vision_labels: ['apple'],
+    candidates: [{ item_id: 'item:apple', name: '사과', confidence: 0.94 }],
+    media_id: null,
+    price_tag: {
+      price: 5000,
+      unit_text: '홍로 3개',
+      quantity: 3,
+      unit: 'unit:piece',
+      variety_id: 'variety:apple-hongro',
+    },
+  });
+  show('/scan');
+  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+    target: { files: [new File(['x'], 'apple.jpg')] },
+  });
+  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
+  expect(await screen.findByText('품종: 홍로 (가격표에서 읽었어요)')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '홍로' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: '후지' }));
+  expect(screen.getByRole('button', { name: '후지' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: '홍로' }));
+  fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
+  await waitFor(() =>
+    expect(getPrice).toHaveBeenLastCalledWith(
+      expect.objectContaining({ variety_id: 'variety:apple-hongro' }),
+    ),
+  );
+  expect(await screen.findByRole('button', { name: /홍로 ·/ })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+});
+
+it('단일 품종은 칩을 표시하지 않는다', async () => {
+  show('/items/item:green_onion');
+  await screen.findByText(/aT 기간별/);
+  expect(screen.queryByRole('group', { name: '품종' })).not.toBeInTheDocument();
+  expect(screen.queryByText('품종은 가격표나 상인에게 확인해 주세요')).not.toBeInTheDocument();
 });

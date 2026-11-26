@@ -7,12 +7,31 @@ from app.db.repositories import knowledge_repo, price_repo, store_repo
 from app.schemas.price import MarketPrice, PriceResponse, PriceStat
 
 
-def get_price(conn, item_id, *, market_id=None, on_date=None, unit_id=None, seen_price=None):
+def get_price(
+    conn,
+    item_id,
+    *,
+    market_id=None,
+    on_date=None,
+    unit_id=None,
+    seen_price=None,
+    variety_id=None,
+    _include_varieties=True,
+):
     if knowledge_repo.get_item(conn, item_id) is None:
         raise AppError('ITEM_NOT_FOUND', '품목을 찾을 수 없습니다.', 404)
     market = store_repo.get_market(conn, market_id) if market_id else None
     if market_id and market is None:
         raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
+    choices = price_repo.varieties(conn, item_id)
+    selected = (
+        next((v for v in choices if v['id'] == variety_id), None)
+        if variety_id
+        else next((v for v in choices if (v['props'] or {}).get('default')), None)
+    )
+    if variety_id and selected is None:
+        raise AppError('INVALID_VARIETY', '이 품목의 품종이 아닙니다.', 422)
+    variety_id = selected['id'] if selected else None
     today = on_date or date.today()
     baseline = price_repo.baseline(
         conn,
@@ -20,6 +39,7 @@ def get_price(conn, item_id, *, market_id=None, on_date=None, unit_id=None, seen
         on_date=today,
         sgg_nm=market.get('at_sgg_nm') if market else None,
         market_at_cd=market.get('at_mrkt_cd') if market else None,
+        variety_id=variety_id,
     )
     if baseline is None:
         raise AppError('PRICE_NOT_FOUND', '최근 기준시세가 없습니다.', 404)
@@ -64,6 +84,9 @@ def get_price(conn, item_id, *, market_id=None, on_date=None, unit_id=None, seen
         fallback = 'last_valid'
     values = {
         'item_id': item_id,
+        'variety_id': variety_id,
+        'variety_name': selected['name_ko'] if selected else None,
+        'varieties': [],
         'unit': unit,
         'reference_price': reference_price,
         'diff_pct': round((seen_price - reference_price) / reference_price * 100)
@@ -87,6 +110,35 @@ def get_price(conn, item_id, *, market_id=None, on_date=None, unit_id=None, seen
         values['this_market'] = MarketPrice(
             price=round(baseline['this_market']['price'] * multiplier), name=market['name_ko']
         )
+    if _include_varieties and len(choices) >= 2:
+        for choice in choices:
+            try:
+                view = get_price(
+                    conn,
+                    item_id,
+                    market_id=market_id,
+                    on_date=today,
+                    unit_id=unit_id,
+                    variety_id=choice['id'],
+                    _include_varieties=False,
+                )
+            except AppError as exc:
+                if exc.code != 'PRICE_NOT_FOUND':
+                    raise
+                view = None
+            values['varieties'].append(
+                {
+                    'variety_id': choice['id'],
+                    'name': choice['name_ko'],
+                    'reference_price': view.reference_price if view else None,
+                    'unit': view.unit if view else (unit_id or unit),
+                    'observed_on': view.observed_on if view else None,
+                    'count': view.by_market_type['traditional'].count
+                    if view and 'traditional' in view.by_market_type
+                    else 0,
+                    'default': bool((choice['props'] or {}).get('default')),
+                }
+            )
     return PriceResponse(**values)
 
 

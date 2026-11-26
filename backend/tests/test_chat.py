@@ -324,3 +324,49 @@ def test_store_codes_and_manwon_are_parsed():
     assert f.values('점포 A-15, 단감은') == set()
     assert f.values('3만원 예산') == {(30000.0, None, '원')}
     assert f.values('1만 5천원') == {(15000.0, None, '원')}
+
+
+def test_variety_prices_are_numeric_evidence(monkeypatch, env):
+    monkeypatch.setattr(
+        tools,
+        'execute',
+        lambda *a: {
+            'item_id': 'item:green_onion',
+            'reference_price': 1234,
+            'varieties': [
+                {'name': '홍로', 'reference_price': 2345, 'unit': 'unit:piece', 'count': 3}
+            ],
+        },
+    )
+    provider = FakeProvider(
+        [
+            response([tc('reference_price', {'item_id': 'item:green_onion'})]),
+            response(content='홍로는 1개 2,345원이에요. 999원이에요.'),
+        ]
+    )
+    monkeypatch.setattr(
+        llm, 'run', lambda task, call, accept: Routed(call(provider), 'fake', 'fake', False, None)
+    )
+    result = svc.chat(
+        None,
+        ChatRequest(messages=[{'role': 'user', 'content': '가격?'}], market_id='market:demo'),
+        'd',
+    )
+    assert result.reply == '홍로는 1개 2,345원이에요.'
+    assert result.removed == 1
+
+
+def test_reference_price_variety_argument_and_result(monkeypatch, env):
+    captured = Mock(return_value={'varieties': [{'variety_id': 'variety:apple-hongro'}]})
+    monkeypatch.setattr(tools.price_service, 'get_price', captured)
+    result = tools.execute(
+        None,
+        'market:demo',
+        'd',
+        'reference_price',
+        {'item_id': 'item:apple', 'variety_id': 'variety:apple-hongro'},
+    )
+    assert result['varieties'][0]['variety_id'] == 'variety:apple-hongro'
+    assert captured.call_args.kwargs['variety_id'] == 'variety:apple-hongro'
+    schema = next(t for t in tools.get_tools() if t['function']['name'] == 'reference_price')
+    assert 'variety_id' in schema['function']['parameters']['properties']

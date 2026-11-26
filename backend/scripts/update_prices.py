@@ -2,10 +2,12 @@
 
 import argparse
 from datetime import date, datetime, timedelta
+
 from app.clients import at_price
 from app.db.pool import connection
 from app.db.repositories import price_repo
 from app.utils.market_type import classify_market_type
+
 from ._common import run
 
 
@@ -26,7 +28,11 @@ def observations(rows, entities, code):
                 )
             ]
             item = next((e['id'] for e in mapped if e['type'] == 'item'), None)
-            variety = next((e['id'] for e in mapped if e['type'] != 'item'), None)
+            variety_entity = next((e for e in mapped if e['type'] == 'variety'), None)
+            variety = variety_entity['id'] if variety_entity else None
+            item = variety_entity['item_id'] if variety_entity else item
+            if item is None:
+                raise ValueError('매핑되지 않은 품목 코드')
             values = {
                 k: str(row.get(k, code.get(k, '')))
                 for k in (
@@ -64,11 +70,17 @@ def update_prices(conn, *, days=7, end=None, item_id=None):
         raise ValueError('days는 양수여야 합니다.')
     at_price.require_key()
     end = end or date.today()
-    entities = price_repo.kamis_entities(conn)
+    entities = [e for e in price_repo.kamis_entities(conn) if e['type'] == 'item']
     targets = [e for e in entities if e['type'] == 'item' and (not item_id or e['id'] == item_id)]
-    report = {}
+    collection = []
     for entity in targets:
+        children = price_repo.varieties(conn, entity['id'])
+        entities.extend(children)
+        collection.extend(children or [entity])
+    report = {}
+    for entity in collection:
         eid, code = entity['id'], entity['kamis']
+        parent_id = entity.get('item_id', eid)
         try:
             rows = at_price.fetch_period_retail(
                 code['ctgry_cd'],
@@ -79,12 +91,23 @@ def update_prices(conn, *, days=7, end=None, item_id=None):
             )
             prepared, skipped = observations(rows, entities, code)
             added, changed = price_repo.upsert_observations(conn, prepared)
-            report[eid] = dict(received=len(rows), added=added, changed=changed, skipped=skipped)
+            totals = report.setdefault(
+                parent_id, {'received': 0, 'added': 0, 'changed': 0, 'skipped': 0}
+            )
+            for key, count in {
+                'received': len(rows),
+                'added': added,
+                'changed': changed,
+                'skipped': skipped,
+            }.items():
+                totals[key] += count
             print(f'{eid}: 받은 행={len(rows)} 추가={added} 변경={changed} 건너뜀={skipped}')
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 -- 한 품종의 실패가 나머지 수집을 막지 않게 격리
             # Client exceptions never include request URLs or credentials.
-            message = str(exc).replace(at_price.settings.DATA_GO_KR_KEY, '***')
-            report[eid] = {'error': message}
+            message = str(exc).replace(at_price.settings.DATA_GO_KR_KEY or '<unset>', '***')
+            report.setdefault(parent_id, {'received': 0, 'added': 0, 'changed': 0, 'skipped': 0})[
+                'error'
+            ] = message
             print(f'{eid}: 실패 {message}')
     failures = [eid for eid, result in report.items() if 'error' in result]
     print(f'실패한 품목: {", ".join(failures) or "없음"}')
@@ -96,9 +119,14 @@ def main():
     parser.add_argument('--days', type=int, default=7)
     parser.add_argument('--date', type=date.fromisoformat, default=None)
     parser.add_argument('--item')
+    parser.add_argument('--backfill-varieties', action='store_true')
     args = parser.parse_args()
     if args.days < 1:
         parser.error('--days는 양수여야 합니다.')
+    if args.backfill_varieties:
+        with connection() as conn:
+            print(f'품종 백필: {price_repo.backfill_varieties(conn, args.item)}행')
+        return
     at_price.require_key()  # Missing key must fail before attempting a DB connection.
     with connection() as conn:
         results = update_prices(conn, days=args.days, end=args.date, item_id=args.item)

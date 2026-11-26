@@ -379,3 +379,38 @@ def test_evidence_number_leak_is_removed(sentence):
     from app.knowledge.fact_check import check
 
     assert check(sentence + ' 냉장 보관해요.', '냉장 보관해요.', 'item:green_onion', [])[1] == 1
+
+
+def test_ask_price_includes_varieties(env, monkeypatch):
+    from app.schemas.price import PriceResponse
+
+    price = PriceResponse(
+        item_id='item:apple',
+        variety_id='variety:apple-fuji',
+        variety_name='후지',
+        varieties=[
+            dict(
+                variety_id='variety:apple-hongro',
+                name='홍로',
+                reference_price=2500,
+                unit='unit:piece',
+                observed_on='2026-11-24',
+                count=3,
+                default=False,
+            )
+        ],
+        unit='unit:piece',
+        reference_price=2000,
+        diff_pct=None,
+        region='서울',
+        observed_on='2026-11-24',
+        fallback=None,
+        source='fixture',
+        by_market_type={},
+    )
+    monkeypatch.setattr(svc.price_service, 'get_price', lambda *a, **kw: price)
+    response = env.client.post(
+        '/ask', json={'intent': 'price', 'item_id': 'item:apple', 'market_id': 'm'}, headers=HEADERS
+    )
+    assert response.status_code == 200
+    assert response.json()['price']['varieties'][0]['name'] == '홍로'

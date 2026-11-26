@@ -78,6 +78,7 @@ def test_key_log_masking(configured, monkeypatch, caplog):
 
 
 def test_collect_and_continue(configured, monkeypatch):
+    monkeypatch.setattr(price_repo, 'varieties', lambda *a: [])
     entities = [
         dict(
             id='item:green_onion',

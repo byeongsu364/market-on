@@ -10,6 +10,7 @@ class RecognizeCandidate(BaseModel):
 
 
 class PriceTag(BaseModel):
+    variety_id: str | None = None
     price: float
     unit_text: str
     unit: str | None

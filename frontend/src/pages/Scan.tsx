@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
 import { useAction } from '../hooks/useResource';
 import { recognize } from '../api/scan';
+import { usePrice } from '../hooks/usePrice';
+import { useSession } from '../store/session';
 import { useItem } from '../hooks/useItem';
 import { useRequireMarket } from '../hooks/useFlows';
 import ManualInput from '../components/domain/ManualInput';
@@ -13,6 +15,20 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
     result.candidates[0]?.confidence >= 0.8 ? result.candidates[0].item_id : '',
   );
   const item = useItem(id);
+  const { market } = useSession();
+  const [variety, setVariety] = useState(result.price_tag?.variety_id ?? '');
+  const varieties = usePrice({
+    item_id: id,
+    market_id: market?.market_id ?? '',
+    unit: item.data?.default_unit ?? '',
+  });
+  const choices = varieties.data?.varieties ?? [];
+  const detected = choices.find((v) => v.variety_id === result.price_tag?.variety_id);
+  const selectedVariety =
+    choices.some((v) => v.variety_id === variety) ||
+    (!varieties.data && id === result.candidates[0]?.item_id)
+      ? variety || undefined
+      : undefined;
   const [price, setPrice] = useState(result.price_tag ? String(result.price_tag.price) : '');
   const [unit, setUnit] = useState(result.price_tag?.unit ?? '');
   const [quantity, setQuantity] = useState(String(result.price_tag?.quantity ?? 1));
@@ -42,6 +58,23 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
         <p className="caption">가격표에서 읽었어요 · {result.price_tag.unit_text}</p>
       ) : (
         <p>가격표가 없으면 그냥 넘어가요</p>
+      )}
+      {choices.length >= 2 && (
+        <>
+          {detected && <p>품종: {detected.name} (가격표에서 읽었어요)</p>}
+          <div className="chips" aria-label="품종 확인">
+            {choices.map((v) => (
+              <button
+                className="chip"
+                key={v.variety_id}
+                aria-pressed={selectedVariety ? v.variety_id === selectedVariety : v.default}
+                onClick={() => setVariety(v.variety_id)}
+              >
+                {v.name}
+              </button>
+            ))}
+          </div>
+        </>
       )}
       {result.price_tag || price ? (
         <label>
@@ -92,6 +125,7 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
         onClick={() =>
           navigate(`/items/${encodeURIComponent(id)}`, {
             state: {
+              variety_id: selectedVariety,
               labels: result.vision_labels,
               price: price ? Number(price) : undefined,
               unit: effectiveUnit,

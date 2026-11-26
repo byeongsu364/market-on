@@ -1,9 +1,32 @@
 """Observed and consumer-reported prices, ontology codes and retail baselines."""
 
 from psycopg import sql
-from ._operational import save, rows as fetch_rows
 
-OBSERVATION_FIELDS = 'source exmn_ymd se_cd mrkt_cd item_cd vrty_cd grd_cd ctgry_cd item_nm vrty_nm grd_nm sgg_nm mrkt_nm market_type unit unit_sz price item_id variety_id fetched_at'.split()
+from ._operational import rows as fetch_rows
+from ._operational import save
+
+OBSERVATION_FIELDS = [
+    'source',
+    'exmn_ymd',
+    'se_cd',
+    'mrkt_cd',
+    'item_cd',
+    'vrty_cd',
+    'grd_cd',
+    'ctgry_cd',
+    'item_nm',
+    'vrty_nm',
+    'grd_nm',
+    'sgg_nm',
+    'mrkt_nm',
+    'market_type',
+    'unit',
+    'unit_sz',
+    'price',
+    'item_id',
+    'variety_id',
+    'fetched_at',
+]
 
 
 def upsert_observations(conn, rows):
@@ -58,6 +81,31 @@ def kamis_entities(conn, item_id=None):
     )
 
 
+def varieties(conn, item_id):
+    return fetch_rows(
+        conn,
+        """select e.id,e.type,e.name_ko,e.kamis,r.props,
+        r.subject_id as item_id from entity_relations r join entities e on e.id=r.object_id
+        where r.subject_id=%s and r.predicate='hasGrade' and e.type='variety'
+        order by e.id""",
+        (item_id,),
+    )
+
+
+def backfill_varieties(conn, item_id=None):
+    with conn.transaction():
+        return conn.execute(
+            """update price_observations p set variety_id=e.id, item_id=r.subject_id
+            from entities e join entity_relations r on r.object_id=e.id
+            and r.predicate='hasGrade'
+            where e.type='variety' and p.variety_id is null
+            and p.item_cd=e.kamis->>'item_cd' and p.vrty_cd=e.kamis->>'vrty_cd'
+            and (p.item_id is null or p.item_id=r.subject_id)
+            and (%s::text is null or r.subject_id=%s)""",
+            (item_id, item_id),
+        ).rowcount
+
+
 def sale_units(conn, item_id):
     return fetch_rows(
         conn,
@@ -82,16 +130,25 @@ def observation_unit_id(conn, unit, size):
     return result[0]['id'] if result else None
 
 
-def baseline(conn, item_id, *, on_date, sgg_nm=None, market_at_cd=None, lookback_days=14):
+def baseline(
+    conn, item_id, *, on_date, sgg_nm=None, market_at_cd=None, lookback_days=14, variety_id=None
+):
     from datetime import timedelta
 
     data = fetch_rows(
         conn,
-        """select p.* from price_observations p join entities e on e.id=p.item_id
+        """select p.* from price_observations p join entities e on e.id=coalesce(%s,p.item_id)
         where p.item_id=%s and p.se_cd='01' and p.grd_cd=coalesce(e.kamis->>'grd_cd','04')
-        and (e.kamis->>'vrty_cd' is null or p.vrty_cd=e.kamis->>'vrty_cd')
+        and (%s::text is null or p.variety_id=%s)
         and p.exmn_ymd between %s and %s order by p.exmn_ymd desc,p.mrkt_cd""",
-        (item_id, on_date - timedelta(days=lookback_days), on_date),
+        (
+            variety_id,
+            item_id,
+            variety_id,
+            variety_id,
+            on_date - timedelta(days=lookback_days),
+            on_date,
+        ),
     )
     data = [
         r
@@ -112,22 +169,27 @@ def baseline(conn, item_id, *, on_date, sgg_nm=None, market_at_cd=None, lookback
     def stats(rows):
         prices = [r['price'] for r in rows]
         return (
-            dict(avg=sum(prices) / len(prices), min=min(prices), max=max(prices), n=len(prices))
+            {
+                'avg': sum(prices) / len(prices),
+                'min': min(prices),
+                'max': max(prices),
+                'n': len(prices),
+            }
             if prices
             else None
         )
 
     market = next((r for r in selected if r['mrkt_cd'] == market_at_cd), None)
-    return dict(
-        exmn_ymd=latest,
-        scope='region' if regional else 'national',
-        unit=unit,
-        unit_sz=size,
-        traditional=stats([r for r in selected if r['market_type'] == 'traditional']),
-        large_retail=stats([r for r in selected if r['market_type'] == 'large_retail']),
-        all=stats(selected),
-        this_market={'price': market['price'], 'mrkt_nm': market['mrkt_nm']} if market else None,
-    )
+    return {
+        'exmn_ymd': latest,
+        'scope': 'region' if regional else 'national',
+        'unit': unit,
+        'unit_sz': size,
+        'traditional': stats([r for r in selected if r['market_type'] == 'traditional']),
+        'large_retail': stats([r for r in selected if r['market_type'] == 'large_retail']),
+        'all': stats(selected),
+        'this_market': {'price': market['price'], 'mrkt_nm': market['mrkt_nm']} if market else None,
+    }
 
 
 def lock_device(conn, device_hash):

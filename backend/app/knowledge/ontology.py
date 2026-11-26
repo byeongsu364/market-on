@@ -79,3 +79,11 @@ def match_unit(conn, unit_text):
     target = words(unit_text)
     matches = {r['id'] for r in repo.unit_labels(conn) if words(r['label']) == target and target}
     return next(iter(matches)) if len(matches) == 1 else None
+
+
+def match_variety(conn, item_id, text):
+    from app.db.repositories import price_repo
+
+    allowed = {v['id'] for v in price_repo.varieties(conn, item_id)}
+    matches = allowed.intersection(resolve_entities(conn, text)) if text and allowed else set()
+    return next(iter(matches)) if len(matches) == 1 else None

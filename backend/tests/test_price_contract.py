@@ -36,6 +36,7 @@ def api(monkeypatch):
             return TODAY
 
     monkeypatch.setattr(price_service, 'date', Clock)
+    monkeypatch.setattr(price_repo, 'varieties', lambda *a: [])
     monkeypatch.setattr(knowledge_repo, 'get_item', lambda *a: {'id': QUERY['item_id']})
     monkeypatch.setattr(
         store_repo,
@@ -68,6 +69,9 @@ def test_contract(api, monkeypatch):
     body = response.json()
     assert set(body) == {
         'item_id',
+        'variety_id',
+        'variety_name',
+        'varieties',
         'unit',
         'reference_price',
         'seen_price',
@@ -222,3 +226,9 @@ def test_seed_market_metadata(monkeypatch):
     assert seed.seed_demo_market(conn) == {'markets': 1, 'zones': 6, 'stores': 24}
     assert market.call_args.kwargs['at_sgg_nm'] == '서울'
     assert market.call_args.kwargs['at_mrkt_cd'] is None
+
+
+def test_other_item_variety_422(api):
+    response = api.get('/price', params=QUERY | {'variety_id': 'variety:apple-fuji'})
+    assert response.status_code == 422
+    assert response.json()['error']['code'] == 'INVALID_VARIETY'

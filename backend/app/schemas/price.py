@@ -16,7 +16,20 @@ class MarketPrice(BaseModel):
     name: str
 
 
+class VarietyPrice(BaseModel):
+    variety_id: str
+    name: str
+    reference_price: int | None
+    unit: str
+    observed_on: date | None
+    count: int
+    default: bool
+
+
 class PriceResponse(BaseModel):
+    variety_id: str | None = None
+    variety_name: str | None = None
+    varieties: list[VarietyPrice] = []
     item_id: str
     unit: str
     reference_price: int

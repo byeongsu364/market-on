@@ -24,6 +24,7 @@ class ItemArg(BaseModel):
 
 
 class PriceArg(ItemArg):
+    variety_id: str | None = None
     unit: str | None = None
 
 
@@ -82,7 +83,11 @@ def execute(conn, market_id, device_id, name, arguments):
             ]
         if name == 'reference_price':
             return price_service.get_price(
-                conn, data.item_id, market_id=market_id, unit_id=data.unit
+                conn,
+                data.item_id,
+                market_id=market_id,
+                unit_id=data.unit,
+                variety_id=data.variety_id,
             )
         if name == 'active_sales':
             return sale_service.active(conn, market_id, data.item_id)

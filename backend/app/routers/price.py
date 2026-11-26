@@ -17,8 +17,14 @@ def get_price(
     item_id: str,
     market_id: str,
     unit: str,
+    variety_id: str | None = None,
     seen_price: float | None = Query(default=None, gt=0, allow_inf_nan=False),
 ):
     return price_service.get_price(
-        conn, item_id, market_id=market_id, unit_id=unit, seen_price=seen_price
+        conn,
+        item_id,
+        market_id=market_id,
+        unit_id=unit,
+        seen_price=seen_price,
+        variety_id=variety_id,
     )

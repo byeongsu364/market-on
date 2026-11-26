@@ -15,6 +15,7 @@ export function useResultFlow() {
   const { market, storeContext } = useSession();
   const location = useLocation();
   const initial = (location.state ?? {}) as {
+    variety_id?: string;
     price?: number;
     unit?: string;
     quantity?: number;
@@ -24,6 +25,7 @@ export function useResultFlow() {
   };
   const item = useItem(itemId);
   const [value, setValue] = useState(initial.price ? String(initial.price) : '');
+  const [varietyId, setVarietyId] = useState(initial.variety_id);
   const [selected, setSelected] = useState(initial.unit ?? '');
   const [storeId, setStoreId] = useState(
     storeContext?.market_id === market?.market_id ? storeContext?.store_id : undefined,
@@ -31,6 +33,7 @@ export function useResultFlow() {
   const unit = selected || item.data?.default_unit || '';
   const price = usePrice({
     item_id: itemId,
+    variety_id: varietyId,
     market_id: market?.market_id ?? '',
     unit,
     seen_price: Number(value) > 0 ? Number(value) / (initial.quantity || 1) : undefined,
@@ -79,6 +82,7 @@ export function useResultFlow() {
     setValue,
     unit,
     setSelected,
+    setVarietyId,
     labels: initial.labels ?? [],
     method: initial.method,
     itemId,
