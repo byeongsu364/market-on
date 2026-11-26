@@ -99,8 +99,10 @@ it.each(['merchant', 'market_admin', 'operator'] as const)(
     fireEvent.change(await screen.findByLabelText('아이디'), { target: { value: 'manager' } });
     fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'password' } });
     fireEvent.click(screen.getByRole('button', { name: '로그인' }));
-    if (role === 'market_admin') await screen.findByRole('link', { name: '시장 입구 QR 포스터' });
-    else if (role === 'operator') await screen.findByRole('heading', { name: '상인 승인' });
+    if (role === 'market_admin') {
+      await screen.findByRole('heading', { name: '승인 대기 상인' });
+      expect(screen.queryByRole('link', { name: '시장 입구 QR 포스터' })).not.toBeInTheDocument();
+    } else if (role === 'operator') await screen.findByRole('heading', { name: '상인 승인' });
     else await screen.findByRole('link', { name: '마감세일 올리기' });
     vi.restoreAllMocks();
   },

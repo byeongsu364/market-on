@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useResource, useAction } from '../hooks/useResource';
 import * as api from '../api/marketAdmin';
@@ -71,7 +70,7 @@ export default function MarketAdmin() {
         </section>
       ))}
       {action.error && <ErrorBox message={action.error} />}
-      <Link to="/market-admin/poster">시장 입구 QR 포스터</Link>
+      {/* 시장 입구 QR 포스터 메뉴는 숨김 (2026-11-26 결정). ?market= 링크와 라우트는 그대로 */}
       <button className="secondary market-admin-logout" onClick={() => void auth.logout()}>
         로그아웃
       </button>

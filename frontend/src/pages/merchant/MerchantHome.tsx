@@ -66,8 +66,7 @@ export default function MerchantHome() {
       ))}
       {f.action.error && <ErrorBox message={f.action.error} />}
       <div className="merchant-links">
-        <Link to="/merchant/store">{t('storeInfo')}</Link>
-        <Link to="/merchant/poster">{t('poster')}</Link>
+        {/* 점포 정보·QR 포스터는 메뉴에서 숨김 (2026-11-26 결정, 라우트는 남김) */}
         <button className="secondary" onClick={() => void auth.logout()}>
           {t('logout')}
         </button>
