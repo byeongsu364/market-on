@@ -27,7 +27,7 @@ def save(conn, table, values, *, upsert=False):
         updates = [
             (
                 sql.SQL(
-                    '{}=CASE WHEN stores.location_verified THEN stores.{} ELSE excluded.{} END'
+                    '{}=CASE WHEN stores.location_verified OR stores.location_source IS NOT NULL THEN stores.{} ELSE excluded.{} END'
                 ).format(sql.Identifier(f), sql.Identifier(f), sql.Identifier(f))
                 if table == 'stores'
                 and values.get('source') == 'sbiz'

@@ -223,7 +223,7 @@ function MarketView({ market }: { market: Market }) {
       ? { lat: v.store.lat, lng: v.store.lng }
       : example.get(v.store.store_id);
   const onMap = hasCoords || example.size > 0;
-  const pins: MapPin[] = onMap
+  const pinList: MapPin[] = onMap
     ? views
         .filter((v) => pinAt(v))
         .map((v) => {
@@ -244,6 +244,20 @@ function MarketView({ market }: { market: Market }) {
           };
         })
     : [];
+  // 핀이 30개를 넘으면 겹쳐서 덩어리가 되므로 고른 점포만 큰 핀, 나머지는 업종 색 작은 점
+  const crowded = pinList.filter((p) => p.state === 'default').length > 30;
+  const pins: MapPin[] = crowded
+    ? pinList.map((p) => (p.state === 'default' ? { ...p, state: 'small' } : p))
+    : pinList;
+  const kakaoPins = views.filter((v) => v.store.location_source === 'kakao').length;
+  const sampleNote =
+    example.size > 0
+      ? kakaoPins > 0
+        ? '일부 핀 위치는 예시 · 나머지는 카카오맵 기준'
+        : true
+      : kakaoPins > 0
+        ? '점포 위치는 카카오맵 기준'
+        : hasCoords && map.data?.layout === 'schematic';
 
   const top = (
     <>
@@ -521,7 +535,7 @@ function MarketView({ market }: { market: Market }) {
         pins={pins}
         me={position ?? null}
         center={market}
-        sample={example.size > 0 || (hasCoords && map.data?.layout === 'schematic')}
+        sample={sampleNote}
         onSelect={(id, type) => type === 'pin' && select(id)}
         topInset={desktop ? 0 : 120}
         bottomInset={desktop ? 0 : 300}

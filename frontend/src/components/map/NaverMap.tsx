@@ -116,7 +116,9 @@ export default function NaverMap({ maps, ...props }: MapViewProps & { maps: Nave
       <div ref={node} className={s.naver} role="region" aria-label={props.label} />
       {props.sample && (
         <div className={s.corner}>
-          <span className={s.note}>핀 위치는 예시</span>
+          <span className={s.note}>
+            {typeof props.sample === 'string' ? props.sample : '핀 위치는 예시'}
+          </span>
         </div>
       )}
       {props.children}

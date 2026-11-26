@@ -174,7 +174,7 @@ def save_location(conn, user, data):
         ):
             raise AppError('INVALID_LOCATION', '시장 중심에서 2km 이내의 위치를 선택하세요.', 422)
         conn.execute(
-            'update stores set lat=%s,lng=%s,location_verified=true where id=%s',
+            "update stores set lat=%s,lng=%s,location_verified=true,location_source='merchant' where id=%s",
             (data.lat, data.lng, user['store_id']),
         )
     return get_store(conn, user)

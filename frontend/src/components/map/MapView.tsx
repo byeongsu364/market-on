@@ -26,8 +26,8 @@ export type MapViewProps = {
   onSelect?: (id: string, type: MapMarker['type']) => void;
   /** 지도가 비었을 때 가운데 */
   center?: LatLng;
-  /** 예시 좌표일 때 "핀 위치는 예시" */
-  sample?: boolean;
+  /** 예시 좌표일 때 "핀 위치는 예시". 문자열이면 그 문구를 씀(예: 일부만 예시일 때) */
+  sample?: boolean | string;
   /** 지도 위에 띄울 요소(검색창, 버튼 등) */
   children?: ReactNode;
   /** 아래쪽에 시트가 덮는 높이(px): 내용이 그 위에 오도록 맞춤 */

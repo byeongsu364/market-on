@@ -153,7 +153,11 @@ export default function SketchMap(props: MapViewProps) {
       })}
       <div className={s.corner}>
         <span className={s.note}>미리보기 지도</span>
-        {props.sample && <span className={s.note}>핀 위치는 예시</span>}
+        {props.sample && (
+          <span className={s.note}>
+            {typeof props.sample === 'string' ? props.sample : '핀 위치는 예시'}
+          </span>
+        )}
       </div>
       {props.children}
     </div>

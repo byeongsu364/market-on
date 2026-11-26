@@ -16,6 +16,15 @@ logger = logging.getLogger(__name__)
 ZONE_ORDER = ('청과', '채소', '수산', '정육', '반찬', '떡·분식')
 
 
+def pin_source(row):
+    """지도 핀으로 내보낼 좌표의 출처: 상인 확인(merchant) > 카카오맵 장소 검색(kakao) > 없음."""
+    if row.get('location_verified'):
+        return 'merchant'
+    if row.get('location_source') == 'kakao' and row.get('lat') is not None:
+        return 'kakao'
+    return None
+
+
 def distance(lat, lng, market):
     a, b = radians(lat), radians(market.lat)
     h = sin((b - a) / 2) ** 2 + cos(a) * cos(b) * sin(radians(market.lng - lng) / 2) ** 2
@@ -135,9 +144,10 @@ def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
         stores.append(
             Store(
                 # 상가정보 좌표는 건물 단위(경동 108곳 중 101곳이 같은 점)라 지도 핀으로는
-                # 상인이 확인한 위치만 내보내요. 거리는 건물 좌표로도 계산해요.
-                lat=row.get('lat') if row.get('location_verified') else None,
-                lng=row.get('lng') if row.get('location_verified') else None,
+                # 상인이 확인한 위치와 카카오맵에서 찾은 위치만 내보내요. 거리는 건물 좌표로도 계산해요.
+                lat=row.get('lat') if pin_source(row) else None,
+                lng=row.get('lng') if pin_source(row) else None,
+                location_source=pin_source(row),
                 category=row.get('store_category_id'),
                 naver_name=row['name_ko'],
                 verified=row.get('location_verified', False),

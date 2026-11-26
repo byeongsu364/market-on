@@ -76,6 +76,14 @@
   color: #60646c;
   font-variant-numeric: tabular-nums;
 }
+/* 핀이 많을 때 업종 색 작은 점(누르면 고른 점포는 큰 핀) */
+.mo-dot.mo-dot-cat {
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-width: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 .mo-dot {
   position: absolute;
   width: 9px;

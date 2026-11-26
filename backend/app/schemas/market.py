@@ -49,6 +49,8 @@ class Store(BaseModel):
     category: str | None = None
     naver_name: str = ''
     verified: bool = False
+    # 핀 좌표의 출처(2026-11-27): merchant=상인 확인, kakao=카카오맵 장소 검색, None=좌표 없음
+    location_source: Literal['merchant', 'kakao'] | None = None
     open_now: bool | None = None
     payments: list[str] = []
     intro: str | None = None
