@@ -24,7 +24,7 @@ import { fill } from './format';
 import s from './merchant.module.css';
 
 // Merchant · WebMerchant: 승인된 상인의 홈.
-// 오늘 조회 수·세일 조회 수·진행 중 세일·가격 확인은 지금 API, 단골 수·오늘 품절·가게 위치는 mock만(030 5장).
+// 조회·길 안내 통계와 진행 중 세일·가격 확인을 live API로 표시.
 export default function MerchantHome() {
   const f = useMerchantHome();
   const auth = useAuth();
@@ -40,21 +40,40 @@ export default function MerchantHome() {
   const itemName = (id: string) => catalog.data?.find((i) => i.item_id === id)?.name ?? '';
   const saleName = (sale: ClosingSale) =>
     [itemName(sale.item_id), sale.unit_id ? unitLabel(sale.unit_id) : ''].filter(Boolean).join(' ');
-  const people = (n: number) => `${n}${t('people')}`;
+  const views = (n: number) => `${n}회`;
 
-  const stats = (
-    <Resource state={f.store}>
-      {store && (
-        <div className={desktop ? s.webStats : s.stats}>
-          <Stat value={people(store.today_views)} label={t('storeViews')} />
-          <Stat value={people(store.sale_views)} label={t('saleViews')} />
-          {extras?.favorites !== undefined && (
-            <Stat value={people(extras.favorites)} label={t('merchantFavorites')} />
-          )}
+  const stats = f.stats.data && (
+    <>
+      <div className={desktop ? s.webStats : s.stats}>
+        <Stat value={`오늘 ${f.stats.data.today.views}번 조회`} label={t('storeViews')} />
+        <Stat value={`${f.stats.data.today.directions}회`} label="오늘 길 안내" />
+      </div>
+      <Section title="최근 7일 조회·길 안내">
+        <div className={s.chart} role="img" aria-label="날짜별 조회 수와 길 안내 횟수">
+          {f.stats.data.days.map((day) => (
+            <div key={day.day} className={s.chartDay}>
+              <span className={s.chartBars}>
+                <span
+                  className={s.chartViews}
+                  style={{
+                    height: `${(day.views / Math.max(1, ...f.stats.data!.days.map((d) => Math.max(d.views, d.directions)))) * 100}%`,
+                  }}
+                />
+                <span
+                  className={s.chartDirections}
+                  style={{
+                    height: `${(day.directions / Math.max(1, ...f.stats.data!.days.map((d) => Math.max(d.views, d.directions)))) * 100}%`,
+                  }}
+                />
+              </span>
+              <span>{day.day.slice(5)}</span>
+              <span>{day.views}회 조회</span>
+              <span>길 안내 {day.directions}회</span>
+            </div>
+          ))}
         </div>
-      )}
-      {extras?.favorites !== undefined && <p className={s.help}>{t('merchantSampleValues')}</p>}
-    </Resource>
+      </Section>
+    </>
   );
 
   const endButton = (sale: ClosingSale, repost = false) => (
@@ -87,7 +106,7 @@ export default function MerchantHome() {
                 saleName(sale),
                 formatPrice(sale.sale_price),
                 fill(t('merchantToday'), { time: saleTime(sale.ends_at) }),
-                people(sale.view_count),
+                views(sale.view_count),
                 endButton(sale),
               ],
             }))}

@@ -541,6 +541,7 @@ function MarketView({ market }: { market: Market }) {
       />
       {route && (
         <RouteSheet
+          storeId={route.store.store_id}
           destination={{ ...storeDestination(route.store, market), label: route.store.name }}
           approximate={storeDestination(route.store, market).approximate}
           kind="store"

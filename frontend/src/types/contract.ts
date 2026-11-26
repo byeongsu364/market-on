@@ -412,3 +412,37 @@ export type StoreReview = {
 };
 export type StoreReviews = { average: number | null; count: number; items: StoreReview[] };
 export type ReviewWrite = { rating: number; body: string };
+
+export type MerchantStats = {
+  today: { views: number; directions: number };
+  days: { day: string; views: number; directions: number }[];
+  favorites: null;
+};
+export type MarketAdminStats = {
+  stores: number;
+  merchants_approved: number;
+  merchants_pending: number;
+  views_week: number;
+  recent: {
+    user_id: string;
+    login_id: string;
+    store_id: string;
+    store_name: string;
+    last_sale_at: string | null;
+    sales_week: number;
+  }[];
+};
+export type ListedMarketStats = {
+  market_id: string;
+  name: string;
+  requests_week: number;
+  requests_total: number;
+  application: Pick<MarketApplication, 'status' | 'created_at'> | null;
+};
+export type ActiveMarketStats = {
+  market_id: string;
+  name: string;
+  stores: number;
+  merchants_approved: number;
+  views_week: number;
+};

@@ -18,7 +18,7 @@
 | 손님 계정 | Login, Signup | 역할 `customer` 추가 | 완료 · 2026-11-27 · 0015, live/mock 손님 가입과 로그인 지원 |
 | 가게 위치 저장, 품절 스위치 | StorePin, Merchant | `PUT /merchant/store/location {lat,lng}`, 품목별 품절 `PUT /merchant/store/sold-out` | 부분 완료 · 2026-11-27 · 035, 가게 위치 live 저장. 품절 스위치는 제외 |
 | 경계·편의시설·공지 편집 | WebMarketAdmin | 이번에는 표시만, 편집은 mock | mock만 |
-| 조회 수, 단골 수, 거리 | 목록, Store, Merchant | 점포에 `views_today`, `favorites`, 손님 위치가 있을 때 `distance_m` | 부분 완료 · 2026-11-27 · 035, 지도 `distance_m`. 조회 수·단골 수는 제외 |
+| 조회 수, 단골 수, 거리 | 목록, Store, Merchant | 점포에 `views_today`, `favorites`, 손님 위치가 있을 때 `distance_m` | 부분 완료 · 2026-11-27 · 035, 지도 `distance_m`. 037 상인 조회 통계 완료 · 단골 수는 제외 |
 
 ## 화면을 만들며 더 찾은 빈자리
 
@@ -32,8 +32,8 @@
 | 품종 동의어 | 직접 입력, 검색 | 품종에 `synonyms`(부사 ↔ 후지) | 완료 · 2026-11-27 · 036, 품종 동의어로 검색하고 `variety_id` 반환 |
 | 레시피 목록과 재료-품목 연결 | Shop "레시피로 장보기" | `/recipes`, 재료별 `item_id` | 넣지 않음 |
 | 품목과 카테고리 연결 | SearchEmpty "수산 점포에서 찾아보세요" | 품목에 `store_category` | "{시장} 점포 지도에서 보기"로 대신 |
-| 운영자용 시장 목록 | WebAdmin "요청만 있는 시장", "이용 중인 시장" | `/admin/markets?status=` | 넣지 않음 |
-| 상인 주별·요일별 조회 수, 길 안내 연 횟수 | WebMerchant 막대그래프 | `/merchant/stats?weeks=` | 넣지 않고 "이 세일을 본 사람"만 |
+| 운영자용 시장 목록 | WebAdmin "요청만 있는 시장", "이용 중인 시장" | `/admin/markets?status=` | 완료 · 2026-11-27 · 037, listed/active live 목록 |
+| 상인 주별·요일별 조회 수, 길 안내 연 횟수 | WebMerchant 막대그래프 | `/merchant/stats?days=7` | 완료 · 2026-11-27 · 037, 서울 날짜별 조회·길 안내 live 그래프 |
 | 가입 날짜 | Pending "신청한 날" | `/auth/me`에 `created_at` | 완료 · 2026-11-27 · 035, `created_at` 응답 |
 | 마감세일 품종 | SaleNew 품종 칩 | `SaleCreate`에 `variety_id` | 완료 · 2026-11-27 · 036, 칩 선택·품목 소속 검증·공개 응답 |
 | 점포 결제 수단·한 줄 소개 저장 | StoreEdit | `PATCH /merchant/store`에 `payments`, `intro` | 완료 · 2026-11-27 · 035, live 저장 |
@@ -42,7 +42,7 @@
 
 - 영업 중·결제 수단·한 줄 소개: 지도 live 응답 및 StoreEdit 저장 완료. 품종은 036에서 완료. 오늘 품절은 제외.
 - 가게 위치: `PUT /merchant/store/location` 및 StorePin live 저장 완료. 품절 스위치는 제외.
-- 거리: 손님 좌표가 있는 지도 요청의 `distance_m` 완료. 조회 수·단골 수는 제외.
+- 거리: 손님 좌표가 있는 지도 요청의 `distance_m` 완료. 037 상인 조회 통계 완료 · 단골 수는 제외.
 - 시장 `amenities`는 nullable 계약만 추가. 출처 있는 현장 값이 없어 null 유지. 경계·편의시설 위치는 제외.
 
 
@@ -54,3 +54,12 @@
 - 세일 품종: `POST /merchant/sales`의 선택 `variety_id`, 공개 응답 `variety_id`·`variety_name`, SaleNew 칩.
 - 점포 품종: `GET/PATCH /merchant/store`의 `varieties: {item_id: [variety_id]}`, 지도 점포의 `varieties: [variety_id]`, StoreEdit 저장.
 - 마이그레이션: `0018_variety_links.sql`. 가격 구간·품절·단골 알림 등 나머지 빈자리는 기존 상태 유지.
+
+
+### 037 완료 · 2026-11-27
+
+- `POST /stores/{store_id}/directions`: CSRF, 기기 해시 메모리로 점포당 10분 중복 제외. 네이버·카카오 길 안내 클릭에서 호출.
+- `GET /merchant/stats?days=7` (1~28일): 점포·세일 합산 조회, 길 안내, 빈 날 0, 서울 날짜. 단골 수는 null.
+- `GET /market-admin/stats`: 자기 시장 활성 점포·승인/대기 상인·최근 7일 조회·승인 상인 최근 세일 활동.
+- `GET /admin/markets?status=listed|active`: 요청 수·최근 신청, 활성 시장 통계. 운영자 두 목록 live 연결.
+- 마이그레이션 `0020_store_directions.sql`. 단골·오늘 품절 기능은 범위 제외.

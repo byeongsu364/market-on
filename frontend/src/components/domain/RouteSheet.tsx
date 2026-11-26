@@ -1,3 +1,4 @@
+import { recordDirections } from '../../api/stores';
 import { useCallback, useEffect, useRef } from 'react';
 import Sheet from '../common/Sheet';
 import Icon from '../common/Icon';
@@ -14,11 +15,13 @@ import type { LatLng } from '../../types/contract';
  */
 export default function RouteSheet({
   destination,
+  storeId,
   kind,
   me,
   approximate,
   onClose,
 }: {
+  storeId?: string;
   destination: Destination & { label?: string };
   kind: 'store' | 'market';
   me?: LatLng | null;
@@ -42,6 +45,9 @@ export default function RouteSheet({
       window.removeEventListener('pagehide', cancel);
     };
   }, [cancel]);
+  const record = () => {
+    if (kind === 'store' && storeId) void recordDirections(storeId).catch(() => {});
+  };
   const label = destination.label ?? destination.name;
   const meters = me && !approximate ? distanceM(me, destination) : null;
   // 시장 밖 먼 곳이면 걸어서 몇 분은 적지 않음
@@ -58,6 +64,7 @@ export default function RouteSheet({
         className={buttonClass({ variant: 'primary', size: 'lg', wide: true })}
         href={urls.naverWeb}
         onClick={(e) => {
+          record();
           if (!/Android|iPhone|iPad/i.test(navigator.userAgent)) return;
           e.preventDefault();
           cancel();
@@ -73,7 +80,10 @@ export default function RouteSheet({
       <a
         className={buttonClass({ variant: 'surface', size: 'lg', wide: true })}
         href={urls.kakao}
-        onClick={cancel}
+        onClick={() => {
+          cancel();
+          record();
+        }}
       >
         {t('mapRouteKakao')}
       </a>

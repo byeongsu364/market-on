@@ -24,3 +24,8 @@ export const saveNotice = (text: string) =>
   isMock
     ? mock.saveNotice(text)
     : Promise.reject({ code: 'NOT_AVAILABLE', message: '아직 준비 중인 기능이에요.' });
+
+export const getStats = () =>
+  isMock
+    ? mock.marketStats()
+    : request<import('../types/contract').MarketAdminStats>('/market-admin/stats');

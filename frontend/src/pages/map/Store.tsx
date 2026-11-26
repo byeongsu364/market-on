@@ -321,6 +321,7 @@ export default function Store() {
 
   const sheet = route && destination && (
     <RouteSheet
+      storeId={data.store.store_id}
       destination={{ ...destination, label: data.store.name }}
       approximate={destination.approximate}
       kind="store"

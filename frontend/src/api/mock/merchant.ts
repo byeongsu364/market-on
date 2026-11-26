@@ -46,6 +46,32 @@ const passwords = new Map(users.map((u) => [u.login_id, password]));
 let current: User | null = null;
 const hours = new Map<string, { open: string; close: string }>();
 const views = new Map<string, number>();
+const saleDays = new Map<string, number>();
+const directionDays = new Map<string, number>();
+const directionSeen = new Map<string, number>();
+export const dailyViews = (id: string, day: string) =>
+  (views.get(`${day}:${id}`) ?? 0) + (saleDays.get(`${day}:${id}`) ?? 0);
+export async function direction(id: string) {
+  if (!stores.some((s) => s.store_id === id)) throw new Error('점포를 찾을 수 없어요.');
+  const instant = Date.now();
+  if (instant - (directionSeen.get(id) ?? -Infinity) < 600000) return;
+  directionSeen.set(id, instant);
+  const key = `${seoulDay()}:${id}`;
+  directionDays.set(key, (directionDays.get(key) ?? 0) + 1);
+}
+export async function stats(days = 7): Promise<import('../../types/contract').MerchantStats> {
+  const id = merchant().store_id;
+  const series = Array.from({ length: days }, (_, i) => {
+    const day = seoulDay(new Date(Date.now() - (days - 1 - i) * 86400000));
+    return { day, views: dailyViews(id, day), directions: directionDays.get(`${day}:${id}`) ?? 0 };
+  });
+  const today = series[series.length - 1];
+  return {
+    today: { views: today.views, directions: today.directions },
+    days: series,
+    favorites: null,
+  };
+}
 const details = new Map<string, Pick<MerchantStore, 'payments' | 'intro' | 'varieties'>>();
 export const storeDetails = (id: string) => {
   const d = details.get(id);
@@ -298,7 +324,11 @@ export async function publicStore(id: string) {
 }
 export async function view(id: number) {
   const s = sales.find((s) => s.id === id);
-  if (s) s.view_count++;
+  if (s) {
+    s.view_count++;
+    const key = `${seoulDay()}:${s.store_id}`;
+    saleDays.set(key, (saleDays.get(key) ?? 0) + 1);
+  }
 }
 
 /** 030 mock(merchant030.ts)이 같은 계정 목록과 지금 로그인을 읽음 */
@@ -317,6 +347,9 @@ export function resetMock() {
   hours.clear();
   details.clear();
   views.clear();
+  saleDays.clear();
+  directionDays.clear();
+  directionSeen.clear();
   sales.splice(1);
   sales[0].status = 'active';
   sales[0].view_count = 0;

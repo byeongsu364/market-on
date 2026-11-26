@@ -63,3 +63,12 @@ def reject_application(
     application_id: int, operator=Depends(require_operator), conn=Depends(get_db)
 ):
     return market_request_service.review(conn, operator, application_id, 'rejected')
+
+
+@router.get('/markets')
+def markets(
+    status: Literal['listed', 'active'], operator=Depends(require_operator), conn=Depends(get_db)
+):
+    from app.services import stats_service
+
+    return stats_service.markets(conn, status)

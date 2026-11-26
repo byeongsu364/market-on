@@ -1,6 +1,6 @@
 import type { MarketApplication, MarketDemand, JoinRequest } from '../../types/contract';
-import { markets } from './data';
-import { createPendingManager, reviewManager, operator } from './merchant';
+import { markets, stores } from './data';
+import { createPendingManager, reviewManager, operator, mockUsers, dailyViews } from './merchant';
 import { getDeviceId } from '../client';
 import { seoulDay } from '../../utils/sale';
 const records: { market: string; device: string; day: string; kind: 'nearby' | 'request' }[] = [];
@@ -91,4 +91,48 @@ export async function decide(id: number, decision: 'approve' | 'reject') {
 export function resetMarketRequests() {
   records.splice(0);
   entries.splice(0);
+}
+
+export async function listedMarkets(): Promise<import('../../types/contract').ListedMarketStats[]> {
+  operator();
+  const start = seoulDay(new Date(Date.now() - 6 * 86400000));
+  return markets
+    .filter((m) => m.status === 'listed')
+    .map((m) => {
+      const requests = records.filter((r) => r.market === m.market_id && r.kind === 'request');
+      const application = entries.filter((a) => a.market_id === m.market_id).at(-1);
+      return {
+        market_id: m.market_id,
+        name: m.name,
+        requests_week: requests.filter((r) => r.day >= start && r.day <= seoulDay()).length,
+        requests_total: requests.length,
+        application: application
+          ? { status: application.status, created_at: application.created_at }
+          : null,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.requests_week - a.requests_week ||
+        b.requests_total - a.requests_total ||
+        a.name.localeCompare(b.name),
+    );
+}
+export async function activeMarkets(): Promise<import('../../types/contract').ActiveMarketStats[]> {
+  operator();
+  const week = Array.from({ length: 7 }, (_, i) => seoulDay(new Date(Date.now() - i * 86400000)));
+  return markets
+    .filter((m) => m.status === 'active')
+    .map((m) => ({
+      market_id: m.market_id,
+      name: m.name,
+      stores: stores.filter(() => m.market_id === markets[0].market_id).length,
+      merchants_approved: mockUsers().filter(
+        (u) =>
+          u.role === 'merchant' && u.status === 'approved' && u.store?.market_id === m.market_id,
+      ).length,
+      views_week: stores
+        .filter(() => m.market_id === markets[0].market_id)
+        .reduce((n, s) => n + week.reduce((sum, d) => sum + dailyViews(s.store_id, d), 0), 0),
+    }));
 }

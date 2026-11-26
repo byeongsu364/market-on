@@ -42,3 +42,10 @@ def reject(user_id: UUID, user=Depends(require_market_admin), conn=Depends(get_d
 @router.post('/merchants/{user_id}/disable')
 def disable(user_id: UUID, user=Depends(require_market_admin), conn=Depends(get_db)):
     return {'user': admin_service.set_status(conn, user, user_id, 'disabled')}
+
+
+@router.get('/stats')
+def stats(user=Depends(require_market_admin), conn=Depends(get_db)):
+    from app.services import stats_service
+
+    return stats_service.market(conn, user)

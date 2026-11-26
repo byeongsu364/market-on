@@ -8,6 +8,7 @@ import { getVarieties } from '../api/items';
 import { saleEnd } from '../utils/sale';
 export function useMerchantHome() {
   const store = useResource(api.getStore);
+  const stats = useResource(api.getStats);
   const active = useResource(useCallback(() => api.getSales('active'), []));
   const ended = useResource(useCallback(() => api.getSales('ended'), []));
   const action = useAction(async (id: number, repost = false) => {
@@ -25,7 +26,7 @@ export function useMerchantHome() {
     extras.retry();
     return true;
   });
-  return { store, active, ended, action, extras, soldOut };
+  return { store, stats, active, ended, action, extras, soldOut };
 }
 export function useSaleNew() {
   const store = useResource(api.getStore);

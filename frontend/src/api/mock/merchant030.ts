@@ -1,3 +1,4 @@
+import { seoulDay } from '../../utils/sale';
 // 지시서 030 8단계(상인·시장 관리자 화면)의 mock 전용 값.
 // 백엔드에 아직 없는 것(030 5장 표): 오늘 품절 스위치, 가게 위치 저장, 단골 수, 경계·편의시설·공지 편집.
 // 모두 "예시 값"이에요. 단골 수와 점포 위치는 geo.ts의 예시 계산식을 그대로 써서 지도 화면과 같은 값이 나와요.
@@ -12,7 +13,7 @@ import type {
 import { zones } from '../../constants/zones';
 import { markets, stores } from './data';
 import { storeExtra } from './geo';
-import { currentMockUser, mockUsers, onMockReset } from './merchant';
+import { currentMockUser, mockUsers, onMockReset, dailyViews, sales } from './merchant';
 
 const soldOut = new Map<string, Set<string>>();
 const locations = new Map<string, LatLng>();
@@ -125,4 +126,34 @@ export async function saveNotice(text: string) {
   const value = text.trim().slice(0, 200);
   notices.set(manager().market_id, value);
   return value;
+}
+
+export async function marketStats(): Promise<import('../../types/contract').MarketAdminStats> {
+  const summary = await marketSummary();
+  const mid = manager().market_id;
+  const week = Array.from({ length: 7 }, (_, i) => seoulDay(new Date(Date.now() - i * 86400000)));
+  return {
+    stores: summary.stores_total,
+    merchants_approved: summary.merchants_approved,
+    merchants_pending: summary.merchants_pending,
+    views_week: stores
+      .filter(() => mid === markets[0].market_id)
+      .reduce((sum, s) => sum + week.reduce((n, d) => n + dailyViews(s.store_id, d), 0), 0),
+    recent: merchantsOf(mid)
+      .filter((u) => u.status === 'approved')
+      .map((u) => {
+        const list = sales
+          .filter((s) => s.store_id === u.store.store_id)
+          .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
+        return {
+          user_id: u.id,
+          login_id: u.login_id,
+          store_id: u.store.store_id,
+          store_name: u.store.name,
+          last_sale_at: list[0]?.starts_at ?? null,
+          sales_week: list.filter((s) => week.includes(seoulDay(new Date(s.starts_at)))).length,
+        };
+      })
+      .sort((a, b) => (b.last_sale_at ?? '').localeCompare(a.last_sale_at ?? '')),
+  };
 }
