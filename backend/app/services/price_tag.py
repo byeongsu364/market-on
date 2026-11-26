@@ -75,6 +75,11 @@ def read_unit(conn, text: str) -> tuple[str, str | None, float | None]:
     return '', None, None
 
 
+def read_variety(conn, text: str, item_id: str | None) -> dict:
+    variety_id = match_variety(conn, item_id, text) if item_id else None
+    return {'variety_id': variety_id, 'variety_text': text.strip() if variety_id else None}
+
+
 def parse(conn, text: str, item_id: str | None) -> dict | None:
     if not (text or '').strip():
         return None

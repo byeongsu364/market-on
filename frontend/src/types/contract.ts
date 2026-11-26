@@ -24,6 +24,8 @@ export type Item = {
   labels_i18n: Partial<Record<Language, string>>;
 };
 export type RecognizeResponse = {
+  variety_id?: string | null;
+  variety_text?: string | null;
   model: string;
   media_id: string | null;
   // 손님이 촬영 위치 사용에 동의했을 때만: 1km 안 가장 가까운 시장 ID와 대략 좌표(소수 둘째 자리)
@@ -47,6 +49,8 @@ export type Stat = {
   count: number;
 };
 export type VarietyPrice = {
+  mock?: boolean;
+  source?: string | null;
   variety_id: string;
   name: string;
   reference_price: number | null;
@@ -56,6 +60,7 @@ export type VarietyPrice = {
   default: boolean;
 } & VarietyExtra;
 export type Price = {
+  mock?: boolean;
   variety_id: string | null;
   variety_name: string | null;
   varieties: VarietyPrice[];
@@ -384,6 +389,7 @@ export type StoreExtra = {
 };
 export type VarietyHarvest = { label: string; from?: string; to?: string };
 export type VarietyExtra = {
+  mock?: boolean;
   synonyms?: string[];
   description?: string | null;
   description_source?: string | null;

@@ -46,7 +46,9 @@ export function buildCardData(input: CardInput) {
         ]
       : []),
     ...(price
-      ? [`기준시세 ${price.reference_price.toLocaleString('ko-KR')}원 / ${unitLabel(price.unit)}`]
+      ? [
+          `기준시세 ${price.mock ? '예시 ' : ''}${price.reference_price.toLocaleString('ko-KR')}원 / ${unitLabel(price.unit)}`,
+        ]
       : ['기준시세 정보 없음']),
     ...(comparison ? [comparison] : []),
   ];
@@ -54,7 +56,7 @@ export function buildCardData(input: CardInput) {
     ...(price
       ? [
           // price.source에 조사일이 이미 있으면 다시 붙이지 않음 (실제 응답은 "… · 2026-11-25 조사" 포함)
-          `${price.source}${price.observed_on && !price.source.includes(price.observed_on) ? ` · ${price.observed_on} 조사` : ''} · ${price.region}${price.fallback ? ` · ${{ region_avg: '같은 지역 전체 평균', national_avg: '전국 평균', last_valid: '최근 조사값' }[price.fallback]}` : ''}`,
+          `${price.source}${!price.mock && price.observed_on && !price.source.includes(price.observed_on) ? ` · ${price.observed_on} 조사` : ''} · ${price.region}${price.fallback ? ` · ${{ region_avg: '같은 지역 전체 평균', national_avg: '전국 평균', last_valid: '최근 조사값' }[price.fallback]}` : ''}`,
         ]
       : []),
     ...new Set(item.criteria.map((c) => c.source)),
@@ -258,7 +260,8 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
     ctx.fillStyle = on ? colors.on : colors.off;
     const x = P + i * (cellW + gap);
     round(x, y + 12, cellW, 78, [0, 0, 39, 39]);
-    text(label, x + cellW / 2, y + 140, 32, cellW, {
+    text(label, x + cellW / 2, y + 140, 26, cellW, {
+      lines: 2,
       weight: on ? 600 : 400,
       color: on ? colors.text : colors.soft,
       align: 'center',

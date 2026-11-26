@@ -1,5 +1,5 @@
 import { getRecipes } from './recipes';
-import { mockVarieties } from './varieties';
+import { mockVarieties, mockMultipliers } from './varieties';
 import type {
   MarketMap,
   MultiItemMap,
@@ -49,13 +49,24 @@ export const nearby = (lat?: number, lng?: number, radius_km = 5) =>
   );
 export const recognize = (file: File): Promise<RecognizeResponse> =>
   mock(() => ({
+    variety_id: /부사|fuji/.test(file.name) ? 'variety:apple-fuji' : null,
+    variety_text: /부사|fuji/.test(file.name) ? '부사' : null,
     media_id: '00000000-0000-4000-8000-000000000001',
     price_tag: file.name.includes('price')
-      ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1, variety_id: null }
+      ? {
+          price: 3000,
+          unit_text: '1단',
+          unit: 'unit:bunch',
+          quantity: 1,
+          variety_id: /부사|fuji/.test(file.name) ? 'variety:apple-fuji' : null,
+        }
       : null,
     model: 'gemma4:e4b',
     vision_labels: ['green onion', 'scallion'],
-    candidates: items.slice(0, 3).map((i, j) => ({
+    candidates: (/부사|fuji/.test(file.name)
+      ? [items.find((i) => i.item_id === 'item:apple')!]
+      : items.slice(0, 3)
+    ).map((i, j) => ({
       item_id: i.item_id,
       name: i.name,
       confidence: j === 0 ? (file.name.includes('uncertain') ? 0.65 : 0.94) : 0.3 - j * 0.1,
@@ -95,13 +106,20 @@ export const price = (q: PriceRequest): Promise<Price> =>
     const base = q.item_id === 'item:green_onion' ? 2576 : q.item_id === 'item:onion' ? 2100 : 3200;
     const varieties = mockVarieties(q.item_id).map((v, i) => ({
       ...v,
-      reference_price: v.variety_id.endsWith('shinano-gold')
-        ? null
-        : q.item_id === 'item:mandarin'
-          ? [800, 1200][i]
-          : q.item_id === 'item:apple'
-            ? [3200, 3500][i]
-            : Math.round(convertUnit(base, 'kg', q.unit)),
+      mock: !!v.mock,
+      source: v.mock ? '예시 시세 · 실제 조사값 아님' : null,
+      reference_price: v.mock
+        ? Math.round(
+            (q.item_id === 'item:mandarin' ? 800 : convertUnit(base, 'kg', q.unit)) *
+              mockMultipliers[v.variety_id],
+          )
+        : v.variety_id.endsWith('shinano-gold')
+          ? null
+          : q.item_id === 'item:mandarin'
+            ? [800, 1200][i]
+            : q.item_id === 'item:apple'
+              ? [3200, 3500][i]
+              : Math.round(convertUnit(base, 'kg', q.unit)),
       default: i === 0,
       unit: q.unit,
       observed_on: v.variety_id.endsWith('shinano-gold') ? null : '2026-11-20',
@@ -120,7 +138,12 @@ export const price = (q: PriceRequest): Promise<Price> =>
       region: '서울',
       observed_on: '2026-11-20',
       fallback: null,
-      source: q.item_id === 'item:green_onion' ? source : '팀 작성 예시 가격 · 2026-11-20 · 샘플',
+      mock: !!selected?.mock,
+      source: selected?.mock
+        ? '예시 시세 · 실제 조사값 아님'
+        : q.item_id === 'item:green_onion'
+          ? source
+          : '팀 작성 예시 가격 · 2026-11-20 · 샘플',
       this_market: q.market_id ? { price: reference_price, name: '시연 시장' } : undefined,
       by_market_type: {
         traditional: { price: reference_price, count: 15 },
@@ -416,7 +439,7 @@ export const priceHistory = (
   price({ item_id, variety_id, unit, market_id: 'market:demo' }).then((p) => {
     const selected = p.varieties.find((v) => v.variety_id === p.variety_id);
     // 귤을 포함한 시세는 실제 관측값이 아닌 팀 작성 예시 값이에요.
-    const base = selected ? selected.reference_price : p.reference_price;
+    const base = p.mock ? null : selected ? selected.reference_price : p.reference_price;
     const steps = [1.06, 1.03, 0.98, 1];
     return {
       item_id,

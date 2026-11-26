@@ -157,8 +157,12 @@ async def recognize(conn, image: bytes, use_location: bool = False) -> dict:
         known = await run_in_threadpool(_known_labels, conn, labels)
         candidates = await run_in_threadpool(match_vision_labels, conn, known[:VISION_LABELS_USED])
     tag = None
+    variety = {'variety_id': None, 'variety_text': None}
     if result and result['text'].strip():
         item_id = candidates[0]['item_id'] if candidates else None
+        variety = await run_in_threadpool(
+            price_tag_reader.read_variety, conn, result['text'], item_id
+        )
         tag = await run_in_threadpool(price_tag_reader.parse, conn, result['text'], item_id)
     return {
         'model': VISION_MODEL,
@@ -166,6 +170,7 @@ async def recognize(conn, image: bytes, use_location: bool = False) -> dict:
         'candidates': candidates,
         'media_id': media_id,
         'price_tag': tag,
+        **variety,
         'photo_location': location,
     }
 

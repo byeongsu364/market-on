@@ -1,8 +1,8 @@
 import type { VarietyExtra } from '../../types/contract';
 const catalog: Record<string, [string, string, VarietyExtra][]> = {
   'item:mandarin': [
-    ['variety:mandarin-open', '노지', { synonyms: ['노지감귤'] }],
-    ['variety:mandarin-greenhouse', '시설', { synonyms: ['하우스감귤'] }],
+    ['variety:mandarin-open', '노지', { synonyms: ['노지감귤', '온주밀감'] }],
+    ['variety:mandarin-greenhouse', '시설', { synonyms: ['하우스감귤'], mock: true }],
   ],
   'item:apple': [
     [
@@ -41,6 +41,16 @@ const catalog: Record<string, [string, string, VarietyExtra][]> = {
   'item:green_onion': [['variety:green_onion-daepa', '대파', {}]],
   'item:onion': [['variety:onion-onion', '양파', {}]],
 };
+catalog['item:pear'].push(['variety:pear-noksu', '녹수', { mock: true }]);
+catalog['item:pear'].push(['variety:pear-hanareum', '한아름', { mock: true }]);
+catalog['item:pear'].push(['variety:pear-manpung', '만풍배', { mock: true }]);
+catalog['item:sweet_persimmon'].push(['variety:sweet_persimmon-gampung', '감풍', { mock: true }]);
+catalog['item:sweet_persimmon'].push(['variety:sweet_persimmon-romang', '로망', { mock: true }]);
+catalog['item:sweet_persimmon'].push(['variety:sweet_persimmon-jowan', '조완', { mock: true }]);
+catalog['item:onion'].push(['variety:onion-jangilhwang', '장일황', { mock: true }]);
+catalog['item:onion'].push(['variety:onion-highland', '고랭지 여름양파', { mock: true }]);
+catalog['item:green_onion'].push(['variety:green_onion-cold', '한지형', { mock: true }]);
+catalog['item:green_onion'].push(['variety:green_onion-warm', '난지형', { mock: true }]);
 export const mockVarieties = (item: string) =>
   (catalog[item] ?? []).map(([variety_id, name, extra]) => ({
     variety_id,
@@ -51,3 +61,17 @@ export const mockVarieties = (item: string) =>
     synonyms: [],
     ...extra,
   }));
+
+export const mockMultipliers: Record<string, number> = {
+  'variety:pear-noksu': 0.85,
+  'variety:pear-hanareum': 0.95,
+  'variety:pear-manpung': 1.25,
+  'variety:sweet_persimmon-gampung': 1.15,
+  'variety:sweet_persimmon-romang': 1.1,
+  'variety:sweet_persimmon-jowan': 0.9,
+  'variety:onion-jangilhwang': 1.1,
+  'variety:onion-highland': 1.2,
+  'variety:green_onion-cold': 1.1,
+  'variety:green_onion-warm': 0.9,
+  'variety:mandarin-greenhouse': 1.25,
+};

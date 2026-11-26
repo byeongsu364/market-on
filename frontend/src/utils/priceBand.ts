@@ -2,12 +2,17 @@ import type { Price, PriceBand } from '../types/contract';
 
 // 가격 구간(지시서 030 6장, 기획서 "살까 말까"). 문구는 AI가 아니라 이 코드가 고름.
 // 구간은 화면에 보이는 diff_pct(반올림한 정수, utils/diffPct.ts)로 정함.
-export const BAND_LABELS = ['많이 낮음', '살 만함', '조금 높음', '높음'] as const;
+export const BAND_LABELS = [
+  '기준보다 많이 낮음',
+  '기준과 비슷',
+  '기준보다 조금 높음',
+  '기준보다 높음',
+] as const;
 export const BAND_MESSAGES: Record<PriceBand, string> = {
-  1: '많이 낮아요, 상태를 꼭 확인하세요',
-  2: '살 만한 가격이에요',
-  3: '시세보다 조금 높아요',
-  4: '시세보다 높은 편이에요',
+  1: '기준시세보다 많이 낮아요 · 상태를 함께 확인해 보세요',
+  2: '기준시세와 비슷해요',
+  3: '기준시세보다 조금 높아요',
+  4: '기준시세보다 높아요',
 };
 export const NO_BAND_MESSAGE = '비교는 참고만 하세요';
 export const FALLBACK_LABELS: Record<NonNullable<Price['fallback']>, string> = {

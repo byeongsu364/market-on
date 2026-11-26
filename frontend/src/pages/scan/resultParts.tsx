@@ -93,7 +93,9 @@ export function PriceTable({
           <span className={s.rowLabel}>{t('scanReference')}</span>
           {shownRef != null ? (
             <span className={s.amount}>
-              <span className={s.price}>{formatPrice(shownRef)}</span>
+              <span className={s.price}>
+                {formatPrice(shownRef)} {price?.mock && <small>예시</small>}
+              </span>
               <span className={s.unit}>{unitLabel(price?.unit ?? unit)}</span>
             </span>
           ) : (
@@ -172,7 +174,7 @@ export function PriceTable({
       {price && (
         <p className={`${s.note} ${s.ruled}`}>
           {price.source}
-          {price.observed_on && !price.source.includes(price.observed_on)
+          {!price.mock && price.observed_on && !price.source.includes(price.observed_on)
             ? ` · ${formatDate(price.observed_on)} ${t('scanSurveyed')}`
             : ''}
           {` · ${price.region}`}
@@ -219,7 +221,7 @@ export function VarietyCompare({
             start={<ItemTile itemId={itemId} varietyId={v.variety_id} />}
             title={
               <>
-                {v.name}
+                {v.name} {v.mock && <small>예시</small>}
                 {v.variety_id === selected && (
                   <span className="sr-only"> ({t('scanSelected')})</span>
                 )}
@@ -228,7 +230,7 @@ export function VarietyCompare({
             sub={
               v.reference_price == null
                 ? t('scanNoReference')
-                : `${t('scanReference')} ${formatPrice(v.reference_price)}`
+                : `${t('scanReference')} ${formatPrice(v.reference_price)}${v.mock ? ' · 예시 시세 · 실제 조사값 아님' : ''}`
             }
             end={<BandCell band={varietyBand(seen, v.reference_price, price)} />}
             chevron={false}

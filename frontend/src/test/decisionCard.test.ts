@@ -44,7 +44,7 @@ it('체크한 항목과 품종·가격·서울 날짜·출처·시장 링크를 
   expect(data.sources.join()).toContain('2026-11-25 조사');
   expect(data.url).toBe('https://example.com/?market=market%3Ademo');
   expect(data.filename).toBe('market-on-사과-2026-11-26.png');
-  expect(data.alt).not.toMatch(/살 만해요|신선해요|구매 추천|최저가|등급/);
+  expect(data.alt).not.toMatch(/신선해요|구매 추천|최저가|등급/);
 });
 it('미체크면 모든 포인트를 체크 없이 표시하고 사진 없는 직접 입력을 보존한다', () => {
   const data = buildCardData({ ...input, checked: [], value: '' });

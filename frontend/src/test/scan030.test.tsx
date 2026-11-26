@@ -22,12 +22,12 @@ function show(path: string, state?: object) {
 it('품종을 바꾸면 결론·눈금·기준시세·차이가 함께 바뀐다(사과 1개 2,300원)', async () => {
   show('/items/item:apple?market=market:demo', { price: 2300, quantity: 1 });
   // 후지: 기준시세 3,200원, 28% 낮음 → 2번 칸
-  expect(await screen.findByRole('heading', { name: '살 만한 가격이에요' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: '기준시세와 비슷해요' })).toBeInTheDocument();
   expect(screen.getByText('후지 기준시세보다 28% 낮아요.')).toBeInTheDocument();
   expect(
-    screen.getByRole('img', { name: '기준시세와 견준 가격 자리: 살 만함' }),
+    screen.getByRole('img', { name: '기준시세와 견준 가격 자리: 기준과 비슷' }),
   ).toBeInTheDocument();
-  const table = screen.getByRole('heading', { name: '살 만한 가격이에요' }).closest('section')!;
+  const table = screen.getByRole('heading', { name: '기준시세와 비슷해요' }).closest('section')!;
   // 기준시세 줄(전통시장 평균 줄도 같은 값)
   expect(within(table).getAllByText('3,200원').length).toBeGreaterThan(0);
   expect(within(table).getByText('▼ 28%')).toBeInTheDocument();
@@ -36,13 +36,17 @@ it('품종을 바꾸면 결론·눈금·기준시세·차이가 함께 바뀐다
   // 홍로: 기준시세 3,500원, 34% 낮음 → 1번 칸
   fireEvent.click(screen.getByRole('button', { name: '홍로' }));
   expect(
-    await screen.findByRole('heading', { name: '많이 낮아요, 상태를 꼭 확인하세요' }),
+    await screen.findByRole('heading', {
+      name: '기준시세보다 많이 낮아요 · 상태를 함께 확인해 보세요',
+    }),
   ).toBeInTheDocument();
   expect(screen.getByText('홍로 기준시세보다 34% 낮아요.')).toBeInTheDocument();
   expect(
-    screen.getByRole('img', { name: '기준시세와 견준 가격 자리: 많이 낮음' }),
+    screen.getByRole('img', { name: '기준시세와 견준 가격 자리: 기준보다 많이 낮음' }),
   ).toBeInTheDocument();
-  const hongro = screen.getByRole('heading', { name: '많이 낮아요, 상태를 꼭 확인하세요' });
+  const hongro = screen.getByRole('heading', {
+    name: '기준시세보다 많이 낮아요 · 상태를 함께 확인해 보세요',
+  });
   expect(within(hongro.closest('section')!).getAllByText('3,500원').length).toBeGreaterThan(0);
   expect(within(hongro.closest('section')!).getByText('▼ 34%')).toBeInTheDocument();
   expect(screen.getByRole('heading', { level: 1, name: '사과 홍로' })).toBeInTheDocument();
@@ -62,7 +66,7 @@ it('품종마다 견주는 목록은 같은 값을 품종별 칸으로 보여 �
   const section = list.closest('section')!;
   const rows = within(section).getAllByRole('listitem');
   expect(rows.map((r) => r.textContent)).toEqual([
-    expect.stringMatching(/후지.*3,200원.*살 만함/),
+    expect.stringMatching(/후지.*3,200원.*기준과 비슷/),
     expect.stringMatching(/홍로.*3,500원.*많이 낮음/),
     expect.stringMatching(/시나노골드.*기준시세 자료 없음.*견줄 수 없음/),
   ]);
@@ -84,7 +88,9 @@ it('/items/…?variety= 주소만으로 품종과 기준시세를 되살린다',
   fireEvent.click(screen.getByRole('button', { name: '가격 입력하기' }));
   fireEvent.change(screen.getByLabelText('현장 가격'), { target: { value: '2300' } });
   expect(
-    await screen.findByRole('heading', { name: '많이 낮아요, 상태를 꼭 확인하세요' }),
+    await screen.findByRole('heading', {
+      name: '기준시세보다 많이 낮아요 · 상태를 함께 확인해 보세요',
+    }),
   ).toBeInTheDocument();
 });
 
@@ -95,7 +101,7 @@ it('품종 견줘 보기는 mock 필드의 설명·수확 시기만 쓰고 없�
   expect(within(fuji).getByText('10월 하순 이후')).toBeInTheDocument();
   expect(within(fuji).getByRole('img', { name: '수확이 시작되는 달: 10월' })).toBeInTheDocument();
   expect(within(fuji).getByText(/저장성이 좋아요/)).toBeInTheDocument();
-  expect(within(fuji).getByText('살 만함')).toBeInTheDocument();
+  expect(within(fuji).getByText('기준과 비슷')).toBeInTheDocument();
   const gold = screen.getByRole('heading', { name: '시나노골드' }).closest('article')!;
   expect(within(gold).queryByText('수확 시기')).not.toBeInTheDocument();
   expect(within(gold).getByText('기준시세 자료가 아직 없어요')).toBeInTheDocument();
@@ -127,10 +133,15 @@ it('판단 카드 데이터에 가격 구간과 "신선도는 직접 확인했�
   };
   const card = buildCardData({ ...base, value: '2300' });
   expect(card.band).toBe(1);
-  expect(card.bandLine).toBe('많이 낮아요, 상태를 꼭 확인하세요');
-  expect(card.bandLabels).toEqual(['많이 낮음', '살 만함', '조금 높음', '높음']);
+  expect(card.bandLine).toBe('기준시세보다 많이 낮아요 · 상태를 함께 확인해 보세요');
+  expect(card.bandLabels).toEqual([
+    '기준보다 많이 낮음',
+    '기준과 비슷',
+    '기준보다 조금 높음',
+    '기준보다 높음',
+  ]);
   expect(card.footer).toBe('신선도는 직접 확인했어요');
-  expect(card.alt).toContain('가격 자리 많이 낮음');
+  expect(card.alt).toContain('가격 자리 기준보다 많이 낮음');
   expect(card.alt).not.toMatch(/판정하지 않아요|사지 마세요/);
   const noPrice = buildCardData({ ...base, value: '' });
   expect(noPrice.band).toBeNull();

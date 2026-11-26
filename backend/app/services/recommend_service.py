@@ -161,7 +161,12 @@ def recommend(conn, data, device_id, *, embedder=None, consume=True):
             raise
         # Only local traditional averages in the actual default sale denomination.
         traditional = price.by_market_type.get('traditional')
-        if price.unit != item.default_unit or price.region == '전국' or not traditional:
+        if (
+            price.mock
+            or price.unit != item.default_unit
+            or price.region == '전국'
+            or not traditional
+        ):
             continue
         label = next(
             (r['name_ko'] for r in relations if r['object_id'] == item.default_unit),

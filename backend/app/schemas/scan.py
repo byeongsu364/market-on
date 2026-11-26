@@ -26,6 +26,8 @@ class PhotoLocation(BaseModel):
 
 
 class RecognizeResponse(BaseModel):
+    variety_id: str | None = None
+    variety_text: str | None = None
     model: str
     vision_labels: list[str]
     candidates: list[RecognizeCandidate]

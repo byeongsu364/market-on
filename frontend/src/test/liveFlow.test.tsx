@@ -342,6 +342,10 @@ it('가격표 품종을 확인·수정하고 결과의 기본 품종보다 우�
 });
 
 it('단일 품종은 칩을 표시하지 않는다', async () => {
+  vi.mocked(getPrice).mockImplementation(async (q) => {
+    const p = await mock.price(q);
+    return { ...p, varieties: p.varieties.slice(0, 1) };
+  });
   show('/items/item:green_onion');
   await screen.findByText(/aT 기간별/);
   expect(screen.queryByRole('group', { name: '품종' })).not.toBeInTheDocument();
@@ -402,4 +406,30 @@ it('보류된 제보는 기준시세 차이 안내를 표시한다', async () =>
   vi.mocked(postPriceReport).mockResolvedValue({ id: 1, updated: false, held: true });
   show('/items/item:green_onion?market=market:demo', { price: 3000, method: 'manual' });
   expect(await screen.findByText('기준시세와 차이가 커서 확인 후 반영돼요')).toBeInTheDocument();
+});
+
+it('가격 없이 읽은 부사를 후지로 선택해 결과에 전달한다', async () => {
+  vi.mocked(recognize).mockResolvedValue({
+    model: 'google-vision',
+    media_id: null,
+    price_tag: null,
+    variety_id: 'variety:apple-fuji',
+    variety_text: '부사',
+    vision_labels: ['apple'],
+    candidates: [{ item_id: 'item:apple', name: '사과', confidence: 0.94 }],
+  });
+  show('/scan');
+  fireEvent.change(await screen.findByLabelText('사진 찍기'), {
+    target: { files: [new File(['x'], 'apple.jpg')] },
+  });
+  expect(await screen.findByRole('button', { name: '후지' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
+  await waitFor(() =>
+    expect(getPrice).toHaveBeenLastCalledWith(
+      expect.objectContaining({ variety_id: 'variety:apple-fuji' }),
+    ),
+  );
 });

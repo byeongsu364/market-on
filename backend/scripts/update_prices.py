@@ -74,7 +74,8 @@ def update_prices(conn, *, days=7, end=None, item_id=None):
     targets = [e for e in entities if e['type'] == 'item' and (not item_id or e['id'] == item_id)]
     collection = []
     for entity in targets:
-        children = price_repo.varieties(conn, entity['id'])
+        # 예시 품종(attrs.mock, aT 코드 없음)은 aT에서 받을 게 없어 수집 대상에서 빼요 (046)
+        children = [c for c in price_repo.varieties(conn, entity['id']) if c.get('kamis')]
         entities.extend(children)
         collection.extend(children or [entity])
     report = {}

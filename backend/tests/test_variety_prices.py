@@ -30,7 +30,7 @@ def choices():
 def test_variety_ontology():
     entities = yaml.safe_load((DATA / 'ontology/items.yaml').read_text())['entities']
     varieties = [e for e in entities if e['type'] == 'variety']
-    assert len(varieties) == 9
+    assert len(varieties) == 19
     for item in (e for e in entities if e['type'] == 'item'):
         edges = [r for r in item['relations'] if r['p'] == 'hasGrade']
         defaults = [r for r in edges if r.get('props', {}).get('default')]
@@ -96,6 +96,8 @@ def test_default_explicit_fallback_and_contract(prices, monkeypatch):
     )
     assert set(default.varieties[0].model_dump()) == {
         'variety_id',
+        'mock',
+        'source',
         'name',
         'reference_price',
         'unit',
@@ -208,3 +210,91 @@ def test_mandarin_collection_targets_without_network(monkeypatch):
         ('400', '415', '01'),
         ('400', '415', '02'),
     ]
+
+
+def test_variety_without_price(monkeypatch):
+    from app.services import price_tag
+
+    monkeypatch.setattr(price_tag, 'match_variety', lambda *a: 'variety:apple-fuji')
+    assert price_tag.parse(None, '부사', 'item:apple') is None
+    assert price_tag.read_variety(None, '부사', 'item:apple') == {
+        'variety_id': 'variety:apple-fuji',
+        'variety_text': '부사',
+    }
+
+
+def test_seed_and_remove_mock(monkeypatch):
+    from scripts import seed_mock_varieties as script
+
+    conn = Mock()
+    conn.transaction.return_value = nullcontext()
+    conn.execute.return_value.rowcount = 7
+    assert script.seed(conn, remove=True) == {'deleted': 7, 'inserted': 0}
+    assert "source='mock'" in conn.execute.call_args.args[0]
+    conn.execute.return_value.fetchall.return_value = [
+        {
+            'source': 'at_period_retail',
+            'price': 1000,
+            'item_id': 'item:pear',
+            'variety_id': 'variety:pear-shingo',
+            'exmn_ymd': date(2026, 11, 27),
+        }
+    ]
+    saved = []
+    monkeypatch.setattr(
+        script, 'upsert_observations', lambda c, rows: (saved.extend(rows) or len(rows), 0)
+    )
+    script.seed(conn, today=date(2026, 11, 27))
+    assert all(r['source'] == 'mock' for r in saved)
+    assert saved[0]['price'] == 850
+
+
+def test_baseline_excludes_mock_by_default(monkeypatch):
+    captured = []
+    monkeypatch.setattr(
+        price_repo, 'fetch_rows', lambda c, q, params: captured.append((q, params)) or []
+    )
+    price_repo.baseline(None, 'item:pear', on_date=date(2026, 11, 27))
+    assert "p.source<>'mock' or %s" in captured[0][0]
+    assert captured[0][1][4] is False
+
+
+def test_explicit_mock_price_is_labeled(prices, monkeypatch):
+    real_choices = choices()
+    real_choices[1]['attrs'] = {'mock': True}
+    monkeypatch.setattr(price_repo, 'varieties', lambda *a: real_choices)
+    calls = []
+
+    def mock_rows(conn, query, params):
+        calls.append(params)
+        return [
+            {
+                'source': 'mock',
+                'exmn_ymd': date(2026, 11, 20),
+                'sgg_nm': '서울',
+                'market_type': 'traditional',
+                'mrkt_cd': '0',
+                'price': 25000,
+                'unit': '개',
+                'unit_sz': '10',
+            }
+        ]
+
+    monkeypatch.setattr(price_repo, 'fetch_rows', mock_rows)
+    result = price_service.get_price(
+        None,
+        'item:apple',
+        variety_id='variety:apple-hongro',
+        on_date=date(2026, 11, 24),
+        _include_varieties=False,
+    )
+    assert calls[0][4] is True
+    assert result.mock is True
+    assert result.source == '예시 시세 · 실제 조사값 아님'
+
+
+def test_history_dates_exclude_mock():
+    conn = Mock()
+    conn.execute.return_value = []
+    price_repo.observation_dates(conn, 'item:pear', None, date(2026, 11, 1), date(2026, 11, 27))
+    assert "p.source<>'mock'" in conn.execute.call_args.args[0]

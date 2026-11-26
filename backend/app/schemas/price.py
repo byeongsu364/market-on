@@ -17,6 +17,7 @@ class MarketPrice(BaseModel):
 
 
 class VarietyMetadata(BaseModel):
+    mock: bool = False
     variety_id: str
     name: str
     description: str | None = None
@@ -26,6 +27,7 @@ class VarietyMetadata(BaseModel):
 
 
 class VarietyPrice(VarietyMetadata):
+    source: str | None = None
     variety_id: str
     name: str
     reference_price: int | None
@@ -36,6 +38,7 @@ class VarietyPrice(VarietyMetadata):
 
 
 class PriceResponse(BaseModel):
+    mock: bool = False
     variety_id: str | None = None
     variety_name: str | None = None
     varieties: list[VarietyPrice] = []

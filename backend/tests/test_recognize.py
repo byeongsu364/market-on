@@ -106,6 +106,8 @@ def test_contract_and_weights(api, labels, expected):
     assert set(body) == {
         *('vision_labels', 'candidates', 'media_id', 'price_tag', 'model'),
         'photo_location',
+        'variety_id',
+        'variety_text',
     }
     assert body['model'] == 'google-vision'
     assert body['vision_labels'] == [label.lower() for label in labels]
@@ -395,3 +397,13 @@ def test_vision_usage_limits(monkeypatch):
     )
     assert [vision_usage.take() for _ in range(3)] == [None, None, 'daily_limit']
     vision_usage.reset()
+
+
+def test_variety_without_price_response(api, monkeypatch):
+    client, annotate, _, _, _ = api
+    monkeypatch.setattr(price_tag, 'match_variety', lambda *a: 'variety:apple-fuji')
+    annotate.return_value = seen(['apple'], '부사')
+    body = upload(client).json()
+    assert body['price_tag'] is None
+    assert body['variety_id'] == 'variety:apple-fuji'
+    assert body['variety_text'] == '부사'

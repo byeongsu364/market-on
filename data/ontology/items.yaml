@@ -25,6 +25,8 @@ entities:
       - {key: root, text: 흰 뿌리 쪽을 살짝 만지면 무르지 않고 탄력이 있어요, source: 'src:nics-month-food-green-onion'}
       - {key: bunch, text: 묶음 안의 길이와 굵기가 비슷해요, source: 'src:nics-month-food-green-onion'}
     relations:
+      - {p: hasGrade, o: 'variety:green_onion-warm', source: 'src:nics-month-food-green-onion'}
+      - {p: hasGrade, o: 'variety:green_onion-cold', source: 'src:nics-month-food-green-onion'}
       - {p: hasGrade, o: 'variety:green_onion-daepa', props: {default: true}}
       - {p: isA, o: 'cat:vegetable'}
       - {p: soldBy, o: 'unit:bunch', props: {factor_kg: 0.8, default: true}, source: 'src:team-draft'}
@@ -46,6 +48,8 @@ entities:
       - {key: sprout, text: 싹이 나 있지 않아요, source: 'src:nics-month-food-onion'}
       - {key: weight, text: 들어 보면 크기에 비해 무게감이 있어요, source: 'src:nics-month-food-onion'}
     relations:
+      - {p: hasGrade, o: 'variety:onion-highland', source: 'src:nics-month-food-onion'}
+      - {p: hasGrade, o: 'variety:onion-jangilhwang', source: 'src:nics-month-food-onion'}
       - {p: hasGrade, o: 'variety:onion-onion', props: {default: true}}
       - {p: isA, o: 'cat:vegetable'}
       - {p: soldBy, o: 'unit:kg', props: {factor_kg: 1, default: true}}
@@ -84,6 +88,9 @@ entities:
       - {key: calyx, text: 꽃받침 부위가 파랗지 않고 노랗게 변해 있어요, source: 'src:rda-fruit-choose-store-2007'}
     relations:
       - {p: storedAs, source: 'src:rda-fruit-veg-storage-2023', v: {temp_c: [0, 0], humidity_pct: [90, 95], label: "0℃ · 상대습도 90~95%"}}
+      - {p: hasGrade, o: 'variety:pear-manpung', source: 'src:nics-month-food-pear'}
+      - {p: hasGrade, o: 'variety:pear-hanareum', source: 'src:nics-month-food-pear'}
+      - {p: hasGrade, o: 'variety:pear-noksu', source: 'src:nics-month-food-pear'}
       - {p: hasGrade, o: 'variety:pear-shingo', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
@@ -102,6 +109,9 @@ entities:
     relations:
       - {p: storedAs, source: 'src:nics-month-food-persimmon', v: {temp_c: [0, 2], humidity_pct: null, label: "0~2℃"}}
       - {p: storedAs, source: 'src:nics-month-food-persimmon', v: {temp_c: [0, 0], humidity_pct: null, label: "0℃", note: "부유 품종은", period_label: "1~3개월"}}
+      - {p: hasGrade, o: 'variety:sweet_persimmon-jowan', source: 'src:nics-month-food-persimmon'}
+      - {p: hasGrade, o: 'variety:sweet_persimmon-romang', source: 'src:nics-month-food-persimmon'}
+      - {p: hasGrade, o: 'variety:sweet_persimmon-gampung', source: 'src:nics-month-food-persimmon'}
       - {p: hasGrade, o: 'variety:sweet_persimmon-fuyu', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
@@ -192,7 +202,7 @@ entities:
   - id: variety:mandarin-open
     type: variety
     name_ko: 노지
-    labels: {ko: [노지, 노지감귤]}
+    labels: {ko: [노지, 노지감귤, 온주밀감]}
     kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "01", grd_cd: "15", unit: 개, unit_sz: "10"}
     attrs: {}
   - id: variety:mandarin-greenhouse
@@ -201,3 +211,73 @@ entities:
     labels: {ko: [시설, 하우스감귤]}
     kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "02", grd_cd: "15", unit: 개, unit_sz: "10"}
     attrs: {}
+  - id: variety:pear-noksu
+    type: variety
+    name_ko: 녹수
+    labels: {ko: [녹수]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-pear
+  - id: variety:pear-hanareum
+    type: variety
+    name_ko: 한아름
+    labels: {ko: [한아름]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-pear
+  - id: variety:pear-manpung
+    type: variety
+    name_ko: 만풍배
+    labels: {ko: [만풍배]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-pear
+  - id: variety:sweet_persimmon-gampung
+    type: variety
+    name_ko: 감풍
+    labels: {ko: [감풍]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-persimmon
+  - id: variety:sweet_persimmon-romang
+    type: variety
+    name_ko: 로망
+    labels: {ko: [로망]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-persimmon
+  - id: variety:sweet_persimmon-jowan
+    type: variety
+    name_ko: 조완
+    labels: {ko: [조완]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-persimmon
+  - id: variety:onion-jangilhwang
+    type: variety
+    name_ko: 장일황
+    labels: {ko: [장일황]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-onion
+  - id: variety:onion-highland
+    type: variety
+    name_ko: 고랭지 여름양파
+    labels: {ko: [고랭지 여름양파]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-onion
+  - id: variety:green_onion-cold
+    type: variety
+    name_ko: 한지형
+    labels: {ko: [한지형]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-green-onion
+  - id: variety:green_onion-warm
+    type: variety
+    name_ko: 난지형
+    labels: {ko: [난지형]}
+    kamis: null
+    attrs: {mock: true}
+    source: src:nics-month-food-green-onion

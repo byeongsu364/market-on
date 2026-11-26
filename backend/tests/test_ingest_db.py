@@ -57,8 +57,8 @@ def test_load_replace_search_cache_and_prune(db, tmp_path):
     first = load_all(db, data_dir=data, embedder=fake)
     # 식품안전나라 레시피(scripts.import_recipes 생성)는 받은 만큼 늘어나서 따로 셈
     recipes = len(list((data / 'rag_docs' / 'recipes').glob('foodsafety-*.md')))
-    # 16 sources + 44 explicit/24 generated entities + 25 documents + 레시피
-    assert first['added'] == 109 + recipes * 2
+    # 16 sources + 54 explicit(예시 품종 10 포함)/24 generated entities + 25 documents + 레시피
+    assert first['added'] == 119 + recipes * 2
     ids = db.execute('select id from chunks order by id').fetchall()
     second = load_all(db, data_dir=data, embedder=fake)
     assert second['added'] == second['changed'] == second['deleted'] == 0

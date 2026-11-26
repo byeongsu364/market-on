@@ -302,7 +302,7 @@ export default function Result() {
                         pressed={v.variety_id === f.varietyId}
                         onClick={() => f.setVariety(v.variety_id)}
                       >
-                        {v.name}
+                        {v.name} {v.mock && <small>예시</small>}
                       </Chip>
                     ))}
                   </ChipRow>
@@ -326,6 +326,7 @@ export default function Result() {
                   <h2 className={s.conclusion} id="verdict">
                     {conclusion}
                   </h2>
+                  {price?.mock && <p>예시 시세 · 실제 조사값 아님</p>}
                   {conclusionSub && <p className={s.conclusionSub}>{conclusionSub}</p>}
                   {f.price.error && <p className={s.conclusionSub}>{f.price.error}</p>}
                 </div>
