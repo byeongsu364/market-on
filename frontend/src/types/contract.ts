@@ -6,7 +6,7 @@ export type Market = {
   distance_m: number | null;
   lat: number;
   lng: number;
-};
+} & MarketExtra;
 export type Criterion = {
   key: string;
   text: string;
@@ -51,7 +51,7 @@ export type VarietyPrice = {
   observed_on: string | null;
   count: number;
   default: boolean;
-};
+} & VarietyExtra;
 export type Price = {
   variety_id: string | null;
   variety_name: string | null;
@@ -73,6 +73,8 @@ export type Price = {
     price: number;
     name: string;
   };
+  /** 030 제안: 서버가 계산한 가격 구간. 없으면 utils/priceBand 가 같은 규칙으로 계산 */
+  band?: PriceBand | null;
 };
 export type PriceRequest = {
   variety_id?: string;
@@ -101,13 +103,16 @@ export type Store = {
   hours: string;
   highlight: boolean;
   active_sale?: Pick<ActiveSale, 'sale_price' | 'regular_price' | 'ends_at'> | null;
-};
+} & StoreExtra;
 export type MarketMap = {
   layout: 'schematic' | 'surveyed';
   source_note: string;
   market_id: string;
   zones: Zone[];
   stores: Store[];
+  /** 030: 시장 경계와 편의시설(없으면 평면도) */
+  boundary?: LatLng[];
+  facilities?: Facility[];
 };
 export type RecommendRequest = {
   purpose: '집밥' | '선물' | '모임';
@@ -145,12 +150,19 @@ export type ApiError = {
 export type User = {
   id: string;
   login_id: string;
-  role: 'merchant' | 'operator' | 'market_admin';
+  role: 'merchant' | 'operator' | 'market_admin' | 'customer';
   market: { market_id: string; name: string } | null;
   status: 'pending' | 'approved' | 'rejected' | 'disabled';
   store: { store_id: string; name: string; market_id: string } | null;
 };
-export type AuthRequest = { login_id: string; password: string; store_id?: string };
+export type AuthRequest = {
+  login_id: string;
+  password: string;
+  store_id?: string;
+  captcha_id?: string;
+  captcha_answer?: string;
+};
+export type Captcha = { captcha_id: string; image: string; expires_in: number };
 export type SaleRequest = {
   item_id: string;
   sale_price: number;
@@ -245,6 +257,8 @@ export type JoinRequest = {
   note?: string;
   login_id: string;
   password: string;
+  captcha_id?: string;
+  captcha_answer?: string;
 };
 export type MarketApplication = {
   id: number;
@@ -307,3 +321,61 @@ export type MarketItem = { item_id: string; name: string; store_count: number };
 export type PublicConfig = { naver_map_client_id: string | null };
 
 export type InSeasonItem = { item_id: string; name: string; label: string };
+
+// ---------------------------------------------------------------------------
+// 지시서 030: 백엔드에 아직 없는 필드(모두 선택). mock에서만 채우고, live에서는 비어 있으면 그 기능을 숨김.
+// 제안 형태는 docs/tasks/030-api-gaps.md
+export type LatLng = { lat: number; lng: number };
+export type StoreCategory = 'produce' | 'dried' | 'seafood' | 'side' | 'meat' | 'ricecake';
+export type FacilityKind = 'entrance' | 'parking' | 'toilet';
+export type Facility = LatLng & { kind: FacilityKind; name: string };
+export type MarketExtra = {
+  /** 시장 경계(좌표 목록, 닫힌 다각형) */
+  boundary?: LatLng[];
+  facilities?: Facility[];
+  amenities?: { parking: boolean; toilet: boolean; onnuri: boolean };
+  address?: string;
+  store_count?: number;
+  /** 준비 중 시장의 요청 수 */
+  requests?: number;
+};
+export type PaymentMethod = 'card' | 'cash' | 'transfer' | 'onnuri';
+export type StoreExtra = {
+  lat?: number;
+  lng?: number;
+  category?: StoreCategory;
+  naver_name?: string;
+  verified?: boolean;
+  open_now?: boolean;
+  payments?: PaymentMethod[];
+  /** 점포가 파는 품종 id */
+  varieties?: string[];
+  sold_out_item_ids?: string[];
+  /** 예시 값: 조회 수, 단골 수 */
+  views_today?: number;
+  favorites?: number;
+};
+export type VarietyHarvest = { label: string; from?: string; to?: string };
+export type VarietyExtra = {
+  description?: string | null;
+  description_source?: string | null;
+  harvest?: VarietyHarvest | null;
+};
+export type PriceBand = 1 | 2 | 3 | 4;
+export type PriceHistoryPoint = { week_start: string; price: number | null };
+export type PriceHistory = {
+  item_id: string;
+  variety_id: string | null;
+  unit: string;
+  points: PriceHistoryPoint[];
+  source: string;
+};
+export type Favorite = { store_id: string; name: string; market_id: string; notify: boolean };
+export type MultiItemMap = MarketMap & { item_ids: string[] };
+/** 030 상인 화면의 mock 전용 값(백엔드 없음: 단골 수, 오늘 품절, 가게 위치 확인) */
+export type MerchantExtras = {
+  favorites: number;
+  sold_out_item_ids: string[];
+  location: LatLng | null;
+  location_confirmed: boolean;
+};

@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { useT } from '../../i18n';
 import Sheet from '../common/Sheet';
 import ErrorBox from '../common/ErrorBox';
+import Button from '../common/Button';
+import Icon from '../common/Icon';
+import { buttonClass } from '../common/buttonClass';
 import { drawCard, type CardData } from '../../utils/decisionCard';
+import s from './domain.module.css';
 
 export default function DecisionCardSheet({
   data,
@@ -46,25 +50,33 @@ export default function DecisionCardSheet({
       {error && <ErrorBox message={t(error)} />}
       {image && (
         <>
-          <img className="decision-card-preview" src={image.url} alt={data.alt} />
-          {canShare && (
-            <button
-              className="wide"
-              onClick={async () => {
-                try {
-                  await navigator.share({ files: [image.file] });
-                } catch (cause) {
-                  if (!(cause instanceof Error && cause.name === 'AbortError'))
-                    setError('decisionCardShareError');
-                }
-              }}
+          <img className={s.cardPreview} src={image.url} alt={data.alt} />
+          <div className={s.cardActions}>
+            <a
+              className={buttonClass({ variant: 'primary', grow: true })}
+              href={image.url}
+              download={data.filename}
             >
-              {t('decisionCardShare')}
-            </button>
-          )}
-          <a className="button secondary" href={image.url} download={data.filename}>
-            {t('decisionCardSave')}
-          </a>
+              <Icon name="download" size={20} />
+              {t('decisionCardSave')}
+            </a>
+            {canShare && (
+              <Button
+                grow
+                icon={<Icon name="share" size={20} />}
+                onClick={async () => {
+                  try {
+                    await navigator.share({ files: [image.file] });
+                  } catch (cause) {
+                    if (!(cause instanceof Error && cause.name === 'AbortError'))
+                      setError('decisionCardShareError');
+                  }
+                }}
+              >
+                {t('decisionCardShare')}
+              </Button>
+            )}
+          </div>
         </>
       )}
       <p className="caption">{t('decisionCardPrivacy')}</p>

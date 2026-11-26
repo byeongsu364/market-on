@@ -9,6 +9,10 @@ export type NaverMaps = {
   LatLng: new (lat: number, lng: number) => object;
   LatLngBounds: new (sw: object, ne: object) => { extend: (point: object) => void };
   Marker: new (options: object) => Overlay;
+  // 030: 시장 경계(구멍 뚫린 폴리곤), 장보기 동선 선, HTML 마커 기준점
+  Polygon?: new (options: object) => Overlay;
+  Polyline?: new (options: object) => Overlay;
+  Point?: new (x: number, y: number) => object;
   Event: {
     addListener: (target: Overlay, event: string, callback: () => void) => Listener;
     removeListener: (listener: Listener) => void;

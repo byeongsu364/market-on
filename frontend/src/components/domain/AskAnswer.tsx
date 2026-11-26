@@ -3,6 +3,7 @@ import { useT } from '../../i18n';
 import { unitLabel } from '../../utils/convertUnit';
 import Card from '../common/Card';
 import ModelLabel from './ModelLabel';
+import s from './domain.module.css';
 
 export default function AskAnswer({
   question,
@@ -13,13 +14,13 @@ export default function AskAnswer({
 }) {
   const t = useT();
   return (
-    <Card>
+    <Card as="div" className={s.answer}>
       <h3>{question}</h3>
       {response.kind === 'answer' && (
         <>
           <p>{response.answer}</p>
           <h4>{t('askSources')}</h4>
-          <ul>
+          <ul className={s.sources}>
             {response.citations.map((source, index) => (
               <li key={index}>
                 {source.url ? (

@@ -1,16 +1,16 @@
-import { afterEach, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import App from '../App';
 import MiniMap from '../components/domain/MiniMap';
-import NearbyMap from '../components/domain/NearbyMap';
-import { mapMode } from '../hooks/useNearbyMarkets';
-import { directionUrls, formatDistance } from '../utils/directions';
+import MapView from '../components/map/MapView';
+import { directionUrls, formatDistance, storeDestination, walkMinutes } from '../utils/directions';
+import { parseSearch } from '../pages/map/helpers';
 import * as api from '../api/markets';
 import * as storesApi from '../api/stores';
 import * as mock from '../api/mock';
 import { loadNaverMap, type NaverMaps } from '../utils/naverMap';
-import type { Market } from '../types/contract';
+import type { Market, Store } from '../types/contract';
 const market: Market = {
   market_id: 'market:demo',
   name: '시연 시장 & 사과',
@@ -19,15 +19,19 @@ const market: Market = {
   lng: 126.99,
   distance_m: 500,
 };
+beforeEach(() => {
+  Object.defineProperty(navigator, 'geolocation', { configurable: true, value: undefined });
+});
 afterEach(() => {
+  cleanup();
   vi.restoreAllMocks();
   delete window.naver;
 });
 function Location() {
   const location = useLocation();
-  return <output aria-label="주소">{location.search}</output>;
+  return <output aria-label="주소">{location.pathname + location.search}</output>;
 }
-function show(path = '/map') {
+function show(path = '/') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <App />
@@ -35,33 +39,267 @@ function show(path = '/map') {
     </MemoryRouter>,
   );
 }
-it('모드: 가장 가까운 active가 1km 안이고 선택됐을 때만 안, 품목 링크는 안', () => {
-  expect(mapMode(undefined, market, [market])).toBe('inside');
-  expect(mapMode(undefined, market, [{ ...market, distance_m: 1000 }])).toBe('inside');
-  expect(mapMode(undefined, market, [{ ...market, distance_m: 1001 }])).toBe('outside');
-  expect(mapMode(undefined, market, [{ ...market, status: 'listed' }])).toBe('outside');
-  expect(mapMode(undefined, market, [{ ...market, distance_m: null }])).toBe('outside');
-  expect(mapMode(undefined, null, [market])).toBe('outside');
+const here = () => screen.getByLabelText('주소');
+function locate(position: { lat: number; lng: number } | null) {
+  Object.defineProperty(navigator, 'geolocation', {
+    configurable: true,
+    value: {
+      getCurrentPosition: (ok: PositionCallback, fail: PositionErrorCallback) =>
+        position
+          ? ok({
+              coords: { latitude: position.lat, longitude: position.lng },
+            } as GeolocationPosition)
+          : fail({ code: 1 } as GeolocationPositionError),
+    },
+  });
+}
+const pinButtons = () => screen.queryAllByRole('button', { name: /^점포 A-\d\d, / });
+
+it('시장 밖 `/`은 지도 키 없이 약도로 보이고, 위치를 쓰면 가까운 시장 카드와 길 안내를 보인다', async () => {
+  locate({ lat: 37.5702, lng: 126.9902 });
+  const { container } = show('/');
   expect(
-    mapMode(undefined, market, [{ ...market, market_id: 'other', distance_m: 100 }, market]),
-  ).toBe('outside');
-  expect(mapMode('item:apple', null, [])).toBe('inside');
-});
-it('품목 칩이 URL과 강조 요청을 갱신하고 전체를 누르면 지운다', async () => {
-  const spy = vi.spyOn(storesApi, 'getMarketMap');
-  const { container } = show('/map?item=item:apple');
-  const chip = await screen.findByRole('button', { name: '대파 3곳' });
-  fireEvent.click(chip);
-  expect(screen.getByLabelText('주소')).toHaveTextContent('item=item%3Agreen_onion');
-  await waitFor(() =>
-    expect(spy).toHaveBeenCalledWith('market:demo', 'item:green_onion', undefined),
+    await screen.findByRole('heading', { name: '가까운 시장부터 보여 드릴까요?' }),
+  ).toBeInTheDocument();
+  expect(container.querySelector('[data-map="sketch"]')).toBeTruthy();
+  expect(screen.getByText('미리보기 지도')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: '시장 직접 고르기' })).toHaveAttribute(
+    'href',
+    '/markets',
   );
-  await screen.findByText('대파 파는 점포 3곳');
-  expect(container.querySelectorAll('[data-highlight="true"]')).toHaveLength(3);
-  expect(container.querySelector('[data-focused-zone]')).toBeTruthy();
-  fireEvent.click(screen.getByRole('button', { name: '전체' }));
-  expect(screen.getByLabelText('주소')).toHaveTextContent('');
+  fireEvent.click(screen.getByRole('button', { name: '현재 위치 사용하기' }));
+  expect(await screen.findByRole('heading', { name: '시연 시장' })).toBeInTheDocument();
+  expect(screen.getByText(/식품 점포 24곳이 있어요/)).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: '둘러보기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
+  // 지도 위 시장 이름표: 준비 중 시장은 이름에 "준비 중"
+  expect(screen.getByRole('button', { name: '미지원 시장 · 샘플, 준비 중' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '길 안내' }));
+  const dialog = screen.getByRole('dialog', { name: '시연 시장까지 안내할게요' });
+  expect(within(dialog).getByRole('link', { name: '네이버 지도로 길 안내' })).toHaveAttribute(
+    'href',
+    directionUrls({ name: '시연 시장', lat: 37.57, lng: 126.99 }, window.location.origin).naverWeb,
+  );
 });
+
+it('위치를 거부하면 시장 목록으로 안내한다', async () => {
+  localStorage.setItem('map-onboarded', '1');
+  locate(null);
+  show('/');
+  expect(
+    await screen.findByRole('heading', { name: '위치를 확인하지 못했어요' }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: '시장 목록으로 보기' })).toHaveAttribute(
+    'href',
+    '/markets',
+  );
+});
+
+it('`/?market=market:demo`는 약도에 경계·핀·편의시설과 점포 목록 시트를 보인다', async () => {
+  const { container } = show('/?market=market:demo');
+  expect(await screen.findByRole('tab', { name: '점포 24' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  expect(container.querySelector('[data-map="sketch"]')).toBeTruthy();
+  expect(screen.getByText('핀 위치는 예시')).toBeInTheDocument();
+  expect(screen.getByRole('img', { name: '공중화장실' })).toBeInTheDocument();
+  expect(pinButtons()).toHaveLength(24);
+  const list = screen.getByRole('list', { name: '점포' });
+  expect(within(list).getAllByRole('link')).toHaveLength(10);
+  expect(within(list).getAllByRole('link')[0].getAttribute('href')).toMatch(
+    /^\/s\/store%3AA-\d\d\?market=market%3Ademo$/,
+  );
+  fireEvent.click(screen.getByRole('button', { name: '더 보기' }));
+  expect(within(list).getAllByRole('link')).toHaveLength(24);
+  // 카테고리로 거르면 나머지 핀은 회색 점
+  fireEvent.click(screen.getByRole('button', { name: '수산 4' }));
+  expect(within(list).getAllByRole('link')).toHaveLength(4);
+  expect(pinButtons()).toHaveLength(4);
+  expect(container.querySelectorAll('.mo-dot')).toHaveLength(20);
+  fireEvent.click(screen.getByRole('tab', { name: '제철과 시세' }));
+  expect(here()).toHaveTextContent('tab=info');
+  expect(await screen.findByRole('heading', { name: '오늘 기준시세' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('tab', { name: '마감세일 1' }));
+  expect(await screen.findByRole('heading', { name: '지금 마감세일' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /점포 A-05/ })).toHaveAttribute(
+    'href',
+    '/s/store%3AA-05?market=market%3Ademo',
+  );
+});
+
+it('`/?market=&item=`은 파는 점포만 핀으로 남기고 나머지는 점으로 줄인다', async () => {
+  const spy = vi.spyOn(storesApi, 'getMarketMap');
+  const { container } = show('/?market=market:demo&item=item:green_onion');
+  expect(await screen.findByRole('heading', { name: '대파 파는 점포' })).toBeInTheDocument();
+  expect(spy).toHaveBeenCalledWith('market:demo', 'item:green_onion', undefined);
+  expect(await screen.findByText('3곳')).toBeInTheDocument();
+  expect(pinButtons()).toHaveLength(3);
+  expect(container.querySelectorAll('.mo-dot')).toHaveLength(21);
+  expect(
+    within(screen.getByRole('list', { name: '대파 파는 점포' })).getAllByRole('button'),
+  ).toHaveLength(3);
+  // 검색어 지우기는 시장 안으로
+  expect(screen.getByRole('link', { name: '검색어 지우기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
+});
+
+it('`/?market=market:demo&item=item:apple`은 약도로 보이고 품종으로 거른다', async () => {
+  const { container } = show('/?market=market:demo&item=item:apple');
+  expect(await screen.findByRole('heading', { name: '사과 파는 점포' })).toBeInTheDocument();
+  expect(container.querySelector('[data-map="sketch"]')).toBeTruthy();
+  await waitFor(() => expect(pinButtons()).toHaveLength(5));
+  fireEvent.click(await screen.findByRole('button', { name: '홍로' }));
+  expect(here()).toHaveTextContent('variety=variety%3Aapple-hongro');
+  await waitFor(() => expect(pinButtons()).toHaveLength(2));
+  expect(screen.getByRole('button', { name: '홍로' })).toHaveAttribute('aria-pressed', 'true');
+});
+
+it('주소만으로 시장·품목·점포가 복원된다', async () => {
+  show('/?market=market:demo&item=item:apple&store=store:A-02');
+  expect(await screen.findByRole('region', { name: '고른 점포 점포 A-02' })).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: '점포 A-02, 채소·과일 점포, 선택됨' }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /사과/ })).toHaveAttribute(
+    'href',
+    '/search?market=market%3Ademo&q=%EC%82%AC%EA%B3%BC',
+  );
+  expect(screen.getByRole('link', { name: '점포 보기' })).toHaveAttribute(
+    'href',
+    '/s/store%3AA-02?market=market%3Ademo&item=item%3Aapple',
+  );
+});
+
+it('키보드로 지도 홈에서 검색, 점포, 길 안내까지 간다', async () => {
+  show('/?market=market:demo');
+  const search = await screen.findByRole('link', { name: '시연 시장에서 품목 검색' });
+  search.focus();
+  expect(search).toHaveFocus();
+  fireEvent.click(search);
+  const input = await screen.findByLabelText('시연 시장에서 품목 검색');
+  expect(input.tagName).toBe('INPUT');
+  await waitFor(() => expect(input).toHaveFocus());
+  fireEvent.change(input, { target: { value: '대파' } });
+  await screen.findByRole('link', { name: /대파/ });
+  fireEvent.submit(input.closest('form')!);
+  await waitFor(() =>
+    expect(here()).toHaveTextContent('/?market=market%3Ademo&item=item%3Agreen_onion'),
+  );
+  const list = await screen.findByRole('list', { name: '대파 파는 점포' });
+  const row = within(list).getByRole('button', { name: /점포 A-05/ });
+  row.focus();
+  expect(row).toHaveFocus();
+  fireEvent.click(row);
+  expect(here()).toHaveTextContent('store=store%3AA-05');
+  const card = screen.getByRole('region', { name: '고른 점포 점포 A-05' });
+  fireEvent.click(within(card).getByRole('link', { name: '점포 보기' }));
+  expect(await screen.findByRole('heading', { name: '점포 A-05', level: 1 })).toBeInTheDocument();
+  const route = screen.getByRole('button', { name: '길 안내' });
+  route.focus();
+  expect(route).toHaveFocus();
+  await waitFor(() => expect(route).toBeEnabled());
+  fireEvent.click(route);
+  const dialog = screen.getByRole('dialog', { name: '점포 A-05까지 안내할게요' });
+  const naver = within(dialog).getByRole('link', { name: '네이버 지도로 길 안내' });
+  expect(naver.getAttribute('href')).toBe(
+    'https://map.naver.com/p/search/' + encodeURIComponent('시연 시장 점포 A-05'),
+  );
+  const kakao = within(dialog).getByRole('link', { name: '카카오맵으로 열기' });
+  expect(kakao.getAttribute('href')).toMatch(/^https:\/\/map\.kakao\.com\/link\/to\//);
+  expect(kakao.getAttribute('href')).not.toMatch(/37\.5700?,126\.990?$/);
+  expect(
+    within(dialog).getByText('지도 앱에는 목적지만 넘기고 내 위치는 넘기지 않아요.'),
+  ).toBeInTheDocument();
+  fireEvent.keyDown(document, { key: 'Escape' });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(route).toHaveFocus();
+});
+
+it('검색에 가격을 넣으면 결과로, 모르는 품목이면 찾을 수 있는 품목을 보인다', async () => {
+  expect(parseSearch('사과 2,300원')).toEqual({ name: '사과', price: 2300 });
+  expect(parseSearch('대파')).toEqual({ name: '대파', price: null });
+  expect(parseSearch('사과 5')).toEqual({ name: '사과', price: null });
+  show('/search?market=market:demo&q=사과 2300');
+  const row = await screen.findByRole('link', { name: /사과 2,300원/ });
+  expect(row).toHaveAttribute('href', '/items/item%3Aapple?market=market%3Ademo');
+  fireEvent.change(screen.getByLabelText('시연 시장에서 품목 검색'), {
+    target: { value: '고등어' },
+  });
+  expect(
+    await screen.findByRole('heading', { name: '고등어 파는 점포는 아직 몰라요' }),
+  ).toBeInTheDocument();
+  expect(screen.getByText('지금은 품목 5가지만 파는 점포를 찾을 수 있어요.')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: '시연 시장 점포 지도에서 보기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
+  expect(screen.getByRole('link', { name: '단감' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo&item=item%3Asweet_persimmon',
+  );
+  fireEvent.click(screen.getByRole('link', { name: '단감' }));
+  expect(here()).toHaveTextContent('item=item%3Asweet_persimmon');
+});
+
+it('시장 고르기에서 지원 시장을 고르면 그 시장 안 지도로 간다', async () => {
+  show('/markets');
+  fireEvent.click(await screen.findByRole('button', { name: /시연 시장/ }));
+  await waitFor(() => expect(here()).toHaveTextContent('/?market=market%3Ademo'));
+});
+
+it('준비 중 시장은 요청 화면과 지금 쓸 수 있는 시장을 보인다', async () => {
+  show('/?market=market:std-sample');
+  expect(await screen.findByRole('heading', { name: /아직 준비 중이에요/ })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '이 시장도 쓰고 싶어요' }));
+  expect(await screen.findByText('요청했어요. 이번 주 5명 미만이 요청했어요.')).toHaveAttribute(
+    'role',
+    'status',
+  );
+  expect(screen.getByRole('link', { name: /시연 시장은 지금 쓸 수 있어요/ })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
+});
+
+it('점포에 좌표가 없으면(live) 지도 자리에 평면도와 안내 문구를 두고 시장 위치로 안내한다', async () => {
+  vi.spyOn(storesApi, 'getMarketMap').mockImplementation(async (id, item, unit) => {
+    const map = await mock.map(id, item, unit);
+    return {
+      ...map,
+      boundary: undefined,
+      facilities: undefined,
+      stores: map.stores.map((s) => {
+        const copy: Store = { ...s };
+        delete copy.lat;
+        delete copy.lng;
+        return copy;
+      }),
+    };
+  });
+  const { container } = show('/?market=market:demo&item=item:green_onion');
+  expect(
+    await screen.findByText('배치는 업종별 예시예요 · 실제 위치는 현장에서 확인해 주세요'),
+  ).toBeInTheDocument();
+  expect(container.querySelector('[data-map]')).toBeNull();
+  expect(container.querySelectorAll('[data-highlight="true"]')).toHaveLength(3);
+  fireEvent.click(screen.getByRole('button', { name: '점포 A-05 · 판매 점포' }));
+  const card = await screen.findByRole('region', { name: '고른 점포 점포 A-05' });
+  fireEvent.click(within(card).getByRole('button', { name: '길 안내' }));
+  const dialog = screen.getByRole('dialog');
+  expect(
+    within(dialog).getByText(/점포 위치가 아직 없어 시장 위치로 안내해요/),
+  ).toBeInTheDocument();
+  expect(within(dialog).getByRole('link', { name: '카카오맵으로 열기' })).toHaveAttribute(
+    'href',
+    'https://map.kakao.com/link/to/' + encodeURIComponent('시연 시장 점포 A-05') + ',37.57,126.99',
+  );
+});
+
 it('강조 점포가 가장 많은 구역으로 viewBox를 맞추고 구역별 개수를 표시한다', async () => {
   const map = await mock.map('market:demo', 'item:green_onion');
   const target = map.zones[3];
@@ -74,42 +312,7 @@ it('강조 점포가 가장 많은 구역으로 viewBox를 맞추고 구역별 �
   expect(container.querySelector('svg')?.getAttribute('viewBox')).not.toMatch(/^0 0 376/);
   expect(screen.getByText('대파 5곳')).toBeInTheDocument();
 });
-it('위치 거부와 키 null은 active/listed 시장 카드 목록으로 대체한다', async () => {
-  Object.defineProperty(navigator, 'geolocation', {
-    configurable: true,
-    value: {
-      getCurrentPosition: (_ok: PositionCallback, fail: PositionErrorCallback) =>
-        fail({ code: 1 } as GeolocationPositionError),
-    },
-  });
-  vi.spyOn(api, 'getMarkets').mockResolvedValue([
-    market,
-    { ...market, market_id: 'listed', name: '준비 시장', status: 'listed', distance_m: 1500 },
-  ]);
-  vi.spyOn(api, 'getPublicConfig').mockResolvedValue({ naver_map_client_id: null });
-  show();
-  expect(await screen.findByText('주변 시장을 목록으로 보여드려요')).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: '주변 시장' })).toHaveAttribute('aria-pressed', 'true');
-  expect(await screen.findByText(/품목 5종/)).toBeInTheDocument();
-  expect(screen.getByText('500m')).toBeInTheDocument();
-  expect(screen.getByText('1.5km')).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: '이 시장도 쓰고 싶어요' })).toBeInTheDocument();
-  fireEvent.click(screen.getAllByRole('button', { name: '길 안내' })[0]);
-  expect(screen.getByRole('link', { name: '네이버지도' })).toHaveAttribute(
-    'href',
-    directionUrls(market, window.location.origin).naverWeb,
-  );
-  expect(screen.getByRole('link', { name: '카카오맵' })).toHaveAttribute(
-    'href',
-    directionUrls(market, window.location.origin).kakao,
-  );
-  fireEvent.click(screen.getByRole('button', { name: '닫기' }));
-  fireEvent.click(screen.getByRole('button', { name: '이 시장 둘러보기' }));
-  expect(screen.getByRole('button', { name: '시장 안 지도' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-});
+
 it('길 안내는 목적지 이름을 인코딩하고 출발 위치를 받지 않는다', () => {
   const urls = directionUrls(market, 'https://example.com');
   expect(urls.naverApp).toBe(
@@ -124,8 +327,20 @@ it('길 안내는 목적지 이름을 인코딩하고 출발 위치를 받지 �
   expect(JSON.stringify(urls)).not.toMatch(/slat|slng|sname/);
   expect(formatDistance(999)).toBe('999m');
   expect(formatDistance(1000)).toBe('1.0km');
+  expect(walkMinutes(420)).toBe(6);
+  // 점포: 네이버에서 열 이름이 있으면 그 이름, 좌표가 없으면 시장 좌표로 대신
+  expect(storeDestination({ name: '점포 A-01', naver_name: '사과가게' }, market)).toEqual({
+    name: '사과가게',
+    lat: 37.57,
+    lng: 126.99,
+    approximate: true,
+  });
+  expect(
+    storeDestination({ name: '점포 A-01', lat: 37.5701, lng: 126.9902 }, market),
+  ).toMatchObject({ name: '시연 시장 & 사과 점포 A-01', lat: 37.5701, approximate: false });
 });
-it('SDK 스크립트를 한 번만 로드하고 실패하면 목록 대체 안내를 표시한다', async () => {
+
+it('SDK 스크립트를 한 번만 로드하고 실패하면 mock에서는 약도로 그린다', async () => {
   vi.spyOn(api, 'getPublicConfig').mockResolvedValue({ naver_map_client_id: 'test id' });
   const pending = loadNaverMap('test id');
   expect(loadNaverMap('test id')).toBe(pending);
@@ -134,12 +349,20 @@ it('SDK 스크립트를 한 번만 로드하고 실패하면 목록 대체 안�
   const error = expect(pending).rejects.toThrow();
   script.dispatchEvent(new Event('error'));
   await error;
-  vi.spyOn(console, 'info').mockImplementation(() => {});
-  render(<NearbyMap markets={[market]} position={null} onSelect={vi.fn()} />);
-  expect(await screen.findByText('주변 시장을 목록으로 보여드려요')).toBeInTheDocument();
+  const onFailure = vi.fn();
+  const { container } = render(
+    <MapView
+      label="지도"
+      markets={[{ ...market, id: market.market_id, active: true }]}
+      onFailure={onFailure}
+    />,
+  );
+  await waitFor(() => expect(container.querySelector('[data-map="sketch"]')).toBeTruthy());
+  expect(onFailure).not.toHaveBeenCalled();
   expect(document.querySelectorAll('#naver-maps-sdk')).toHaveLength(1);
 });
-it('모킹한 네이버 지도 마커 클릭은 시장을 선택하고 정리된다', async () => {
+
+it('모킹한 네이버 지도 마커 클릭은 시장을 고르고 정리된다', async () => {
   const click = vi.fn();
   const destroy = vi.fn();
   const remove = vi.fn();
@@ -169,12 +392,18 @@ it('모킹한 네이버 지도 마커 클릭은 시장을 선택하고 정리된
     } as NaverMaps,
   };
   vi.spyOn(api, 'getPublicConfig').mockResolvedValue({ naver_map_client_id: 'test' });
-  const { unmount } = render(
-    <NearbyMap markets={[market]} position={{ lat: 37, lng: 127 }} onSelect={click} />,
+  const { unmount, container } = render(
+    <MapView
+      label="주변 시장 지도"
+      markets={[{ ...market, id: market.market_id, active: true }]}
+      me={{ lat: 37, lng: 127 }}
+      onSelect={click}
+    />,
   );
   await waitFor(() => expect(window.naver?.maps.Marker).toHaveBeenCalled());
+  expect(container.querySelector('[data-map="naver"]')).toBeTruthy();
   select();
-  expect(click).toHaveBeenCalledWith(market);
+  expect(click).toHaveBeenCalledWith('market:demo', 'market');
   unmount();
   expect(destroy).toHaveBeenCalled();
   expect(remove).toHaveBeenCalled();
@@ -192,7 +421,7 @@ it('추가 공개 API mock의 계약 키와 판매 점포 수가 일치한다', 
   );
 });
 
-it('네이버 인증 실패(등록 안 된 주소)면 시장 목록으로 바꾼다', async () => {
+it('네이버 인증 실패(등록 안 된 주소)를 알린다', async () => {
   const { onNaverAuthFailure } = await import('../utils/naverMap');
   const seen = vi.fn();
   const off = onNaverAuthFailure(seen);

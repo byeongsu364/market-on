@@ -105,6 +105,22 @@ export async function signup(q: AuthRequest) {
   passwords.set(u.login_id, q.password);
   return session(u);
 }
+/** 손님 계정(030, mock만). 역할 customer는 백엔드에 아직 없음 */
+export async function signupCustomer(q: AuthRequest) {
+  validateSignup(q.login_id, q.password);
+  const u: PendingMerchant = {
+    id: q.login_id,
+    login_id: q.login_id,
+    market: null,
+    role: 'customer',
+    status: 'approved',
+    store: null,
+    created_at: new Date().toISOString(),
+  };
+  users.push(u);
+  passwords.set(u.login_id, q.password);
+  return session(u);
+}
 function merchant() {
   if (current?.role !== 'merchant' || current.status !== 'approved' || !current.store)
     throw new Error('승인된 상인만 쓸 수 있어요.');
@@ -246,7 +262,14 @@ export async function view(id: number) {
   if (s) s.view_count++;
 }
 
+/** 030 mock(merchant030.ts)이 같은 계정 목록과 지금 로그인을 읽음 */
+export const mockUsers = () => users;
+export const currentMockUser = () => current;
+const resetHooks: (() => void)[] = [];
+export const onMockReset = (fn: () => void) => resetHooks.push(fn);
+
 export function resetMock() {
+  resetHooks.forEach((fn) => fn());
   current = null;
   confirmations.clear();
   users.splice(0, users.length, ...structuredClone(initialUsers));

@@ -2,6 +2,7 @@ import QRCode from 'qrcode';
 import type { Item, Market, Price } from '../types/contract';
 import { seoulDay } from './sale';
 import { unitLabel } from './convertUnit';
+import { BAND_LABELS, priceBand } from './priceBand';
 
 export type CardInput = {
   item: Item;
@@ -58,7 +59,12 @@ export function buildCardData(input: CardInput) {
       : []),
     ...new Set(item.criteria.map((c) => c.source)),
   ];
-  const footer = 'Market-On은 판정하지 않아요 · 확인은 직접 했어요';
+  // 가격 구간: 결과 화면과 같은 규칙(utils/priceBand). 가격을 넣지 않았으면 눈금을 모두 끄고 문구를 비움
+  const verdict = hasPrice && price ? priceBand(price, price.variety_id) : null;
+  const band = verdict?.band ?? null;
+  const bandLine = verdict ? verdict.message : '';
+  // 신선도에는 결론을 붙이지 않고 손님이 한 확인만 적음(기획서 "팀 원칙과 맞추기")
+  const footer = '신선도는 직접 확인했어요';
   const title = [item.name, price?.variety_name].filter(Boolean).join(' · ');
   return {
     date,
@@ -70,6 +76,10 @@ export function buildCardData(input: CardInput) {
     prices,
     sources,
     footer,
+    band,
+    bandLabels: [...BAND_LABELS],
+    bandLine,
+    bandNote: verdict?.fallbackNote ?? null,
     store: store?.name ?? market.name,
     url: new URL(
       store
@@ -86,6 +96,8 @@ export function buildCardData(input: CardInput) {
       count,
       ...points,
       ...prices,
+      band ? `가격 자리 ${BAND_LABELS[band - 1]}` : '',
+      bandLine,
       store?.name,
       ...sources,
       footer,
@@ -121,50 +133,71 @@ export function wrapText(
   return result;
 }
 
+const FONT = '"Pretendard Variable", Pretendard, system-ui, sans-serif';
+
+/** 판단 카드 PNG(1080×1760). 어두운 면(surface-dark) 위에 시안 Card의 배치를 그대로 옮김 */
 export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promise<Blob> {
   await document.fonts.ready;
   await Promise.all([
-    document.fonts.load('700 48px "Wanted Sans Variable"', data.title + 'Market-On'),
-    document.fonts.load('500 28px "SUIT Variable"', data.alt),
+    document.fonts.load(`700 48px ${FONT}`, data.title + 'Market-On'),
+    document.fonts.load(`400 28px ${FONT}`, data.alt),
   ]);
-  // A scoped light element resolves semantic tokens without changing the app theme.
+  // 앱 테마와 상관없이 밝은 테마의 토큰 값을 읽음(카드는 늘 같은 모습)
   const palette = document.createElement('div');
   palette.dataset.theme = 'light';
   document.body.append(palette);
   const style = getComputedStyle(palette);
-  const colors = Object.fromEntries(
-    ['bg', 'card', 'text', 'photo-placeholder'].map((key) => [
-      key === 'photo-placeholder' ? 'placeholder' : key,
-      style.getPropertyValue(`--color-${key}`).trim(),
-    ]),
-  );
+  const token = (name: string) => style.getPropertyValue(`--color-${name}`).trim();
+  const colors = {
+    bg: token('surface-dark'),
+    text: token('on-dark'),
+    soft: token('on-dark-soft'),
+    on: token('signal-dark'),
+    diff: token('signal-text-dark'),
+    off: token('gauge-off-dark'),
+    photo: token('photo-placeholder'),
+    qrBg: token('surface-card'),
+    qr: token('ink'),
+  };
   palette.remove();
-  canvas.width = 1080;
-  canvas.height = 1350;
+  const W = 1080;
+  const H = 1760;
+  const P = 60;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas unavailable');
   ctx.fillStyle = colors.bg;
-  ctx.fillRect(0, 0, 1080, 1350);
+  ctx.fillRect(0, 0, W, H);
   const text = (
     value: string,
     x: number,
     y: number,
     size: number,
     width: number,
-    lines = 1,
-    heading = false,
+    { lines = 1, weight = 400, color = colors.text, align = 'left' as CanvasTextAlign } = {},
   ) => {
-    ctx.fillStyle = colors.text;
-    ctx.font = `${heading ? 700 : 500} ${size}px "${heading ? 'Wanted Sans Variable' : 'SUIT Variable'}", sans-serif`;
-    wrapText(value, (s) => ctx.measureText(s).width, width, lines).forEach((s, i) =>
-      ctx.fillText(s, x, y + i * size * 1.35),
-    );
+    ctx.fillStyle = color;
+    ctx.textAlign = align;
+    ctx.font = `${weight} ${size}px ${FONT}`;
+    const rows = wrapText(value, (s) => ctx.measureText(s).width, width, lines);
+    rows.forEach((s, i) => ctx.fillText(s, x, y + i * size * 1.35));
+    ctx.textAlign = 'left';
+    return rows.length * size * 1.35;
   };
-  text('Market-On', 48, 65, 42, 450, 1, true);
-  text(data.market, 500, 60, 24, 340);
-  text(data.date, 860, 60, 24, 172);
-  ctx.fillStyle = colors.placeholder;
-  ctx.fillRect(48, 104, 440, 440);
+  const round = (x: number, y: number, w: number, h: number, r: number[]) => {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fill();
+  };
+  // 머리: 로고 글자, 시장과 날짜
+  text('Market-On', P, 92, 52, 400, { weight: 700 });
+  text(`${data.market}, ${data.date}`, W - P, 88, 32, 560, { color: colors.soft, align: 'right' });
+  // 사진(없으면 빈 면)
+  const photoY = 140;
+  const photoH = 380;
+  ctx.fillStyle = colors.photo;
+  round(P, photoY, W - P * 2, photoH, [40]);
   if (data.photo) {
     const url = URL.createObjectURL(data.photo);
     try {
@@ -174,44 +207,98 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
         img.onerror = () => reject(new Error('Photo unavailable'));
         img.src = url;
       });
-      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const boxW = W - P * 2;
+      const scale = Math.max(boxW / img.naturalWidth, photoH / img.naturalHeight);
+      const sw = boxW / scale;
+      const sh = photoH / scale;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(P, photoY, boxW, photoH, [40]);
+      ctx.clip();
       ctx.drawImage(
         img,
-        (img.naturalWidth - side) / 2,
-        (img.naturalHeight - side) / 2,
-        side,
-        side,
-        48,
-        104,
-        440,
-        440,
+        (img.naturalWidth - sw) / 2,
+        (img.naturalHeight - sh) / 2,
+        sw,
+        sh,
+        P,
+        photoY,
+        boxW,
+        photoH,
       );
+      ctx.restore();
     } finally {
       URL.revokeObjectURL(url);
     }
-  } else text(data.title, 76, 290, 48, 384, 3, true);
-  text(data.title, 528, 175, 48, 504, 3, true);
-  text('내가 확인한 것', 48, 608, 36, 984, 1, true);
-  text(data.count, 48, 653, 27, 984);
-  const pointSize = data.points.length > 4 ? 24 : 28;
-  const pointHeight = Math.min(64, 170 / Math.max(1, data.points.length));
-  data.points.forEach((point, i) =>
-    text(point, 48, 700 + i * pointHeight, pointSize, 984, pointHeight >= 64 ? 2 : 1),
-  );
-  // 사진 오른쪽 빈자리에 가격 (제목 아래)
-  data.prices.forEach((price, i) => text(price, 528, 300 + i * 92, 28, 504, 2));
-  text(data.store, 48, 1080, 34, 750, 2, true);
-  const qr = QRCode.create(data.url, { errorCorrectionLevel: 'M' }).modules;
-  const cell = 180 / (qr.size + 8);
-  ctx.fillStyle = colors.card;
-  ctx.fillRect(852, 984, 180, 180);
+  }
+  // 품목, 가격 줄
+  let y = photoY + photoH + 70;
+  text(data.title, P, y, 38, W - P * 2, { weight: 500, color: colors.soft });
+  y += 20;
+  data.prices.forEach((line, i) => {
+    y += i === 0 ? 64 : 48;
+    text(line, P, y, i === 0 ? 48 : 32, W - P * 2, {
+      weight: i === 0 ? 700 : 400,
+      color:
+        i === 0
+          ? colors.text
+          : line.startsWith('▼') || line.startsWith('▲')
+            ? colors.diff
+            : colors.soft,
+    });
+  });
+  // 가격 눈금: 4px 막대 아래 네 칸, 켜진 칸만 주황(signal-dark)
+  y += 50;
+  const gap = 12;
+  const cellW = (W - P * 2 - gap * 3) / 4;
   ctx.fillStyle = colors.text;
+  round(P, y, W - P * 2, 12, [6]);
+  data.bandLabels.forEach((label, i) => {
+    const on = data.band === i + 1;
+    ctx.fillStyle = on ? colors.on : colors.off;
+    const x = P + i * (cellW + gap);
+    round(x, y + 12, cellW, 78, [0, 0, 39, 39]);
+    text(label, x + cellW / 2, y + 140, 32, cellW, {
+      weight: on ? 600 : 400,
+      color: on ? colors.text : colors.soft,
+      align: 'center',
+    });
+  });
+  y += 210;
+  text(data.bandLine || '비교는 참고만 하세요', P, y, 56, W - P * 2, { weight: 600 });
+  if (data.bandNote) {
+    y += 52;
+    text(data.bandNote, P, y, 30, W - P * 2, { color: colors.soft });
+  }
+  // 내가 확인한 것(체크한 것만 ✓)
+  y += 50;
+  ctx.fillStyle = colors.off;
+  ctx.fillRect(P, y, W - P * 2, 3);
+  y += 20;
+  data.points.slice(0, 4).forEach((point) => {
+    y += 52;
+    text(point, P, y, 34, 700, { lines: 1 });
+  });
+  y += 56;
+  text(`${data.count}. ${data.footer}.`, P, y, 30, 700, { lines: 2, color: colors.soft });
+  // 아래: 점포, 출처, QR
+  const qrSize = 200;
+  const qrY = H - P - qrSize;
+  text(data.store, P, qrY + 40, 38, W - P * 3 - qrSize, { lines: 1, weight: 600 });
+  text(data.sources.join(' · '), P, qrY + 96, 24, W - P * 3 - qrSize, {
+    lines: 4,
+    color: colors.soft,
+  });
+  const qr = QRCode.create(data.url, { errorCorrectionLevel: 'M' }).modules;
+  const cell = qrSize / (qr.size + 8);
+  const qrX = W - P - qrSize;
+  ctx.fillStyle = colors.qrBg;
+  round(qrX, qrY, qrSize, qrSize, [16]);
+  ctx.fillStyle = colors.qr;
   for (let row = 0; row < qr.size; row++)
     for (let col = 0; col < qr.size; col++)
       if (qr.get(row, col))
-        ctx.fillRect(852 + (col + 4) * cell, 984 + (row + 4) * cell, cell + 0.2, cell + 0.2);
-  text(data.sources.join(' · '), 48, 1198, 23, 984, 3);
-  text(data.footer, 48, 1310, 26, 984);
+        ctx.fillRect(qrX + (col + 4) * cell, qrY + (row + 4) * cell, cell + 0.2, cell + 0.2);
   return new Promise((resolve, reject) =>
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('PNG unavailable'))),
