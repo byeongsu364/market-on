@@ -3,7 +3,7 @@ import Icon from '../common/Icon';
 import { useShoppingContext } from '../../hooks/useShoppingContext';
 import s from './layout.module.css';
 
-// 하단 탭 세 칸: 지도, 찍기, 장보기. 내 정보는 지도 검색창 오른쪽 둥근 버튼.
+// 하단 탭 세 칸: 지도, 찍기, 장바구니. 내 정보는 지도 검색창 오른쪽 둥근 버튼.
 export default function TabBar() {
   const { pathname } = useLocation();
   const ctx = useShoppingContext();
@@ -21,7 +21,7 @@ export default function TabBar() {
       </Link>
       <Link to={ctx.href('/shop')} className={s.tab} aria-current={onShop ? 'page' : undefined}>
         <Icon name="basket" strokeWidth={onShop ? 1.9 : 1.7} />
-        장보기
+        장바구니
       </Link>
     </nav>
   );

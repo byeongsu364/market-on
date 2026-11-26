@@ -8,7 +8,7 @@ import { useShoppingContext } from '../../hooks/useShoppingContext';
 import { LANGUAGE_NAMES } from '../../pages/me/languages';
 import s from './layout.module.css';
 
-// PC 머리말: 로고, 지도·장보기·상인·시장, 검색창, 언어, 로그인, 사진으로 확인하기
+// PC 머리말: 로고, 지도·장바구니·상인·시장, 검색창, 언어, 로그인, 사진으로 확인하기
 export default function WebHeader() {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ export default function WebHeader() {
           지도
         </Link>
         <Link to={ctx.href('/shop')} aria-current={section === 'shop' ? 'page' : undefined}>
-          장보기
+          장바구니
         </Link>
         <Link to={merchantHref} aria-current={section === 'merchant' ? 'page' : undefined}>
           상인·시장
