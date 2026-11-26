@@ -1,12 +1,17 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import Icon from './Icon';
+import s from './ui.module.css';
+// 모달 시트(아래에서 올라옴, PC는 가운데 창). Esc로 닫고 포커스를 안에 가둠.
 export default function Sheet({
   title,
   onClose,
   children,
+  hideTitle = false,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  hideTitle?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -17,7 +22,9 @@ export default function Sheet({
     const handle = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key !== 'Tab') return;
-      const nodes = ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href]');
+      const nodes = ref.current?.querySelectorAll<HTMLElement>(
+        'button:not(:disabled),a[href],input:not(:disabled),select,textarea',
+      );
       if (!nodes?.length) return;
       const first = nodes[0],
         last = nodes[nodes.length - 1];
@@ -38,16 +45,20 @@ export default function Sheet({
   }, [onClose]);
   return (
     <div
-      className="sheet-backdrop"
+      className={s.backdrop}
       onClick={(e) => {
         if (e.currentTarget === e.target) onClose();
       }}
     >
-      <div className="sheet" ref={ref} role="dialog" aria-modal="true" aria-label={title}>
-        <button className="secondary close" onClick={onClose}>
-          닫기
-        </button>
-        <h2>{title}</h2>
+      <div className={s.modal} ref={ref} role="dialog" aria-modal="true" aria-label={title}>
+        <span className={s.grabber} aria-hidden="true" />
+        <div className={s.modalHead}>
+          <h2 className={hideTitle ? 'sr-only' : s.modalTitle}>{title}</h2>
+          {hideTitle && <span style={{ flex: 1 }} />}
+          <button className={s.iconButton} onClick={onClose} aria-label="닫기">
+            <Icon name="close" />
+          </button>
+        </div>
         {children}
       </div>
     </div>

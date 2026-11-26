@@ -1,84 +1,185 @@
-/* tokens.css */
+/* tokens.css
+ * 2026-11-26 지시서 030: 올리브·피치 팔레트를 Market-On 디자인 시스템(흰 바탕, 검은 글자, 켜진 것 하나만 주황)으로 바꿈.
+ * 기존 변수 이름(--color-bg 등)은 그대로 두고 값만 바꿨고, 새 토큰은 --color-* / --space-* / --radius-* 로 더함.
+ * 값의 출처: docs/design/handoff-2026-11-26/design-system/tokens.json
+ */
+@font-face {
+  font-family: 'Pretendard Variable';
+  src: url('/fonts/PretendardVariable.woff2') format('woff2');
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root,
 [data-theme='light'] {
-  /* palette */
-  --olive: #3a5f2b;
-  --olive-deep: #2f4a23;
-  --peach: #ff9f7a;
-  --peach-deep: #d9643c;
-  --cream: #fff8f1;
+  /* design-system tokens */
+  --color-canvas: #ffffff;
+  --color-canvas-soft: #fafafa;
+  --color-surface-card: #ffffff;
+  --color-surface-strong: #f4f4f6;
+  --color-surface-dark: #171717;
+  --color-hairline: #ebecef;
+  --color-hairline-strong: #dcdee0;
+  --color-control-border: #8b8d93;
+  --color-ink: #171717;
+  --color-body: #60646c;
+  --color-muted: #6b6f77;
+  --color-primary: #000000;
+  --color-primary-active: #1a1a1a;
+  --color-on-primary: #ffffff;
+  --color-on-dark: #ffffff;
+  --color-on-dark-soft: #b0b4ba;
+  --color-signal: #f2622e;
+  --color-signal-dark: #ff8a5b;
+  --color-signal-text: #c2410c;
+  --color-signal-text-dark: #ff9f7a;
+  --color-on-signal: #171717;
+  --color-signal-soft: #fff1ea;
+  --color-wash-light: #fff6ef;
+  --color-wash-mid: #ffe6d3;
+  --color-link: #0d74ce;
+  --color-danger: #b42318;
+  --color-gauge-off: #e6e7eb;
+  --color-gauge-off-dark: #34343a;
+  --color-me: #2477e0;
+  --color-map-ground: #f4f4f2;
 
-  /* semantic */
-  --color-bg: var(--cream);
-  --color-card: #ffffff;
-  --color-photo-placeholder: #e8e8e8;
-  --color-surface: var(--olive);
-  --color-on-surface: var(--cream);
-  --color-text: var(--olive-deep);
-  --color-text-secondary: #596d4c;
-  --color-accent-text: var(--peach-deep);
-  --color-accent: var(--peach);
-  --color-on-accent: var(--olive-deep);
-  --color-border: #2f4a231f;
-  --color-focus: var(--peach-deep);
-
-  /* type & shape */
-  --font-sans: 'Geist Variable', 'SUIT Variable', system-ui, sans-serif;
-  --radius-card: 8px;
-  --radius-button: 999px;
-  --radius-pill: 999px;
-  --font-heading: 'Geist Variable', 'Wanted Sans Variable', 'SUIT Variable', sans-serif;
-  --radius-icon: 24%;
+  /* existing semantic names (값만 새 시스템으로) */
+  --color-bg: var(--color-canvas);
+  --color-card: var(--color-surface-card);
+  --color-photo-placeholder: var(--color-surface-strong);
+  --color-surface: var(--color-primary);
+  --color-on-surface: var(--color-on-primary);
+  --color-text: var(--color-ink);
+  --color-text-secondary: var(--color-body);
+  --color-accent-text: var(--color-signal-text);
+  --color-accent: var(--color-signal);
+  --color-on-accent: var(--color-on-signal);
+  --color-border: var(--color-hairline-strong);
+  --color-focus: var(--color-ink);
   color-scheme: light;
 }
 
 [data-theme='dark'] {
-  --color-bg: var(--olive);
-  --color-card: var(--olive-deep);
-  --color-surface: var(--cream);
-  --color-on-surface: var(--olive);
-  --color-text: var(--cream);
-  --color-text-secondary: #d8d9c9;
-  --color-accent-text: var(--peach);
-  --color-accent: var(--peach);
-  --color-on-accent: var(--olive-deep);
-  --color-border: #fff8f129;
-  --color-focus: var(--peach);
+  --color-canvas: #111113;
+  --color-canvas-soft: #161618;
+  --color-surface-card: #19191b;
+  --color-surface-strong: #232326;
+  --color-surface-dark: #26262a;
+  --color-hairline: #232326;
+  --color-hairline-strong: #34343a;
+  --color-control-border: #6e7178;
+  --color-ink: #ededed;
+  --color-body: #b0b4ba;
+  --color-muted: #8b8f97;
+  --color-primary: #ffffff;
+  --color-primary-active: #e6e6e6;
+  --color-on-primary: #171717;
+  --color-signal: #ff8a5b;
+  --color-signal-text: #ff9f7a;
+  --color-signal-soft: #2b1a13;
+  --color-wash-light: #2a1c15;
+  --color-wash-mid: #4a2c1c;
+  --color-link: #70b8ff;
+  --color-danger: #ff9a8f;
+  --color-gauge-off: #34343a;
+  --color-map-ground: #1c1c1e;
   color-scheme: dark;
 }
 
 /* 사용자가 직접 고르지 않았을 때 기기 설정을 따름 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-bg: var(--olive);
-    --color-card: var(--olive-deep);
-    --color-surface: var(--cream);
-    --color-on-surface: var(--olive);
-    --color-text: var(--cream);
-    --color-text-secondary: #d8d9c9;
-    --color-accent-text: var(--peach);
-    --color-border: #fff8f129;
-    --color-focus: var(--peach);
+    --color-canvas: #111113;
+    --color-canvas-soft: #161618;
+    --color-surface-card: #19191b;
+    --color-surface-strong: #232326;
+    --color-surface-dark: #26262a;
+    --color-hairline: #232326;
+    --color-hairline-strong: #34343a;
+    --color-control-border: #6e7178;
+    --color-ink: #ededed;
+    --color-body: #b0b4ba;
+    --color-muted: #8b8f97;
+    --color-primary: #ffffff;
+    --color-primary-active: #e6e6e6;
+    --color-on-primary: #171717;
+    --color-signal: #ff8a5b;
+    --color-signal-text: #ff9f7a;
+    --color-signal-soft: #2b1a13;
+    --color-link: #70b8ff;
+    --color-danger: #ff9a8f;
+    --color-gauge-off: #34343a;
+    --color-map-ground: #1c1c1e;
     color-scheme: dark;
   }
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-}
-
 :root {
-  --color-print-bg: #ffffff;
-  --color-print-text: #2f4a23;
-}
+  /* 핀 색: 카테고리 여섯 가지. 핀 위 아이콘과 테두리는 --color-on-pin */
+  --pin-produce: #1f9d55;
+  --pin-dried: #b7791f;
+  --pin-seafood: #2477e0;
+  --pin-side: #8a56d6;
+  --pin-meat: #e0484e;
+  --pin-ricecake: #d2488f;
+  --pin-default: #8b8d93;
+  --color-on-pin: #ffffff;
 
-:root {
+  /* 예전 구역 미니맵용(새 화면에는 쓰지 않음, MiniMap 대체 화면에서만) */
   --color-zone-0: #c9b458;
   --color-zone-1: #7fa36b;
   --color-zone-2: #6e9bb0;
   --color-zone-3: #b07a6e;
   --color-zone-4: #a08bb0;
   --color-zone-5: #c4a484;
+
+  /* type */
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* space */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-24: 96px;
+
+  /* radius */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-xxl: 24px;
+  --radius-pill: 9999px;
+  --radius-button: var(--radius-lg);
+  --radius-card: var(--radius-xl);
+  --radius-icon: 30%;
+
+  /* shadow */
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.06), 0 6px 16px rgba(0, 0, 0, 0.1);
+  --shadow-sheet: 0 -2px 20px rgba(0, 0, 0, 0.1);
+
+  /* layout */
+  --app-max: 480px;
+  --web-max: 1140px;
+  --tabbar-h: 80px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --color-print-bg: #ffffff;
+  --color-print-text: #171717;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
 }
