@@ -43,6 +43,9 @@ def test_variety_ontology():
 
 @pytest.fixture
 def prices(monkeypatch):
+    monkeypatch.setattr(knowledge_repo, 'source_title', lambda c, key: key)
+    monkeypatch.setattr(knowledge_repo, 'item_labels', lambda *a: [])
+    monkeypatch.setattr(knowledge_repo, 'season_relations', lambda *a: [])
     monkeypatch.setattr(knowledge_repo, 'get_item', lambda *a: {'id': 'item:apple'})
     monkeypatch.setattr(
         store_repo, 'get_market', lambda *a: {'at_sgg_nm': '서울', 'at_mrkt_cd': None}
@@ -99,6 +102,10 @@ def test_default_explicit_fallback_and_contract(prices, monkeypatch):
         'observed_on',
         'count',
         'default',
+        'description',
+        'description_source',
+        'harvest',
+        'synonyms',
     }
     assert [v.reference_price for v in default.varieties] == [2000, 3000, None]
     assert default.varieties[2].count == 0
@@ -112,7 +119,7 @@ def test_default_explicit_fallback_and_contract(prices, monkeypatch):
         get(variety_id='variety:pear-shingo')
     assert exc.value.status_code == 422
     monkeypatch.setattr(price_repo, 'varieties', lambda *a: choices()[:1])
-    assert get().varieties == []
+    assert len(get().varieties) == 1
 
 
 def test_collection_parent_and_every_variety(monkeypatch):

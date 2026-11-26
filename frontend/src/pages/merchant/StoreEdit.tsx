@@ -1,3 +1,6 @@
+import { useCallback } from 'react';
+import { getVarieties } from '../../api/items';
+import { useResource } from '../../hooks/useResource';
 import { useStoreEdit } from '../../hooks/useMerchant';
 import Resource from '../../components/common/Resource';
 import Button from '../../components/common/Button';
@@ -67,6 +70,17 @@ export default function StoreEdit() {
             </Resource>
             <p className={s.help}>{t('merchantSellsHelp')}</p>
           </div>
+          {f.catalog.data
+            ?.filter((i) => f.chosen.includes(i.item_id))
+            .map((i) => (
+              <StoreVarieties
+                key={i.item_id}
+                itemId={i.item_id}
+                name={i.name}
+                selected={f.varietyValue[i.item_id] ?? []}
+                onChange={(ids) => f.setVarieties({ ...f.varietyValue, [i.item_id]: ids })}
+              />
+            ))}
           <div className={s.group}>
             <span className={s.groupLabel}>결제 수단</span>
             <ChipRow label="결제 수단" wrap>
@@ -119,5 +133,42 @@ export default function StoreEdit() {
         </Button>
       </Footer>
     </form>
+  );
+}
+
+function StoreVarieties({
+  itemId,
+  name,
+  selected,
+  onChange,
+}: {
+  itemId: string;
+  name: string;
+  selected: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const choices = useResource(useCallback(() => getVarieties(itemId), [itemId]));
+  if (!choices.data?.length) return null;
+  return (
+    <div className={s.group}>
+      <span className={s.groupLabel}>{name} 품종</span>
+      <ChipRow label={`${name} 품종`} wrap>
+        {choices.data.map((v) => (
+          <Chip
+            key={v.variety_id}
+            pressed={selected.includes(v.variety_id)}
+            onClick={() =>
+              onChange(
+                selected.includes(v.variety_id)
+                  ? selected.filter((id) => id !== v.variety_id)
+                  : [...selected, v.variety_id],
+              )
+            }
+          >
+            {v.name}
+          </Chip>
+        ))}
+      </ChipRow>
+    </div>
   );
 }

@@ -110,9 +110,7 @@ def test_login_captcha_after_two_failures(memory, captcha_on, fixed_answer):  # 
     assert blocked.json()['error']['code'] == 'CAPTCHA_REQUIRED'
     assert user['failed_logins'] == 2
     issued = client.get('/auth/captcha').json()
-    ok = login(
-        'merchant_a', PASSWORD, captcha_id=issued['captcha_id'], captcha_answer=fixed_answer
-    )
+    ok = login('merchant_a', PASSWORD, captcha_id=issued['captcha_id'], captcha_answer=fixed_answer)
     assert ok.status_code == 200 and user['failed_logins'] == 0
 
 

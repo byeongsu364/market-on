@@ -61,7 +61,12 @@ def get_item(conn, item_id, lang='ko'):
 def search(conn, q):
     query = normalize(q)
     return (
-        [get_item(conn, row['entity_id']) for row in repo.search_items(conn, query)]
+        [
+            get_item(conn, row['entity_id']).model_copy(
+                update={'variety_id': row.get('variety_id')}
+            )
+            for row in repo.search_items(conn, query)
+        ]
         if query
         else [get_item(conn, item_id) for item_id in repo.catalog_ids(conn)]
     )

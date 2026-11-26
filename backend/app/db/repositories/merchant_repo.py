@@ -29,3 +29,23 @@ def valid_unit(conn, unit_id):
 
 def update_hours(conn, store_id, hours):
     conn.execute('update stores set hours=%s where id=%s', (Jsonb(hours), store_id))
+
+
+def varieties(conn, store_id):
+    result = {}
+    for row in rows(
+        conn,
+        'select item_id,variety_id from store_item_varieties where store_id=%s order by item_id,variety_id',
+        (store_id,),
+    ):
+        result.setdefault(row['item_id'], []).append(row['variety_id'])
+    return result
+
+
+def set_varieties(conn, store_id, values):
+    conn.execute('delete from store_item_varieties where store_id=%s', (store_id,))
+    for item, ids in values.items():
+        for variety in set(ids):
+            conn.execute(
+                'insert into store_item_varieties values(%s,%s,%s)', (store_id, item, variety)
+            )

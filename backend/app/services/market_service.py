@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from types import SimpleNamespace
 
 from app.core.errors import AppError
-from app.db.repositories import sale_repo, store_repo
+from app.db.repositories import merchant_repo, sale_repo, store_repo
 from app.schemas.market import ActiveSale, Market, MarketMap, Store, StorePrice, Zone
 
 from .price_service import get_price
@@ -142,6 +142,9 @@ def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
                 naver_name=row['name_ko'],
                 verified=row.get('location_verified', False),
                 open_now=open_now(hours),
+                varieties=[
+                    v for ids in merchant_repo.varieties(conn, row['id']).values() for v in ids
+                ],
                 payments=row.get('payments', []),
                 intro=row.get('intro'),
                 distance_m=round(distance(lat, lng, SimpleNamespace(**row)) * 6_371_000)

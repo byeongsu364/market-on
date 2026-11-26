@@ -24,6 +24,11 @@ PASSWORD = 'merchant-password'
 
 @pytest.fixture
 def memory(monkeypatch):
+    variety_links = {}
+    monkeypatch.setattr(merchant_repo, 'varieties', lambda c, sid: variety_links.get(sid, {}))
+    monkeypatch.setattr(
+        merchant_repo, 'set_varieties', lambda c, sid, values: variety_links.update({sid: values})
+    )
     from unittest.mock import Mock
 
     conn = Mock(transaction=nullcontext)

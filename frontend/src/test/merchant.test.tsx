@@ -211,3 +211,25 @@ it('점포 정보에서 결제 수단과 한 줄 소개를 저장한다', async 
     expect(store.intro).toBe('매일 신선하게 준비해요');
   });
 });
+it('세일 품종을 선택해 저장하고 품목을 바꾸면 선택을 비운다', async () => {
+  await mock.login(mock.demoCredentials());
+  await mock.updateStore({ item_ids: ['item:apple', 'item:onion'] });
+  show('/merchant/sale/new');
+  fireEvent.click(await screen.findByRole('button', { name: '사과' }));
+  fireEvent.click(await screen.findByRole('button', { name: '홍로' }));
+  expect(screen.getByRole('button', { name: '홍로' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: '양파' }));
+  fireEvent.click(await screen.findByRole('button', { name: '사과' }));
+  expect(await screen.findByRole('button', { name: '홍로' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
+  fireEvent.click(screen.getByRole('button', { name: '홍로' }));
+  fireEvent.change(screen.getByLabelText('할인가'), { target: { value: '2300' } });
+  fireEvent.click(screen.getByRole('button', { name: '올리기' }));
+  await screen.findByRole('heading', { name: '진행 중 세일' });
+  expect(mock.sales.at(-1)).toMatchObject({
+    variety_id: 'variety:apple-hongro',
+    variety_name: '홍로',
+  });
+});

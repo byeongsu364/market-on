@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useId } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getPriceHistory } from '../../api/price';
 import { useResource } from '../../hooks/useResource';
@@ -246,23 +246,27 @@ export function PriceHistoryChart({
   itemId,
   varietyId,
   varietyName,
+  marketId,
   unit,
   seen,
 }: {
   itemId: string;
   varietyId?: string;
   varietyName?: string;
+  marketId?: string;
   unit: string;
   seen?: number;
 }) {
   const t = useT();
   const history = useResource(
     useCallback(
-      () => (unit ? getPriceHistory(itemId, varietyId, unit) : Promise.resolve(null)),
-      [itemId, varietyId, unit],
+      () => (unit ? getPriceHistory(itemId, varietyId, unit, marketId) : Promise.resolve(null)),
+      [itemId, varietyId, unit, marketId],
     ),
   );
-  const points = history.data?.points.filter((p) => p.price != null) ?? [];
+  const chartId = useId();
+  const allPoints = history.data?.points ?? [];
+  const points = allPoints.filter((p) => p.price != null);
   if (points.length < 2) return null;
   const values = points.map((p) => p.price as number);
   const all = seen ? [...values, seen] : values;
@@ -270,17 +274,14 @@ export function PriceHistoryChart({
   const hi = Math.max(...all) * 1.05;
   const W = 320;
   const H = 130;
-  const x = (i: number) => 16 + (i * (W - 32)) / (points.length - 1);
+  const x = (i: number) => 16 + (i * (W - 32)) / (allPoints.length - 1);
   const y = (v: number) => 10 + ((hi - v) / (hi - lo || 1)) * (H - 20);
   const change = values[values.length - 1] - values[0];
   const name = varietyName ?? '';
   const label = varietyName ? `${varietyName} ` : '';
   return (
-    <section className={s.group} aria-labelledby="price-history">
-      <SectionHeader
-        id="price-history"
-        title={t('scanHistoryTitle').replace('{name}', label).trim()}
-      />
+    <section className={s.group} aria-labelledby={chartId}>
+      <SectionHeader id={chartId} title={t('scanHistoryTitle').replace('{name}', label).trim()} />
       <svg
         className={s.chart}
         viewBox={`0 0 ${W} ${H + 24}`}
@@ -293,13 +294,25 @@ export function PriceHistoryChart({
         {seen && <line className={s.chartSeen} x1={0} x2={W} y1={y(seen)} y2={y(seen)} />}
         <polyline
           className={s.chartLine}
-          points={values.map((v, i) => `${x(i)},${y(v)}`).join(' ')}
+          points={values.map((v, i) => `${x(allPoints.indexOf(points[i]))},${y(v)}`).join(' ')}
         />
         {values.map((v, i) => (
-          <circle key={i} className={s.chartDot} cx={x(i)} cy={y(v)} r={3.5} />
+          <circle
+            key={i}
+            className={s.chartDot}
+            cx={x(allPoints.indexOf(points[i]))}
+            cy={y(v)}
+            r={3.5}
+          />
         ))}
         {points.map((p, i) => (
-          <text key={p.week_start} className={s.chartLabel} x={x(i)} y={H + 18} textAnchor="middle">
+          <text
+            key={p.week_start}
+            className={s.chartLabel}
+            x={x(allPoints.indexOf(points[i]))}
+            y={H + 18}
+            textAnchor="middle"
+          >
             {Number(p.week_start.slice(5, 7))}/{Number(p.week_start.slice(8, 10))}
           </text>
         ))}
