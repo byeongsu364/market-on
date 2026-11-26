@@ -41,10 +41,10 @@ it('언어와 화면: 언어·글자 크기·테마를 바꾸고 기억한다', 
   fireEvent.click(english);
   expect(english).toBeChecked();
   expect(document.documentElement.lang).toBe('en');
-  fireEvent.click(screen.getByRole('button', { name: '크게' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Large' }));
   expect(document.documentElement.dataset.textSize).toBe('large');
   expect(JSON.parse(localStorage.getItem('text-size')!)).toBe('large');
-  fireEvent.click(screen.getByRole('button', { name: '다크' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Dark' }));
   expect(document.documentElement.dataset.theme).toBe('dark');
 });
 

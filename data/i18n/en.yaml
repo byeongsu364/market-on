@@ -1,0 +1,1186 @@
+_meta:
+  machine_translated: true
+  reviewed: false
+entities:
+  cat:vegetable:
+    text: Vegetables
+    reviewed: false
+  cat:fruit:
+    text: fruit
+    reviewed: false
+  item:green_onion:
+    text: Green onion
+    reviewed: false
+  crit:green_onion-leaf:
+    text: The tips of the leaves look elastic and there are no dry leaves mixed in.
+    reviewed: false
+  crit:green_onion-stem:
+    text: The white part of the stem is plentiful and clean.
+    reviewed: false
+  crit:green_onion-root:
+    text: If you gently touch the white root, it is firm and elastic, not soft.
+    reviewed: false
+  crit:green_onion-bunch:
+    text: The length and thickness within the group are similar.
+    reviewed: false
+  item:onion:
+    text: onion
+    reviewed: false
+  crit:onion-firm:
+    text: If you press it with your hand, it is hard, not soft
+    reviewed: false
+  crit:onion-skin:
+    text: The shells are vividly colored and well-dried.
+    reviewed: false
+  crit:onion-sprout:
+    text: There are no sprouts.
+    reviewed: false
+  crit:onion-weight:
+    text: If you listen to it, it has a sense of weight compared to its size.
+    reviewed: false
+  item:apple:
+    text: apple
+    reviewed: false
+  crit:apple-color:
+    text: The shell color is uniform and bright.
+    reviewed: false
+  crit:apple-stem:
+    text: The tip has a blue hue and appears moist.
+    reviewed: false
+  crit:apple-surface:
+    text: There are no scratches or signs of disease or insects
+    reviewed: false
+  crit:apple-tap:
+    text: When tapped lightly, it feels resilient and full.
+    reviewed: false
+  item:pear:
+    text: pear
+    reviewed: false
+  crit:pear-color:
+    text: It is a clear and transparent yellowish color
+    reviewed: false
+  crit:pear-skin:
+    text: The skin is smooth and not wrinkled.
+    reviewed: false
+  crit:pear-bottom:
+    text: There is no protrusion on the opposite side of the nozzle and no black fine
+      cracks.
+    reviewed: false
+  crit:pear-calyx:
+    text: The base part is not blue, but has turned yellow.
+    reviewed: false
+  item:sweet_persimmon:
+    text: sweet persimmon
+    reviewed: false
+  crit:sweet_persimmon-calyx:
+    text: It is attached without a gap between the grip and the fruit.
+    reviewed: false
+  crit:sweet_persimmon-spots:
+    text: Overall, there are no stains.
+    reviewed: false
+  crit:sweet_persimmon-firm:
+    text: If you touch it, the flesh is firm.
+    reviewed: false
+  crit:sweet_persimmon-color:
+    text: More than 90% of the peel is colored yellow
+    reviewed: false
+  item:mandarin:
+    text: mandarin
+    reviewed: false
+  crit:mandarin-skin:
+    text: The peel is thin and it is attached to the flesh without any gap between
+      the peel and the flesh.
+    reviewed: false
+  crit:mandarin-shape:
+    text: It is round and flat, with no protruding part at the tip.
+    reviewed: false
+  crit:mandarin-stem:
+    text: It is a deep orange color and the tip is firmly attached with green.
+    reviewed: false
+  crit:mandarin-gloss:
+    text: The skin is not too glossy
+    reviewed: false
+  unit:bunch:
+    text: bunch
+    reviewed: false
+  unit:kg:
+    text: kg
+    reviewed: false
+  unit:piece:
+    text: piece
+    reviewed: false
+  variety:apple-fuji:
+    text: fuji
+    reviewed: false
+  variety:apple-hongro:
+    text: Hongro
+    reviewed: false
+  variety:apple-shinano-gold:
+    text: Shinano Gold
+    reviewed: false
+  variety:pear-shingo:
+    text: Report
+    reviewed: false
+  variety:sweet_persimmon-fuyu:
+    text: buoyancy
+    reviewed: false
+  variety:green_onion-daepa:
+    text: leek
+    reviewed: false
+  variety:onion-onion:
+    text: onion
+    reviewed: false
+  variety:mandarin-open:
+    text: Noji
+    reviewed: false
+  variety:mandarin-greenhouse:
+    text: Facilities
+    reviewed: false
+  variety:pear-noksu:
+    text: Noksu
+    reviewed: false
+  variety:pear-hanareum:
+    text: Han Areum
+    reviewed: false
+  variety:pear-manpung:
+    text: Manpungbae
+    reviewed: false
+  variety:sweet_persimmon-gampung:
+    text: Wind reduction
+    reviewed: false
+  variety:sweet_persimmon-romang:
+    text: Romance
+    reviewed: false
+  variety:sweet_persimmon-jowan:
+    text: Jowan
+    reviewed: false
+  variety:onion-jangilhwang:
+    text: Jang Il-hwang
+    reviewed: false
+  variety:onion-highland:
+    text: Highland summer onion
+    reviewed: false
+  variety:green_onion-cold:
+    text: Hanjihyeong
+    reviewed: false
+  variety:green_onion-warm:
+    text: Nanji-hyung
+    reviewed: false
+  cat:grain:
+    text: Grain
+    reviewed: false
+  cat:special:
+    text: Specialty crops
+    reviewed: false
+  cat:livestock:
+    text: Livestock products
+    reviewed: false
+  cat:seafood:
+    text: Seafood
+    reviewed: false
+  item:rice:
+    text: rice
+    reviewed: false
+  crit:rice-p1:
+    text: ''
+    reviewed: false
+  variety:rice-01:
+    text: ''
+    reviewed: false
+  variety:rice-10:
+    text: ''
+    reviewed: false
+  item:glutinous_rice:
+    text: glutinous rice
+    reviewed: false
+  variety:glutinous_rice-01:
+    text: General
+    reviewed: false
+  item:soybean:
+    text: soybean
+    reviewed: false
+  variety:soybean-01:
+    text: White bean (domestic)
+    reviewed: false
+  item:red_bean:
+    text: red bean
+    reviewed: false
+  crit:red_bean-p1:
+    text: Red, glossy, with large eggs and thin shells is preferred, and it is best
+      to avoid those that float in water or have uneven eggs.
+    reviewed: false
+  variety:red_bean-00:
+    text: Red beans (domestic)
+    reviewed: false
+  item:mung_bean:
+    text: mung bean
+    reviewed: false
+  crit:mung_bean-p1:
+    text: ''
+    reviewed: false
+  variety:mung_bean-00:
+    text: Domestic
+    reviewed: false
+  item:sweet_potato:
+    text: sweet potato
+    reviewed: false
+  crit:sweet_potato-p1:
+    text: Shape should be uniform, surface smooth, hard, and free of scratches.
+    reviewed: false
+  variety:sweet_potato-00:
+    text: Night
+    reviewed: false
+  item:potato:
+    text: potato
+    reviewed: false
+  variety:potato-01:
+    text: Sumi (Noji)
+    reviewed: false
+  item:brown_rice:
+    text: brown rice
+    reviewed: false
+  variety:brown_rice-01:
+    text: Chalhyunmi
+    reviewed: false
+  item:barley:
+    text: barley
+    reviewed: false
+  variety:barley-04:
+    text: Chalbori
+    reviewed: false
+  item:mixed_grains:
+    text: mixed grains
+    reviewed: false
+  variety:mixed_grains-01:
+    text: Domestic
+    reviewed: false
+  item:napa_cabbage:
+    text: napa cabbage
+    reviewed: false
+  crit:napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:napa_cabbage-03:
+    text: Autumn
+    reviewed: false
+  item:cabbage:
+    text: cabbage
+    reviewed: false
+  variety:cabbage-00:
+    text: Cabbage
+    reviewed: false
+  item:spinach:
+    text: spinach
+    reviewed: false
+  crit:spinach-p1:
+    text: ''
+    reviewed: false
+  variety:spinach-00:
+    text: spinach
+    reviewed: false
+  item:lettuce:
+    text: lettuce
+    reviewed: false
+  variety:lettuce-01:
+    text: Radish
+    reviewed: false
+  variety:lettuce-02:
+    text: Spring
+    reviewed: false
+  item:young_napa_cabbage:
+    text: young napa cabbage
+    reviewed: false
+  variety:young_napa_cabbage-00:
+    text: Brassica rapa
+    reviewed: false
+  item:watermelon:
+    text: watermelon
+    reviewed: false
+  variety:watermelon-00:
+    text: Watermelon
+    reviewed: false
+  item:cucumber:
+    text: cucumber
+    reviewed: false
+  variety:cucumber-01:
+    text: Spine system
+    reviewed: false
+  variety:cucumber-02:
+    text: Dada mechanism
+    reviewed: false
+  variety:cucumber-03:
+    text: Overseas Korean Agency
+    reviewed: false
+  item:squash:
+    text: squash
+    reviewed: false
+  crit:squash-p1:
+    text: ''
+    reviewed: false
+  crit:squash-p2:
+    text: 'Pumpkin: Good if the color is evenly deep, firm, and heavy for its size'
+    reviewed: false
+  crit:squash-p3:
+    text: 'Old pumpkin: Very large size, glossy body and yellowish color. Firm skin
+      is preferred.'
+    reviewed: false
+  variety:squash-01:
+    text: Zucchini
+    reviewed: false
+  variety:squash-02:
+    text: Zucchini
+    reviewed: false
+  item:tomato:
+    text: tomato
+    reviewed: false
+  variety:tomato-00:
+    text: tomato
+    reviewed: false
+  item:strawberry:
+    text: strawberry
+    reviewed: false
+  variety:strawberry-00:
+    text: Seolhyang
+    reviewed: false
+  item:radish:
+    text: radish
+    reviewed: false
+  crit:radish-p1:
+    text: White, smooth, hard, and heavy (delicious radish with a plump root and blue
+      leaves).
+    reviewed: false
+  crit:radish-p2:
+    text: Straight in shape, not split, bursting, or having many fine roots.
+    reviewed: false
+  variety:radish-03:
+    text: Autumn
+    reviewed: false
+  item:carrot:
+    text: carrot
+    reviewed: false
+  variety:carrot-01:
+    text: No-rinse (Domestic)
+    reviewed: false
+  item:young_radish:
+    text: young radish
+    reviewed: false
+  variety:young_radish-00:
+    text: young radish
+    reviewed: false
+  item:dried_chili:
+    text: dried chili
+    reviewed: false
+  variety:dried_chili-00:
+    text: Firebrand
+    reviewed: false
+  item:green_chili:
+    text: green chili
+    reviewed: false
+  variety:green_chili-00:
+    text: Chili peppers (green, etc.)
+    reviewed: false
+  variety:green_chili-02:
+    text: ''
+    reviewed: false
+  variety:green_chili-03:
+    text: Cheongyang chili pepper
+    reviewed: false
+  variety:green_chili-04:
+    text: cucumber-flavored chili pepper
+    reviewed: false
+  item:red_chili:
+    text: red chili
+    reviewed: false
+  variety:red_chili-00:
+    text: Red chili pepper
+    reviewed: false
+  item:peeled_garlic:
+    text: peeled garlic
+    reviewed: false
+  variety:peeled_garlic-01:
+    text: Garlic cloves (domestic)
+    reviewed: false
+  item:ginger:
+    text: ginger
+    reviewed: false
+  crit:ginger-p1:
+    text: The meat should be firm and large, with an earthy color, and it is good
+      if multiple pieces are attached in one lump.
+    reviewed: false
+  crit:ginger-p2:
+    text: Egg is large, wide, has few wrinkles on the shell, and peels easily.
+    reviewed: false
+  crit:ginger-p3:
+    text: Having a unique spiciness and strong aroma, with a somewhat dark color and
+      an uneven shape.
+    reviewed: false
+  variety:ginger-00:
+    text: Domestic
+    reviewed: false
+  item:eggplant:
+    text: eggplant
+    reviewed: false
+  variety:eggplant-00:
+    text: eggplant
+    reviewed: false
+  item:water_dropwort:
+    text: water dropwort
+    reviewed: false
+  variety:water_dropwort-00:
+    text: Minari
+    reviewed: false
+  item:perilla_leaves:
+    text: perilla leaves
+    reviewed: false
+  variety:perilla_leaves-00:
+    text: Perilla leaf
+    reviewed: false
+  item:chives:
+    text: chives
+    reviewed: false
+  variety:chives-00:
+    text: chives
+    reviewed: false
+  item:bell_pepper:
+    text: bell pepper
+    reviewed: false
+  variety:bell_pepper-00:
+    text: Cheong
+    reviewed: false
+  item:paprika:
+    text: paprika
+    reviewed: false
+  variety:paprika-00:
+    text: Paprika
+    reviewed: false
+  item:melon:
+    text: melon
+    reviewed: false
+  variety:melon-00:
+    text: melon
+    reviewed: false
+  item:chili_powder:
+    text: chili powder
+    reviewed: false
+  variety:chili_powder-00:
+    text: Domestic
+    reviewed: false
+  variety:chili_powder-01:
+    text: China
+    reviewed: false
+  item:mustard_greens:
+    text: mustard greens
+    reviewed: false
+  variety:mustard_greens-00:
+    text: God
+    reviewed: false
+  item:cherry_tomato:
+    text: cherry tomato
+    reviewed: false
+  variety:cherry_tomato-02:
+    text: Jujube cherry tomatoes
+    reviewed: false
+  item:baby_napa_cabbage:
+    text: baby napa cabbage
+    reviewed: false
+  crit:baby_napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:baby_napa_cabbage-00:
+    text: baby cabbage
+    reviewed: false
+  item:broccoli:
+    text: broccoli
+    reviewed: false
+  crit:broccoli-p1:
+    text: ''
+    reviewed: false
+  variety:broccoli-00:
+    text: Broccoli (domestic)
+    reviewed: false
+  item:sesame:
+    text: sesame
+    reviewed: false
+  variety:sesame-01:
+    text: White (domestic)
+    reviewed: false
+  variety:sesame-02:
+    text: China
+    reviewed: false
+  item:peanut:
+    text: peanut
+    reviewed: false
+  variety:peanut-01:
+    text: Domestic
+    reviewed: false
+  variety:peanut-02:
+    text: Import
+    reviewed: false
+  item:oyster_mushroom:
+    text: oyster mushroom
+    reviewed: false
+  variety:oyster_mushroom-00:
+    text: Oyster mushroom
+    reviewed: false
+  variety:oyster_mushroom-01:
+    text: Aeneutari mushroom
+    reviewed: false
+  item:enoki_mushroom:
+    text: enoki mushroom
+    reviewed: false
+  variety:enoki_mushroom-00:
+    text: Eringii mushroom
+    reviewed: false
+  item:king_oyster_mushroom:
+    text: king oyster mushroom
+    reviewed: false
+  variety:king_oyster_mushroom-00:
+    text: King oyster mushroom
+    reviewed: false
+  item:walnut:
+    text: walnut
+    reviewed: false
+  variety:walnut-00:
+    text: Imports
+    reviewed: false
+  item:almond:
+    text: almond
+    reviewed: false
+  variety:almond-00:
+    text: Import
+    reviewed: false
+  item:banana:
+    text: banana
+    reviewed: false
+  variety:banana-02:
+    text: Imports
+    reviewed: false
+  item:lemon:
+    text: lemon
+    reviewed: false
+  variety:lemon-00:
+    text: Import
+    reviewed: false
+  item:pineapple:
+    text: pineapple
+    reviewed: false
+  variety:pineapple-02:
+    text: Imports
+    reviewed: false
+  item:mango:
+    text: mango
+    reviewed: false
+  variety:mango-00:
+    text: Import
+    reviewed: false
+  item:orange:
+    text: orange
+    reviewed: false
+  variety:orange-06:
+    text: Nable Australia
+    reviewed: false
+  item:grape:
+    text: grape
+    reviewed: false
+  variety:grape-12:
+    text: Shine Muscat
+    reviewed: false
+  item:avocado:
+    text: avocado
+    reviewed: false
+  variety:avocado-00:
+    text: Import
+    reviewed: false
+  item:blueberry:
+    text: blueberry
+    reviewed: false
+  variety:blueberry-02:
+    text: Imports (frozen)
+    reviewed: false
+  item:kiwi:
+    text: kiwi
+    reviewed: false
+  variety:kiwi-01:
+    text: Gold
+    reviewed: false
+  item:beef:
+    text: beef
+    reviewed: false
+  variety:beef-21:
+    text: Relief
+    reviewed: false
+  variety:beef-22:
+    text: Sirloin
+    reviewed: false
+  variety:beef-36:
+    text: Seoldo
+    reviewed: false
+  variety:beef-40:
+    text: Leber
+    reviewed: false
+  variety:beef-50:
+    text: Galbi
+    reviewed: false
+  item:pork:
+    text: pork
+    reviewed: false
+  variety:pork-25:
+    text: Foreleg
+    reviewed: false
+  variety:pork-27:
+    text: Pork belly
+    reviewed: false
+  variety:pork-28:
+    text: Galbi
+    reviewed: false
+  variety:pork-68:
+    text: Beef chuck
+    reviewed: false
+  item:imported_beef:
+    text: imported beef
+    reviewed: false
+  variety:imported_beef-31:
+    text: Galbi
+    reviewed: false
+  variety:imported_beef-37:
+    text: Rib slice
+    reviewed: false
+  item:imported_pork:
+    text: imported pork
+    reviewed: false
+  variety:imported_pork-27:
+    text: Pork belly
+    reviewed: false
+  item:chicken:
+    text: chicken
+    reviewed: false
+  variety:chicken-05:
+    text: 'Chicken #12'
+    reviewed: false
+  variety:chicken-99:
+    text: Chicken (kg)
+    reviewed: false
+  variety:chicken-04:
+    text: Chicken No. 11
+    reviewed: false
+  variety:chicken-03:
+    text: Rooster 10
+    reviewed: false
+  variety:chicken-02:
+    text: Chicken 9
+    reviewed: false
+  variety:chicken-01:
+    text: Native Chicken No. 17
+    reviewed: false
+  item:egg:
+    text: egg
+    reviewed: false
+  variety:egg-21:
+    text: XL10 units
+    reviewed: false
+  variety:egg-23:
+    text: XL30 unit
+    reviewed: false
+  item:milk:
+    text: milk
+    reviewed: false
+  variety:milk-01:
+    text: White milk
+    reviewed: false
+  item:mackerel:
+    text: mackerel
+    reviewed: false
+  variety:mackerel-03:
+    text: Domestic (salted)
+    reviewed: false
+  variety:mackerel-05:
+    text: ''
+    reviewed: false
+  variety:mackerel-08:
+    text: Imported (salted)
+    reviewed: false
+  item:dried_anchovy:
+    text: dried anchovy
+    reviewed: false
+  variety:dried_anchovy-00:
+    text: Dried anchovies
+    reviewed: false
+  item:dried_squid:
+    text: dried squid
+    reviewed: false
+  variety:dried_squid-00:
+    text: dried squid
+    reviewed: false
+  item:laver:
+    text: laver
+    reviewed: false
+  variety:laver-00:
+    text: dried seaweed
+    reviewed: false
+  variety:laver-01:
+    text: Roasted seaweed
+    reviewed: false
+  item:dried_seaweed:
+    text: dried seaweed
+    reviewed: false
+  variety:dried_seaweed-00:
+    text: dried seaweed
+    reviewed: false
+  item:oyster:
+    text: oyster
+    reviewed: false
+  variety:oyster-00:
+    text: ''
+    reviewed: false
+  item:imported_croaker:
+    text: imported croaker
+    reviewed: false
+  variety:imported_croaker-04:
+    text: Customs revenue (refrigerated)
+    reviewed: false
+  item:salted_shrimp:
+    text: salted shrimp
+    reviewed: false
+  variety:salted_shrimp-00:
+    text: salted shrimp
+    reviewed: false
+  item:anchovy_sauce:
+    text: anchovy sauce
+    reviewed: false
+  variety:anchovy_sauce-00:
+    text: Anchovy sauce
+    reviewed: false
+  item:sea_salt:
+    text: sea salt
+    reviewed: false
+  variety:sea_salt-00:
+    text: Sea salt
+    reviewed: false
+  item:abalone:
+    text: abalone
+    reviewed: false
+  variety:abalone-00:
+    text: Refrigeration
+    reviewed: false
+  item:shrimp:
+    text: shrimp
+    reviewed: false
+  variety:shrimp-01:
+    text: Whiteleg (Import)
+    reviewed: false
+  item:saury:
+    text: saury
+    reviewed: false
+  variety:saury-01:
+    text: Frozen (Imported)
+    reviewed: false
+  item:squid:
+    text: squid
+    reviewed: false
+  variety:squid-04:
+    text: Nearshore (frozen)
+    reviewed: false
+  variety:squid-05:
+    text: Offshore (frozen)
+    reviewed: false
+  item:hairtail:
+    text: hairtail
+    reviewed: false
+  variety:hairtail-03:
+    text: Domestic (refrigerated)
+    reviewed: false
+  variety:hairtail-04:
+    text: Domestic (frozen)
+    reviewed: false
+  item:pollock:
+    text: pollock
+    reviewed: false
+  variety:pollock-04:
+    text: Frozen (Deep-sea Imported Integrated)
+    reviewed: false
+  variety:pollock-05:
+    text: Frozen processing
+    reviewed: false
+  item:croaker:
+    text: croaker
+    reviewed: false
+  variety:croaker-05:
+    text: ''
+    reviewed: false
+  variety:croaker-06:
+    text: Refrigerant (refrigeration)
+    reviewed: false
+  variety:croaker-07:
+    text: Dried yellow corvina
+    reviewed: false
+  item:dried_kelp:
+    text: dried kelp
+    reviewed: false
+  variety:dried_kelp-01:
+    text: Wando-made
+    reviewed: false
+  item:scallop:
+    text: scallop
+    reviewed: false
+  variety:scallop-01:
+    text: Marine clam (Red clam)
+    reviewed: false
+  item:mussel:
+    text: mussel
+    reviewed: false
+  variety:mussel-01:
+    text: Kimberley clams (refrigerated)
+    reviewed: false
+  variety:mussel-02:
+    text: Unopened clams (refrigerated)
+    reviewed: false
+  item:blue_crab:
+    text: blue crab
+    reviewed: false
+  variety:blue_crab-00:
+    text: Frozen
+    reviewed: false
+  item:spanish_mackerel:
+    text: spanish mackerel
+    reviewed: false
+  variety:spanish_mackerel-01:
+    text: Refrigeration
+    reviewed: false
+  item:mackerel_fillet:
+    text: mackerel fillet
+    reviewed: false
+  variety:mackerel_fillet-00:
+    text: Import
+    reviewed: false
+  variety:mackerel_fillet-01:
+    text: Domestic
+    reviewed: false
+  item:clam:
+    text: clam
+    reviewed: false
+  variety:clam-00:
+    text: refrigerated
+    reviewed: false
+  item:octopus:
+    text: octopus
+    reviewed: false
+  variety:octopus-00:
+    text: Import (frozen)
+    reviewed: false
+  item:cockle:
+    text: cockle
+    reviewed: false
+  variety:cockle-00:
+    text: Domestic (New cockle)
+    reviewed: false
+  unit:egg10:
+    text: 10 district
+    reviewed: false
+  unit:egg30:
+    text: 30th district
+    reviewed: false
+  unit:fish:
+    text: Marie
+    reviewed: false
+  unit:fish10:
+    text: 10 animals
+    reviewed: false
+  unit:fish5:
+    text: 5 animals
+    reviewed: false
+  unit:g100:
+    text: ''
+    reviewed: false
+  unit:g150:
+    text: ''
+    reviewed: false
+  unit:g50:
+    text: ''
+    reviewed: false
+  unit:g500:
+    text: ''
+    reviewed: false
+  unit:g600:
+    text: ''
+    reviewed: false
+  unit:head:
+    text: Give up
+    reviewed: false
+  unit:kg10:
+    text: ''
+    reviewed: false
+  unit:kg2:
+    text: ''
+    reviewed: false
+  unit:kg20:
+    text: ''
+    reviewed: false
+  unit:kg5:
+    text: ''
+    reviewed: false
+  unit:liter:
+    text: ''
+    reviewed: false
+  unit:pair:
+    text: hand
+    reviewed: false
+  unit:piece10:
+    text: ''
+    reviewed: false
+  unit:piece3:
+    text: ''
+    reviewed: false
+  unit:sheet10:
+    text: Chapter 10
+    reviewed: false
+  recipe:foodsafety-32:
+    text: Soft tofu, apple, and cucumber salad with sauce
+    reviewed: false
+  recipe:foodsafety-33:
+    text: Apple shrimp dried pollack soup
+    reviewed: false
+  recipe:foodsafety-150:
+    text: Mandarin kimchi
+    reviewed: false
+  recipe:foodsafety-261:
+    text: Taco Sauce Braised Chicken
+    reviewed: false
+  recipe:foodsafety-268:
+    text: Tomato pork hangover soup
+    reviewed: false
+  recipe:foodsafety-306:
+    text: Five-color stir-fried noodles
+    reviewed: false
+  recipe:foodsafety-360:
+    text: Bit Onion Kimchi
+    reviewed: false
+  recipe:foodsafety-388:
+    text: Grilled chicken gizzard
+    reviewed: false
+  recipe:foodsafety-422:
+    text: Apple pickles
+    reviewed: false
+  recipe:foodsafety-479:
+    text: Rice croquette
+    reviewed: false
+  recipe:foodsafety-483:
+    text: Fruit pickled kimchi
+    reviewed: false
+  recipe:foodsafety-597:
+    text: Dispatching and Jwaak
+    reviewed: false
+  recipe:foodsafety-718:
+    text: Apple sauce chop
+    reviewed: false
+  recipe:foodsafety-853:
+    text: Sirloin steak barbecue
+    reviewed: false
+  recipe:foodsafety-923:
+    text: Spinach pear mieum
+    reviewed: false
+  recipe:foodsafety-1129:
+    text: Wine pear stuffing
+    reviewed: false
+  recipe:foodsafety-2953:
+    text: Jeju Island Bingtteok, Tangerine Soy Sauce
+    reviewed: false
+  recipe:foodsafety-3089:
+    text: Fern-leafed Parsley & Persimmon Salad
+    reviewed: false
+  recipe:foodsafety-3172:
+    text: Persimmon pickles
+    reviewed: false
+  recipe:foodsafety-3175:
+    text: Tangerine bean salad
+    reviewed: false
+  recipe:foodsafety-3285:
+    text: Spinach Hummus
+    reviewed: false
+  region:seoul:
+    text: Seoul
+    reviewed: false
+  region:busan-myeongji:
+    text: Myeongji, Buk-gu, Busan
+    reviewed: false
+  region:jeonnam-coast:
+    text: Jeonnam coastal region
+    reviewed: false
+  region:chungnam-asan:
+    text: Asan, Chungcheongnam-do
+    reviewed: false
+  store_category:fruit:
+    text: fruit
+    reviewed: false
+  store_category:vegetable:
+    text: vegetables
+    reviewed: false
+  store_category:seafood:
+    text: seafood
+    reviewed: false
+  store_category:meat:
+    text: meat
+    reviewed: false
+  store_category:side_dish:
+    text: side dishes
+    reviewed: false
+  store_category:snack:
+    text: rice cakes & snacks
+    reviewed: false
+  store_category:produce:
+    text: produce
+    reviewed: false
+  store_category:dried:
+    text: dried seafood and salted seafood
+    reviewed: false
+phrases:
+  가을~겨울:
+    text: Autumn~Winter
+    reviewed: false
+  일반적으로 늦가을이나 초봄에 씨를 뿌려 수확:
+    text: Generally sown in late autumn or early spring and harvested
+    reviewed: false
+  4~6월:
+    text: ''
+    reviewed: false
+  조생종 4월~5월 초:
+    text: ''
+    reviewed: false
+  9월 상·중순:
+    text: ''
+    reviewed: false
+  고랭지 여름양파:
+    text: Highland summer onion
+    reviewed: false
+  0℃ · 상대습도 90~95%:
+    text: 0℃ · Relative humidity 90~95%
+    reviewed: false
+  0~2℃:
+    text: 0~2°C
+    reviewed: false
+  0℃:
+    text: 0°C
+    reviewed: false
+  부유 품종은:
+    text: Floating breeds are
+    reviewed: false
+  1~3개월:
+    text: 1~3 months
+    reviewed: false
+  10월 하순 이후:
+    text: ''
+    reviewed: false
+  만생종:
+    text: Man-saengjong
+    reviewed: false
+  중생종 추석용 품종:
+    text: Mesozoic Thanksgiving breeds
+    reviewed: false
+  10월 하순~11월 상순:
+    text: ''
+    reviewed: false
+  남부 주산지는 대개 11월 상순:
+    text: ''
+    reviewed: false
+  채소:
+    text: Vegetables
+    reviewed: false
+  과일:
+    text: Fruit
+    reviewed: false
+  곡물:
+    text: Cereal
+    reviewed: false
+  특용작물:
+    text: Specialty crops
+    reviewed: false
+  축산물:
+    text: Livestock products
+    reviewed: false
+  수산물:
+    text: Seafood
+    reviewed: false
+  반찬:
+    text: side dish
+    reviewed: false
+  기타:
+    text: Other
+    reviewed: false
+  국&찌개:
+    text: Stew & Soup
+    reviewed: false
+  끓이기:
+    text: Boiling
+    reviewed: false
+  일품:
+    text: Delicacy
+    reviewed: false
+  볶기:
+    text: Stir-fry
+    reviewed: false
+  후식:
+    text: Dessert
+    reviewed: false
+  굽기:
+    text: Grilling
+    reviewed: false
+  밥:
+    text: rice
+    reviewed: false
+  튀기기:
+    text: Frying
+    reviewed: false
+  청과:
+    text: Fruits
+    reviewed: false
+  수산:
+    text: Fisheries
+    reviewed: false
+  정육:
+    text: Butchery
+    reviewed: false
+  떡·분식:
+    text: Rice cake and snack foods
+    reviewed: false
+  채소·과일:
+    text: Vegetables and fruits
+    reviewed: false
+  건어물·젓갈:
+    text: Dried seafood and salted seafood
+    reviewed: false
+  눈 오는 날 만드는:
+    text: Making a snowy day
+    reviewed: false
+  더운 날 만드는:
+    text: Making hot days
+    reviewed: false
+  비 오는 날 만드는:
+    text: Making on a rainy day
+    reviewed: false
+  요리:
+    text: Cooking
+    reviewed: false
+  추운 날 끓이는:
+    text: boiled on a cold day
+    reviewed: false
+templates:
+  season_featured:
+    text: Korea's Rural Development Administration ('Food of the Month') lists {name} for months {months}.
+    reviewed: false
+  season_harvest:
+    text: '{name} is harvested {period}{note}.'
+    reviewed: false
+  season_regions:
+    text: '{name} is widely grown in {regions}.'
+    reviewed: false
+  storage:
+    text: 'Guidance: store {name} at {temperature}.'
+    reviewed: false
+  storage_period:
+    text: 'Guidance: store {name} at {temperature} for {period}.'
+    reviewed: false
+  recipe_reason:
+    text: 'A dish made with {name}: {dish}'
+    reviewed: false
+  recipe_season_reason:
+    text: 'Seasonal in month {month}, a dish made with {name}: {dish}'
+    reviewed: false

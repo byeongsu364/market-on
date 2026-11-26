@@ -79,3 +79,51 @@ def check(answer, evidence, item_id, dictionary):
 
 def sentences(answer):
     return [s for s in re.split(r'(?<=[.!?。])\s+|\n+', answer.strip()) if s]
+
+
+TRANSLATION_FORBIDDEN = {
+    'ko': FORBIDDEN,
+    'en': re.compile(
+        r'\b(?:fresh(?:ness)?|grade|recommend\w*|should buy|buy now)\b', re.IGNORECASE
+    ),
+    'zh': re.compile(r'新鲜|新鮮|等级|等級|推荐|推薦|建议购买|建議購買'),
+    'ja': re.compile(r'新鮮|鮮度|等級|おすすめ|お勧め|推薦|買うべき'),
+    'vi': re.compile(
+        r'\btươi\b|\bphân hạng\b|\bkhuyến nghị\b|\bnên mua\b|\bđề xuất\b', re.IGNORECASE
+    ),
+}
+
+
+def translation_signature(text):
+    """Numbers including unitless values, and value-bound normalized unit symbols.
+
+    Months deliberately compare numbers only. Known language spellings normalize
+    to symbols; dropping or changing a denomination fails closed.
+    """
+    text = normalize_values(text).replace('°C', '℃').replace('°c', '℃')
+    text = re.sub(r'(개월|달|个月|個月|[かヶケ]月|months?|tháng)', ' ', text)
+    # Language-specific spellings normalize to the six display denominations.
+    aliases = {
+        '℃': r'°\s*c|degrees?\s*celsius|摄氏度|攝氏度|摂氏度|độ\s*c',
+        '%': r'percent(?:age)?|phần\s*trăm|パーセント',
+        'kg': r'kilograms?|kilôgam|ki-lô-gam|千克|公斤|キログラム',
+        'g': r'grams?|gam|克|グラム',
+        '원': r'\bwon\b|\bkrw\b|韩元|韓元|ウォン',
+        '개': r'pieces?|items?|个|個|cái|quả|chiếc',
+    }
+    for unit, pattern in aliases.items():
+        text = re.sub(pattern, unit, text, flags=re.IGNORECASE)
+    text = re.sub(r'(?<=\d)\s*도', '℃', text)
+    text = re.sub(r'(?<=\d)\s*[-–—]\s*(?=\d)', '~', text)
+    numbers = {float(n) for n in re.findall(NUMBER, text)}
+    units = {
+        (float(number), unit.lower())
+        for number, unit in re.findall(rf'({NUMBER})\s*(℃|%|kg|g|원|개)', text, re.IGNORECASE)
+    }
+    return numbers, units
+
+
+def translation_check(original, translated, lang):
+    return translation_signature(original) == translation_signature(
+        translated
+    ) and not TRANSLATION_FORBIDDEN.get(lang, FORBIDDEN).search(translated)

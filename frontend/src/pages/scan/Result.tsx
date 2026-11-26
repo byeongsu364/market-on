@@ -1,3 +1,4 @@
+import { useSession } from '../../store/session';
 import Recipes from '../../components/domain/Recipes';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -52,6 +53,7 @@ function usePhotoUrl(photo?: File) {
  */
 export default function Result() {
   const t = useT();
+  const { language } = useSession();
   const f = useResult();
   const desktop = useIsDesktop();
   const [checks, setChecks] = useState<{ itemId: string; keys: string[] }>({
@@ -218,6 +220,7 @@ export default function Result() {
     if (!item || !f.market) return;
     setCard(
       buildCardData({
+        lang: language,
         item,
         market: f.market,
         checked,

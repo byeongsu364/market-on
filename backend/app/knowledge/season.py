@@ -3,6 +3,8 @@
 from app.db.repositories import knowledge_repo as repo
 from app.schemas.ask import Citation
 
+from . import i18n
+
 
 def _source(row):
     return Citation(**{key: row[key] for key in ('title', 'publisher', 'url', 'license')})
@@ -38,12 +40,15 @@ def _facts(rows, item_id, month):
             regions.append({'id': row['object_id'], 'name': row['object_name']})
         if source not in sources:
             sources.append(source)
-    return dict(
-        featured_months=sorted(set(featured)), harvest=harvest, regions=regions, sources=sources
-    )
+    return {
+        'featured_months': sorted(set(featured)),
+        'harvest': harvest,
+        'regions': regions,
+        'sources': sources,
+    }
 
 
-def season_statements(conn, item_id, name, *, variety_id=None, month=None):
+def season_statements(conn, item_id, name, *, variety_id=None, month=None, lang='ko'):
     """Return each sentence alongside only the relation sources used by it."""
     rows = repo.season_relations(conn, item_id)
     facts = _facts(rows, item_id, month)
@@ -78,6 +83,51 @@ def season_statements(conn, item_id, name, *, variety_id=None, month=None):
         statements.append(
             (f'{name}{particle} {names}에서 많이 재배해요.', [_source(r) for r in regions])
         )
+    if lang != 'ko':
+        localized = []
+        for original, sources in statements:
+            translated = original
+            localized_name = i18n.label(conn, item_id, lang, name)
+            if "'이달의 식재료'" in original:
+                translated = i18n.template(
+                    'season_featured',
+                    lang,
+                    original,
+                    name=localized_name,
+                    months=', '.join(str(m) for m in facts['featured_months']),
+                )
+            else:
+                for harvest in facts['harvest']:
+                    if harvest['label'] not in original:
+                        continue
+                    period = i18n.text(harvest['label'], lang, '', section='phrases')
+                    note = i18n.text(harvest.get('note', ''), lang, '', section='phrases')
+                    if period and (not harvest.get('note') or note):
+                        translated = i18n.template(
+                            'season_harvest',
+                            lang,
+                            original,
+                            name=i18n.label(
+                                conn,
+                                harvest['variety_id'] or item_id,
+                                lang,
+                                harvest['variety_name'] or name,
+                            ),
+                            period=period,
+                            note=f' ({note})' if note else '',
+                        )
+                if '많이 재배해요' in original:
+                    translated = i18n.template(
+                        'season_regions',
+                        lang,
+                        original,
+                        name=localized_name,
+                        regions=', '.join(
+                            i18n.label(conn, r['id'], lang, r['name']) for r in facts['regions']
+                        ),
+                    )
+            localized.append((translated, sources))
+        return localized
     return statements
 
 

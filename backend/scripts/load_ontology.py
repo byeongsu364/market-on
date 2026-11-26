@@ -64,6 +64,17 @@ def load_ontology(conn, directory=DATA / 'ontology', *, prune=False, cleanup=Tru
             entity['relations'].append({'p': 'hasCriterion', 'o': cid, 'source': source})
             lines.append(1)
     records.extend(generated)
+    # Draft labels are presentation data, never evidence documents.
+    from app.knowledge.i18n import LANGUAGES
+
+    for lang in LANGUAGES[1:]:
+        path = directory.parent / 'i18n' / f'{lang}.yaml'
+        if path.exists():
+            drafts = yaml.safe_load(path.read_text()).get('entities', {})
+            for _, entity, _ in records:
+                entry = drafts.get(entity['id'], {})
+                if entry.get('text'):
+                    entity.setdefault('translated_labels', {})[lang] = entry['text']
     ids = [e['id'] for _, e, _ in records]
     if len(set(ids)) != len(ids):
         raise ValueError('온톨로지 파일에 중복 엔터티 ID가 있습니다.')

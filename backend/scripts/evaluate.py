@@ -13,6 +13,7 @@ from app.core.errors import AppError
 from app.knowledge import fact_check, retriever
 from app.knowledge.intents import doc_types_for_intent
 from app.llm.factory import get_embedder
+from app.llm.translate import translate
 from app.schemas.ask import AskRequest
 from app.services import ask_service
 
@@ -27,15 +28,29 @@ def evaluate(conn, *, data_dir: Path = DATA, questions=None, embedder=None) -> d
     )
     rows = []
     for q in questions:
-        row = {'id': q['id'], 'question': q['question'], 'retrieval_hit': None}
+        row = {
+            'id': q['id'],
+            'question': q['question'],
+            'lang': q.get('lang', 'ko'),
+            'retrieval_hit': None,
+        }
+        korean_question = q['question']
+        if row['lang'] != 'ko':
+            korean_question, ok = translate(
+                korean_question, 'ko', conn, source=row['lang'], check=False
+            )
+            if not ok:
+                row['unavailable'] = '측정 못 함: 번역 서버'
         chunks = []
-        request = AskRequest(**{k: q[k] for k in ('question', 'item_id', 'intent') if k in q})
-        if q.get('doc_key'):
+        request = AskRequest(
+            **{k: q[k] for k in ('question', 'item_id', 'intent', 'lang') if k in q}
+        )
+        if q.get('doc_key') and not row.get('unavailable'):
             try:
                 chunks = retriever.search(
                     conn,
                     embedder or get_embedder(),
-                    q['question'],
+                    korean_question,
                     entity_ids=[q['item_id']],
                     intent=q['intent'],
                     lang='ko',
@@ -60,7 +75,7 @@ def evaluate(conn, *, data_dir: Path = DATA, questions=None, embedder=None) -> d
                     join chunk_entities ce on ce.chunk_id=c.id
                     where ce.entity_id=%s and d.doc_type=any(%s) and d.review_status != 'rejected'
                     order by ts_rank(to_tsvector('simple',c.content), plainto_tsquery('simple',%s)) desc,c.id limit 5""",
-                    (q['item_id'], doc_types_for_intent(q['intent']), q['question']),
+                    (q['item_id'], doc_types_for_intent(q['intent']), korean_question),
                 ).fetchall()
                 row['retrieval_hit'] = q['doc_key'] in {r[0] for r in keys}
                 row['retrieval_mode'] = 'lexical_fallback'
@@ -79,6 +94,10 @@ def evaluate(conn, *, data_dir: Path = DATA, questions=None, embedder=None) -> d
                 raise_unavailable=True,
             )
             row.update(kind=result.kind, seconds=time.monotonic() - began)
+            if row['lang'] != 'ko' and result.answer:
+                row['translation_pass'] = result.translated and fact_check.translation_check(
+                    result.original or '', result.answer, row['lang']
+                )
             if result.kind == 'recipes':
                 row['cited'] = bool(result.citations)
                 row['recipe_count'] = len(result.recipes or [])
@@ -91,9 +110,9 @@ def evaluate(conn, *, data_dir: Path = DATA, questions=None, embedder=None) -> d
                     where d.review_status != 'rejected' and s.title=any(%s)""",
                     ([c.title for c in result.citations],),
                 ).fetchall()
-                row['values_pass'] = fact_check.values(result.answer or '') <= fact_check.values(
-                    '\n'.join(r[0] for r in evidence)
-                )
+                row['values_pass'] = fact_check.values(
+                    result.original or result.answer or ''
+                ) <= fact_check.values('\n'.join(r[0] for r in evidence))
             if q.get('expect'):
                 # 범위 밖 질문은 '지어내지 않은 안전한 응답'이면 정답: 자료 없음·범위 밖 거절·품목 되묻기,
                 # 또는 질문마다 허용한 응답(예: 가격 예측 → 예측 없이 오늘 시세만)
@@ -130,6 +149,7 @@ def evaluate(conn, *, data_dir: Path = DATA, questions=None, embedder=None) -> d
         'metrics': {
             'retrieval': metric('retrieval_hit'),
             'citations': metric('cited'),
+            'translation': metric('translation_pass'),
             'values': metric('values_pass'),
             'no_evidence': metric('no_evidence_correct'),
             'latency': {

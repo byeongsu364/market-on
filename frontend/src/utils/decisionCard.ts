@@ -1,10 +1,13 @@
 import QRCode from 'qrcode';
+import { t as translate, type Key } from '../i18n';
+import type { Language } from '../types/contract';
 import type { Item, Market, Price } from '../types/contract';
 import { seoulDay } from './sale';
 import { unitLabel } from './convertUnit';
-import { BAND_LABELS, priceBand } from './priceBand';
+import { priceBand } from './priceBand';
 
 export type CardInput = {
+  lang?: Language;
   item: Item;
   market: Pick<Market, 'market_id' | 'name'>;
   checked: string[];
@@ -19,6 +22,9 @@ export type CardInput = {
 };
 export function buildCardData(input: CardInput) {
   const { item, market, price, store } = input;
+  const lang = input.lang ?? 'ko';
+  const t = (key: Key) => translate(key, lang);
+  const bandLabels = [t('cardBand1'), t('cardBand2'), t('cardBand3'), t('cardBand4')];
   const selected = item.criteria.filter((c) => input.checked.includes(c.key));
   const date = seoulDay(input.now);
   const seen = Number(input.value);
@@ -28,28 +34,42 @@ export function buildCardData(input: CardInput) {
     pct == null
       ? ''
       : pct === 0
-        ? '기준시세와 차이가 없어요 · 0%'
-        : `${pct < 0 ? '▼ −' : '▲ +'}${Math.abs(pct)}% · 기준시세보다 ${Math.abs(pct)}% ${pct < 0 ? '낮아요' : '높아요'}`;
+        ? t('cardEqual')
+        : `${pct < 0 ? '▼ −' : '▲ +'}${Math.abs(pct)}% · ${t(pct < 0 ? 'cardLower' : 'cardHigher').replace('{pct}', String(Math.abs(pct)))}`;
   const points = (selected.length ? selected : item.criteria).map(
     (c) => `${selected.length ? '✓ ' : ''}${c.text}`,
   );
   const count = selected.length
-    ? `${item.criteria.length}개 중 ${selected.length}개 확인`
-    : `확인 포인트 ${item.criteria.length}개`;
+    ? t('cardChecked')
+        .replace('{total}', String(item.criteria.length))
+        .replace('{done}', String(selected.length))
+    : t('cardPoints').replace('{total}', String(item.criteria.length));
   const prices = [
     ...(hasPrice
       ? [
           // "5,000원 / 3개 (1개 1,667원)" — "3 × 1개"처럼 읽히지 않게
           input.quantity > 1
-            ? `현장 가격 ${seen.toLocaleString('ko-KR')}원 / ${input.quantity}${unitLabel(input.unit).replace(/^1/, '')} (${unitLabel(input.unit)} ${Math.round(seen / input.quantity).toLocaleString('ko-KR')}원)`
-            : `현장 가격 ${seen.toLocaleString('ko-KR')}원 / ${unitLabel(input.unit)}`,
+            ? `${t('cardPriceLine')
+                .replace('{price}', seen.toLocaleString('ko-KR'))
+                .replace(
+                  '{unit}',
+                  String(input.quantity) + unitLabel(input.unit).replace(/^1/, ''),
+                )} (${unitLabel(input.unit)} ${Math.round(seen / input.quantity).toLocaleString('ko-KR')}원)`
+            : t('cardPriceLine')
+                .replace('{price}', seen.toLocaleString('ko-KR'))
+                .replace('{unit}', unitLabel(input.unit)),
         ]
       : []),
     ...(price
       ? [
-          `기준시세 ${price.mock ? '예시 ' : ''}${price.reference_price.toLocaleString('ko-KR')}원 / ${unitLabel(price.unit)}`,
+          t('cardReferenceLine')
+            .replace(
+              '{price}',
+              `${price.mock ? t('sample') + ' ' : ''}${price.reference_price.toLocaleString('ko-KR')}`,
+            )
+            .replace('{unit}', unitLabel(price.unit)),
         ]
-      : ['기준시세 정보 없음']),
+      : [t('cardNoPrice')]),
     ...(comparison ? [comparison] : []),
   ];
   const sources = [
@@ -64,11 +84,17 @@ export function buildCardData(input: CardInput) {
   // 가격 구간: 결과 화면과 같은 규칙(utils/priceBand). 가격을 넣지 않았으면 눈금을 모두 끄고 문구를 비움
   const verdict = hasPrice && price ? priceBand(price, price.variety_id) : null;
   const band = verdict?.band ?? null;
-  const bandLine = verdict ? verdict.message : '';
+  const bandLine = verdict
+    ? verdict.band
+      ? t(`cardMessage${verdict.band}` as Key)
+      : t('cardCompareNote')
+    : '';
   // 신선도에는 결론을 붙이지 않고 손님이 한 확인만 적음(기획서 "팀 원칙과 맞추기")
-  const footer = '신선도는 직접 확인했어요';
+  const footer = t('cardFooter');
   const title = [item.name, price?.variety_name].filter(Boolean).join(' · ');
   return {
+    lang,
+    compareNote: t('cardCompareNote'),
     date,
     title,
     market: market.name,
@@ -79,7 +105,7 @@ export function buildCardData(input: CardInput) {
     sources,
     footer,
     band,
-    bandLabels: [...BAND_LABELS],
+    bandLabels,
     bandLine,
     bandNote: verdict?.fallbackNote ?? null,
     store: store?.name ?? market.name,
@@ -94,11 +120,11 @@ export function buildCardData(input: CardInput) {
       market.name,
       date,
       title,
-      '내가 확인한 것',
+      t('cardMyChecks'),
       count,
       ...points,
       ...prices,
-      band ? `가격 자리 ${BAND_LABELS[band - 1]}` : '',
+      band ? `${lang === 'ko' ? '가격 자리 ' : ''}${bandLabels[band - 1]}` : '',
       bandLine,
       store?.name,
       ...sources,
@@ -135,7 +161,8 @@ export function wrapText(
   return result;
 }
 
-const FONT = '"Pretendard Variable", Pretendard, system-ui, sans-serif';
+const FONT =
+  '"Pretendard Variable", Pretendard, system-ui, "PingFang SC", "Hiragino Sans", "Yu Gothic", "Microsoft YaHei", sans-serif';
 
 /** 판단 카드 PNG(1080×1760). 어두운 면(surface-dark) 위에 시안 Card의 배치를 그대로 옮김 */
 export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promise<Blob> {
@@ -268,7 +295,7 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
     });
   });
   y += 210;
-  text(data.bandLine || '비교는 참고만 하세요', P, y, 56, W - P * 2, { weight: 600 });
+  text(data.bandLine || data.compareNote, P, y, 56, W - P * 2, { weight: 600 });
   if (data.bandNote) {
     y += 52;
     text(data.bandNote, P, y, 30, W - P * 2, { color: colors.soft });

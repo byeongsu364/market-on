@@ -7,9 +7,11 @@ from app.schemas.item import Criterion, Item
 
 
 def preferred(labels, lang, fallback):
-    return next(
-        (l['label'] for l in labels if l['lang'] == lang and l['kind'] == 'preferred'), fallback
-    )
+    for kind in ('translated', 'preferred'):
+        for label in labels:
+            if label['lang'] == lang and label['kind'] == kind:
+                return label['label']
+    return fallback
 
 
 def get_item(conn, item_id, lang='ko'):
@@ -54,22 +56,23 @@ def get_item(conn, item_id, lang='ko'):
         labels_i18n={
             l['lang']: l['label']
             for l in labels
-            if l['kind'] == 'preferred' and l['lang'] in ('ko', 'en', 'zh', 'ja', 'vi')
+            if l['kind'] in ('translated', 'preferred')
+            and l['lang'] in ('ko', 'en', 'zh', 'ja', 'vi')
         },
     )
 
 
-def search(conn, q):
+def search(conn, q, lang='ko'):
     query = normalize(q)
     return (
         [
-            get_item(conn, row['entity_id']).model_copy(
+            get_item(conn, row['entity_id'], lang).model_copy(
                 update={'variety_id': row.get('variety_id')}
             )
             for row in repo.search_items(conn, query)
         ]
         if query
-        else [get_item(conn, item_id) for item_id in repo.catalog_ids(conn)]
+        else [get_item(conn, item_id, lang) for item_id in repo.catalog_ids(conn)]
     )
 
 

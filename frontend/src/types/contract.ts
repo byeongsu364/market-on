@@ -125,6 +125,7 @@ export type MarketMap = {
   facilities?: Facility[];
 };
 export type RecommendRequest = {
+  lang?: Language;
   purpose: '집밥' | '선물' | '모임';
   relation?: '가족' | '친구' | '나';
   event?: string;
@@ -133,6 +134,9 @@ export type RecommendRequest = {
   market_id: string;
 };
 export type RecommendItem = {
+  lang?: Language;
+  translated?: boolean;
+  original?: string | null;
   item_id: string;
   name: string;
   quantity: number;
@@ -158,6 +162,7 @@ export type ApiError = {
 };
 
 export type User = {
+  lang?: Language;
   created_at?: string;
   id: string;
   login_id: string;
@@ -303,7 +308,7 @@ export type AskRequest = {
   intent?: AskIntent;
   item_id?: string;
   market_id?: string;
-  lang?: 'ko';
+  lang?: Language;
 };
 export type Citation = {
   draft: boolean;
@@ -314,6 +319,9 @@ export type Citation = {
 };
 export type PriceView = Price;
 export type AskResponse = {
+  lang?: Language;
+  translated?: boolean;
+  original?: string | null;
   kind: 'answer' | 'no_evidence' | 'need_item' | 'price' | 'where' | 'recipes' | 'out_of_scope';
   intent: AskIntent | null;
   item_id: string | null;
@@ -333,8 +341,16 @@ export type AskResponse = {
 
 // 도우미 메시지는 서버가 준 reply_sig를 sig로 그대로 돌려줘요 (없으면 서버가 그 메시지를 빼요)
 export type ChatMessage = { role: 'user' | 'assistant'; content: string; sig?: string };
-export type ChatRequest = { messages: ChatMessage[]; market_id: string; item_id?: string };
+export type ChatRequest = {
+  lang?: Language;
+  messages: ChatMessage[];
+  market_id: string;
+  item_id?: string;
+};
 export type ChatResponse = {
+  lang?: Language;
+  translated?: boolean;
+  original?: string | null;
   reply: string;
   citations: Citation[];
   tools: { name: string; label: string }[];

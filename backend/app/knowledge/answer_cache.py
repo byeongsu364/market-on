@@ -39,7 +39,7 @@ def document_digest(versions):
 
 def recommend_key(conn, data, item_ids):
     version = document_digest([(i, ask_repo.document_version(conn, i)) for i in item_ids])
-    key = f'recommend:v2:{data.market_id}:{data.purpose}:{data.relation}:{data.headcount}:{data.budget}:{seoul_day()}:{version}'
+    key = f'recommend:v3:{data.lang}:{data.market_id}:{data.purpose}:{data.relation}:{data.headcount}:{data.budget}:{seoul_day()}:{version}'
     # Events change reasons; hash that optional context rather than store its text in the key.
     if data.event:
         key += ':' + sha256(data.event.encode()).hexdigest()

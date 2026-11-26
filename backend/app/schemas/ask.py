@@ -16,7 +16,7 @@ class AskRequest(BaseModel):
     intent: AskIntent | None = None
     item_id: str | None = None
     market_id: str | None = None
-    lang: Literal['ko'] = 'ko'
+    lang: Literal['ko', 'en', 'zh', 'ja', 'vi'] = 'ko'
 
     @model_validator(mode='after')
     def require_question(self):
@@ -41,6 +41,9 @@ class Candidate(BaseModel):
 
 
 class AskResponse(BaseModel):
+    lang: Literal['ko', 'en', 'zh', 'ja', 'vi'] = 'ko'
+    translated: bool = False
+    original: str | None = None
     model_config = ConfigDict(validate_assignment=True)
     kind: Literal['answer', 'no_evidence', 'need_item', 'price', 'where', 'recipes', 'out_of_scope']
     intent: AskIntent | None = None

@@ -1,12 +1,18 @@
+# FastAPI dependency defaults are intentional.
+# ruff: noqa: B008
 """Authentication transport and secure cookie settings."""
+
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
 from app.core import captcha
 from app.core.config import settings
 from app.core.errors import AppError
-from app.deps import get_db, current_user, require_csrf
-from app.schemas.merchant import Signup, Credentials
+from app.deps import current_user, get_db, require_csrf
+from app.schemas.merchant import Credentials, Signup
 from app.services import auth_service
 
 router = APIRouter(prefix='/auth', tags=['auth'], dependencies=[Depends(require_csrf)])
@@ -59,3 +65,13 @@ def logout(request: Request, response: Response, user=Depends(current_user), con
 @router.get('/me')
 def me(user=Depends(current_user), conn=Depends(get_db)):
     return {'user': auth_service.public_user(conn, user)}
+
+
+class LanguagePreference(BaseModel):
+    lang: Literal['ko', 'en', 'zh', 'ja', 'vi']
+
+
+@router.patch('/me')
+def language(data: LanguagePreference, user=Depends(current_user), conn=Depends(get_db)):
+    conn.execute('update users set lang=%s where id=%s', (data.lang, user['id']))
+    return {'lang': data.lang}

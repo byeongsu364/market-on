@@ -18,3 +18,8 @@ export const getCaptcha = (): Promise<Captcha | null> =>
   isMock ? Promise.resolve(null) : request<Captcha>('/auth/captcha');
 /** 손님 가입도 서버의 동일한 가입 계약을 사용해요. */
 export const signupCustomer = (q: AuthRequest) => signup({ ...q, role: 'customer' });
+
+export const saveLanguage = (lang: import('../types/contract').Language) =>
+  isMock
+    ? Promise.resolve()
+    : request('/auth/me', { method: 'PATCH', body: JSON.stringify({ lang }) });

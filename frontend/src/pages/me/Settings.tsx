@@ -1,3 +1,6 @@
+import { useContext, useState } from 'react';
+import { AuthContext } from '../../store/auth';
+import { saveLanguage } from '../../api/auth';
 import { useSession, type TextSize } from '../../store/session';
 import AppHeader from '../../components/layout/AppHeader';
 import Icon from '../../components/common/Icon';
@@ -7,9 +10,11 @@ import { useT } from '../../i18n';
 import type { Language } from '../../types/contract';
 import s from './me.module.css';
 
-// Settings: 언어, 글자 크기, 화면 테마. 번역은 한국어만(다른 언어는 한국어로 대신 보임).
+// Language, text size and theme preferences.
 export default function Settings() {
   const t = useT();
+  const auth = useContext(AuthContext);
+  const [languageError, setLanguageError] = useState(false);
   const session = useSession();
   const languages = Object.keys(LANGUAGE_NAMES) as Language[];
   const sizes: { value: TextSize; label: string }[] = [
@@ -34,13 +39,17 @@ export default function Settings() {
               <div key={l}>
                 <label className={s.radio} lang={l}>
                   <span className={s.radioName}>{LANGUAGE_NAMES[l]}</span>
-                  {l !== 'ko' && <span className={s.radioNote}>{t('meTranslationPending')}</span>}
+                  {l !== 'ko' && <span className={s.radioNote}>{t('machineTranslation')}</span>}
                   <input
                     type="radio"
                     name="language"
                     value={l}
                     checked={session.language === l}
-                    onChange={() => session.setLanguage(l)}
+                    onChange={() => {
+                      session.setLanguage(l);
+                      setLanguageError(false);
+                      if (auth?.user) void saveLanguage(l).catch(() => setLanguageError(true));
+                    }}
                   />
                   <span className={s.radioMark} aria-hidden="true">
                     {session.language === l && <Icon name="check" size={16} strokeWidth={2.4} />}
@@ -50,6 +59,7 @@ export default function Settings() {
             ))}
           </div>
         </fieldset>
+        {languageError && <p role="alert">{t('languageSaveError')}</p>}
         <div className={s.group}>
           <h2 className={s.groupHead}>{t('meTextSize')}</h2>
           <ChipRow label={t('meTextSize')} wrap>

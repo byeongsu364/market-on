@@ -6,6 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Query
 
+from app.core.language import preferred_language, present
 from app.deps import get_db, optional_user, require_csrf
 from app.schemas.market import Market, MarketItem, MarketMap
 from app.services import market_request_service as requests
@@ -47,6 +48,7 @@ def market_map(
     unit: str | None = None,
     lat: float | None = Query(default=None, ge=-90, le=90),
     lng: float | None = Query(default=None, ge=-180, le=180),
+    lang=Depends(preferred_language),
     user=Depends(optional_user),
     conn=Depends(get_db),
 ):
@@ -57,12 +59,12 @@ def market_map(
         saved = {f['store_id'] for f in favorites(conn, user['id'])}
         for store in result.stores:
             store.favorite = store.store_id in saved
-    return result
+    return present(conn, result, lang)
 
 
 @router.get('/{market_id}/items', response_model=list[MarketItem])
-def market_items(market_id: str, conn=Depends(get_db)):
-    return market_service.market_items(conn, market_id)
+def market_items(market_id: str, conn=Depends(get_db), lang=Depends(preferred_language)):
+    return present(conn, market_service.market_items(conn, market_id), lang)
 
 
 @router.get('/{market_id}', response_model=Market)

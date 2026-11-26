@@ -75,3 +75,52 @@ def test_server_unavailable(tmp_path, monkeypatch):
     assert report['metrics']['citations']['rate'] is None
     assert '측정 못 함' in report['results'][0]['unavailable']
     ask.assert_not_called()
+
+
+def test_foreign_translation_metrics(tmp_path, monkeypatch):
+    from collections import Counter
+
+    import yaml
+
+    questions = yaml.safe_load((e.DATA / 'eval/questions.yaml').read_text())['questions']
+    foreign = [q for q in questions if q.get('lang')]
+    assert Counter(q['lang'] for q in foreign) == {'en': 4, 'zh': 2, 'ja': 2, 'vi': 2}
+    by_id = {q['id']: q for q in questions}
+    assert all(q['doc_key'] == by_id[q['id'][3:]]['doc_key'] for q in foreign)
+    conn = Mock()
+    conn.execute.return_value.fetchall.return_value = [('apple/storage.md',)]
+    monkeypatch.setattr(e, 'translate', lambda *a, **kw: ('사과 보관', True))
+    search = Mock(return_value=[SimpleNamespace(chunk_id=1)])
+    monkeypatch.setattr(e.retriever, 'search', search)
+    monkeypatch.setattr(
+        e.ask_service,
+        'ask',
+        lambda *a, **kw: AskResponse(
+            kind='answer',
+            answer='Store for 1 month.',
+            original='1개월 보관해요.',
+            lang='en',
+            translated=True,
+            citations=[{'title': '원문 제목', 'publisher': None, 'url': None, 'license': None}],
+        ),
+    )
+    report = e.evaluate(
+        conn,
+        data_dir=tmp_path,
+        embedder=Mock(),
+        questions=[
+            {
+                'id': 'en-test',
+                'question': 'How to store apples?',
+                'item_id': 'item:apple',
+                'intent': 'store',
+                'doc_key': 'apple/storage.md',
+                'lang': 'en',
+            }
+        ],
+    )
+    assert report['metrics']['translation']['rate'] == 1
+    assert report['metrics']['retrieval']['rate'] == 1
+    assert report['metrics']['citations']['rate'] == 1
+    assert search.call_args.args[2] == '사과 보관'
+    assert search.call_args.kwargs['lang'] == 'ko'

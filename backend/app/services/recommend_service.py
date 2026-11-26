@@ -9,9 +9,10 @@ import httpx
 
 from app.core.errors import AppError
 from app.db.repositories import ask_repo, knowledge_repo, sale_repo, store_repo
-from app.knowledge import answer_cache, citation, fact_check, retriever, season
+from app.knowledge import answer_cache, citation, fact_check, i18n, retriever, season
 from app.llm import recommend as recommend_llm
 from app.llm.factory import get_embedder
+from app.llm.translate import translate
 from app.schemas.recommend import RecommendResponse
 
 from . import ask_service, item_service, market_service, price_service
@@ -307,5 +308,12 @@ def recommend(conn, data, device_id, *, embedder=None, consume=True):
         note=NOTE if candidates else '이 시장에서 파는 품목의 시세가 아직 없어요',
         model=model,
     )
+    for item in result.items:
+        item.lang = data.lang
+        item.original = item.reason
+        item.reason, item.translated = translate(item.reason, data.lang, conn)
+    result.items = [
+        type(item)(**i18n.localize(conn, item.model_dump(), data.lang)) for item in result.items
+    ]
     answer_cache.save(conn, key, result.model_dump(mode='json'), model)
     return result

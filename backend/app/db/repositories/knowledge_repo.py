@@ -64,8 +64,16 @@ def upsert_entity(conn, entity, relations):
         for lang, names in entity.get('labels', {}).items()
         for i, label in enumerate(names)
     )
+    translated = entity.get('translated_labels', {})
+    labels = [row for row in labels if translated.get(row[1]) != row[0]]
+    labels.extend((text, lang, 'translated') for lang, text in translated.items())
     vision = set(entity.get('vision', []))
-    labels = [row for row in labels if not (row[1] == 'en' and row[0] in vision)]
+    labels = [
+        row
+        for row in labels
+        if not (row[1] == 'en' and row[0] in vision and row[2] != 'translated')
+    ]
+    vision.discard(translated.get('en'))
     labels = sorted(labels + [(label, 'en', 'vision') for label in vision])
     old_labels = sorted(
         conn.execute(
@@ -414,7 +422,7 @@ def vision_item_labels(conn):
         """select e.id,e.name_ko,l.label from entities e
         join entity_labels l on l.entity_id=e.id
         where e.type='item' and (l.kind='vision' or
-        (l.lang='en' and l.kind in ('preferred','synonym')))
+        (l.lang='en' and l.kind in ('preferred','synonym','translated')))
         order by e.id,l.label""",
     )
 
@@ -444,8 +452,8 @@ def item_vocabulary(conn) -> list[dict]:
         from entities e
         join lateral (
           select l.label from entity_labels l where l.entity_id=e.id
-          and ((l.lang='en' and l.kind='preferred') or l.kind='vision')
-          order by case when l.lang='en' and l.kind='preferred' then 0 else 1 end,
+          and ((l.lang='en' and l.kind in ('preferred','translated')) or l.kind='vision')
+          order by case when l.lang='en' and l.kind in ('preferred','translated') then 0 else 1 end,
                    l.label limit 1
         ) chosen on true
         where e.type='item'

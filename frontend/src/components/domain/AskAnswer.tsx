@@ -1,3 +1,4 @@
+import TranslationNotice from './TranslationNotice';
 import { RecipeCards } from './Recipes';
 import type { AskResponse } from '../../types/contract';
 import { useT } from '../../i18n';
@@ -69,6 +70,7 @@ export default function AskAnswer({
         </>
       )}
       {response.kind === 'out_of_scope' && <p>{t('askScope')}</p>}
+      <TranslationNotice {...response} />
     </Card>
   );
 }

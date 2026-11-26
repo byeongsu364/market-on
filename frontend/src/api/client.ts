@@ -17,10 +17,18 @@ export function getDeviceId() {
   }
   return deviceId;
 }
+export function selectedLanguage() {
+  try {
+    const value = JSON.parse(localStorage.getItem('language') ?? '"ko"');
+    return ['ko', 'en', 'zh', 'ja', 'vi'].includes(value) ? String(value) : 'ko';
+  } catch {
+    return 'ko';
+  }
+}
 export async function request<T>(
   path: string,
   options: RequestInit = {},
-  language = 'ko',
+  language = selectedLanguage(),
 ): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set('X-Device-Id', getDeviceId());

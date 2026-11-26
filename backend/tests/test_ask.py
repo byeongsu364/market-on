@@ -217,7 +217,7 @@ def test_api_validation_and_contract(env, monkeypatch):
         {'question': '가' * 201},
         {'intent': 'bad'},
         {'question': ' '},
-        {'intent': 'store', 'lang': 'en'},
+        {'intent': 'store', 'lang': 'fr'},
     ):
         assert env.client.post('/ask', json=body, headers=HEADERS).status_code == 422
     response = env.client.post(
@@ -225,6 +225,9 @@ def test_api_validation_and_contract(env, monkeypatch):
     )
     assert response.status_code == 200
     assert set(response.json()) == {
+        'lang',
+        'translated',
+        'original',
         'kind',
         'intent',
         'item_id',
@@ -352,14 +355,14 @@ def test_citation_document_marker(monkeypatch, body, draft):
         svc.ask_repo,
         'sources',
         lambda *a: [
-            dict(
-                title='출처',
-                publisher=None,
-                url=None,
-                license=None,
-                body=body,
-                review_status='reviewed',
-            )
+            {
+                'title': '출처',
+                'publisher': None,
+                'url': None,
+                'license': None,
+                'body': body,
+                'review_status': 'reviewed',
+            }
         ],
     )
     assert attach_citations(Mock(), [SimpleNamespace(chunk_id=1)])[0]['draft'] is draft
@@ -400,15 +403,15 @@ def test_ask_price_includes_varieties(env, monkeypatch):
         variety_id='variety:apple-fuji',
         variety_name='후지',
         varieties=[
-            dict(
-                variety_id='variety:apple-hongro',
-                name='홍로',
-                reference_price=2500,
-                unit='unit:piece',
-                observed_on='2026-11-24',
-                count=3,
-                default=False,
-            )
+            {
+                'variety_id': 'variety:apple-hongro',
+                'name': '홍로',
+                'reference_price': 2500,
+                'unit': 'unit:piece',
+                'observed_on': '2026-11-24',
+                'count': 3,
+                'default': False,
+            }
         ],
         unit='unit:piece',
         reference_price=2000,

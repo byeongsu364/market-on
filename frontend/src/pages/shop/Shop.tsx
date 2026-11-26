@@ -1,3 +1,4 @@
+import TranslationNotice from '../../components/domain/TranslationNotice';
 import Recipes from '../../components/domain/Recipes';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -143,6 +144,7 @@ export default function Shop() {
                       {i.name}
                     </h3>
                     <span className={s.sub}>{i.reason}</span>
+                    <TranslationNotice {...i} />
                     <span className={s.note}>
                       {i.sources.map((src, n) => (
                         <span key={n}>
