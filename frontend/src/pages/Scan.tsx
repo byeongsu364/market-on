@@ -10,7 +10,7 @@ import { useRequireMarket } from '../hooks/useFlows';
 import ManualInput from '../components/domain/ManualInput';
 import { unitLabel } from '../utils/convertUnit';
 import type { RecognizeResponse } from '../types/contract';
-function Confirmation({ result }: { result: RecognizeResponse }) {
+function Confirmation({ result, photo }: { result: RecognizeResponse; photo: File }) {
   const [id, setId] = useState(
     result.candidates[0]?.confidence >= 0.8 ? result.candidates[0].item_id : '',
   );
@@ -125,6 +125,7 @@ function Confirmation({ result }: { result: RecognizeResponse }) {
         onClick={() =>
           navigate(`/items/${encodeURIComponent(id)}`, {
             state: {
+              photo,
               variety_id: selectedVariety,
               labels: result.vision_labels,
               price: price ? Number(price) : undefined,
@@ -206,8 +207,12 @@ export default function Scan() {
           <ManualInput />
         </>
       )}
-      {action.data && recognizedFile === camera.file && (
-        <Confirmation key={camera.preview + action.data.media_id} result={action.data} />
+      {action.data && recognizedFile && recognizedFile === camera.file && (
+        <Confirmation
+          key={camera.preview + action.data.media_id}
+          result={action.data}
+          photo={recognizedFile}
+        />
       )}
     </>
   );

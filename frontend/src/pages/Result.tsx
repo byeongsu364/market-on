@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useResultFlow, useRequireMarket } from '../hooks/useFlows';
+import DecisionCardSheet from '../components/domain/DecisionCardSheet';
+import { buildCardData, type CardData } from '../utils/decisionCard';
 import Resource from '../components/common/Resource';
 import AskPanel from '../components/domain/AskPanel';
 import Checklist from '../components/domain/Checklist';
@@ -10,6 +12,14 @@ import { unitLabel } from '../utils/convertUnit';
 import { useT } from '../i18n';
 export default function Result() {
   const f = useResultFlow();
+  const [checks, setChecks] = useState<{ itemId: string; keys: string[] }>({
+    itemId: '',
+    keys: [],
+  });
+  if (checks.itemId !== f.itemId) setChecks({ itemId: f.itemId, keys: [] });
+  const checked = checks.itemId === f.itemId ? checks.keys : [];
+  const [card, setCard] = useState<CardData>();
+  const closeCard = useCallback(() => setCard(undefined), []);
   const [expandedFor, setExpandedFor] = useState('');
   const listKey = `${f.itemId}:${f.map.data?.market_id}`;
   const selling = (f.map.data?.stores ?? [])
@@ -34,7 +44,16 @@ export default function Result() {
               {(f.labels.length ? f.labels : f.item.data.vision_labels).join(', ')}
             </small>
           )}
-          <Checklist key={f.itemId} criteria={f.item.data.criteria} />
+          <Checklist
+            criteria={f.item.data.criteria}
+            checked={checked}
+            onToggle={(key) =>
+              setChecks({
+                itemId: f.itemId,
+                keys: checked.includes(key) ? checked.filter((k) => k !== key) : [...checked, key],
+              })
+            }
+          />
           <AskPanel key={`ask:${f.itemId}`} itemId={f.itemId} />
           <Link to={`/chat?item_id=${encodeURIComponent(f.itemId)}`}>대화로 더 묻기</Link>
           <section className="card" id="price-comparison">
@@ -123,6 +142,31 @@ export default function Result() {
           {Number(f.value) > 0 && (
             <p className="caption">이 가격은 시장 가격표에 익명으로 더해져요</p>
           )}
+          <button
+            className="secondary wide"
+            // 품목·시장 정보가 오기 전에 누르면 아무 일도 안 일어나던 문제 → 준비될 때까지 비활성
+            disabled={!f.item.data || !f.market || f.price.loading || f.map.loading}
+            onClick={() => {
+              if (!f.item.data || !f.market) return;
+              setCard(
+                buildCardData({
+                  item: f.item.data,
+                  market: f.market,
+                  checked,
+                  photo: f.photo,
+                  price: f.price.data,
+                  value: f.value,
+                  quantity: f.quantity,
+                  unit: f.unit,
+                  store: f.map.data?.stores.find((s) => s.store_id === f.storeId),
+                  origin: window.location.origin,
+                }),
+              );
+            }}
+          >
+            {t('decisionCardCreate')}
+          </button>
+          {card && <DecisionCardSheet data={card} onClose={closeCard} />}
           <div className="fixed-action">
             <Link
               className="button"

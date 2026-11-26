@@ -11,6 +11,7 @@
   /* semantic */
   --color-bg: var(--cream);
   --color-card: #ffffff;
+  --color-photo-placeholder: #e8e8e8;
   --color-surface: var(--olive);
   --color-on-surface: var(--cream);
   --color-text: var(--olive-deep);
