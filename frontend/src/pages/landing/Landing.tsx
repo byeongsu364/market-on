@@ -29,7 +29,7 @@ const BASES = [
     body: '안심On이 품목마다 알려 주는 확인 포인트로 직접 체크',
   },
   { no: '04', title: '출처', body: '모든 숫자 아래 조사처와 조사일' },
-  { no: '05', title: '파는 가게', body: '이 시장 안 어느 점포에서 파는지' },
+  { no: '05', title: '판매점', body: '이 시장 안 어느 점포에서 판매하는지' },
 ];
 
 const NOT_SAID = ['신선', '등급', '별점', '구매하지 마세요'];
@@ -245,18 +245,18 @@ export default function Landing() {
                 shape="panel"
                 className={s.shot}
                 poster="/landing/market.webp"
-                label={`파는 가게 안내 화면: 시장 지도에 사과 파는 점포 ${FACTS.appleStores}곳`}
+                label={`판매점 안내 화면: 시장 지도에 사과 판매점 ${FACTS.appleStores}곳`}
               />
               <span className={s.cardLabel}>구매</span>
-              <h3 className={s.cardTitle}>파는 가게 안내</h3>
-              <p className={s.cardBody}>그 품목을 파는 시장 안 점포만 지도에 남겨 길을 안내해요.</p>
+              <h3 className={s.cardTitle}>판매점 안내</h3>
+              <p className={s.cardBody}>그 품목의 시장 안 판매점만 지도에 남겨 길을 안내해요.</p>
             </li>
             <li>
               <FeatureVideo
                 shape="panel"
                 className={s.shot}
                 poster="/landing/recipes.webp"
-                label="장바구니 화면: 레시피에서 고르기로 연 이달 제철 레시피와 재료를 파는 점포 수"
+                label="장바구니 화면: 레시피에서 고르기로 연 이달 제철 레시피와 재료별 판매점 수"
               />
               <span className={s.cardLabel}>구매 후</span>
               <h3 className={s.cardTitle}>레시피 · 손질 · 보관</h3>

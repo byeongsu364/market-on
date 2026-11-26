@@ -226,7 +226,7 @@ it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
     expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();
     await waitFor(() => expect(log).toHaveBeenCalled());
     expect(
-      await screen.findByRole('heading', { name: '이 시장에서 대파 파는 곳' }),
+      await screen.findByRole('heading', { name: '이 시장의 대파 판매점' }),
     ).toBeInTheDocument();
     expect(screen.queryByText(/인식 라벨/)).not.toBeInTheDocument();
   } finally {

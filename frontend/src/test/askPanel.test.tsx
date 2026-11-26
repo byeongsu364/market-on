@@ -100,7 +100,7 @@ it.each([
   ['answer', '냉장 보관해요.'],
   ['no_evidence', '냉장 보관해요.'],
   ['price', '기준시세 자료가 아직 없어요'],
-  ['where', '이 시장에서 0곳이 팔아요'],
+  ['where', '이 시장 판매점 0곳'],
   ['out_of_scope', '이 품목의 고르는 법·보관·손질·제철을 물어볼 수 있어요'],
 ] as const)('kind %s', (kind, text) => {
   render(

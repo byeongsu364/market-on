@@ -78,7 +78,7 @@ export default function Poster({ market = false }: { market?: boolean }) {
                   {showMarket ? (
                     <h2 className={s.posterName}>
                       사진 한 장으로
-                      <br /> 어디서 파는지 바로
+                      <br /> 어디서 판매하는지 바로
                     </h2>
                   ) : (
                     <h2 className={s.posterName}>{info.store_name}</h2>

@@ -134,12 +134,12 @@ it('`/?market=market:demo`는 약도에 경계·핀·편의시설과 점포 목�
   );
 });
 
-it('`/?market=&item=`은 파는 점포만 핀으로 남기고 나머지는 점으로 줄인다', async () => {
+it('`/?market=&item=`은 판매점만 핀으로 남기고 나머지는 점으로 줄인다', async () => {
   const spy = vi.spyOn(storesApi, 'getMarketMap');
   const marketsSpy = vi.spyOn(api, 'getMarkets');
   const marketSpy = vi.spyOn(api, 'getMarket');
   const { container } = show('/?market=market:demo&item=item:green_onion');
-  expect(await screen.findByRole('heading', { name: '대파 파는 점포' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: '대파 판매점' })).toBeInTheDocument();
   expect(spy).toHaveBeenCalledWith('market:demo', 'item:green_onion', undefined);
   expect(await screen.findByText('3곳')).toBeInTheDocument();
   expect(pinButtons()).toHaveLength(3);
@@ -148,7 +148,7 @@ it('`/?market=&item=`은 파는 점포만 핀으로 남기고 나머지는 점�
   expect(marketSpy).toHaveBeenCalledTimes(1);
   expect(spy).toHaveBeenCalledTimes(1);
   expect(
-    within(screen.getByRole('list', { name: '대파 파는 점포' })).getAllByRole('button'),
+    within(screen.getByRole('list', { name: '대파 판매점' })).getAllByRole('button'),
   ).toHaveLength(3);
   // 검색어 지우기는 시장 안으로
   expect(screen.getByRole('link', { name: '검색어 지우기' })).toHaveAttribute(
@@ -159,7 +159,7 @@ it('`/?market=&item=`은 파는 점포만 핀으로 남기고 나머지는 점�
 
 it('`/?market=market:demo&item=item:apple`은 약도로 보이고 품종으로 거른다', async () => {
   const { container } = show('/?market=market:demo&item=item:apple');
-  expect(await screen.findByRole('heading', { name: '사과 파는 점포' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: '사과 판매점' })).toBeInTheDocument();
   expect(container.querySelector('[data-map="sketch"]')).toBeTruthy();
   await waitFor(() => expect(pinButtons()).toHaveLength(5));
   fireEvent.click(await screen.findByRole('button', { name: '홍로' }));
@@ -199,7 +199,7 @@ it('키보드로 지도 홈에서 검색, 점포, 길 안내까지 간다', asyn
   await waitFor(() =>
     expect(here()).toHaveTextContent('/?market=market%3Ademo&item=item%3Agreen_onion'),
   );
-  const list = await screen.findByRole('list', { name: '대파 파는 점포' });
+  const list = await screen.findByRole('list', { name: '대파 판매점' });
   const row = within(list).getByRole('button', { name: /점포 A-05/ });
   row.focus();
   expect(row).toHaveFocus();
@@ -240,9 +240,9 @@ it('검색에 가격을 넣으면 결과로, 모르는 품목이면 찾을 수 �
     target: { value: '고등어' },
   });
   expect(
-    await screen.findByRole('heading', { name: '고등어 파는 점포는 아직 몰라요' }),
+    await screen.findByRole('heading', { name: '고등어 판매점은 아직 몰라요' }),
   ).toBeInTheDocument();
-  expect(screen.getByText('지금은 품목 5가지만 파는 점포를 찾을 수 있어요.')).toBeInTheDocument();
+  expect(screen.getByText('지금은 품목 5가지만 판매점을 찾을 수 있어요.')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: '시연 시장 점포 지도에서 보기' })).toHaveAttribute(
     'href',
     '/?market=market%3Ademo',

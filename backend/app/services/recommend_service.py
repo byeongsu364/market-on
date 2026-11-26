@@ -305,7 +305,7 @@ def recommend(conn, data, device_id, *, embedder=None, consume=True):
         total=total,
         budget=data.budget,
         left=data.budget - total,
-        note=NOTE if candidates else '이 시장에서 파는 품목의 시세가 아직 없어요',
+        note=NOTE if candidates else '이 시장 판매 품목의 시세가 아직 없어요',
         model=model,
     )
     for item in result.items:

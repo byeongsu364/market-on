@@ -60,7 +60,7 @@ it('예시·말풍선·도구·출처·모델·품목 링크와 복원·새 대�
   expect(screen.getByText(response.reply)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '새 대화' }));
   expect(screen.queryByText(response.reply)).not.toBeInTheDocument();
-  expect(screen.getByRole('button', { name: '사과 어디서 팔아요?' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '사과 판매점은 어디예요?' })).toBeInTheDocument();
 });
 it.each([
   [429, '질문이 많아요. 잠시 뒤에 다시 물어봐 주세요'],

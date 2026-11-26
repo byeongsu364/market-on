@@ -14,7 +14,7 @@ import { routeHref } from '../../hooks/useShopRoute';
 import s from './shop.module.css';
 import { useWaitSteps } from '../../hooks/useWaitSteps';
 
-const examples = ['대파 냉동해도 돼요?', '4명 선물 3만원으로 구성해 줘', '사과 어디서 팔아요?'];
+const examples = ['대파 냉동해도 돼요?', '4명 선물 3만원으로 구성해 줘', '사과 판매점은 어디예요?'];
 
 function Conversation({ marketId, itemId }: { marketId: string; itemId?: string }) {
   const t = useT();
@@ -41,8 +41,8 @@ function Conversation({ marketId, itemId }: { marketId: string; itemId?: string 
             </span>
             <h2>시장에서 궁금한 걸 물어보세요</h2>
             <p>
-              고르는 법, 보관, 손질, 제철, 시세, 파는 점포를 물어보면 출처가 있는 자료에서 찾아
-              답해요. 자료에 없는 내용은 모른다고 답해요.
+              고르는 법, 보관, 손질, 제철, 시세, 판매점을 물어보면 출처가 있는 자료에서 찾아 답해요.
+              자료에 없는 내용은 모른다고 답해요.
             </p>
           </section>
         )}

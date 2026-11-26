@@ -95,9 +95,9 @@ it('로딩과 빈 구성 note를 표시한다', async () => {
     total: 0,
     left: 20000,
     model: null,
-    note: '이 시장에서 파는 품목의 시세가 아직 없어요',
+    note: '이 시장 판매 품목의 시세가 아직 없어요',
   });
-  await screen.findByText('이 시장에서 파는 품목의 시세가 아직 없어요');
+  await screen.findByText('이 시장 판매 품목의 시세가 아직 없어요');
   expect(screen.queryByText('GPT')).not.toBeInTheDocument();
 });
 it('오류를 표시한다', async () => {

@@ -18,7 +18,7 @@ import f from './features.module.css';
 const TOC = [
   { id: 'anshimon', label: '안심On' },
   { id: 'before', label: '방문 전 기준시세' },
-  { id: 'store', label: '파는 가게' },
+  { id: 'store', label: '판매점' },
   { id: 'merchant', label: '소상공인 홍보' },
   { id: 'tools', label: '상인 도구' },
   { id: 'after', label: '레시피 · 관리법' },
@@ -34,7 +34,7 @@ const FLOW = [
   { no: '1', text: '사진 한 장으로 고르고' },
   { no: '2', text: '근거로 비교하고' },
   { no: '3', text: '안심On으로 납득하고', on: true },
-  { no: '4', text: '파는 가게에서 구매합니다' },
+  { no: '4', text: '판매점에서 구매합니다' },
 ];
 
 const ANSHIMON_STEPS = [
@@ -54,7 +54,7 @@ const LOOP = [
   { title: '안심하고 구매한 손님이', text: '안심On 카드를 친구에게 공유해요.' },
   { title: '가게가 노출되고', text: '카드와 지도에 상호가 함께 표시돼요.' },
   { title: '새 손님이 찾아와요', text: '공유를 받은 친구가 같은 가게로 와요.', key: true },
-  { title: '매출과 재고 소진', text: '바겐세일 정보로 남은 재고까지 팔아요.' },
+  { title: '매출과 재고 소진', text: '바겐세일 정보로 남은 재고까지 판매해요.' },
 ];
 
 const MERCHANT_TOOLS = [
@@ -339,13 +339,13 @@ function Features() {
           aria-labelledby="store-title"
         >
           <div className={`${f.copy} ${m.reveal}`}>
-            <p className={b.kicker}>구매 · 파는 가게 안내</p>
+            <p className={b.kicker}>구매 · 판매점 안내</p>
             <h2 id="store-title" className={f.h3}>
-              납득했다면, 파는 가게로 바로.
+              납득했다면, 판매점으로 바로.
             </h2>
             <p className={b.leadSm}>
-              품목을 고르면 시장 지도에 그 품목을 파는 점포만 남아요. 경동시장에서 사과를 고르면
-              실제 상호 {FACTS.appleStores}곳이 표시돼요.
+              품목을 고르면 시장 지도에 그 품목의 판매점만 남아요. 경동시장에서 사과를 고르면 실제
+              판매점 {FACTS.appleStores}곳이 표시돼요.
             </p>
             <div className={b.chipRow}>
               <span className={b.tag}>소상공인시장진흥공단 상가정보</span>
@@ -358,8 +358,8 @@ function Features() {
               src="/landing/video/store.mp4"
               webm="/landing/video/store.webm"
               poster="/landing/video/store.webp"
-              label={`사과를 검색하면 지도에 사과 파는 점포 ${FACTS.appleStores}곳이 남고, 점포를 고르는 장면`}
-              alt={`경동시장 지도에서 사과 파는 점포 ${FACTS.appleStores}곳을 핀과 목록으로 보여 주는 화면`}
+              label={`사과를 검색하면 지도에 사과 판매점 ${FACTS.appleStores}곳이 남고, 판매점을 고르는 장면`}
+              alt={`경동시장 지도에서 사과 판매점 ${FACTS.appleStores}곳을 핀과 목록으로 보여 주는 화면`}
             />
           </figure>
         </article>
@@ -406,7 +406,7 @@ function Features() {
               src="/landing/video/merchant.mp4"
               webm="/landing/video/merchant.webm"
               poster="/landing/video/merchant.webp"
-              label="안심On 카드에 가게 이름이 함께 담기고, 그 가게 화면에서 파는 품목과 길 안내를 보는 장면"
+              label="안심On 카드에 가게 이름이 함께 담기고, 그 판매점 화면에서 판매 품목과 길 안내를 보는 장면"
               alt="안심On 카드와 그 가게의 점포 화면"
             />
           </figure>
@@ -446,7 +446,7 @@ function Features() {
                 가게에서는, 오늘의 바겐세일까지.
               </h2>
               <p className={b.leadSm}>
-                상인이 바겐세일 정보를 올리면 파는 가게 목록과 지도에 함께 보여요. 상인도 관리자도
+                상인이 바겐세일 정보를 올리면 판매점 목록과 지도에 함께 보여요. 상인도 관리자도
                 가격을 따로 입력하지 않아요.
               </p>
               <ul className={`${b.chipRow} ${b.bare}`}>
@@ -489,13 +489,13 @@ function Features() {
                   webm="/landing/video/recipe.webm"
                   poster="/landing/video/recipe.webp"
                   label="장바구니에서 레시피에서 고르기를 누르고, 제철 레시피 과일겉절이의 재료와 만드는 법을 보는 장면"
-                  alt="레시피 화면: 과일겉절이 재료마다 이 시장에서 파는 점포 수와 만드는 법"
+                  alt="레시피 화면: 과일겉절이 재료마다 이 시장 판매점 수와 만드는 법"
                 />
                 <figcaption>
                   <strong>레시피 추천</strong>
                   <span>
                     장바구니에서 "레시피에서 고르기"를 누르면 이달 제철 재료로 만드는 레시피를 골라
-                    드려요. 재료마다 이 시장에서 파는 점포 수를 알려 드리고, 시장 밖 재료는 따로
+                    드려요. 재료마다 이 시장의 판매점 수를 알려 드리고, 시장 밖 재료는 따로
                     표시해요.
                   </span>
                 </figcaption>
@@ -602,7 +602,7 @@ function Features() {
                     </span>
                   </td>
                   <td>시장 안 위치. 대부분이 시장 건물 하나의 같은 좌표이고 호수도 비어 있어요.</td>
-                  <td className={f.fill}>업종별 점포 지도 · 파는 점포 강조</td>
+                  <td className={f.fill}>업종별 점포 지도 · 판매점 강조</td>
                 </tr>
                 <tr>
                   <th scope="row">손님</th>
@@ -699,7 +699,7 @@ function Features() {
             </div>
             <div>
               <span className={b.stat}>{FACTS.appleStores}곳</span>
-              <span className={f.proofLabel}>사과 파는 점포</span>
+              <span className={f.proofLabel}>사과 판매점</span>
               <span className={f.proofText}>경동시장에서 열면 실제 상호로 표시</span>
             </div>
             <div>

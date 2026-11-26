@@ -39,7 +39,7 @@ it('결과의 실제 체크박스와 가격 비교를 표시하고 판정 표현
 });
 it('지도 3점포 강조와 점포 고르기·길 안내 시트 닫기·포커스 복귀를 지원한다', async () => {
   const { container } = show('/map?item=item:green_onion');
-  await screen.findByRole('heading', { name: '대파 파는 점포' });
+  await screen.findByRole('heading', { name: '대파 판매점' });
   await waitFor(() => expect(container.querySelectorAll('.mo-pin')).toHaveLength(3));
   const pin = screen.getByRole('button', { name: '점포 A-05, 채소·과일 점포, 마감세일 중' });
   fireEvent.click(pin);
@@ -68,7 +68,7 @@ it('홈에서 파일 선택 후 결과와 지도로 이동한다', async () => {
   fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   await screen.findByRole('heading', { name: '대파' });
   fireEvent.click(await screen.findByRole('link', { name: '3곳 지도' }));
-  expect(await screen.findByRole('heading', { name: '대파 파는 점포' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: '대파 판매점' })).toBeInTheDocument();
   expect(await screen.findByText('3곳')).toBeInTheDocument();
 });
 it('시장 미선택이면 선택 화면을 거쳐 원래 흐름으로 돌아온다', async () => {

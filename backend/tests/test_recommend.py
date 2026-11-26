@@ -201,7 +201,7 @@ def test_no_candidates_or_evidence(env, monkeypatch):
     monkeypatch.setattr(svc.store_repo, 'market_items', lambda *a: [])
     result = request(env)
     assert result.items == [] and result.total == 0 and result.left == 10000
-    assert result.note == '이 시장에서 파는 품목의 시세가 아직 없어요'
+    assert result.note == '이 시장 판매 품목의 시세가 아직 없어요'
     # AI 이유 없이 끝난 결과는 저장하지 않음 (시세·모델이 돌아오면 다시 만들어요)
     assert env.cache == {}
 

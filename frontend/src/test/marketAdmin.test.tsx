@@ -123,7 +123,7 @@ it('시장 입구 포스터는 시장 URL의 QR을 표시한다', async () => {
       <App />
     </MemoryRouter>,
   );
-  await screen.findByRole('heading', { name: '사진 한 장으로 어디서 파는지 바로' });
+  await screen.findByRole('heading', { name: '사진 한 장으로 어디서 판매하는지 바로' });
   await waitFor(() => expect(container.querySelector('.poster-qr svg')).toBeTruthy());
   vi.restoreAllMocks();
 });

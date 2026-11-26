@@ -84,7 +84,7 @@ describe('홈', () => {
     expect(
       screen.getByRole('heading', { name: '안심하고 구매할 수 있는 시장을 만듭니다.' }),
     ).toBeInTheDocument();
-    for (const name of ['오늘의 기준시세', '안심On', '파는 가게 안내', '레시피 · 손질 · 보관'])
+    for (const name of ['오늘의 기준시세', '안심On', '판매점 안내', '레시피 · 손질 · 보관'])
       expect(screen.getByRole('heading', { level: 3, name })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /솔루션 자세히 보기/ })).toHaveAttribute(
       'href',
@@ -187,7 +187,7 @@ describe('기능', () => {
     show('/intro/features');
     await screen.findByRole('heading', { level: 1 });
     const text = pageText();
-    expect(text).toContain('실제 상호 52곳');
+    expect(text).toContain('실제 판매점 52곳');
     expect(screen.getAllByText('971개').length).toBeGreaterThan(0);
     expect(screen.getAllByText('106곳').length).toBeGreaterThan(0);
     expect(text).toContain('품목 95개, 품종 144개, 확인 포인트 40개');
