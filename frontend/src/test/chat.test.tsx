@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Chat from '../pages/Chat';
+import Chat from '../pages/shop/Chat';
 import { SessionContext, useSessionState } from '../store/session';
 import { chat } from '../api/chat';
 import type { ChatResponse } from '../types/contract';
@@ -39,13 +39,17 @@ it('예시·말풍선·도구·출처·모델·품목 링크와 복원·새 대�
     item_id: 'item:green_onion',
     messages: [{ role: 'user', content: '대파 냉동해도 돼요?' }],
   });
-  expect(screen.getByLabelText('내 질문')).toHaveClass('chat-user');
+  expect(screen.getByLabelText('내 질문')).toHaveTextContent('대파 냉동해도 돼요?');
   expect(screen.getByText('근거 자료 찾기')).toBeInTheDocument();
   expect(screen.getByText(/검수 전/)).toBeInTheDocument();
   expect(screen.getByText(/Gemma/)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: '대파 결과 보기' })).toHaveAttribute(
     'href',
-    '/items/item%3Agreen_onion',
+    '/items/item%3Agreen_onion?market=market%3Ademo',
+  );
+  expect(screen.getByRole('link', { name: '대파 지도 보기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo&item=item%3Agreen_onion',
   );
   first.unmount();
   render(
