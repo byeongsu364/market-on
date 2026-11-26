@@ -25,6 +25,8 @@ export type Item = {
 export type RecognizeResponse = {
   model: string;
   media_id: string | null;
+  // 손님이 촬영 위치 사용에 동의했을 때만: 1km 안 가장 가까운 시장 ID와 대략 좌표(소수 둘째 자리)
+  photo_location?: { market_id: string | null; lat: number; lng: number } | null;
   price_tag: {
     price: number;
     variety_id: string | null;

@@ -14,7 +14,17 @@ from app.llm import json_output, router
 from app.main import app
 from app.services import scan_service
 
-JPEG = b'\xff\xd8\xffsample'
+# 구조가 맞는 아주 작은 사진들 (메타데이터 없음 → 지워도 그대로). 모델은 가짜라 그림 내용은 상관없음
+JPEG = (
+    b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00'
+    b'\xff\xda\x00\x08\x01\x01\x00\x00\x3f\x00sample\xff\xd9'
+)
+PNG = (
+    b'\x89PNG\r\n\x1a\n'
+    + b'\x00\x00\x00\x06IDATsample\x00\x00\x00\x00'
+    + b'\x00\x00\x00\x00IEND\xaeB`\x82'
+)
+WEBP = b'RIFF\x16\x00\x00\x00WEBPVP8L\x0a\x00\x00\x00sample1234'
 
 
 @pytest.fixture
@@ -94,7 +104,11 @@ def test_contract_and_weights(api, labels, expected):
     response = upload(client)
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == {'vision_labels', 'candidates', 'media_id', 'price_tag', 'model'}
+    assert set(body) == {
+        *('vision_labels', 'candidates', 'media_id', 'price_tag', 'model'),
+        'photo_location',
+    }
+    assert body['photo_location'] is None
     assert body['vision_labels'] == labels
     assert [(c['item_id'], c['confidence']) for c in body['candidates']] == expected
     assert all(set(c) == {'item_id', 'name', 'confidence'} for c in body['candidates'])
@@ -176,8 +190,8 @@ def test_unavailable(api, exc):
     ('data', 'ext', 'mime'),
     [
         (JPEG, 'jpg', 'image/jpeg'),
-        (b'\x89PNG\r\n\x1a\nsample', 'png', 'image/png'),
-        (b'RIFF1234WEBPsample', 'webp', 'image/webp'),
+        (PNG, 'png', 'image/png'),
+        (WEBP, 'webp', 'image/webp'),
     ],
 )
 def test_media_saved(api, data, ext, mime):
