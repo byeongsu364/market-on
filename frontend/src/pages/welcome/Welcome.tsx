@@ -27,7 +27,7 @@ function deviceLanguage(): Language {
 const STEPS = [
   { image: '/landing/map.webp', title: 'welcomeStep1Title', body: 'welcomeStep1Body' },
   { image: '/landing/market.webp', title: 'welcomeStep2Title', body: 'welcomeStep2Body' },
-  { image: '/landing/result.webp', title: 'welcomeStep3Title', body: 'welcomeStep3Body' },
+  { image: '/landing/guide-result.webp', title: 'welcomeStep3Title', body: 'welcomeStep3Body' },
 ] as const;
 
 export default function Welcome({ onDone }: { onDone: () => void }) {

@@ -2,6 +2,7 @@ import { beforeEach, expect, it } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
+import en from '../i18n/locales/en.json';
 
 // 기기 언어는 한국어로(jsdom 기본은 en-US). 영어 기기는 마지막 테스트에서 확인
 const deviceLanguage = (tag: string) =>
@@ -32,9 +33,7 @@ it('처음이면 언어부터 고르고, 고른 언어로 안내 3장을 넘긴 
   expect(screen.getByText('1 / 3')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Next' }));
   fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-  expect(
-    screen.getByRole('heading', { name: 'Snap, compare, and decide yourself' }),
-  ).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: en.welcomeStep3Title })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Get started' }));
   expect(screen.queryByText('3 / 3')).toBeNull();
   expect(localStorage.getItem('welcomed')).toBe('1');

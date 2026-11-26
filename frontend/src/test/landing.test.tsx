@@ -82,7 +82,7 @@ describe('홈', () => {
     );
     expect(screen.getByRole('heading', { name: /왜 마트 앱을 열까요/ })).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: '안심하고 살 수 있는 시장을 만듭니다.' }),
+      screen.getByRole('heading', { name: '안심하고 구매할 수 있는 시장을 만듭니다.' }),
     ).toBeInTheDocument();
     for (const name of ['오늘의 기준시세', '안심On', '파는 가게 안내', '레시피 · 손질 · 보관'])
       expect(screen.getByRole('heading', { level: 3, name })).toBeInTheDocument();

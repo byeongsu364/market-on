@@ -157,7 +157,7 @@ export default function Landing() {
           <div className={b.headBlock}>
             <p className={b.kicker}>해결 방법</p>
             <h2 id="way-title" className={`${b.h2} ${m.reveal}`}>
-              안심하고 살 수 있는 시장을 만듭니다.
+              안심하고 구매할 수 있는 시장을 만듭니다.
             </h2>
             <p className={b.lead}>
               AI가 대신 고르면 생각이 멈춰요. Market-On은 사기 직전에 필요한 근거 다섯 가지를 켜고,
