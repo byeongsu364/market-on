@@ -386,12 +386,15 @@ describe('FeatureVideo', () => {
   });
 });
 
-it('기능 페이지 숫자는 영상 속 화면(노지 귤 250원 · 기준시세 279원 · 10%, 대파 2,128원)과 같다', async () => {
+it('기능 페이지 숫자·설명은 영상 속 화면(노지 귤 250원 · 기준시세 279원 · 10%, 대파 2,128원, 장바구니 레시피)과 같다', async () => {
   show('/intro/features');
   await screen.findByRole('heading', { level: 1 });
   const text = document.body.textContent ?? '';
   expect(text).toContain('기준시세보다 10% 낮아요');
-  expect(text).toContain('노지 귤 1개 전통시장 279원');
+  expect(text).not.toContain('노지 귤 1개 전통시장 279원');
+  // 레시피는 장바구니에서, 손질법은 결과 화면의 손질 버튼으로
+  expect(text).toContain('레시피에서 고르기');
+  expect(text).toContain('결과 화면에서 손질을 누르면');
   expect(text).toContain('대파 1단 경동시장 2,128원');
   expect(text).not.toContain('9% 낮아요');
   expect(text).not.toContain('부사 3개 5,000원');

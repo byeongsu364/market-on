@@ -256,12 +256,13 @@ export default function Landing() {
                 shape="panel"
                 className={s.shot}
                 poster="/landing/recipes.webp"
-                label="레시피 화면: 이달 제철 재료로 만드는 요리와 재료를 파는 점포 수"
+                label="장바구니 화면: 레시피에서 고르기로 연 이달 제철 레시피와 재료를 파는 점포 수"
               />
               <span className={s.cardLabel}>구매 후</span>
               <h3 className={s.cardTitle}>레시피 · 손질 · 보관</h3>
               <p className={s.cardBody}>
-                산 품목으로 만들 요리와 손질법, 보관법을 근거와 함께 알려 드려요.
+                장바구니에서 제철 레시피를 고르고, 결과 화면에서 손질법 · 보관법을 근거와 함께
+                물어봐요.
               </p>
             </li>
           </ol>

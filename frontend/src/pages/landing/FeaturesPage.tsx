@@ -322,9 +322,8 @@ function Features() {
               가기 전에, 오늘 시세부터.
             </h2>
             <p className={b.leadSm}>
-              전통시장과 대형마트 가격을 나란히 보여 드리고(노지 귤 1개 전통시장 279원 · 대형마트
-              388원), 지금 제철인 품목을 먼저 올려요. 손님이 스스로 시장을 찾아오게 하는 첫
-              화면이에요.
+              전통시장과 대형마트 가격을 나란히 보여 드리고, 지금 제철인 품목을 먼저 올려요. 손님이
+              스스로 시장을 찾아오게 하는 첫 화면이에요.
             </p>
             <div className={b.chipRow}>
               <span className={b.tag}>aT 농산물 가격정보</span>
@@ -468,13 +467,14 @@ function Features() {
           >
             <div className={`${f.afterTop} ${m.reveal}`}>
               <div className={f.afterHead}>
-                <p className={b.kicker}>구매 후 · 안심On에서 이어서</p>
+                <p className={b.kicker}>구매 후 · 장바구니와 물어보기</p>
                 <h2 id="after-title" className={f.h3}>
                   사고 나서도, 끝까지 쓰게.
                 </h2>
                 <p className={b.leadSm}>
-                  안심On에서 같은 품목의 레시피와 손질법, 보관법으로 이어져요. 근거 문서에 없는
-                  내용은 지어내지 않고 "적혀 있지 않아요"라고 답해요.
+                  레시피는 장바구니에서 이달 제철 재료로 골라요. 손질법과 보관법은 결과 화면에서
+                  손질 · 보관을 누르거나 대화로 물어보면, 근거 문서와 출처를 붙여 답해요. 근거에
+                  없는 내용은 지어내지 않고 "적혀 있지 않아요"라고 답해요.
                 </p>
               </div>
             </div>
@@ -488,19 +488,20 @@ function Features() {
                   src="/landing/video/recipe.mp4"
                   webm="/landing/video/recipe.webm"
                   poster="/landing/video/recipe.webp"
-                  label="사과 결과 화면에서 이 재료로 만드는 요리를 골라 재료와 만드는 법을 보는 장면"
-                  alt="레시피 화면: 이달 제철 재료로 만드는 요리와 재료를 파는 이 시장 점포 수"
+                  label="장바구니에서 레시피에서 고르기를 누르고, 제철 레시피 과일겉절이의 재료와 만드는 법을 보는 장면"
+                  alt="레시피 화면: 과일겉절이 재료마다 이 시장에서 파는 점포 수와 만드는 법"
                 />
                 <figcaption>
-                  <strong>레시피 추천</strong>
+                  <strong>레시피 추천 · 장바구니</strong>
                   <span>
-                    산 품목으로 만들 요리와 재료 수량을 보여 드리고, 남은 재료를 파는 같은 시장
-                    점포로 이어 드려요.
+                    장바구니에서 "레시피에서 고르기"를 누르면 이달 제철 재료로 만드는 레시피를 골라
+                    드려요. 재료마다 이 시장에서 파는 점포 수를 알려 드리고, 시장 밖 재료는 따로
+                    표시해요.
                   </span>
                 </figcaption>
               </figure>
               <figure>
-                {/* 영상: /landing/video/prep.mp4 (+ .webm), 세로 — 아직 화면 캡처가 없어 영상 자리로 둠 */}
+                {/* 영상: /landing/video/prep.mp4 (+ .webm), 세로 */}
                 <FeatureVideo
                   shape="panel"
                   height={360}
@@ -511,8 +512,11 @@ function Features() {
                   label="대파 결과 화면에서 손질을 누르면 근거 문서와 출처가 붙은 손질법이 나오는 장면"
                 />
                 <figcaption>
-                  <strong>손질법</strong>
-                  <span>품목마다 손질 순서를 근거 문서와 출처를 붙여 알려 드려요.</span>
+                  <strong>손질법 · 결과 화면</strong>
+                  <span>
+                    결과 화면에서 손질을 누르면 그 품목의 손질법을 근거 문서의 출처, 답한 모델과
+                    함께 보여 드려요. 고르는 법 · 보관 · 제철도 같은 방법으로 물어봐요.
+                  </span>
                 </figcaption>
               </figure>
               <figure>
@@ -529,7 +533,10 @@ function Features() {
                 />
                 <figcaption>
                   <strong>보관법</strong>
-                  <span>얼마나, 어떻게 두면 되는지 농사로 같은 공식 자료를 근거로 답해요.</span>
+                  <span>
+                    "대파 냉동해도 돼요?"처럼 대화로 물어보면 농촌진흥청 이달의 식재료 같은 공식
+                    자료를 근거로 답해요.
+                  </span>
                 </figcaption>
               </figure>
             </div>
