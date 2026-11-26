@@ -141,7 +141,7 @@ export const FEATURES: Feature[] = [
     title: '무엇을 얼마나 살지, 무엇을 만들지',
     lead: '도우미가 용도, 인원, 예산을 차례로 물어보고 품목과 수량을 짜 드려요. 제철 재료로 만드는 레시피에서 재료를 파는 같은 시장 점포로 이어 드려요.',
     hero: '/landing/recipes.webp',
-    heroAlt: '레시피로 장보기 목록: 제철 단감·사과로 만드는 반찬과 국',
+    heroAlt: '장바구니 대화에서 연 레시피 목록: 제철 단감·사과로 만드는 반찬과 국',
     sections: [
       {
         title: '대화로 짜는 장바구니',
