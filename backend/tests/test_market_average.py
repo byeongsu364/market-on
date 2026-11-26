@@ -52,7 +52,11 @@ def test_average_fills_only_missing_sellers_and_sorts(public, monkeypatch, obser
     monkeypatch.setattr(market_service, 'get_price', get)
     result = market_service.market_map(None, 'market:demo', 'item:green_onion', 'unit:bunch')
     get.assert_called_once_with(
-        None, 'item:green_onion', market_id='market:demo', unit_id='unit:bunch'
+        None,
+        'item:green_onion',
+        market_id='market:demo',
+        unit_id='unit:bunch',
+        _include_varieties=False,
     )
     assert [s.store_id for s in result.stores[:4]] == [
         'store:demo-A06',
