@@ -83,6 +83,7 @@ it('직접 입력은 가격이 필수이며 결과 진입과 점포 선택 때 �
 });
 async function photo(tag: boolean) {
   vi.mocked(recognize).mockResolvedValue({
+    model: 'gemma4:e4b',
     vision_labels: ['green onion'],
     candidates: [{ item_id: 'item:green_onion', name: '대파', confidence: 0.94 }],
     media_id: '00000000-0000-4000-8000-000000000001',
@@ -168,6 +169,7 @@ it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
 });
 it('QR에서 고른 점포는 사진 결과의 최초 제보에 포함한다', async () => {
   vi.mocked(recognize).mockResolvedValue({
+    model: 'gemma4:e4b',
     vision_labels: [],
     candidates: [{ item_id: 'item:green_onion', name: '대파', confidence: 0.9 }],
     media_id: '00000000-0000-4000-8000-000000000001',

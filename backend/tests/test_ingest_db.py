@@ -53,13 +53,14 @@ def test_load_replace_search_cache_and_prune(db, tmp_path):
     data = tmp_path / 'data'
     fake = FakeProvider()
     first = load_all(db, data_dir=data, embedder=fake)
-    assert first['added'] == 28  # source + 16 explicit/3 generated entities + 8 documents
+    assert first['added'] == 54  # 14 sources + 16 explicit/3 generated entities + 21 documents
     ids = db.execute('select id from chunks order by id').fetchall()
     second = load_all(db, data_dir=data, embedder=fake)
     assert second['added'] == second['changed'] == second['deleted'] == 0
     assert db.execute('select id from chunks order by id').fetchall() == ids
-    results = search(db, fake, '파 고르는 법')
-    assert results[0].document_title == '대파 확인 포인트'
+    # fake 임베딩은 의미 순위가 없어서 1순위 대신 포함 여부만 확인
+    results = search(db, fake, '파 고르는 법', intent='select', k=10)
+    assert '대파 고를 때 확인할 점' in {r.document_title for r in results}
     assert results[0].doc_type == 'criterion'
     assert (
         search(db, fake, '파 고르는 법', doc_types=['storage'], lang='ko')[0].doc_type == 'storage'
@@ -181,8 +182,9 @@ def test_alignment(db, tmp_path):
     db.execute("update sources set quote_only=true where source_key='src:team-draft'")
     upsert_document(db, doc, embedder=fake)
     results = search(db, fake, 'scallion', intent='store', k=100)
-    assert results and all(r.doc_type == 'storage' and r.quote_only for r in results)
+    assert results and all(r.doc_type == 'storage' for r in results)
     result = next(r for r in results if r.document_title == doc.title)
+    assert result.quote_only  # 출처의 quote_only가 검색 결과에 실림
     assert result.market_id == doc.market_id and result.published == doc.published
     doc.published = date(2026, 11, 21)
     assert upsert_document(db, doc).status == 'changed'

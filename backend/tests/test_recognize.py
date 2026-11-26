@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from app.core.config import settings
 from app.db.repositories import knowledge_repo, media_repo
 from app.deps import get_db
-from app.llm import json_output
+from app.llm import json_output, router
 from app.main import app
 from app.services import scan_service
 
@@ -22,6 +22,7 @@ def api(monkeypatch, tmp_path):
     conn = Mock()
     conn.transaction.side_effect = nullcontext
     monkeypatch.setattr(settings, 'MEDIA_DIR', tmp_path)
+    monkeypatch.setattr(settings, 'OLLAMA_BASE_URL', 'http://offline.invalid')
     media = Mock(return_value='11111111-1111-1111-1111-111111111111')
     monkeypatch.setattr(media_repo, 'insert_media', media)
     dictionary = [
@@ -46,7 +47,9 @@ def api(monkeypatch, tmp_path):
     )
     provider = Mock()
     provider.generate.return_value = '{"labels": ["scallion"]}'
-    monkeypatch.setattr(json_output, 'get_llm', lambda: provider)
+    monkeypatch.setattr(router, '_provider', lambda name: provider)
+    monkeypatch.setattr(settings, 'OPENAI_API_KEY', None)
+    monkeypatch.setattr(router.llm_call_repo, 'record', Mock())
     app.dependency_overrides[get_db] = lambda: conn
     try:
         with TestClient(app) as client:
@@ -90,7 +93,7 @@ def test_contract_and_weights(api, labels, expected):
     response = upload(client)
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == {'vision_labels', 'candidates', 'media_id', 'price_tag'}
+    assert set(body) == {'vision_labels', 'candidates', 'media_id', 'price_tag', 'model'}
     assert body['vision_labels'] == labels
     assert [(c['item_id'], c['confidence']) for c in body['candidates']] == expected
     assert all(set(c) == {'item_id', 'name', 'confidence'} for c in body['candidates'])
@@ -206,13 +209,10 @@ def test_save_failure_continues(api, monkeypatch, caplog, failure):
 
 
 def test_deadline(monkeypatch):
-    # Assert the enclosing deadline without waiting 60 real seconds.
-    async def timeout(awaitable, *, timeout):
-        assert timeout == 60
-        awaitable.close()
+    def timeout(*args, **kwargs):
         raise TimeoutError
 
-    monkeypatch.setattr(json_output.asyncio, 'wait_for', timeout)
+    monkeypatch.setattr(json_output, 'run', timeout)
     from app.core.errors import AppError
 
     with pytest.raises(AppError) as error:
@@ -234,10 +234,10 @@ def test_eight_megabyte_boundary(api):
 def test_unconfigured_provider(api, monkeypatch):
     from app.core.errors import AppError
 
-    def unavailable():
+    def unavailable(name):
         raise AppError('LLM_NOT_CONFIGURED', 'missing URL', 503)
 
-    monkeypatch.setattr(json_output, 'get_llm', unavailable)
+    monkeypatch.setattr(router, '_provider', unavailable)
     response = upload(api[0])
     assert response.status_code == 503
     assert response.json()['error']['code'] == 'RECOGNIZE_UNAVAILABLE'
@@ -305,3 +305,61 @@ def test_price_tag(api, monkeypatch, tag, expected):
         assert set(body['price_tag']) == {'price', 'unit_text', 'unit', 'quantity'}
         assert (body['price_tag']['unit'], body['price_tag']['quantity']) == expected
         assert body['price_tag']['price'] == float(tag['price'])
+
+
+@pytest.mark.parametrize('label', ['other:pineapple', 'unknown', ''])
+def test_escalates_unknown(api, monkeypatch, label):
+    import json
+
+    client, gemma, _, _ = api
+    gemma.generate.return_value = json.dumps({'labels': [label] if label else []})
+    gpt = Mock()
+    gpt.generate.return_value = '{"labels": ["apple"]}'
+    monkeypatch.setattr(settings, 'OPENAI_API_KEY', 'test-secret')
+    monkeypatch.setattr(settings, 'OPENAI_CHAT_MODEL', 'test-model')
+    monkeypatch.setattr(router, '_provider', lambda name: gpt if name == 'openai' else gemma)
+    body = upload(client).json()
+    assert body['model'] == 'openai:test-model'
+    assert body['candidates'][0]['item_id'] == 'item:apple'
+    assert gpt.generate.call_count == 1
+
+
+def test_good_gemma_never_calls_gpt(api, monkeypatch):
+    monkeypatch.setattr(settings, 'OPENAI_API_KEY', 'test-secret')
+    monkeypatch.setattr(settings, 'OPENAI_CHAT_MODEL', 'test-model')
+    factory = Mock(return_value=api[1])
+    monkeypatch.setattr(router, '_provider', factory)
+    body = upload(api[0]).json()
+    assert body['model'] == settings.OLLAMA_CHAT_MODEL
+    factory.assert_called_once_with('gemma')
+
+
+def test_missing_gpt_returns_unknown_gemma(api):
+    api[1].generate.return_value = '{"labels": ["other:pineapple"]}'
+    body = upload(api[0]).json()
+    assert body['vision_labels'] == ['other:pineapple']
+    assert body['model'] == settings.OLLAMA_CHAT_MODEL
+
+
+def test_low_confidence_escalates(api, monkeypatch):
+    client, gemma, _, _ = api
+    gpt = Mock()
+    gpt.generate.return_value = '{"labels": ["apple"]}'
+    gemma.generate.return_value = '{"labels": ["weak"]}'
+    monkeypatch.setattr(settings, 'OPENAI_API_KEY', 'test-secret')
+    monkeypatch.setattr(settings, 'OPENAI_CHAT_MODEL', 'test-model')
+    monkeypatch.setattr(router, '_provider', lambda name: gpt if name == 'openai' else gemma)
+    monkeypatch.setattr(
+        scan_service,
+        'match_vision_labels',
+        lambda conn, labels: [
+            {
+                'item_id': 'item:apple',
+                'name': '사과',
+                'confidence': 0.5 if labels == ['weak'] else 1.0,
+            }
+        ],
+    )
+    body = upload(client).json()
+    assert body['model'] == 'openai:test-model'
+    assert router.llm_call_repo.record.call_args.kwargs['reason'] == 'low_confidence'

@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.db.repositories import knowledge_repo, media_repo
 from app.deps import get_db
 from app.knowledge.ontology import match_vision_labels
-from app.llm import json_output
+from app.llm import router
 from app.main import app
 from scripts.load_ontology import load_ontology
 from scripts.load_sources import load_sources
@@ -43,8 +43,9 @@ def test_recognition_sql_and_media(db, monkeypatch, tmp_path):
         assert {r['item_id'] for r in result[1:]} == {'item:test-similar', 'item:test-substitute'}
         assert all(r['confidence'] == 0.6 for r in result[1:])
         monkeypatch.setattr(settings, 'MEDIA_DIR', tmp_path)
+        monkeypatch.setattr(settings, 'OLLAMA_BASE_URL', 'http://offline.invalid')
         provider = type('Provider', (), {'generate': lambda *a, **k: '{"labels": ["scallion"]}'})()
-        monkeypatch.setattr(json_output, 'get_llm', lambda: provider)
+        monkeypatch.setattr(router, '_provider', lambda name: provider)
         app.dependency_overrides[get_db] = lambda: db
         try:
             with TestClient(app) as client:
@@ -122,4 +123,27 @@ def test_item_vocabulary_sql(db):
         assert [row['name_en'] for row in vocabulary] == sorted(
             row['name_en'] for row in vocabulary
         )
+        raise Rollback()
+
+
+def test_llm_call_metadata(db):
+    from app.db.repositories.llm_call_repo import insert
+
+    with db.transaction():
+        insert(
+            db,
+            task='recognize',
+            provider='openai',
+            model='openai:test',
+            ms=123,
+            escalated=True,
+            reason='unknown_item',
+            ok=True,
+        )
+        row = db.execute(
+            'select task, provider, model, ms, escalated, reason, ok, created_at '
+            'from llm_calls order by id desc limit 1'
+        ).fetchone()
+        assert row[:7] == ('recognize', 'openai', 'openai:test', 123, True, 'unknown_item', True)
+        assert row[7] is not None
         raise Rollback()

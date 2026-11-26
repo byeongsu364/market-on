@@ -1,5 +1,27 @@
-"""answer_cache 자리. 허용 의존성: llm, db.repositories, clients 및 공통 층."""
+"""Seoul-day and document-content versioned answer cache."""
+
+import json
+import re
+from datetime import datetime
+from hashlib import sha256
+from zoneinfo import ZoneInfo
+
+from app.db.repositories import ask_repo
 
 
-def get_cached_answer():
-    raise NotImplementedError
+def cache_key(conn, item, intent, lang, question):
+    version = sha256(
+        json.dumps(ask_repo.document_version(conn, item), ensure_ascii=False, default=str).encode()
+    ).hexdigest()
+    normalized = re.sub(r'[\s?？]', '', question.lower()) if question else None
+    question_hash = sha256(normalized.encode()).hexdigest()[:16] if normalized else 'chip'
+    day = datetime.now(ZoneInfo('Asia/Seoul')).date().isoformat()
+    return f'ask:{item}:{intent}:{lang}:{day}:{version}:{question_hash}'
+
+
+def get_cached_answer(conn, key):
+    return ask_repo.get_cache(conn, key)
+
+
+def save(conn, key, answer, model):
+    ask_repo.put_cache(conn, key, answer, model)

@@ -1,3 +1,5 @@
+from app.llm.limits import http_timeout
+
 """Ollama 요청 계약은 HTTP를 monkeypatch하여 오프라인으로 검증해요."""
 
 import base64
@@ -30,7 +32,10 @@ def test_batches(configured, monkeypatch, task):
     monkeypatch.setattr(http, 'post_sync', post)
     assert len(configured.embed(['x'] * 65, task=task)) == 65
     assert [len(c[1]['input']) for c in calls] == [32, 32, 1]
-    assert all(c[0] == 'http://localhost:11434/api/embed' and c[2] == 120 for c in calls)
+    assert all(
+        c[0] == 'http://localhost:11434/api/embed' and c[2] == http_timeout('gemma', 120.0)
+        for c in calls
+    )
     assert all(c[1]['model'] == settings.OLLAMA_EMBEDDING_MODEL for c in calls)
     assert configured.embed([], task=task) == []
     assert len(calls) == 3
@@ -62,7 +67,7 @@ def test_generate(configured, monkeypatch):
             'stream': False,
             'think': False,
         },
-        timeout=180.0,
+        timeout=http_timeout('gemma'),
     )
     configured.generate('짧은 질문')
     assert post.call_args.kwargs['json']['messages'] == [{'role': 'user', 'content': '짧은 질문'}]
