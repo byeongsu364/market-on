@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { getPublicConfig } from '../../api/markets';
 import { formatDistance } from '../../utils/directions';
-import { loadNaverMap } from '../../utils/naverMap';
+import { loadNaverMap, onNaverAuthFailure } from '../../utils/naverMap';
 import type { Market } from '../../types/contract';
 export default function NearbyMap({
   markets,
@@ -16,6 +16,8 @@ export default function NearbyMap({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [available, setAvailable] = useState(true);
+  // 네이버 인증 실패(등록 안 된 주소) → 깨진 지도 대신 시장 목록
+  useEffect(() => onNaverAuthFailure(() => setAvailable(false)), []);
   useEffect(() => {
     let active = true;
     let dispose: (() => void) | undefined;

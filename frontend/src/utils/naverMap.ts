@@ -17,7 +17,21 @@ export type NaverMaps = {
 declare global {
   interface Window {
     naver?: { maps: NaverMaps };
+    navermap_authFailure?: () => void;
   }
+}
+// 등록되지 않은 도메인이면 SDK는 정상으로 불러와지고, 인증 실패는 나중에 이 전역 함수로만 알려 줌
+// (2026-11-26: Cloudflare 임시 주소에서 지도가 깨진 채로 보이던 문제)
+let authFailed = false;
+const authListeners = new Set<() => void>();
+window.navermap_authFailure = () => {
+  authFailed = true;
+  authListeners.forEach((listener) => listener());
+};
+export function onNaverAuthFailure(listener: () => void): () => void {
+  if (authFailed) listener();
+  authListeners.add(listener);
+  return () => authListeners.delete(listener);
 }
 let loading: Promise<NaverMaps> | undefined;
 export function loadNaverMap(clientId: string): Promise<NaverMaps> {

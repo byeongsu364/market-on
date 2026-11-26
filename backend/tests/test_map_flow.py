@@ -56,3 +56,23 @@ def test_radius(monkeypatch):
                 assert client.get(f'/markets/nearby?radius_km={radius}').status_code == 422
     finally:
         app.dependency_overrides.pop(get_db, None)
+
+
+def test_far_away_falls_back_to_nearest(monkeypatch):
+    # 2026-11-26 실제: 안산 근처(경동시장 30km)에서 반경 10km 안에 시장이 없어 목록이 비었음
+    monkeypatch.setattr(
+        store_repo,
+        'list_markets',
+        lambda c: [
+            dict(id=str(i), name_ko=str(i), lat=lat, lng=127, status='active')
+            for i, lat in enumerate([37.5, 37.6, 38.0])
+        ],
+    )
+    app.dependency_overrides[get_db] = lambda: object()
+    try:
+        with TestClient(app) as client:
+            got = client.get('/markets/nearby?lat=37.0&lng=127&radius_km=10').json()
+            assert [m['market_id'] for m in got] == ['0', '1', '2']
+            assert got[0]['distance_m'] > 10_000
+    finally:
+        app.dependency_overrides.pop(get_db, None)

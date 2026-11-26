@@ -191,3 +191,12 @@ it('추가 공개 API mock의 계약 키와 판매 점포 수가 일치한다', 
     items.map((item) => item.name).sort((a, b) => a.localeCompare(b, 'ko')),
   );
 });
+
+it('네이버 인증 실패(등록 안 된 주소)면 시장 목록으로 바꾼다', async () => {
+  const { onNaverAuthFailure } = await import('../utils/naverMap');
+  const seen = vi.fn();
+  const off = onNaverAuthFailure(seen);
+  window.navermap_authFailure?.();
+  expect(seen).toHaveBeenCalled();
+  off();
+});

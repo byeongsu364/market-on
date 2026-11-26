@@ -18,6 +18,9 @@ def distance(lat, lng, market):
     return 2 * asin(sqrt(min(1, max(0, h))))
 
 
+NEAREST_FALLBACK = 5
+
+
 def nearby(conn, lat=None, lng=None, device_id=None, radius_km=5):
     markets = [
         Market(
@@ -33,7 +36,12 @@ def nearby(conn, lat=None, lng=None, device_id=None, radius_km=5):
     for market in markets:
         if lat is not None and lng is not None:
             market.distance_m = round(distance(lat, lng, market) * 6_371_000)
-    markets = [m for m in markets if m.distance_m is None or m.distance_m <= radius_km * 1000]
+    within = [m for m in markets if m.distance_m is None or m.distance_m <= radius_km * 1000]
+    # 반경 안에 시장이 하나도 없으면(예: 시장에서 30km 떨어진 곳) 빈 목록 대신 가까운 순 5곳
+    # — 그래야 시장 목록·주변 시장 지도에서 시장을 고를 수 있음
+    if not within and lat is not None and lng is not None:
+        within = sorted(markets, key=lambda m: m.distance_m)[:NEAREST_FALLBACK]
+    markets = within
     if device_id:
         from .price_report_service import hash_device
         from app.db.repositories import market_request_repo
