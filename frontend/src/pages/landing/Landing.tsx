@@ -161,7 +161,7 @@ export default function Landing() {
             </h2>
             <p className={b.lead}>
               AI가 대신 고르면 생각이 멈춰요. Market-On은 구매 직전에 필요한 근거 다섯 가지를 켜고,
-              선택은 손님에게 남겨요.
+              선택은 사용자에게 남겨요.
             </p>
           </div>
           <ol className={`${s.bases} ${m.reveal}`}>
@@ -177,7 +177,7 @@ export default function Landing() {
             <p>
               판단 근거는 Market-On이,
               <br />
-              선택은 손님이.
+              선택은 사용자가.
             </p>
             <div className={s.notSaid}>
               <span className={s.notSaidLabel} id="not-said">
@@ -280,7 +280,7 @@ export default function Landing() {
           <p className={b.closingTitle}>
             판단 근거는 Market-On이,
             <br />
-            선택은 손님이.
+            선택은 사용자가.
           </p>
           <p className={b.closingLead}>앱 설치 없이 지금 바로 경동시장에서 써 볼 수 있어요.</p>
           <div className={b.btnRowWide}>

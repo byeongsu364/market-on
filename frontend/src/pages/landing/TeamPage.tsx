@@ -129,7 +129,7 @@ export default function TeamPage() {
             <br />
             Market-On.
           </p>
-          <p className={b.closingLead}>판단 근거는 Market-On이, 선택은 손님이.</p>
+          <p className={b.closingLead}>판단 근거는 Market-On이, 선택은 사용자가.</p>
           <div className={b.btnRowWide}>
             <a href={APP_START} className={`${b.btn} ${b.btnOnDark}`} onClick={startWeb}>
               웹페이지로 시작하기
