@@ -183,6 +183,16 @@ export default function Store() {
     </button>
   ) : null;
 
+  // 지도 아래 글은 이 점포 핀의 출처로 정함(시장 전체가 예시 배치여도 대조한 점포는 "예시"가 아님, 2026-11-27)
+  const source = map.data?.stores.find((x) => x.store_id === storeId)?.location_source;
+  const pinNote =
+    source === 'kakao'
+      ? '카카오맵 기준 위치'
+      : source === 'naver'
+        ? '네이버 지도 기준 위치'
+        : source === 'merchant'
+          ? false
+          : map.data?.layout === 'schematic';
   const miniMap = hasPin && (
     <div className={desktop ? s.bigMap : s.storeMap}>
       <MapView
@@ -192,7 +202,7 @@ export default function Store() {
         boundary={desktop ? map.data?.boundary : undefined}
         boundaryLabel={desktop ? marketName : undefined}
         center={pins.find((p) => p.id === storeId)}
-        sample={map.data?.layout === 'schematic'}
+        sample={pinNote}
       />
     </div>
   );
