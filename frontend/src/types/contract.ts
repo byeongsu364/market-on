@@ -24,6 +24,8 @@ export type Item = {
   labels_i18n: Partial<Record<Language, string>>;
 };
 export type RecognizeResponse = {
+  variety_id?: string | null;
+  variety_text?: string | null;
   model: string;
   media_id: string | null;
   // 손님이 촬영 위치 사용에 동의했을 때만: 1km 안 가장 가까운 시장 ID와 대략 좌표(소수 둘째 자리)
@@ -47,6 +49,8 @@ export type Stat = {
   count: number;
 };
 export type VarietyPrice = {
+  mock?: boolean;
+  source?: string | null;
   variety_id: string;
   name: string;
   reference_price: number | null;
@@ -56,6 +60,7 @@ export type VarietyPrice = {
   default: boolean;
 } & VarietyExtra;
 export type Price = {
+  mock?: boolean;
   variety_id: string | null;
   variety_name: string | null;
   varieties: VarietyPrice[];
@@ -187,6 +192,7 @@ export type ClosingSale = SaleRequest & {
 };
 export type ActiveSale = ClosingSale & { store_name: string; item_name: string };
 export type MerchantStore = {
+  favorite?: boolean;
   varieties?: Record<string, string[]>;
   payments?: PaymentMethod[];
   intro?: string | null;
@@ -363,6 +369,7 @@ export type MarketExtra = {
 };
 export type PaymentMethod = 'card' | 'cash' | 'transfer' | 'onnuri';
 export type StoreExtra = {
+  favorite?: boolean | null;
   lat?: number | null;
   lng?: number | null;
   category?:
@@ -386,6 +393,7 @@ export type StoreExtra = {
 };
 export type VarietyHarvest = { label: string; from?: string; to?: string };
 export type VarietyExtra = {
+  mock?: boolean;
   synonyms?: string[];
   description?: string | null;
   description_source?: string | null;
@@ -400,9 +408,15 @@ export type PriceHistory = {
   points: PriceHistoryPoint[];
   source: string;
 };
-export type Favorite = { store_id: string; name: string; market_id: string; notify: boolean };
+export type Favorite = {
+  store_id: string;
+  name: string;
+  market_id: string;
+  notify: boolean;
+  active_sale?: { sale_price: number; regular_price: number | null; ends_at: string } | null;
+};
 export type MultiItemMap = MarketMap & { item_ids: string[] };
-/** 위치 확인은 live 지원. 단골 수·오늘 품절은 mock 전용 선택 값. */
+/** 위치 확인과 단골 수는 live 지원. 오늘 품절은 mock 전용 선택 값. */
 export type MerchantExtras = {
   favorites?: number;
   sold_out_item_ids?: string[];
@@ -425,7 +439,7 @@ export type ReviewWrite = { rating: number; body: string };
 export type MerchantStats = {
   today: { views: number; directions: number };
   days: { day: string; views: number; directions: number }[];
-  favorites: null;
+  favorites: number;
 };
 export type MarketAdminStats = {
   stores: number;

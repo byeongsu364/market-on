@@ -68,12 +68,12 @@ export default function ScanConfirm({
   const [searching, setSearching] = useState(false);
   const item = useItem(id);
   const tag = result.price_tag;
-  const [variety, setVariety] = useState(tag?.variety_id ?? '');
+  const [variety, setVariety] = useState(result.variety_id ?? tag?.variety_id ?? '');
   const [varietyFrom, setVarietyFrom] = useState<'tag' | 'choice' | undefined>(
-    tag?.variety_id ? 'tag' : undefined,
+    result.variety_id || tag?.variety_id ? 'tag' : undefined,
   );
   const varieties = usePrice({
-    item_id: tag ? id : '',
+    item_id: tag || result.variety_id ? id : '',
     market_id: ctx.marketId ?? '',
     unit: item.data?.default_unit ?? '',
   });
@@ -146,7 +146,7 @@ export default function ScanConfirm({
         )}
       </div>
 
-      {tag && choices.length >= 2 && (
+      {(tag || result.variety_id) && choices.length >= 2 && (
         <div className={s.group}>
           <div className={s.groupHead}>
             <span className={s.groupLabel} id="scan-variety">
@@ -172,7 +172,7 @@ export default function ScanConfirm({
                   setVarietyFrom('choice');
                 }}
               >
-                {v.name}
+                {v.name} {v.mock && <small>예시</small>}
               </Chip>
             ))}
           </ChipRow>

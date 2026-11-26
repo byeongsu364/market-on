@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import AppHeader from '../../components/layout/AppHeader';
 import Icon from '../../components/common/Icon';
 import { CategoryBadge, List, Toggle } from '../../components/common/parts';
@@ -9,6 +10,8 @@ import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { useActiveSales } from '../../hooks/useSales';
 import {
   favoritesAvailable,
+  saveFavorite,
+  enablePush,
   getFavorites,
   getNotifySettings,
   saveNotifySettings,
@@ -25,10 +28,11 @@ import s from '../map/map.module.css';
 
 type Row = Favorite & { category: StoreCategory | null; marketName: string; open?: boolean | null };
 
-/** 단골 점포와 알림(시안 Saved). 백엔드가 없어 mock에서만 열고, live에서는 준비 중 안내만 보임 */
+/** 계정에 저장한 단골 점포와 알림 설정. */
 export default function Saved() {
   const t = useT();
   const desktop = useIsDesktop();
+  const { user } = useAuth();
   return (
     <>
       {!desktop && <AppHeader back="/me" />}
@@ -37,7 +41,13 @@ export default function Saved() {
           <h1 className={desktop ? s.titleWeb : s.title}>{t('mapSavedTitle')}</h1>
           <p className={s.lead}>{favoritesAvailable ? t('mapSavedLead') : t('mapSavedLater')}</p>
         </div>
-        {favoritesAvailable && <SavedBody />}
+        {user?.role === 'customer' ? (
+          <SavedBody />
+        ) : (
+          <p>
+            로그인하면 단골을 저장할 수 있어요 <Link to="/login?next=%2Fme%2Fsaved">로그인</Link>
+          </p>
+        )}
       </div>
     </>
   );
@@ -67,17 +77,21 @@ function SavedBody() {
       });
     }, []),
   );
+  const [message, setMessage] = useState('');
   const [settings, setSettings] = useState<NotifySettings | null>(null);
   useEffect(() => {
     let active = true;
-    void getNotifySettings().then((v) => active && setSettings(v));
+    void getNotifySettings()
+      .then((v) => active && setSettings(v))
+      .catch(() => active && setMessage('알림 설정을 불러오지 못했어요.'));
     return () => {
       active = false;
     };
   }, []);
   const change = (next: NotifySettings) => {
-    setSettings(next);
-    void saveNotifySettings(next);
+    void saveNotifySettings(next)
+      .then(setSettings)
+      .catch(() => setMessage('알림 설정을 저장하지 못했어요.'));
   };
   return (
     <>
@@ -116,6 +130,15 @@ function SavedBody() {
                     </span>
                     <Icon name="chevronRight" size={20} />
                   </Link>
+                  <Toggle
+                    label={`${f.name} 알림`}
+                    checked={f.notify}
+                    onChange={(notify) => {
+                      void saveFavorite(f, notify)
+                        .then(() => rows.retry())
+                        .catch(() => setMessage('점포 알림을 저장하지 못했어요.'));
+                    }}
+                  />
                 </li>
               );
             })}
@@ -155,7 +178,17 @@ function SavedBody() {
           </List>
         )}
         <p className={s.note}>{t('mapNotifyNote')}</p>
-        <p className={s.note}>{t('mapNotifySample')}</p>
+        <button
+          type="button"
+          onClick={() => {
+            void enablePush()
+              .then(() => setMessage('알림을 받을 준비가 됐어요.'))
+              .catch((e: Error) => setMessage(e.message));
+          }}
+        >
+          알림 받기
+        </button>
+        <p role="status">{message}</p>
       </section>
     </>
   );

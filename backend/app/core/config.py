@@ -6,7 +6,6 @@ from pathlib import Path
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 DEFAULT_LLM_ROUTES: dict[str, list[str]] = {
     # route는 젬마가 맡고, 젬마 서버가 꺼졌을 때만 제미나이 → GPT
     # (040 완료 기준: 젬마 없이도 물어보기가 답해야 함)
@@ -22,6 +21,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[3] / '.env', extra='ignore'
     )
+    VAPID_PUBLIC_KEY: str = ''
+    VAPID_PRIVATE_KEY: str = ''
+    VAPID_SUBJECT: str = ''
     DEVICE_HASH_SALT: str = ''
 
     @model_validator(mode='after')

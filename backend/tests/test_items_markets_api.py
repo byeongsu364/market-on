@@ -5,11 +5,10 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
-from fastapi.testclient import TestClient
-
-from app.db.repositories import knowledge_repo, sale_repo, store_repo, price_repo
+from app.db.repositories import knowledge_repo, price_repo, sale_repo, store_repo
 from app.deps import get_db
 from app.main import app
+from fastapi.testclient import TestClient
 from scripts import seed_demo_market as seed
 
 ITEM_KEYS = {
@@ -39,7 +38,7 @@ def public(monkeypatch):
         market_service, 'get_price', lambda *a, **kw: SimpleNamespace(this_market=None)
     )
     markets, zones, stores, items = {}, {}, {}, {}
-    monkeypatch.setattr(store_repo, 'market_extras', lambda *a: dict(store_count=0, requests=0))
+    monkeypatch.setattr(store_repo, 'market_extras', lambda *a: {'store_count': 0, 'requests': 0})
     for name, target in [
         ('upsert_market', markets),
         ('upsert_zone', zones),
@@ -66,25 +65,25 @@ def public(monkeypatch):
     monkeypatch.setattr(
         store_repo,
         'market_items',
-        lambda c, m: [dict(store_id=s, item_id=i) for s, ids in items.items() for i in ids],
+        lambda c, m: [{'store_id': s, 'item_id': i} for s, ids in items.items() for i in ids],
     )
     monkeypatch.setattr(
         sale_repo,
         'latest_active_by_store',
         lambda *a: [
-            dict(
-                store_id='store:demo-A05',
-                sale_price=2000,
-                regular_price=None,
-                ends_at=datetime.now(UTC),
-            )
+            {
+                'store_id': 'store:demo-A05',
+                'sale_price': 2000,
+                'regular_price': None,
+                'ends_at': datetime.now(UTC),
+            }
         ],
     )
     monkeypatch.setattr(
         knowledge_repo,
         'get_item',
         lambda c, e: (
-            dict(name_ko='대파', kamis={'unit': 'kg'}) if e == 'item:green_onion' else None
+            {'name_ko': '대파', 'kamis': {'unit': 'kg'}} if e == 'item:green_onion' else None
         ),
     )
     monkeypatch.setattr(
@@ -92,8 +91,8 @@ def public(monkeypatch):
         'item_labels',
         lambda c, e: (
             [
-                dict(label='대파', lang='ko', kind='preferred'),
-                dict(label='파', lang='ko', kind='synonym'),
+                {'label': '대파', 'lang': 'ko', 'kind': 'preferred'},
+                {'label': '파', 'lang': 'ko', 'kind': 'synonym'},
             ]
             if e.startswith('item:')
             else []
@@ -104,16 +103,16 @@ def public(monkeypatch):
         'item_relations',
         lambda *a: (
             [
-                dict(
-                    predicate='hasCriterion',
-                    object_id=f'crit:green_onion-{k}',
-                    type='criterion',
-                    name_ko=k,
-                    source_title='팀 작성 초안 · 샘플',
-                )
+                {
+                    'predicate': 'hasCriterion',
+                    'object_id': f'crit:green_onion-{k}',
+                    'type': 'criterion',
+                    'name_ko': k,
+                    'source_title': '팀 작성 초안 · 샘플',
+                }
                 for k in ('leaf', 'stem', 'root')
             ]
-            + [dict(predicate='soldBy', object_id='unit:bunch', props={'default': True})]
+            + [{'predicate': 'soldBy', 'object_id': 'unit:bunch', 'props': {'default': True}}]
         ),
     )
     app.dependency_overrides[get_db] = lambda: None
@@ -146,7 +145,7 @@ def test_search_empty_and_normalized(public, monkeypatch):
     monkeypatch.setattr(
         knowledge_repo,
         'search_items',
-        lambda c, q: calls.append(q) or [dict(entity_id='item:green_onion')],
+        lambda c, q: calls.append(q) or [{'entity_id': 'item:green_onion'}],
     )
     c = public[0]
     for q in ('파', ' SCALLION ', 'apple'):
@@ -160,8 +159,8 @@ def test_search_empty_and_normalized(public, monkeypatch):
 
 def test_markets_contract(public, caplog):
     c, markets, stores = public
-    markets['far'] = dict(id='far', name_ko='가', lat=37.6, lng=127)
-    markets['missing'] = dict(id='missing', name_ko='나', lat=None, lng=127)
+    markets['far'] = {'id': 'far', 'name_ko': '가', 'lat': 37.6, 'lng': 127}
+    markets['missing'] = {'id': 'missing', 'name_ko': '나', 'lat': None, 'lng': 127}
     result = c.get('/markets/nearby?lat=37.57&lng=126.99').json()
     assert [m['market_id'] for m in result] == ['market:demo', 'far']
     assert all(
@@ -209,6 +208,7 @@ def test_markets_contract(public, caplog):
     ]
     for i, s in enumerate(result['stores']):
         assert set(s) == {
+            'favorite',
             'varieties',
             'source',
             'items_basis',
@@ -261,8 +261,8 @@ def test_item_language_and_unit_fallbacks(public, monkeypatch):
         knowledge_repo,
         'item_relations',
         lambda *a: [
-            dict(predicate='soldBy', object_id='unit:each', props={}),
-            dict(predicate='soldBy', object_id='unit:kg', props={'default': True}),
+            {'predicate': 'soldBy', 'object_id': 'unit:each', 'props': {}},
+            {'predicate': 'soldBy', 'object_id': 'unit:kg', 'props': {'default': True}},
         ],
     )
     result = c.get('/items/item:green_onion').json()
@@ -278,7 +278,7 @@ def test_map_missing_hours_and_no_item(public):
 
 
 def test_live_store_map_fields_and_distance(public):
-    c, markets, stores = public
+    c, _markets, stores = public
     store = stores['store:demo-A01']
     store.update(
         lat=37.57,

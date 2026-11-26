@@ -50,6 +50,7 @@ export default function MerchantHome() {
       <div className={desktop ? s.webStats : s.stats}>
         <Stat value={views(f.stats.data.today.views)} label="오늘 조회" />
         <Stat value={views(f.stats.data.today.directions)} label="오늘 길 안내" />
+        <Stat value={`${f.stats.data.favorites ?? 0}명`} label="단골 손님" />
       </div>
       <Section title="최근 7일">
         <div className={s.chartLegend} aria-hidden="true">

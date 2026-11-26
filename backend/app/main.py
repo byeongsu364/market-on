@@ -1,38 +1,42 @@
 """앱 생성 및 라우터 등록. 허용 의존성: routers, core 및 db 풀 종료."""
 
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from app.db.pool import close_pool
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.core.config import settings
-from app.llm import quota as llm_quota
-from app.schemas.market import PublicConfig
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.logging import setup_logging
+from app.db.pool import close_pool
+from app.llm import quota as llm_quota
 from app.routers import (
-    ontology,
-    recommend,
-    ask,
-    scan,
-    price,
-    merchant,
-    stores,
-    recipe,
-    card,
-    agent,
-    auth,
     admin,
-    market_admin,
-    sales,
+    agent,
+    ask,
+    auth,
+    card,
     items,
-    markets,
-    price_reports,
     join,
+    market_admin,
+    markets,
+    me,
+    merchant,
+    ontology,
+    price,
+    price_reports,
+    recipe,
+    recommend,
+    sales,
+    scan,
+    stores,
 )
+from app.schemas.market import PublicConfig
 
 setup_logging()
 routers = [
+    me.router,
     ontology.router,
     recommend.router,
     ask.router,

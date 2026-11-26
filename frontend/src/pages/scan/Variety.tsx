@@ -107,12 +107,14 @@ export default function Variety() {
                           {v.name}
                         </h2>
                         <span className={s.sub}>
+                          {v.mock && <small>예시 · </small>}
                           {v.reference_price == null
                             ? t('scanNoReferenceYet')
                             : `${t('scanReference')} ${unitLabel(v.unit)} ${formatPrice(v.reference_price)}`}
                         </span>
                       </div>
                     </div>
+                    {v.mock && <p className={s.note}>예시 시세 · 실제 조사값 아님</p>}
                     {v.description && <p className={s.body}>{v.description}</p>}
                     {v.harvest && <Harvest v={v} />}
                     <PriceHistoryChart

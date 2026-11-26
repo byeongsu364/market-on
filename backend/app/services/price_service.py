@@ -31,6 +31,14 @@ def get_price(
     )
     if variety_id and selected is None:
         raise AppError('INVALID_VARIETY', '이 품목의 품종이 아닙니다.', 422)
+    is_mock = bool(
+        variety_id
+        and selected
+        and (
+            (selected.get('attrs') or {}).get('mock')
+            or selected['id'] == 'variety:mandarin-greenhouse'
+        )
+    )
     variety_id = selected['id'] if selected else None
     today = on_date or date.today()
     baseline = price_repo.baseline(
@@ -40,9 +48,11 @@ def get_price(
         sgg_nm=market.get('at_sgg_nm') if market else None,
         market_at_cd=market.get('at_mrkt_cd') if market else None,
         variety_id=variety_id,
+        allow_mock=is_mock,
     )
     if baseline is None:
         raise AppError('PRICE_NOT_FOUND', '최근 기준시세가 없습니다.', 404)
+    is_mock = baseline.get('mock', False)
     units = price_repo.sale_units(conn, item_id)
     target = (
         next((u for u in units if u['id'] == unit_id), None)
@@ -74,7 +84,10 @@ def get_price(
         'region': market['at_sgg_nm'] if baseline['scope'] == 'region' else '전국',
         'observed_on': baseline['exmn_ymd'],
         'fallback': fallback,
-        'source': f'aT 기간별 소매가격 · {baseline["exmn_ymd"].isoformat()} 조사',
+        'mock': is_mock,
+        'source': '예시 시세 · 실제 조사값 아님'
+        if is_mock
+        else f'aT 기간별 소매가격 · {baseline["exmn_ymd"].isoformat()} 조사',
         'by_market_type': {
             group: PriceStat(
                 price=round(baseline[group]['avg'] * multiplier), count=baseline[group]['n']
@@ -116,6 +129,8 @@ def get_price(
                     'count': view.by_market_type['traditional'].count
                     if view and 'traditional' in view.by_market_type
                     else 0,
+                    'mock': view.mock if view else bool((choice.get('attrs') or {}).get('mock')),
+                    'source': view.source if view else None,
                     'default': bool((choice['props'] or {}).get('default')),
                 }
             )
@@ -149,18 +164,18 @@ def variety_metadata(conn, item_id, choice):
     harvest = next(
         (h for h in season_facts(conn, item_id)['harvest'] if h['variety_id'] == choice['id']), None
     )
-    return dict(
-        description=attrs.get('description'),
-        description_source=source,
-        harvest={k: harvest[k] for k in ('label', 'from', 'to') if k in harvest}
+    return {
+        'description': attrs.get('description'),
+        'description_source': source,
+        'harvest': {k: harvest[k] for k in ('label', 'from', 'to') if k in harvest}
         if harvest
         else None,
-        synonyms=[
+        'synonyms': [
             l['label']
             for l in knowledge_repo.item_labels(conn, choice['id'])
             if l['lang'] == 'ko' and l['label'] != choice['name_ko']
         ],
-    )
+    }
 
 
 def list_varieties(conn, item_id):
@@ -221,23 +236,23 @@ def get_history(
                 stat = baseline['traditional'] or baseline['all']
                 values.append((stat['avg'] * multiplier, stat['n']))
         points.append(
-            dict(
-                week_start=start,
-                price=round(
+            {
+                'week_start': start,
+                'price': round(
                     sum(value * count for value, count in values)
                     / sum(count for _, count in values)
                 )
                 if values
                 else None,
-            )
+            }
         )
-    return dict(
-        item_id=item_id,
-        variety_id=variety_id,
-        unit=unit,
-        points=points,
-        source='aT 기간별 소매가격 · 주별 평균',
-    )
+    return {
+        'item_id': item_id,
+        'variety_id': variety_id,
+        'unit': unit,
+        'points': points,
+        'source': 'aT 기간별 소매가격 · 주별 평균',
+    }
 
 
 def baseline_unit(conn, baseline, target):

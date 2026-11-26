@@ -68,6 +68,7 @@ def test_contract(api, monkeypatch):
     assert response.status_code == 200
     body = response.json()
     assert set(body) == {
+        'mock',
         'item_id',
         'variety_id',
         'variety_name',
@@ -238,7 +239,7 @@ def test_gyeongdong_this_market(api, monkeypatch):
     monkeypatch.setattr(
         store_repo,
         'get_market',
-        lambda *a: dict(name_ko='경동시장', at_sgg_nm='서울', at_mrkt_cd='0110212'),
+        lambda *a: {'name_ko': '경동시장', 'at_sgg_nm': '서울', 'at_mrkt_cd': '0110212'},
     )
     monkeypatch.setattr(
         price_repo,

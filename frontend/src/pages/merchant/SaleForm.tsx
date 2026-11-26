@@ -18,7 +18,7 @@ import a from '../account/account.module.css';
 import s from './merchant.module.css';
 
 // 마감세일 올리기. page = SaleNew(모바일 한 화면), aside = WebMerchant 오른쪽 면.
-// 단골 알림 수는 백엔드가 없어 mock에서만 보임(030 5장).
+// 단골 수는 계정 기준 상인 통계에서 가져옴.
 export default function SaleForm({
   variant = 'page',
   onDone,
@@ -37,7 +37,11 @@ export default function SaleForm({
   const what = item ? `${item.name} ${unitLabel(unit)}` : '';
   const summary = ready
     ? fill(
-        t(variant === 'aside' && favorites ? 'merchantSaleSummaryNotify' : 'merchantSaleSummary'),
+        t(
+          variant === 'aside' && favorites !== undefined
+            ? 'merchantSaleSummaryNotify'
+            : 'merchantSaleSummary',
+        ),
         {
           time: saleTime(f.endsAt),
           item: what,
@@ -205,9 +209,7 @@ export default function SaleForm({
               </div>
             </div>
             {favorites !== undefined && (
-              <p className={s.help}>
-                {fill(t('merchantNotify'), { n: favorites })} {t('merchantSampleValues')}
-              </p>
+              <p className={s.help}>{fill(t('merchantNotify'), { n: favorites })}</p>
             )}
           </div>
         )}

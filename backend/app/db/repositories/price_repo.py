@@ -55,7 +55,7 @@ def upsert_observations(conn, rows):
 
 def latest_exmn_date(conn, item_id, variety_id=None, on_date=None):
     return conn.execute(
-        'select max(exmn_ymd) from price_observations where item_id=%s and (%s::text is null or variety_id=%s) and exmn_ymd<=coalesce(%s::date,current_date)',
+        "select max(exmn_ymd) from price_observations where source<>'mock' and item_id=%s and (%s::text is null or variety_id=%s) and exmn_ymd<=coalesce(%s::date,current_date)",
         (item_id, variety_id, variety_id, on_date),
     ).fetchone()[0]
 
@@ -131,7 +131,15 @@ def observation_unit_id(conn, unit, size):
 
 
 def baseline(
-    conn, item_id, *, on_date, sgg_nm=None, market_at_cd=None, lookback_days=14, variety_id=None
+    conn,
+    item_id,
+    *,
+    on_date,
+    sgg_nm=None,
+    market_at_cd=None,
+    lookback_days=14,
+    variety_id=None,
+    allow_mock=False,
 ):
     from datetime import timedelta
 
@@ -140,12 +148,14 @@ def baseline(
         """select p.* from price_observations p join entities e on e.id=coalesce(%s,p.item_id)
         where p.item_id=%s and p.se_cd='01' and p.grd_cd=coalesce(e.kamis->>'grd_cd','04')
         and (%s::text is null or p.variety_id=%s)
+        and (p.source<>'mock' or %s)
         and p.exmn_ymd between %s and %s order by p.exmn_ymd desc,p.mrkt_cd""",
         (
             variety_id,
             item_id,
             variety_id,
             variety_id,
+            allow_mock,
             on_date - timedelta(days=lookback_days),
             on_date,
         ),
@@ -181,6 +191,7 @@ def baseline(
 
     market = next((r for r in selected if r['mrkt_cd'] == market_at_cd), None)
     return {
+        'mock': any(r.get('source') == 'mock' for r in selected),
         'exmn_ymd': latest,
         'scope': 'region' if regional else 'national',
         'unit': unit,
@@ -268,6 +279,7 @@ def observation_dates(conn, item_id, variety_id, start, end):
         join entities e on e.id=coalesce(%s,p.item_id)
         where p.item_id=%s and (%s::text is null or p.variety_id=%s)
         and p.se_cd='01' and p.grd_cd=coalesce(e.kamis->>'grd_cd','04')
+        and p.source<>'mock'
         and p.market_type in ('traditional','large_retail')
         and p.exmn_ymd between %s and %s order by p.exmn_ymd""",
             (variety_id, item_id, variety_id, variety_id, start, end),

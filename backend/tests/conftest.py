@@ -1,7 +1,6 @@
 """공통 테스트 설정."""
 
 import pytest
-
 from app.core import captcha
 from app.core.config import settings
 
@@ -25,3 +24,14 @@ def no_external_ai_by_default(monkeypatch):
     quota.reset()
     yield
     quota.reset()
+
+
+@pytest.fixture(autouse=True)
+def no_real_push(monkeypatch):
+    from unittest.mock import Mock
+
+    from app.services import web_push
+
+    sender = Mock(return_value=201)
+    monkeypatch.setattr(web_push, 'send', sender)
+    yield sender

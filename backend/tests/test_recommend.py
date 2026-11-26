@@ -92,7 +92,10 @@ def env(monkeypatch):
         svc.price_service,
         'get_price',
         lambda *a, **kw: NS(
-            unit='unit:piece', region='서울', by_market_type={'traditional': NS(price=1000)}
+            mock=False,
+            unit='unit:piece',
+            region='서울',
+            by_market_type={'traditional': NS(price=1000)},
         ),
     )
     monkeypatch.setattr(
@@ -259,9 +262,25 @@ def test_partial_reason_removal(env):
 
 def test_prices_require_local_traditional_and_default_unit(env, monkeypatch):
     for price in [
-        NS(unit='unit:kg', region='서울', by_market_type={'traditional': NS(price=1000)}),
-        NS(unit='unit:piece', region='전국', by_market_type={'traditional': NS(price=1000)}),
-        NS(unit='unit:piece', region='서울', by_market_type={}),
+        NS(
+            mock=True,
+            unit='unit:piece',
+            region='서울',
+            by_market_type={'traditional': NS(price=1000)},
+        ),
+        NS(
+            mock=False,
+            unit='unit:kg',
+            region='서울',
+            by_market_type={'traditional': NS(price=1000)},
+        ),
+        NS(
+            mock=False,
+            unit='unit:piece',
+            region='전국',
+            by_market_type={'traditional': NS(price=1000)},
+        ),
+        NS(mock=False, unit='unit:piece', region='서울', by_market_type={}),
     ]:
         env.cache.clear()
         monkeypatch.setattr(svc.price_service, 'get_price', lambda *a, price=price, **kw: price)

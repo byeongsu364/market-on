@@ -45,7 +45,9 @@ export function buildCardData(input: CardInput) {
         ]
       : []),
     ...(price
-      ? [`기준시세 ${price.reference_price.toLocaleString('ko-KR')}원 / ${unitLabel(price.unit)}`]
+      ? [
+          `기준시세 ${price.mock ? '예시 ' : ''}${price.reference_price.toLocaleString('ko-KR')}원 / ${unitLabel(price.unit)}`,
+        ]
       : ['기준시세 정보 없음']),
     ...(comparison ? [comparison] : []),
   ];
@@ -53,7 +55,7 @@ export function buildCardData(input: CardInput) {
     ...(price
       ? [
           // price.source에 조사일이 이미 있으면 다시 붙이지 않음 (실제 응답은 "… · 2026-11-25 조사" 포함)
-          `${price.source}${price.observed_on && !price.source.includes(price.observed_on) ? ` · ${price.observed_on} 조사` : ''} · ${price.region}${price.fallback ? ` · ${{ region_avg: '같은 지역 전체 평균', national_avg: '전국 평균', last_valid: '최근 조사값' }[price.fallback]}` : ''}`,
+          `${price.source}${!price.mock && price.observed_on && !price.source.includes(price.observed_on) ? ` · ${price.observed_on} 조사` : ''} · ${price.region}${price.fallback ? ` · ${{ region_avg: '같은 지역 전체 평균', national_avg: '전국 평균', last_valid: '최근 조사값' }[price.fallback]}` : ''}`,
         ]
       : []),
     ...new Set(item.criteria.map((c) => c.source)),
@@ -80,7 +82,8 @@ export function buildCardData(input: CardInput) {
     : null;
   const refLine = price
     ? {
-        label: '기준시세',
+        // 046: 예시 품종 시세(실제 조사값 아님)면 그렇게 적음
+        label: price.mock ? '기준시세(예시)' : '기준시세',
         value: `${price.reference_price.toLocaleString('ko-KR')}원`,
         unit: unitLabel(price.unit),
       }

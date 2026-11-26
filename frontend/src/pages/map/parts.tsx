@@ -1,6 +1,8 @@
 import ReviewSummary from '../../components/domain/ReviewSummary';
 import { useCallback, type ReactNode, type RefObject } from 'react';
 import { Link, type To } from 'react-router-dom';
+import NotificationBell from '../../components/layout/NotificationBell';
+import FavoriteButton from '../../components/domain/FavoriteButton';
 import BottomSheet from '../../components/common/BottomSheet';
 import Button, { ButtonLink } from '../../components/common/Button';
 import Icon from '../../components/common/Icon';
@@ -119,6 +121,7 @@ export function SearchPill({
           <Icon name="close" />
         </Link>
       )}
+      <NotificationBell />
       <Link to="/me" aria-label={t('mapMyInfo')} className={s.pillMe}>
         <span>
           <Icon name="user" size={20} />
@@ -279,6 +282,12 @@ export function SelectedStoreCard({
         )}
       </div>
       <ReviewSummary key={store.store_id} storeId={store.store_id} to={storeHref} />
+      <FavoriteButton
+        key={`favorite-${store.store_id}`}
+        storeId={store.store_id}
+        name={store.name}
+        marketId={new URL(storeHref, window.location.origin).searchParams.get('market') ?? ''}
+      />
       {itemName && !price && <p className={s.rowSub}>{t('mapNoStorePrice')}</p>}
       <div className={s.buttons}>
         <Button

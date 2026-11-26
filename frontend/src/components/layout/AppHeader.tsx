@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
 import Icon from '../common/Icon';
 import s from './layout.module.css';
 
@@ -33,6 +34,7 @@ export default function AppHeader({
         )}
         {title && <h1 className={s.appTitle}>{title}</h1>}
         {end}
+        <NotificationBell />
       </div>
     </header>
   );

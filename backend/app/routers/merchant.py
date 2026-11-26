@@ -1,15 +1,18 @@
+# FastAPI dependencies and pytest fixture imports are intentional.
+# ruff: noqa: B008
 """Approved merchant endpoints."""
 
-from fastapi import APIRouter, Depends, Query
-from app.deps import get_db, require_merchant, require_csrf
+from fastapi import APIRouter, BackgroundTasks, Depends, Query
+
 from app.core.config import settings
+from app.deps import get_db, require_csrf, require_merchant, require_merchant_write
 from app.schemas.merchant import (
+    PriceConfirm,
+    Repost,
+    SaleCreate,
+    SaleStatus,
     StoreLocation,
     StorePatch,
-    SaleCreate,
-    Repost,
-    SaleStatus,
-    PriceConfirm,
 )
 from app.services import merchant_service as service
 
@@ -32,13 +35,32 @@ def sales(status: SaleStatus = 'active', user=Depends(require_merchant), conn=De
 
 
 @router.post('/sales', status_code=201)
-def create(data: SaleCreate, user=Depends(require_merchant), conn=Depends(get_db)):
-    return service.create_sale(conn, user, data.model_dump())
+def create(
+    data: SaleCreate,
+    background_tasks: BackgroundTasks,
+    user=Depends(require_merchant_write, scope='function'),
+    conn=Depends(get_db, scope='function'),
+):
+    from app.services.notification_service import dispatch_sale
+
+    result = service.create_sale(conn, user, data.model_dump())
+    background_tasks.add_task(dispatch_sale, result['id'])
+    return result
 
 
 @router.post('/sales/{sale_id}/repost', status_code=201)
-def repost(sale_id: int, data: Repost, user=Depends(require_merchant), conn=Depends(get_db)):
-    return service.repost(conn, user, sale_id, data.ends_at)
+def repost(
+    sale_id: int,
+    data: Repost,
+    background_tasks: BackgroundTasks,
+    user=Depends(require_merchant_write, scope='function'),
+    conn=Depends(get_db, scope='function'),
+):
+    from app.services.notification_service import dispatch_sale
+
+    result = service.repost(conn, user, sale_id, data.ends_at)
+    background_tasks.add_task(dispatch_sale, result['id'])
+    return result
 
 
 @router.post('/sales/{sale_id}/end')
