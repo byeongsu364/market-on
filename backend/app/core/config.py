@@ -23,6 +23,8 @@ class Settings(BaseSettings):
         return self
 
     COOKIE_SECURE: bool = False
+    # 자동입력 방지 문자: 회원가입·입점 신청은 항상, 로그인은 같은 아이디로 2번 틀린 뒤부터
+    CAPTCHA_ENABLED: bool = True
     SESSION_DAYS: int = 30
     DATABASE_URL: str | None = None
     GEMINI_API_KEY: str | None = None
