@@ -44,6 +44,7 @@ class StorePrice(BaseModel):
 
 
 class Store(BaseModel):
+    varieties: list[str] = []
     lat: float | None = None
     lng: float | None = None
     category: str | None = None

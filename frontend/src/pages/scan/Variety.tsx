@@ -13,7 +13,7 @@ import { ItemTile } from '../../components/common/parts';
 import { formatPrice } from '../../utils/formatPrice';
 import { unitLabel } from '../../utils/convertUnit';
 import { euro, josa } from '../../utils/josa';
-import { BandCell } from './resultParts';
+import { BandCell, PriceHistoryChart } from './resultParts';
 import { varietyBand } from '../../utils/varietyBand';
 import type { VarietyPrice } from '../../types/contract';
 import s from './result.module.css';
@@ -114,7 +114,14 @@ export default function Variety() {
                       </div>
                     </div>
                     {v.description && <p className={s.body}>{v.description}</p>}
-                    <Harvest v={v} />
+                    {v.harvest && <Harvest v={v} />}
+                    <PriceHistoryChart
+                      itemId={itemId}
+                      varietyId={v.variety_id}
+                      varietyName={v.name}
+                      unit={v.unit}
+                      marketId={ctx.marketId ?? undefined}
+                    />
                     {seen && (
                       <div className={s.ifRow}>
                         <span>{t('scanIfPrice').replace('{price}', formatPrice(seen))}</span>

@@ -13,6 +13,7 @@ export type Criterion = {
   source: string;
 };
 export type Item = {
+  variety_id?: string | null;
   item_id: string;
   name: string;
   synonyms: string[];
@@ -166,6 +167,7 @@ export type AuthRequest = {
 };
 export type Captcha = { captcha_id: string; image: string; expires_in: number };
 export type SaleRequest = {
+  variety_id?: string | null;
   item_id: string;
   sale_price: number;
   regular_price?: number;
@@ -173,6 +175,7 @@ export type SaleRequest = {
   ends_at: string;
 };
 export type ClosingSale = SaleRequest & {
+  variety_name?: string | null;
   id: number;
   store_id: string;
   starts_at: string;
@@ -181,6 +184,7 @@ export type ClosingSale = SaleRequest & {
 };
 export type ActiveSale = ClosingSale & { store_name: string; item_name: string };
 export type MerchantStore = {
+  varieties?: Record<string, string[]>;
   payments?: PaymentMethod[];
   intro?: string | null;
   location?: LatLng | null;
@@ -369,6 +373,7 @@ export type StoreExtra = {
 };
 export type VarietyHarvest = { label: string; from?: string; to?: string };
 export type VarietyExtra = {
+  synonyms?: string[];
   description?: string | null;
   description_source?: string | null;
   harvest?: VarietyHarvest | null;

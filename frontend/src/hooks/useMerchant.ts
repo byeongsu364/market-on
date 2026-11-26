@@ -4,6 +4,7 @@ import * as api from '../api/merchant';
 import { getPending, decide } from '../api/admin';
 import { useResource, useAction } from './useResource';
 import { useItemCatalog } from './useFlows';
+import { getVarieties } from '../api/items';
 import { saleEnd } from '../utils/sale';
 export function useMerchantHome() {
   const store = useResource(api.getStore);
@@ -30,6 +31,10 @@ export function useSaleNew() {
   const store = useResource(api.getStore);
   const catalog = useItemCatalog();
   const [item, setItem] = useState('');
+  const [variety, setVariety] = useState('');
+  const varieties = useResource(
+    useCallback(() => (item ? getVarieties(item) : Promise.resolve([])), [item]),
+  );
   const [price, setPrice] = useState('');
   const [regular, setRegular] = useState('');
   const [unit, setUnit] = useState('');
@@ -40,6 +45,7 @@ export function useSaleNew() {
   const submit = () =>
     action.run({
       item_id: item,
+      variety_id: varieties.data?.some((v) => v.variety_id === variety) ? variety : null,
       sale_price: Number(price),
       ...(regular ? { regular_price: Number(regular) } : {}),
       ...(unit ? { unit_id: unit } : {}),
@@ -50,6 +56,9 @@ export function useSaleNew() {
     catalog,
     item,
     setItem,
+    variety,
+    setVariety,
+    varieties,
     price,
     setPrice,
     regular,
@@ -67,6 +76,8 @@ export function useSaleNew() {
 export function useStoreEdit() {
   const store = useResource(api.getStore);
   const catalog = useItemCatalog();
+  const [varieties, setVarieties] = useState<Record<string, string[]> | null>(null);
+  const varietyValue = varieties ?? store.data?.varieties ?? {};
   const [hours, setHours] = useState<{ open: string; close: string } | null>(null);
   const [selected, setSelected] = useState<string[] | null>(null);
   const [payments, setPayments] = useState<PaymentMethod[] | null>(null);
@@ -83,6 +94,8 @@ export function useStoreEdit() {
     store,
     catalog,
     chosen,
+    varietyValue,
+    setVarieties,
     value,
     action,
     setHours,
@@ -93,7 +106,15 @@ export function useStoreEdit() {
     toggle: (id: string) =>
       setSelected(chosen.includes(id) ? chosen.filter((i) => i !== id) : [...chosen, id]),
     save: () =>
-      action.run({ hours: value, item_ids: chosen, payments: paymentValue, intro: introValue }),
+      action.run({
+        hours: value,
+        item_ids: chosen,
+        payments: paymentValue,
+        intro: introValue,
+        varieties: Object.fromEntries(
+          Object.entries(varietyValue).filter(([id]) => chosen.includes(id)),
+        ),
+      }),
   };
 }
 export function useAdmin() {

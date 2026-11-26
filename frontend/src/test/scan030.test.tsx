@@ -97,7 +97,7 @@ it('품종 견줘 보기는 mock 필드의 설명·수확 시기만 쓰고 없�
   expect(within(fuji).getByText(/저장성이 좋아요/)).toBeInTheDocument();
   expect(within(fuji).getByText('살 만함')).toBeInTheDocument();
   const gold = screen.getByRole('heading', { name: '시나노골드' }).closest('article')!;
-  expect(within(gold).getByText('정보가 아직 없어요')).toBeInTheDocument();
+  expect(within(gold).queryByText('수확 시기')).not.toBeInTheDocument();
   expect(within(gold).getByText('기준시세 자료가 아직 없어요')).toBeInTheDocument();
   expect(within(gold).getByText('견줄 수 없음')).toBeInTheDocument();
   expect(within(gold).queryByRole('paragraph')).not.toBeInTheDocument();

@@ -14,6 +14,7 @@ def get_store(conn, user):
         raise AppError('STORE_NOT_FOUND', '점포를 찾을 수 없습니다.', 404)
     return {
         'store_id': store['id'],
+        'varieties': merchant_repo.varieties(conn, store_id),
         'name': store['name_ko'],
         'payments': store.get('payments', []),
         'intro': store.get('intro'),
@@ -39,10 +40,29 @@ def patch_store(conn, user, data):
         check(data.intro)
     with conn.transaction():
         user_repo.lock_store(conn, store_id)
+        current = merchant_repo.varieties(conn, store_id)
+        sold = (
+            data.item_ids
+            if data.item_ids is not None
+            else [i['item_id'] for i in merchant_repo.items(conn, store_id)]
+        )
+        selections = (
+            data.varieties
+            if data.varieties is not None
+            else {k: v for k, v in current.items() if k in sold}
+        )
+        from app.db.repositories import price_repo
+
+        for item, ids in selections.items():
+            if item not in sold or not set(ids) <= {
+                v['id'] for v in price_repo.varieties(conn, item)
+            }:
+                raise AppError('INVALID_VARIETY', '판매 품목의 품종을 선택하세요.', 422)
         if data.item_ids is not None:
             if set(data.item_ids) != merchant_repo.valid_items(conn, data.item_ids):
                 raise AppError('INVALID_ITEM', '품목을 확인하세요.', 422)
             store_repo.set_store_items(conn, store_id, data.item_ids, 'merchant')
+        merchant_repo.set_varieties(conn, store_id, selections)
         if data.payments is not None:
             conn.execute('update stores set payments=%s where id=%s', (data.payments, store_id))
         if 'intro' in data.model_fields_set:
@@ -70,6 +90,12 @@ def create_sale(conn, user, values):
             i['item_id'] for i in merchant_repo.items(conn, user['store_id'])
         }:
             raise AppError('ITEM_NOT_SOLD', '내 점포의 취급 품목을 선택하세요.', 422)
+        from app.db.repositories import price_repo
+
+        if values.get('variety_id') and values['variety_id'] not in {
+            v['id'] for v in price_repo.varieties(conn, values['item_id'])
+        }:
+            raise AppError('INVALID_VARIETY', '이 품목의 품종이 아닙니다.', 422)
         if values.get('unit_id') and not merchant_repo.valid_unit(conn, values['unit_id']):
             raise AppError('INVALID_UNIT', '판매 단위를 확인하세요.', 422)
         return closing_sale(

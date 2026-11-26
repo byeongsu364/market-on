@@ -93,6 +93,7 @@ export default function SaleForm({
                     icon={src && <img className={s.chipImg} src={src} alt="" />}
                     onClick={() => {
                       f.setItem(i.item_id);
+                      f.setVariety('');
                       f.setUnit(i.default_unit);
                     }}
                   >
@@ -103,6 +104,22 @@ export default function SaleForm({
           </ChipRow>
         </div>
       </Resource>
+      {!!f.varieties.data?.length && (
+        <ChipRow label="품종" wrap>
+          <Chip pressed={!f.variety} onClick={() => f.setVariety('')}>
+            품종 선택 안 함
+          </Chip>
+          {f.varieties.data.map((v) => (
+            <Chip
+              key={v.variety_id}
+              pressed={f.variety === v.variety_id}
+              onClick={() => f.setVariety(v.variety_id)}
+            >
+              {v.name}
+            </Chip>
+          ))}
+        </ChipRow>
+      )}
       <div className={s.fieldRow}>
         <Field
           label={t('discountPrice')}

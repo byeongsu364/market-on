@@ -84,7 +84,7 @@ def kamis_entities(conn, item_id=None):
 def varieties(conn, item_id):
     return fetch_rows(
         conn,
-        """select e.id,e.type,e.name_ko,e.kamis,r.props,
+        """select e.id,e.type,e.name_ko,e.kamis,e.attrs,r.props,
         r.subject_id as item_id from entity_relations r join entities e on e.id=r.object_id
         where r.subject_id=%s and r.predicate='hasGrade' and e.type='variety'
         order by e.id""",
@@ -257,3 +257,18 @@ def confirm_store_price(conn, store_id, item_id, unit_id, price, user_id):
         returning price,confirmed_at""",
         (store_id, item_id, unit_id, price, user_id),
     )[0]
+
+
+def observation_dates(conn, item_id, variety_id, start, end):
+    return [
+        r[0]
+        for r in conn.execute(
+            """select distinct p.exmn_ymd from price_observations p
+        join entities e on e.id=coalesce(%s,p.item_id)
+        where p.item_id=%s and (%s::text is null or p.variety_id=%s)
+        and p.se_cd='01' and p.grd_cd=coalesce(e.kamis->>'grd_cd','04')
+        and p.market_type in ('traditional','large_retail')
+        and p.exmn_ymd between %s and %s order by p.exmn_ymd""",
+            (variety_id, item_id, variety_id, variety_id, start, end),
+        )
+    ]

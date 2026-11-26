@@ -35,6 +35,7 @@ routers = [
     ask.router,
     scan.router,
     price.router,
+    price.plural_router,
     merchant.router,
     stores.router,
     recipe.router,

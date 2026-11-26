@@ -84,7 +84,7 @@ export default function Result() {
   const verdict = f.verdict;
   const band = verdict?.band ?? null;
   const variety = price?.varieties.find((v) => v.variety_id === f.varietyId);
-  const name = [item?.name, variety?.name].filter(Boolean).join(' ');
+  const name = [...new Set([item?.name, variety?.name])].filter(Boolean).join(' ');
   const reference = variety ? variety.reference_price : (price?.reference_price ?? null);
   const cheaper =
     f.seen && band && band >= 3
@@ -361,11 +361,19 @@ export default function Result() {
                 />
               )}
 
-              {isMock && !!price && (
+              {variety?.description && (
+                <p className={s.body}>
+                  {variety.description}
+                  {variety.description_source && <small> · {variety.description_source}</small>}
+                </p>
+              )}
+              {variety?.harvest && <p className={s.body}>수확 시기 · {variety.harvest.label}</p>}
+              {!!price && (
                 <PriceHistoryChart
                   itemId={f.itemId}
                   varietyId={f.varietyId}
                   varietyName={variety?.name}
+                  marketId={f.ctx.marketId ?? undefined}
                   unit={f.unit}
                   seen={f.seen}
                 />

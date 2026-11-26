@@ -334,14 +334,16 @@ def search_items(conn, query):
     # strpos treats %, _ and backslashes as literal query characters.
     return rows(
         conn,
-        """select entity_id from (
-        select distinct on (l.entity_id) l.entity_id,
+        """select entity_id, variety_id from (
+        select distinct on (coalesce(r.subject_id,l.entity_id)) coalesce(r.subject_id,l.entity_id) as entity_id,
+          case when e.type='variety' then e.id else null end as variety_id,
           case when l.label_norm=%s then 0
                when strpos(l.label_norm,%s)=1 then 1 else 2 end as rank,
           case when l.kind='preferred' then 0 else 1 end as preferred
         from entity_labels l join entities e on e.id=l.entity_id
-        where e.type='item' and strpos(l.label_norm,%s)>0
-        order by l.entity_id,rank,preferred
+        left join entity_relations r on r.object_id=e.id and r.predicate='hasGrade'
+        where (e.type='item' or (e.type='variety' and r.subject_id is not null)) and strpos(l.label_norm,%s)>0
+        order by coalesce(r.subject_id,l.entity_id),rank,preferred
         ) matches order by rank,preferred,entity_id limit 10""",
         (query, query, query),
     )
@@ -458,3 +460,8 @@ def variety_items(conn, variety_ids):
             (variety_ids,),
         )
     ]
+
+
+def source_title(conn, key):
+    row = conn.execute('select title from sources where source_key=%s', (key,)).fetchone()
+    return row[0] if row else None

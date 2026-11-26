@@ -16,7 +16,16 @@ class MarketPrice(BaseModel):
     name: str
 
 
-class VarietyPrice(BaseModel):
+class VarietyMetadata(BaseModel):
+    variety_id: str
+    name: str
+    description: str | None = None
+    description_source: str | None = None
+    harvest: dict[str, str] | None = None
+    synonyms: list[str] = []
+
+
+class VarietyPrice(VarietyMetadata):
     variety_id: str
     name: str
     reference_price: int | None
@@ -41,3 +50,16 @@ class PriceResponse(BaseModel):
     source: str
     by_market_type: dict[Literal['traditional', 'large_retail'], PriceStat]
     this_market: MarketPrice | None = None
+
+
+class HistoryPoint(BaseModel):
+    week_start: date
+    price: int | None
+
+
+class PriceHistory(BaseModel):
+    item_id: str
+    variety_id: str | None
+    unit: str
+    points: list[HistoryPoint]
+    source: str
