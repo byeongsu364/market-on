@@ -154,6 +154,14 @@ legend {
   }
 }
 
+/* 글자 크기(설정 > 글자 크기): 화면 본문을 비율로 키움 */
+:root[data-text-size='large'] .app-main {
+  zoom: 1.1;
+}
+:root[data-text-size='xlarge'] .app-main {
+  zoom: 1.22;
+}
+
 /* 예전 화면 조각이 아직 쓰는 공용 클래스(새 부품으로 옮기는 동안만) ----- */
 .chips {
   display: flex;
