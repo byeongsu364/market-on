@@ -26,3 +26,4 @@ class PriceReportRequest(BaseModel):
 class PriceReportResponse(BaseModel):
     id: int
     updated: bool
+    held: bool = False

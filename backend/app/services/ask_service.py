@@ -14,6 +14,7 @@ from app.knowledge import (
     ontology,
     retriever,
     season,
+    storage,
 )
 from app.llm import ask as ask_llm
 from app.llm.factory import get_embedder
@@ -78,6 +79,13 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
         )
         result.citations = season.statement_citations(statements)
         return result
+    if intent == 'store' and storage.is_fact_question(data.question):
+        statements = storage.storage_statements(conn, ids[0], item['name_ko'])
+        if statements:
+            result.kind = 'answer'
+            result.answer = ' '.join(text for text, _ in statements)
+            result.citations = season.statement_citations(statements)
+            return result
     key = answer_cache.cache_key(conn, ids[0], intent, data.lang, data.question)
     cached = answer_cache.get_cached_answer(conn, key)
     if cached:

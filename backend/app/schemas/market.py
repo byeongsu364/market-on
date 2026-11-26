@@ -67,6 +67,7 @@ class Store(BaseModel):
     highlight: bool
     active_sale: ActiveSale | None
     price: StorePrice | None = None
+    pending_reporters: int = 0
 
 
 class MarketMap(BaseModel):

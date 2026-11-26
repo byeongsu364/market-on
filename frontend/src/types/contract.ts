@@ -97,6 +97,7 @@ export type Store = {
   items_basis: 'merchant' | 'sbiz_guess' | 'mixed';
   guessed_item_ids: string[];
   price: StorePrice;
+  pending_reporters?: number;
   store_id: string;
   name: string;
   zone_id: string;
@@ -220,7 +221,7 @@ export type PriceReportRequest = {
   method: 'price_tag_photo' | 'manual';
   media_id?: string;
 };
-export type PriceReportResponse = { id: number; updated: boolean };
+export type PriceReportResponse = { id: number; updated: boolean; held: boolean };
 
 export type StorePrice = {
   price: number;

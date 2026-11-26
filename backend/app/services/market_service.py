@@ -132,6 +132,10 @@ def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
         hours = row['hours'] or {}
         sells = assortment.get(row['id'], [])
         sale = sales.get(row['id'])
+        shown, pending = None, 0
+        if item_id and item_id in sells:
+            _, shown, pending = store_price(conn, row, item_id, unit, with_pending=True)
+            shown = shown or market_avg
         stores.append(
             Store(
                 # 상가정보 좌표는 건물 단위(경동 108곳 중 101곳이 같은 점)라 지도 핀으로는
@@ -171,9 +175,8 @@ def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
                 else '',
                 highlight=item_id is not None and item_id in sells,
                 active_sale=ActiveSale(**sale) if sale else None,
-                price=store_price(conn, row, item_id, unit)[1] or market_avg
-                if item_id and item_id in sells
-                else None,
+                price=shown,
+                pending_reporters=pending,
             )
         )
     logger.info('Market %s: omitted %d stores without map coordinates', market_id, omitted)

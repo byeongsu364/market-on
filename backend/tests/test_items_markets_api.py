@@ -229,6 +229,7 @@ def test_markets_contract(public, caplog):
             'naver_name',
             'verified',
             'open_now',
+            'pending_reporters',
             'payments',
             'intro',
             'distance_m',

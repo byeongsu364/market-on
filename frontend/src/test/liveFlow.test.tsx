@@ -39,7 +39,7 @@ beforeEach(() => {
   vi.mocked(getMarket).mockReset().mockResolvedValue(market);
   vi.mocked(getPrice).mockImplementation(mock.price);
   vi.mocked(getPriceHistory).mockReset().mockResolvedValue(null);
-  vi.mocked(postPriceReport).mockReset().mockResolvedValue({ id: 1, updated: false });
+  vi.mocked(postPriceReport).mockReset().mockResolvedValue({ id: 1, updated: false, held: false });
   vi.mocked(recognize).mockReset();
   Object.defineProperty(navigator, 'geolocation', { configurable: true, value: undefined });
 });
@@ -396,4 +396,10 @@ it('서버 품종 설명·수확 시기·최근 4주 그래프를 결과에 표�
     'each',
     'market:demo',
   );
+});
+
+it('보류된 제보는 기준시세 차이 안내를 표시한다', async () => {
+  vi.mocked(postPriceReport).mockResolvedValue({ id: 1, updated: false, held: true });
+  show('/items/item:green_onion?market=market:demo', { price: 3000, method: 'manual' });
+  expect(await screen.findByText('기준시세와 차이가 커서 확인 후 반영돼요')).toBeInTheDocument();
 });

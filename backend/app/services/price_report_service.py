@@ -2,6 +2,8 @@
 
 from hashlib import sha256
 
+from . import price_service
+
 from app.core.config import settings
 from app.core.errors import AppError
 from app.db.repositories import knowledge_repo, media_repo, price_repo, store_repo
@@ -31,8 +33,29 @@ def submit(conn, data, device_id):
         price_repo.lock_device(conn, device_hash)
         if price_repo.hourly_report_count(conn, device_hash) >= 30:
             raise AppError('TOO_MANY_REPORTS', '한 시간에 30건까지 제보할 수 있습니다.', 429)
+        held = False
+        try:
+            reference = price_service.get_price(
+                conn,
+                data.item_id,
+                market_id=data.market_id,
+                unit_id=data.unit,
+                _include_varieties=False,
+            )
+        except AppError as exc:
+            if exc.code != 'PRICE_NOT_FOUND':
+                raise
+        else:
+            # Only compare matching denominations; a missing unit cannot identify the report unit.
+            if data.unit and reference.unit == data.unit:
+                amount = data.price / (data.quantity or 1)
+                held = (
+                    amount < reference.reference_price * 0.3
+                    or amount > reference.reference_price * 3
+                )
         values = data.model_dump(exclude={'unit'}) | {
             'unit_id': data.unit,
             'device_hash': device_hash,
+            'status': 'held' if held else 'ok',
         }
-        return price_repo.save_recent_report(conn, values)
+        return price_repo.save_recent_report(conn, values) | {'held': held}

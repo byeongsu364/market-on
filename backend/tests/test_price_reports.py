@@ -33,6 +33,14 @@ def api(monkeypatch):
     monkeypatch.setattr(media_repo, 'get_media', lambda c, i: {'kind': 'photo'})
     monkeypatch.setattr(price_repo, 'lock_device', Mock())
     monkeypatch.setattr(price_repo, 'hourly_report_count', lambda *a: 0)
+    from app.services import price_report_service
+    from app.core.errors import AppError
+
+    monkeypatch.setattr(
+        price_report_service.price_service,
+        'get_price',
+        Mock(side_effect=AppError('PRICE_NOT_FOUND', '없음', 404)),
+    )
     save = Mock(return_value={'id': 7, 'updated': False})
     monkeypatch.setattr(price_repo, 'save_recent_report', save)
     app.dependency_overrides[get_db] = lambda: conn
@@ -47,7 +55,7 @@ def test_contract_privacy_and_photo(api):
     client, save, _ = api
     result = client.post('/price-reports', json=BODY, headers=HEADERS)
     assert result.status_code == 201
-    assert result.json() == {'id': 7, 'updated': False}
+    assert result.json() == {'id': 7, 'updated': False, 'held': False}
     values = save.call_args.args[1]
     assert (
         values['device_hash'] == sha256((DEVICE + settings.DEVICE_HASH_SALT).encode()).hexdigest()
@@ -61,7 +69,7 @@ def test_contract_privacy_and_photo(api):
         | {'method': 'price_tag_photo', 'media_id': DEVICE, 'unit': 'unit:bunch', 'quantity': 3},
         headers=HEADERS,
     )
-    assert result.status_code == 201 and result.json() == {'id': 7, 'updated': True}
+    assert result.status_code == 201 and result.json() == {'id': 7, 'updated': True, 'held': False}
 
 
 @pytest.mark.parametrize(
@@ -159,3 +167,22 @@ def test_request_contract_keys():
         'method',
         'media_id',
     }
+
+
+@pytest.mark.parametrize('amount,held', [(290, True), (3010, True), (300, False), (3000, False)])
+def test_reference_boundaries_and_held_response(api, monkeypatch, amount, held):
+    from types import SimpleNamespace
+    from app.services import price_report_service
+
+    monkeypatch.setattr(
+        price_report_service.price_service,
+        'get_price',
+        Mock(return_value=SimpleNamespace(unit='unit:bunch', reference_price=1000)),
+    )
+    response = api[0].post(
+        '/price-reports',
+        json=BODY | {'unit': 'unit:bunch', 'price': amount * 2, 'quantity': 2},
+        headers=HEADERS,
+    )
+    assert response.status_code == 201 and response.json()['held'] is held
+    assert api[1].call_args.args[1]['status'] == ('held' if held else 'ok')

@@ -13,7 +13,7 @@ OUTLIER_FRACTION = 0.30
 SEOUL = ZoneInfo('Asia/Seoul')
 
 
-def aggregate(reports, confirmations, units, target_id, *, now=None):
+def aggregate(reports, confirmations, units, target_id, *, now=None, with_pending=False):
     now = now or datetime.now(UTC)
     cutoff = now - timedelta(days=WINDOW_DAYS)
     by_id = {u['id']: u for u in units}
@@ -30,12 +30,18 @@ def aggregate(reports, confirmations, units, target_id, *, now=None):
 
     latest = {}
     for row in sorted(reports, key=lambda r: (r['reported_at'], r.get('id', 0)), reverse=True):
-        if not row.get('store_id') or not cutoff <= row['reported_at'] <= now:
+        if (
+            row.get('status', 'ok') != 'ok'
+            or not row.get('store_id')
+            or not cutoff <= row['reported_at'] <= now
+        ):
             continue
         value = converted(row)
         if value is not None and row.get('device_hash'):
             latest.setdefault(row['device_hash'], (value, row['reported_at']))
     values = list(latest.values())
+    reporters = len(values)
+    pending = reporters if 0 < reporters < 3 else 0
     if len(values) >= 3:
         middle = median(v for v, _ in values)
         values = [(v, t) for v, t in values if abs(v - middle) <= middle * OUTLIER_FRACTION]
@@ -55,17 +61,18 @@ def aggregate(reports, confirmations, units, target_id, *, now=None):
 
     customers = (
         result(median(v for v, _ in values), max(t for _, t in values), 'customers', len(values))
-        if values
+        if reporters >= 3 and values
         else None
     )
     if confirmation:
         value = converted(confirmation)
         if value is not None:
-            return customers, result(value, confirmation['confirmed_at'], 'merchant', 0)
-    return customers, customers
+            shown = result(value, confirmation['confirmed_at'], 'merchant', 0)
+            return (customers, shown, pending) if with_pending else (customers, shown)
+    return (customers, customers, pending) if with_pending else (customers, customers)
 
 
-def store_price(conn, store, item_id, unit=None, *, reports=None):
+def store_price(conn, store, item_id, unit=None, *, reports=None, with_pending=False):
     item = get_item(conn, item_id)
     target = unit or item.default_unit
     if target not in item.units:
@@ -86,4 +93,5 @@ def store_price(conn, store, item_id, unit=None, *, reports=None):
         price_repo.store_confirmations(conn, store['id'], item_id),
         units,
         target,
+        with_pending=with_pending,
     )

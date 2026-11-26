@@ -519,3 +519,15 @@ def variety_items(conn, variety_ids):
 def source_title(conn, key):
     row = conn.execute('select title from sources where source_key=%s', (key,)).fetchone()
     return row[0] if row else None
+
+
+def storage_relations(conn, item_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select r.object_value, s.source_key, s.title, s.publisher, s.url, s.license
+        from entity_relations r join sources s on s.id=r.source_id
+        where r.subject_id=%s and r.predicate='storedAs' order by r.id""",
+        (item_id,),
+    )

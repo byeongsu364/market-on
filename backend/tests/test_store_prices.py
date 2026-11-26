@@ -44,14 +44,14 @@ def test_latest_device_outliers_and_contract():
         'stale',
         'merchant_confirmed',
     }
-    assert run([report(100), report(9000, 'b')])[1]['reporters'] == 2
+    assert run([report(100), report(9000, 'b')])[1] is None
 
 
 def test_window_stale_and_seoul_midnight():
     assert run([report(hours=169)])[1] is None
-    assert run([report(hours=24)])[1]['stale']
-    assert not run([report(hours=14)])[1]['stale']
-    assert run([report(hours=15.1)])[1]['stale']
+    assert run([report(hours=24, device=d) for d in 'abc'])[1]['stale']
+    assert not run([report(hours=14, device=d) for d in 'abc'])[1]['stale']
+    assert run([report(hours=15.1, device=d) for d in 'abc'])[1]['stale']
     assert run([report(store_id=None)])[1] is None
 
 
@@ -64,14 +64,14 @@ def test_window_stale_and_seoul_midnight():
     ],
 )
 def test_conversion(row, unit, expected):
-    shown = run([row], unit=unit)[1]
+    shown = run([row | {'device_hash': d} for d in 'abc'], unit=unit)[1]
     assert (shown['price'] if shown else None) == expected
 
 
 def test_confirmation_precedence_and_expiry():
     confirmation = dict(price=2000, unit_id='unit:piece', confirmed_at=NOW - timedelta(hours=1))
     assert run([report(hours=2)], [confirmation])[1]['source'] == 'merchant'
-    customers, shown = run([report()], [confirmation])
+    customers, shown = run([report(device=d) for d in 'abc'], [confirmation])
     assert shown['source'] == 'merchant' and customers['merchant_confirmed']
     assert run([], [confirmation])[1]['reporters'] == 0
     assert run([], [confirmation | {'confirmed_at': NOW - timedelta(days=8)}])[1] is None
@@ -79,13 +79,31 @@ def test_confirmation_precedence_and_expiry():
     rows = [report(1800, 'a', 2), report(1800, 'b', 2), report(9000, 'c')]
     assert run(rows, [confirmation])[1]['source'] == 'merchant'
     confirmation['confirmed_at'] = NOW - timedelta(days=3)
-    customers, shown = run([report(hours=24)], [confirmation])
+    customers, shown = run([report(hours=24, device=d) for d in 'abc'], [confirmation])
     assert shown['source'] == 'merchant' and customers['price'] == 1800
     confirmation['confirmed_at'] = NOW - timedelta(days=8)
-    assert run([report(hours=24)], [confirmation])[1]['source'] == 'customers'
+    assert (
+        run([report(hours=24, device=d) for d in 'abc'], [confirmation])[1]['source'] == 'customers'
+    )
 
 
 def test_missing_quantity_counts_as_one_unit():
     # 직접 입력 제보는 quantity가 NULL로 저장돼요
-    _, shown = run([report(2500, 'a', quantity=None), report(2400, 'b', quantity=None)])
-    assert shown['price'] == 2450 and shown['reporters'] == 2
+    _, shown = run(
+        [
+            report(2500, 'a', quantity=None),
+            report(2400, 'b', quantity=None),
+            report(2450, 'c', quantity=None),
+        ]
+    )
+    assert shown['price'] == 2450 and shown['reporters'] == 3
+
+
+def test_pending_unique_devices_held_and_window():
+    rows = [report(device='a', hours=1), report(device='a'), report(device='b')]
+    assert aggregate(rows, [], UNITS, 'unit:piece', now=NOW, with_pending=True) == (None, None, 2)
+    rows += [report(device='c', status='held'), report(device='d', hours=169)]
+    assert aggregate(rows, [], UNITS, 'unit:piece', now=NOW, with_pending=True) == (None, None, 2)
+    rows.append(report(device='c'))
+    customer, shown, pending = aggregate(rows, [], UNITS, 'unit:piece', now=NOW, with_pending=True)
+    assert shown == customer and shown['reporters'] == 3 and pending == 0

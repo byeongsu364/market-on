@@ -470,7 +470,7 @@ export function SellingStores({
                     <span>{zone}</span>
                   ) : null}
                   {st.guessed_item_ids.includes(itemId) && <span>{t('scanGuessTag')}</span>}
-                  <StorePriceDisplay price={st.price} />
+                  <StorePriceDisplay price={st.price} pendingReporters={st.pending_reporters} />
                 </span>
               </ListRow>
             );

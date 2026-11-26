@@ -225,7 +225,7 @@ def save_recent_report(conn, values):
     if recent:
         conn.execute(
             """update price_reports set unit_id=%s,quantity=%s,price=%s,method=%s,
-            media_id=%s,store_id=%s,reported_at=clock_timestamp() where id=%s""",
+            media_id=%s,store_id=%s,status=%s,reported_at=clock_timestamp() where id=%s""",
             (
                 values['unit_id'],
                 values['quantity'],
@@ -233,6 +233,7 @@ def save_recent_report(conn, values):
                 values['method'],
                 values['media_id'],
                 values['store_id'],
+                values.get('status', 'ok'),
                 recent[0],
             ),
         )

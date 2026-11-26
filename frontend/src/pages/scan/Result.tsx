@@ -188,7 +188,11 @@ export default function Result() {
           ))}
           <Chip onClick={() => f.setStoreId(null)}>{t('scanSkip')}</Chip>
         </ChipRow>
-        {Number(f.value) > 0 && <p className={s.note}>{t('scanReportNote')}</p>}
+        {Number(f.value) > 0 && (
+          <p className={s.note}>
+            {f.reportHeld ? '기준시세와 차이가 커서 확인 후 반영돼요' : t('scanReportNote')}
+          </p>
+        )}
       </div>
     </Resource>
   );
