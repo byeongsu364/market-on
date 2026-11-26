@@ -17,8 +17,7 @@ from pathlib import Path
 
 from app.clients import vision
 from app.db.pool import connection
-from app.knowledge.ontology import match_vision_labels
-from app.services import price_tag, scan_service
+from app.services import scan_service
 
 from ._common import run
 
@@ -32,7 +31,7 @@ def check(folder: Path, save: bool) -> None:
     photos = sorted(p for p in folder.iterdir() if p.suffix.lower() in PHOTOS)
     if not photos:
         raise SystemExit(f'사진이 없어요: {folder}')
-    rows, times = [], []
+    rows, times, saved = [], [], 0
     with connection() as conn:
         for path in photos:
             raw = path.read_bytes()
@@ -46,13 +45,8 @@ def check(folder: Path, save: bool) -> None:
                 rows.append(f'| {path.name} | 비전 실패 또는 한도 | - | - | - | {seconds:.2f}초 |')
                 continue
             times.append(seconds)
-            labels = scan_service.labels_from(result)
-            candidates = match_vision_labels(conn, labels[: scan_service.VISION_LABELS_USED])
-            if not candidates and labels:
-                known = scan_service._known_labels(conn, labels)
-                candidates = match_vision_labels(conn, known[: scan_service.VISION_LABELS_USED])
-            item_id = candidates[0]['item_id'] if candidates else None
-            tag = price_tag.parse(conn, result['text'], item_id) if result['text'].strip() else None
+            found = scan_service.interpret(conn, result)  # 서버와 같은 방법
+            candidates, tag = found['candidates'], found['price_tag']
             if save:
                 FIXTURES.mkdir(parents=True, exist_ok=True)
                 (FIXTURES / f'{path.stem}.json').write_text(
@@ -63,13 +57,14 @@ def check(folder: Path, save: bool) -> None:
                     ),
                     encoding='utf-8',
                 )
+                saved += 1
             top = ', '.join(f'{c["name"]}({c["confidence"]:.2f})' for c in candidates) or '-'
             scored = ', '.join(f'{label}({score:.2f})' for label, score in result['labels'][:6])
             text = ' / '.join(result['text'].split('\n'))[:40]
             price = f'{int(tag["price"]):,}원' if tag and tag['price'] else '가격 못 읽음'
-            tag_text = (
-                f'{price} · {tag["unit_text"] or "-"} · {tag["variety_id"] or "-"}' if tag else '-'
-            )
+            tag_text = f'{price} · {tag["unit_text"] or "-"}' if tag else '-'
+            if found['variety_id']:
+                tag_text += f' · 품종 {found["variety_id"]}'
             rows.append(
                 f'| {path.name} | {scored} | {top} | {text or "-"} | {tag_text} | {seconds:.2f}초 |'
             )
@@ -78,8 +73,8 @@ def check(folder: Path, save: bool) -> None:
     print('\n'.join(rows))
     if times:
         print(f'\n비전 호출 {len(times)}장 · 중앙값 {statistics.median(times):.2f}초')
-    if save:
-        print(f'비전 응답 저장: {FIXTURES}')
+    if saved:
+        print(f'비전 응답 {saved}개 저장: {FIXTURES}')
 
 
 def main():

@@ -18,7 +18,8 @@ entities:
     attrs: {}
     source: src:team-draft
     labels: {"ko": ["대파", "파"]}
-    vision: [green onion, scallion]
+    # 비전 실제 응답(11/27, 대파 사진 3장)에서 확인: Scallion·Welsh onion·Leek
+    vision: [green onion, scallion, welsh onion, leek]
     criteria:
       - {key: leaf, text: 잎 끝까지 탄력 있어 보이고 마른 잎이 섞여 있지 않아요, source: 'src:nics-month-food-green-onion', labels: {en: [Healthy leaves]}}
       - {key: stem, text: 줄기의 흰 부분이 많고 깨끗해요, source: 'src:nics-month-food-green-onion'}
@@ -101,6 +102,8 @@ entities:
     kamis: {"ctgry_cd": "400", "item_cd": "416", "vrty_cd": "00", "grd_cd": "04", "unit": "개", "unit_sz": "5"}
     attrs: {}
     labels: {"ko": ["단감"], "en": ["sweet persimmon"]}
+    # 비전 실제 응답(11/27)은 "Persimmon"·"Common Persimmon" (sweet persimmon으로는 안 줌)
+    vision: [persimmon]
     criteria:
       - {key: calyx, text: 꼭지와 과실 사이에 틈 없이 붙어 있어요, source: 'src:nics-month-food-persimmon'}
       - {key: spots, text: 전체적으로 얼룩이 없어요, source: 'src:nics-month-food-persimmon'}
@@ -122,6 +125,8 @@ entities:
     kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "01", grd_cd: "15", unit: 개, unit_sz: "10"}
     attrs: {}
     labels: {ko: [귤, 감귤, 밀감], en: [mandarin, tangerine]}
+    # 비전 실제 응답(11/27, 귤 사진 3장)에서 확인: Mandarin orange·Clementine
+    vision: [mandarin orange, clementine]
     criteria:
       - {key: skin, text: 껍질이 얇고 껍질과 과육 사이에 빈 공간 없이 붙어 있어요, source: 'src:nics-month-food-mandarin'}
       - {key: shape, text: 꼭지 부분이 튀어나오지 않고 좌우로 둥글고 납작해요, source: 'src:nics-month-food-mandarin'}

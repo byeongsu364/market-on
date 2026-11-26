@@ -186,7 +186,8 @@ def test_mandarin_catalog_and_documents():
     assert len(sources) == 26  # 047: 공유 원문 출처 10개 추가
     item = next(e for e in entities if e['id'] == 'item:mandarin')
     assert item['labels'] == {'ko': ['귤', '감귤', '밀감'], 'en': ['mandarin', 'tangerine']}
-    assert not item.get('vision')
+    # 비전 라벨은 실제 구글 비전 응답에서 확인한 것만 (11/27, 귤 사진 3장)
+    assert item['vision'] == ['mandarin orange', 'clementine']
     assert len(item['criteria']) == 4
     assert all(c['source'] in sources for c in item['criteria'])
     grades = [r for r in item['relations'] if r['p'] == 'hasGrade']

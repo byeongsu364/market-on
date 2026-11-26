@@ -17,7 +17,7 @@
 | 9 | 한국관광공사 관광음식 ([15174840](https://www.data.go.kr/data/15174840/openapi.do)) | G3 | 공공데이터포털 | `DATA_GO_KR_KEY` | 한 번 | ✅ 호출 확인 |
 | 10 | 식품안전나라 레시피 DB ([COOKRCP01](https://www.foodsafetykorea.go.kr/api/openApiInfo.do?svc_no=COOKRCP01)) | F1·F2 | 식품안전나라 별도 키 | `FOODSAFETY_KEY` | 한 번 전부 | ✅ 호출 확인 · 레시피 11개 적재 (11/26) · 이용허락범위 제한 없음(공공데이터포털 15060073) |
 | 11 | 네이버 지도 (Maps · Web Dynamic Map) | 시장 위치 지도 | 네이버 클라우드 플랫폼 콘솔 | `NAVER_MAP_CLIENT_ID` / `NAVER_MAP_CLIENT_SECRET` | 화면 (지도 스크립트) | ✅ 발급·지도 표시 확인, 시장 지도 화면에 연결됨 (11/26) |
-| 20 | Google Cloud Vision (LABEL + TEXT 한 번에) | **사진 품목 인식·가격표 글자 (유일한 인식 경로, 040)** | Google Cloud 콘솔 프로젝트 `market-on` | `GOOGLE_VISION_API_KEY`, `VISION_DAILY_LIMIT`(300), `VISION_MONTHLY_LIMIT`(1000) | 서버 (`clients/vision.py`) | 🔑 키 발급 (11/26) · 코드 연결 (11/27, 실제 사진 확인 전) · 키 제한(Cloud Vision API만) 확인 필요 |
+| 20 | Google Cloud Vision (LABEL + TEXT 한 번에) | **사진 품목 인식·가격표 글자 (유일한 인식 경로, 040)** | Google Cloud 콘솔 프로젝트 `market-on` | `GOOGLE_VISION_API_KEY`, `VISION_DAILY_LIMIT`(300), `VISION_MONTHLY_LIMIT`(1000) | 서버 (`clients/vision.py`) | 🔑 키 발급 (11/26) · 코드 연결 (11/27) · 실제 사진 17장 확인: 비전 1.03초, 1순위 15/17 (라벨 + 사진 속 글자) · 키 제한(Cloud Vision API만) 확인 필요 |
 | 21 | 카카오맵 (지도 JavaScript SDK · 로컬 REST API) | (예비) 네이버 지도를 못 쓸 때 지도 표시, 주소→좌표 | 카카오 디벨로퍼스 앱 `Market-On` (ID 1668225) | `KAKAO_JS_KEY` / `KAKAO_REST_API_KEY` | 화면 (지도 스크립트) / 서버 | 🔑 키 발급·카카오맵 사용 ON (11/27) · 아직 코드에서 안 씀 |
 
 - 공공데이터포털 API(1~9번)는 **계정당 인증키 하나**로 모두 쓴다. API마다 활용신청만 따로 한다.

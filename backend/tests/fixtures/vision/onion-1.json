@@ -1,0 +1,45 @@
+{
+  "labels": [
+    [
+      "Food",
+      0.99189675
+    ],
+    [
+      "Ingredient",
+      0.96601385
+    ],
+    [
+      "Produce",
+      0.9606622
+    ],
+    [
+      "Natural foods",
+      0.8953252
+    ],
+    [
+      "Root Vegetables",
+      0.80862325
+    ],
+    [
+      "Vegetable",
+      0.8049921
+    ],
+    [
+      "Staple food",
+      0.7543716
+    ],
+    [
+      "Potato",
+      0.73841214
+    ],
+    [
+      "Market",
+      0.73354954
+    ],
+    [
+      "Yukon Gold potato",
+      0.7288518
+    ]
+  ],
+  "text": "양파\n133.000"
+}

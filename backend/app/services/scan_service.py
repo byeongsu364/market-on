@@ -4,6 +4,7 @@
 """
 
 import logging
+import re
 from datetime import datetime
 from time import monotonic
 from types import SimpleNamespace
@@ -137,6 +138,153 @@ def labels_from(result: dict | None) -> list[str]:
     return [label.lower() for label, _ in ranked]
 
 
+def _tokens(text: str) -> list[str]:
+    return re.findall(r'[a-z0-9]+', text.lower())
+
+
+def _known_labels(conn, labels: list[str]) -> tuple[list[str], list[str]]:
+    """온톨로지와 맞는 비전 라벨만 (비전 점수 순서 유지).
+
+    비전은 "Food", "Fruit"처럼 넓은 라벨을 먼저 주고, 품목 라벨("Persimmon", "Mandarin orange")은
+    7~10번째에 줄 때가 많아요(11/27 실제 사진 17장). 10개를 모두 보고, 사전 라벨과 같거나
+    사전 라벨을 품는 라벨만 남겨요 ("yellow onion" ⊃ "onion").
+    넓은 라벨이 사전 라벨 안에 있는 경우("orange" ⊂ "mandarin orange")는 받지 않아요.
+
+    돌려주는 값: (실제 응답에서 확인한 비전 라벨로 맞은 것, 영어 품목 이름으로만 맞은 것).
+    047에서 품목이 95개로 늘면서 "Orange"(오렌지)·"Potato"(감자) 같은 넓은 라벨이 영어 이름으로
+    바로 붙어서, 확인된 비전 라벨("clementine", "persimmon")을 먼저 봐요.
+    """
+    from app.db.repositories import knowledge_repo
+
+    rows = knowledge_repo.vision_item_labels(conn)
+    confirmed = [_tokens(r['label']) for r in rows if r.get('kind') == 'vision']
+    names = [_tokens(r['label']) for r in rows if r.get('kind') != 'vision']
+
+    def contains(tokens, part):
+        return any(tokens[i : i + len(part)] == part for i in range(len(tokens) - len(part) + 1))
+
+    def hit(tokens, dictionary):
+        return any(t and (tokens == t or contains(tokens, t)) for t in dictionary)
+
+    by_vision, by_name = [], []
+    for label in labels:
+        tokens = _tokens(label)
+        if not tokens:
+            continue
+        if hit(tokens, confirmed):
+            by_vision.append(label)
+        elif hit(tokens, names):
+            by_name.append(label)
+    # 더 구체적인 라벨이 있으면 그 안에 든 넓은 라벨은 뺌 ("mandarin orange"가 있으면 "orange" 제외)
+    chosen = [_tokens(label) for label in by_vision + by_name]
+    by_name = [
+        label
+        for label in by_name
+        if not any(o != _tokens(label) and contains(o, _tokens(label)) for o in chosen)
+    ]
+    return by_vision, by_name
+
+
+def items_in_text(conn, text: str) -> list[str]:
+    """사진 속 글자(가격표·상자)에 적힌 품목 이름 → 품목 ID (온톨로지 한국어 라벨, AI 없음).
+
+    "대파2500" → 대파, "홀로꿀사과" → 사과, "신고배" → 품종 → 배, "효돈감귤" → 귤.
+    한 글자 이름(파·배·귤)은 그 낱말만 있을 때만 봐요 ("파인애플"의 '파'는 대파가 아님).
+    """
+    from app.db.repositories import knowledge_repo
+
+    rows = [
+        (label, eid)
+        for label, eid, _ in knowledge_repo.label_dictionary(conn)
+        # 가격표·상자 글자는 한국어라 한글 이름만 봐요 ("appear" 속 "pear" 같은 오인 방지)
+        if label and eid.startswith(('item:', 'variety:')) and re.search('[가-힣]', label)
+    ]
+    rows.sort(key=lambda row: (-len(row[0]), row[1]))
+    found: list[str] = []
+    for word in re.split(r'[\s/·,()\[\]<>"\'|]+', text.lower()):
+        word = re.sub(r'[^0-9a-z가-힣]', '', word)
+        occupied: set[int] = set()
+        for label, eid in rows:
+            for match in re.finditer(re.escape(label), word):
+                start, end = match.span()
+                if len(label) == 1 and (start or re.match('[가-힣]', word[end : end + 1])):
+                    continue
+                span = set(range(start, end))
+                if occupied & span:
+                    continue
+                occupied |= span
+                if eid not in found:
+                    found.append(eid)
+    items: list[str] = []
+    for eid in found:
+        ids = [eid] if eid.startswith('item:') else knowledge_repo.variety_items(conn, [eid])
+        for item_id in ids:
+            if item_id not in items and knowledge_repo.get_item(conn, item_id):
+                items.append(item_id)
+    return items
+
+
+# 사진 속 글자에 품목이 하나만 적혀 있으면 확신도 (0.8 이상이면 화면이 바로 골라 둠)
+TEXT_ONE_ITEM_CONFIDENCE = 0.9
+TEXT_ITEM_CONFIDENCE = 0.6
+
+
+def candidates_from(conn, labels: list[str], text: str) -> list[dict]:
+    """비전 라벨(10개 전체) + 사진 속 글자의 품목 이름 → 후보 최대 3개."""
+    from app.db.repositories import knowledge_repo
+
+    by_vision, by_name = _known_labels(conn, labels)
+    known = by_vision + by_name
+    candidates = match_vision_labels(conn, known[:VISION_LABELS_USED]) if known else []
+    in_text = items_in_text(conn, text) if text.strip() else []
+    if not in_text:
+        return candidates
+    by_id = {c['item_id']: c for c in candidates}
+    if len(in_text) == 1:
+        item_id = in_text[0]
+        # 글자가 1순위: 라벨과 같은 품목이거나, 라벨로 못 찾았거나, 라벨이 영어 품목 이름으로만 맞았을 때
+        # (단감 사진에 "Orange", 양파 사진에 "Potato"가 와도 가격표에 "단감"·"양파"가 있으면 글자를 믿음)
+        if item_id in by_id or not candidates or not by_vision:
+            # 라벨과 글자가 같은 품목을 가리키거나 라벨로 못 찾았으면 글자가 1순위
+            first = by_id.get(item_id) or {
+                'item_id': item_id,
+                'name': knowledge_repo.get_item(conn, item_id)['name_ko'],
+                'confidence': 0.0,
+            }
+            first = first | {'confidence': max(first['confidence'], TEXT_ONE_ITEM_CONFIDENCE)}
+            rest = [c for c in candidates if c['item_id'] != item_id]
+            return [first, *rest][:3]
+    extra = [
+        {
+            'item_id': item_id,
+            'name': knowledge_repo.get_item(conn, item_id)['name_ko'],
+            'confidence': TEXT_ITEM_CONFIDENCE,
+        }
+        for item_id in in_text
+        if item_id not in by_id
+    ]
+    return sorted([*candidates, *extra], key=lambda c: (-c['confidence'], c['item_id']))[:3]
+
+
+def interpret(conn, result: dict | None) -> dict:
+    """비전 응답 → 후보·가격표·품종. 서버(recognize)와 확인 스크립트(vision_check)가 같이 써요."""
+    labels = labels_from(result)
+    text = result['text'] if result else ''
+    candidates = candidates_from(conn, labels, text)
+    tag = None
+    variety = {'variety_id': None, 'variety_text': None}
+    if text.strip():
+        item_id = candidates[0]['item_id'] if candidates else None
+        variety = price_tag_reader.read_variety(conn, text, item_id)
+        tag = price_tag_reader.parse(conn, text, item_id)
+    return {
+        'vision_labels': labels[:VISION_LABELS_USED],
+        'candidates': candidates,
+        'price_tag': tag,
+        **variety,
+    }
+
+
 async def recognize(conn, image: bytes, use_location: bool = False) -> dict:
     ext, mime = image_format(image)
     # 저장·비전 전송 전에 메타데이터(위치·기기·시각)를 지움. 위치는 동의했을 때만 대략값으로 남김
@@ -150,34 +298,10 @@ async def recognize(conn, image: bytes, use_location: bool = False) -> dict:
     gps = None  # 원래 좌표는 여기서 버림
     media_id = await run_in_threadpool(save_photo, conn, image, ext, mime, location)
     result = await run_in_threadpool(call_vision, image)
-    labels = labels_from(result)
-    # 비전은 "Food", "Fruit"처럼 넓은 라벨을 먼저 줄 때가 많아요. 사전에 있는 라벨을 앞으로 당겨서 매칭
-    candidates = await run_in_threadpool(match_vision_labels, conn, labels[:VISION_LABELS_USED])
-    if not candidates and labels:
-        known = await run_in_threadpool(_known_labels, conn, labels)
-        candidates = await run_in_threadpool(match_vision_labels, conn, known[:VISION_LABELS_USED])
-    tag = None
-    variety = {'variety_id': None, 'variety_text': None}
-    if result and result['text'].strip():
-        item_id = candidates[0]['item_id'] if candidates else None
-        variety = await run_in_threadpool(
-            price_tag_reader.read_variety, conn, result['text'], item_id
-        )
-        tag = await run_in_threadpool(price_tag_reader.parse, conn, result['text'], item_id)
+    found = await run_in_threadpool(interpret, conn, result)
     return {
         'model': VISION_MODEL,
-        'vision_labels': labels[:VISION_LABELS_USED],
-        'candidates': candidates,
+        **found,
         'media_id': media_id,
-        'price_tag': tag,
-        **variety,
         'photo_location': location,
     }
-
-
-def _known_labels(conn, labels: list[str]) -> list[str]:
-    """온톨로지 비전 라벨 사전에 있는 라벨만 (비전 점수 순서 유지)."""
-    from app.db.repositories import knowledge_repo
-
-    dictionary = {row['label'].strip().lower() for row in knowledge_repo.vision_item_labels(conn)}
-    return [label for label in labels if label in dictionary]

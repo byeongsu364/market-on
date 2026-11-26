@@ -1,0 +1,45 @@
+{
+  "labels": [
+    [
+      "Produce",
+      0.9794772
+    ],
+    [
+      "Ingredient",
+      0.9581496
+    ],
+    [
+      "Vegetable",
+      0.9573152
+    ],
+    [
+      "Natural foods",
+      0.94361806
+    ],
+    [
+      "Food",
+      0.93189836
+    ],
+    [
+      "Leek",
+      0.8782851
+    ],
+    [
+      "Leaf vegetable",
+      0.84242535
+    ],
+    [
+      "Scallion",
+      0.83993626
+    ],
+    [
+      "Welsh onion",
+      0.83593124
+    ],
+    [
+      "Calçot",
+      0.7932317
+    ]
+  ],
+  "text": "대파\n1단\n3000\nOhmy News"
+}

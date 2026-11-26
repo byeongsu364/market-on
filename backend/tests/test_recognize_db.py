@@ -185,3 +185,55 @@ def test_llm_call_metadata(db):
         assert row[:7] == ('ask', 'openai', 'openai:test', 123, True, 'unknown_item', True)
         assert row[7] is not None and row[8] == 'write'
         raise Rollback()
+
+
+VISION_FIXTURES = Path(__file__).with_name('fixtures') / 'vision'
+# 11/27 실제 구글 비전 응답 17장(인터넷 시장 사진). 정답 품목(1순위), 가격표 기대값
+# 047(품목 95개) 이후: "Orange"·"Potato" 같은 넓은 라벨이 오렌지·감자에 붙어도 확인된 비전 라벨·가격표 글자가 우선
+EXPECTED = {
+    'apple-1': ('item:apple', 10000),  # 라벨은 넓은 것뿐 → 글자 "사과"
+    'apple-2': ('item:apple', None),
+    'apple-3': ('item:apple', None),  # "홀로꿀사과 144개만원": 글자 잘못 읽어 가격은 비움
+    'green_onion-1': ('item:green_onion', 3000),
+    'green_onion-2': ('item:green_onion', None),  # 가격 여러 개 → 비움
+    'green_onion-3': ('item:green_onion', None),  # Onion보다 확인된 비전 라벨 Welsh onion·Leek 우선
+    'mandarin-1': ('item:mandarin', None),  # 상자 글씨 4141은 가격 아님
+    'mandarin-2': ('item:mandarin', None),  # 글자 "타이벡 귤", '스위티오 파인'의 '파'는 대파 아님
+    'mandarin-3': ('item:mandarin', None),  # Clementine
+    'onion-1': ('item:onion', None),  # 비전은 감자로 봄 → 글자 "양파"
+    'onion-2': ('item:onion', None),  # 마트 가격표: 가격 여러 개
+    'onion-3': ('item:onion', None),
+    'pear-1': (None, None),  # 비전이 오렌지·호박으로 보고 글자도 없음 → 못 맞힘 (품목 확인 안 함)
+    'pear-2': ('item:pear', None),  # 글자 "신고배" → 품종 → 배, 잘못 읽은 "374"는 가격 아님
+    'persimmon-1': ('item:sweet_persimmon', None),  # Persimmon (7번째 라벨)
+    'persimmon-2': ('item:sweet_persimmon', 3000),  # 비전은 귤로 봄 → 글자 "단감"
+    'persimmon-3': ('item:sweet_persimmon', None),  # 비전은 토마토로 봄 → 글자 "단감"
+}
+
+
+def test_real_vision_fixtures(db):
+    """실제 비전 응답으로 품목 후보·가격표를 확인해요 (키 없이, 서버와 같은 scan_service.interpret)."""
+    import json
+
+    from app.services.scan_service import interpret
+
+    data = Path(__file__).resolve().parents[2] / 'data'
+    assert {p.stem for p in VISION_FIXTURES.glob('*.json')} == set(EXPECTED)
+    with db.transaction():
+        load_sources(db, data / 'sources.yaml')
+        load_ontology(db, data / 'ontology')
+        top_hits = 0
+        for name, (item_id, price) in EXPECTED.items():
+            raw = json.loads((VISION_FIXTURES / f'{name}.json').read_text(encoding='utf-8'))
+            result = {'labels': [tuple(pair) for pair in raw['labels']], 'text': raw['text']}
+            found = interpret(db, result)
+            ids = [c['item_id'] for c in found['candidates']]
+            if item_id is None:
+                assert 'item:pear' not in ids[:1], name  # 배로 잘못 붙지는 않음
+            else:
+                assert ids[:1] == [item_id], (name, ids)
+                top_hits += 1
+            tag = found['price_tag']
+            assert (tag['price'] if tag else None) == price, (name, tag)
+        assert top_hits == 16
+        raise Rollback()
