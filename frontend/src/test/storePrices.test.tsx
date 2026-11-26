@@ -34,7 +34,7 @@ it('손님 가격을 그대로 확인 요청한다', async () => {
       <MerchantPrices />
     </SessionProvider>,
   );
-  fireEvent.click(await screen.findByRole('button', { name: '확인' }));
+  fireEvent.click(await screen.findByRole('button', { name: /맞아요/ }));
   expect(post).toHaveBeenCalledWith({ item_id: 'i', unit: price.unit, price: 1800 });
   vi.restoreAllMocks();
 });

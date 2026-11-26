@@ -89,12 +89,13 @@ it('입점 검색·수요·신청 완료 뒤 pending 관리자가 로그인한�
   fireEvent.change(await screen.findByLabelText('시장 이름'), { target: { value: '등록' } });
   fireEvent.click(screen.getByRole('button', { name: '검색' }));
   fireEvent.click(await screen.findByRole('button', { name: '등록 시장' }));
-  await screen.findByText('이번 주 이 시장 근처에서 Market-On을 연 사람 5명 미만');
+  await screen.findByText('최근 7일 동안 손님 5명 미만이 이 시장을 요청했어요');
   fireEvent.change(screen.getByLabelText('시장 공식 연락처'), { target: { value: '02-123-4567' } });
   fireEvent.change(screen.getByLabelText('아이디'), { target: { value: 'join_manager' } });
   fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'password123' } });
   fireEvent.click(screen.getByRole('button', { name: '입점 신청' }));
-  await screen.findByText(/운영팀이 확인하면 시장 관리자 화면이 열려요/);
+  await screen.findByRole('heading', { name: '신청을 보냈어요' });
+  expect(screen.getByText(/운영팀이 확인하면 시장 관리자 화면이 열려요/)).toBeInTheDocument();
   const result = await auth.login({ login_id: 'join_manager', password: 'password123' });
   expect(result.user?.status).toBe('pending');
   expect(result.user?.role).toBe('market_admin');
@@ -114,9 +115,9 @@ it.each(['approve', 'reject'] as const)(
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     const decide = vi.spyOn(api, 'decide');
     show('/admin');
-    const heading = await screen.findByRole('heading', { name: listed.name });
-    const button = within(heading.closest('article')!).getByRole('button', {
-      name: decision === 'approve' ? '승인' : '거절',
+    const row = await screen.findByRole('row', { name: new RegExp(listed.name) });
+    const button = within(row).getByRole('button', {
+      name: decision === 'approve' ? /승인/ : /거절/,
     });
     fireEvent.click(button);
     expect(decide).not.toHaveBeenCalled();
