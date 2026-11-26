@@ -46,6 +46,7 @@ def test_request(configured, monkeypatch, image, mime):
     assert kwargs['headers'] == {'Authorization': 'Bearer test-super-secret'}
     assert kwargs['json'] == {
         'model': 'chosen-model',
+        'max_completion_tokens': 2048,
         'messages': [
             {'role': 'system', 'content': 'rules'},
             {

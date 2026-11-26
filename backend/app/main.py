@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from app.db.pool import close_pool
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.llm import quota as llm_quota
 from app.schemas.market import PublicConfig
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.logging import setup_logging
@@ -71,6 +72,28 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+class LLMClientKey:
+    """외부 AI 손님별 횟수 규칙(app/llm/quota.py)에 쓸 구분값을 요청마다 정해 둬요."""
+
+    def __init__(self, inner):
+        self.inner = inner
+
+    async def __call__(self, scope, receive, send):
+        if scope['type'] != 'http':
+            return await self.inner(scope, receive, send)
+        device = dict(scope.get('headers') or []).get(b'x-device-id', b'')[:64].decode('latin-1')
+        client = scope.get('client')
+        key = f'device:{device}' if device else (f'ip:{client[0]}' if client else None)
+        token = llm_quota.client_key.set(key)
+        try:
+            await self.inner(scope, receive, send)
+        finally:
+            llm_quota.client_key.reset(token)
+
+
+app.add_middleware(LLMClientKey)
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(RequestValidationError, validation_error_handler)
 for router in routers:

@@ -11,7 +11,8 @@ from app.core.errors import AppError
 from app.db.repositories import llm_call_repo
 from .base import LLMProvider
 from .factory import _provider
-from .limits import PROVIDER_TIMEOUTS
+from . import quota
+from .limits import EXTERNAL_PROVIDERS, PROVIDER_TIMEOUTS
 
 T = TypeVar('T')
 
@@ -30,6 +31,8 @@ def model_name(name):
         return settings.OLLAMA_CHAT_MODEL
     if name == 'openai':
         return 'openai:' + (settings.OPENAI_CHAT_MODEL or '')
+    if name == 'gemini':
+        return 'gemini:' + settings.GEMINI_CHAT_MODEL
     return name
 
 
@@ -68,6 +71,21 @@ def run(
     reason = None
     fallback = None
     for index, name in enumerate(names):
+        if name in EXTERNAL_PROVIDERS:
+            limited = quota.take(name)
+            if limited:
+                # 외부 AI 사용 규칙에 걸리면 부르지 않고 다음 모델로 (젬마 답이 있으면 그걸 돌려줌)
+                llm_call_repo.record(
+                    task=task,
+                    provider=name,
+                    model=model_name(name),
+                    ms=0,
+                    escalated=index > 0,
+                    reason=limited,
+                    ok=False,
+                )
+                last_error = AppError('LLM_LIMITED', '외부 AI 사용 한도에 도달했어요.', 503)
+                continue
         start = monotonic()
         rejected = None
         ok = False

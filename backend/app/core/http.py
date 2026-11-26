@@ -34,15 +34,17 @@ async def _request(
     raise RuntimeError('Unreachable')
 
 
-def _request_sync(method: str, url: str, *, timeout: float = 10.0, **kwargs: Any) -> httpx.Response:
+def _request_sync(
+    method: str, url: str, *, timeout: float = 10.0, retries: int = 2, **kwargs: Any
+) -> httpx.Response:
     with httpx.Client(timeout=timeout) as client:
-        for attempt in range(3):
+        for attempt in range(retries + 1):
             try:
                 response = client.request(method, url, **kwargs)
                 response.raise_for_status()
                 return response
             except (httpx.TransportError, httpx.HTTPStatusError) as exc:
-                if attempt == 2 or not _retryable(exc):
+                if attempt == retries or not _retryable(exc):
                     raise
                 logger.warning('HTTP %s failed (attempt %s)', method, attempt + 1)
                 time.sleep(0.25 * (attempt + 1))
@@ -61,8 +63,11 @@ def get_sync(url: str, *, timeout: float = 10.0, **kwargs: Any) -> httpx.Respons
     return _request_sync('GET', url, timeout=timeout, **kwargs)
 
 
-def post_sync(url: str, *, timeout: float = 10.0, **kwargs: Any) -> httpx.Response:
-    return _request_sync('POST', url, timeout=timeout, **kwargs)
+def post_sync(
+    url: str, *, timeout: float = 10.0, retries: int = 2, **kwargs: Any
+) -> httpx.Response:
+    """retries: 실패 시 다시 보내는 횟수 (기본 2번, 외부 AI는 1번)."""
+    return _request_sync('POST', url, timeout=timeout, retries=retries, **kwargs)
 
 
 class _MaskServiceKey(logging.Filter):

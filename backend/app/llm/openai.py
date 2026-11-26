@@ -35,8 +35,13 @@ class OpenAIProvider(LLMProvider):
             return http.post_sync(
                 settings.OPENAI_BASE_URL.rstrip('/') + '/chat/completions',
                 headers={'Authorization': f'Bearer {settings.OPENAI_API_KEY}'},
-                json={'model': settings.OPENAI_CHAT_MODEL, 'messages': messages},
+                json={
+                    'model': settings.OPENAI_CHAT_MODEL,
+                    'messages': messages,
+                    'max_completion_tokens': settings.LLM_MAX_OUTPUT_TOKENS,
+                },
                 timeout=http_timeout('openai'),
+                retries=1,
             ).json()['choices'][0]['message']['content']
         except Exception:  # noqa: BLE001 - sanitize transport errors that may contain credentials
             # Transport exceptions can contain arbitrary server text, including credentials.
@@ -47,7 +52,11 @@ class OpenAIProvider(LLMProvider):
 
     def chat(self, messages, tools):
         try:
-            body = {'model': settings.OPENAI_CHAT_MODEL, 'messages': messages}
+            body = {
+                'model': settings.OPENAI_CHAT_MODEL,
+                'messages': messages,
+                'max_completion_tokens': settings.LLM_MAX_OUTPUT_TOKENS,
+            }
             if tools:
                 body['tools'] = tools
             message = http.post_sync(
@@ -55,6 +64,7 @@ class OpenAIProvider(LLMProvider):
                 headers={'Authorization': f'Bearer {settings.OPENAI_API_KEY}'},
                 json=body,
                 timeout=http_timeout('openai'),
+                retries=1,
             ).json()['choices'][0]['message']
             return {
                 'content': message.get('content'),

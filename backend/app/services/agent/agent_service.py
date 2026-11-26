@@ -3,6 +3,7 @@
 import json
 import re
 
+from app.core import chat_sign
 from app.core.errors import AppError
 from app.db.repositories import ask_repo, store_repo
 from app.knowledge import fact_check
@@ -160,9 +161,8 @@ def chat(conn, data, device_id):
         )
 
     try:
-        routed = chat_llm.generate(
-            [m.model_dump() for m in data.messages], tools.get_tools(), execute, finalize, context
-        )
+        history, _ = chat_sign.trusted_history(data.messages)
+        routed = chat_llm.generate(history, tools.get_tools(), execute, finalize, context)
     except Exception as exc:
         raise AppError(
             'ASK_UNAVAILABLE', '지금은 답변을 찾을 수 없어요. 잠시 뒤 다시 물어봐 주세요.', 503
@@ -172,4 +172,5 @@ def chat(conn, data, device_id):
             'ASK_UNAVAILABLE', '지금은 답변을 찾을 수 없어요. 잠시 뒤 다시 물어봐 주세요.', 503
         )
     routed.value.model = routed.model
+    routed.value.reply_sig = chat_sign.sign(routed.value.reply)
     return routed.value

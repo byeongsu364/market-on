@@ -13,3 +13,15 @@ def captcha_off_by_default(monkeypatch):
     captcha._reset_for_tests()
     yield
     captcha._reset_for_tests()
+
+
+@pytest.fixture(autouse=True)
+def no_external_ai_by_default(monkeypatch):
+    """노트북 .env에 실제 키가 있어도 테스트가 제미나이·GPT를 부르지 않게 해요. 필요한 테스트만 켜요."""
+    from app.llm import quota
+
+    monkeypatch.setattr(settings, 'GEMINI_API_KEY', None)
+    monkeypatch.setattr(settings, 'OPENAI_API_KEY', None)
+    quota.reset()
+    yield
+    quota.reset()
