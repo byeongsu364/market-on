@@ -387,6 +387,17 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
   y += text(data.sources[0] ?? '', P, y, 26, W - P * 2, { lines: 2, color: colors.soft });
   text(data.disclaimer, P, y + 6, 26, W - P * 2, { color: colors.soft });
 
+  // 내용 높이에 맞춰 아래 빈 곳을 잘라냄(체크 수·출처 길이에 따라 높이가 달라짐)
+  const used = Math.min(H, Math.ceil(y + 6 + 26 * 1.35 + P));
+  if (used < H) {
+    const copy = document.createElement('canvas');
+    copy.width = W;
+    copy.height = used;
+    copy.getContext('2d')?.drawImage(canvas, 0, 0, W, used, 0, 0, W, used);
+    canvas.height = used;
+    ctx.drawImage(copy, 0, 0);
+  }
+
   return new Promise((resolve, reject) =>
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('PNG unavailable'))),
