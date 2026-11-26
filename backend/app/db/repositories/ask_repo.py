@@ -30,7 +30,7 @@ def consume_quota(conn, device_hash):
 
 def document_version(conn, item_id):
     return conn.execute(
-        """select d.doc_key,d.body,d.content_hash,s.title,s.publisher,s.url,s.license
+        """select d.doc_key,d.body,d.content_hash,d.review_status,s.title,s.publisher,s.url,s.license
         from documents d join sources s on s.id=d.source_id
         where exists (select 1 from chunks c join chunk_entities ce on ce.chunk_id=c.id
         where c.document_id=d.id and ce.entity_id=%s) order by d.doc_key""",
@@ -56,7 +56,7 @@ def sources(conn, chunk_ids):
 
     return rows(
         conn,
-        """select distinct s.title,s.publisher,s.url,s.license,d.body from sources s
+        """select distinct s.title,s.publisher,s.url,s.license,d.body,d.review_status from sources s
         join documents d on d.source_id=s.id join chunks c on c.document_id=d.id
         where c.id=any(%s) order by s.title,s.publisher,s.url,s.license""",
         (chunk_ids,),

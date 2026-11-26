@@ -29,6 +29,8 @@ def read_document(path, directory):
         entities=meta.get('entities', []),
         market_id=meta.get('market_id'),
         published=meta.get('published'),
+        review_status=meta.get('review_status', 'draft'),
+        varieties=meta.get('varieties', []),
     )
 
 

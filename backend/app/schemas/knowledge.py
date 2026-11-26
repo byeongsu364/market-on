@@ -18,6 +18,8 @@ class Document:
     published: date | None = None
     entities: list[str] = field(default_factory=list)
     entity_names: list[str] = field(default_factory=list)
+    review_status: Literal['draft', 'reviewed', 'rejected'] = 'draft'
+    varieties: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -25,6 +27,8 @@ class Chunk:
     chunk_index: int
     content: str
     entity_ids: set[str] = field(default_factory=set)
+    variety_id: str | None = None
+    numbers: list[str] = field(default_factory=list)
 
 
 @dataclass

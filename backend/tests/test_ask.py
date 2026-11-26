@@ -349,7 +349,16 @@ def test_citation_document_marker(monkeypatch, body, draft):
     monkeypatch.setattr(
         svc.ask_repo,
         'sources',
-        lambda *a: [dict(title='출처', publisher=None, url=None, license=None, body=body)],
+        lambda *a: [
+            dict(
+                title='출처',
+                publisher=None,
+                url=None,
+                license=None,
+                body=body,
+                review_status='reviewed',
+            )
+        ],
     )
     assert attach_citations(Mock(), [SimpleNamespace(chunk_id=1)])[0]['draft'] is draft
 

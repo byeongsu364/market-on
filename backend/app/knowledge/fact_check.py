@@ -2,8 +2,6 @@
 
 import re
 
-from .ingest import tag_entities
-
 NUMBER = r'(?<![A-Za-z0-9.\-])-?\d+(?:\.\d+)?'
 VALUES = re.compile(
     rf'({NUMBER})(?:\s*[~∼〜–—-]\s*({NUMBER}))?\s*(℃|°C|도|개월|달|일|주|월|%|Bx|kg|g|원|개|단|명)',
@@ -52,7 +50,16 @@ def values(text):
     }
 
 
+def extract_numbers(text):
+    """Keep original numeric/unit spellings for chunk metadata."""
+    korean = r'(?:한두|두세|서너|한|두|세|네|다섯|여섯|일곱|여덟|아홉|열)\s*(?:달|개월|일|주|월|도|개|단|명)'
+    pattern = re.compile(rf'{VALUES.pattern}|{korean}', re.IGNORECASE)
+    return list(dict.fromkeys(m.group(0) for m in pattern.finditer(text)))
+
+
 def check(answer, evidence, item_id, dictionary):
+    from .ingest import tag_entities
+
     supported = values(evidence)
     evidence_items = tag_entities(evidence, dictionary)
     kept, removed = [], 0

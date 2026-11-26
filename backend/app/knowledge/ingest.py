@@ -1,12 +1,15 @@
 """Shared atomic document ingestion for CLI and future merchant APIs."""
 
-from dataclasses import replace
 import hashlib
 import json
 import re
+from dataclasses import replace
+
 from app.db.repositories import knowledge_repo as repo
 from app.schemas.knowledge import Chunk, Document, UpsertResult
-from .ontology import normalize, load_label_dictionary
+
+from .fact_check import extract_numbers
+from .ontology import load_label_dictionary, normalize
 
 TOPICS = {
     'criterion': '확인 포인트',
@@ -82,7 +85,11 @@ def _hash(*values):
 
 
 def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
+    if doc.review_status not in {'draft', 'reviewed', 'rejected'}:
+        raise ValueError('알 수 없는 review_status')
     digest = _hash(
+        doc.review_status,
+        doc.varieties,
         doc.source_key,
         doc.doc_type,
         doc.lang,
@@ -100,14 +107,35 @@ def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
             return UpsertResult('skipped', old[0])
         affected = repo.document_entities(conn, old[0]) if old else set()
         names = repo.entity_names(conn, doc.entities)
+        allowed = repo.document_varieties(conn, doc.entities)
+        if set(doc.varieties) - allowed:
+            raise ValueError('varieties는 문서 품목에 속한 품종 ID여야 합니다.')
         chunks = chunk_document(replace(doc, entity_names=names))
         dictionary = load_label_dictionary(conn)
+        variety_labels = repo.ko_variety_labels(conn)
         if old:
             repo.delete_document(conn, old[0])
         did = repo.insert_document(conn, doc, digest)
         ids = []
         for chunk in chunks:
             chunk.entity_ids |= tag_entities(chunk.content, dictionary)
+            chunk.numbers = extract_numbers(chunk.content)
+            if doc.varieties:
+                # A scalar chunk field cannot represent several explicit varieties.
+                matches = set(doc.varieties)
+                if len(matches) > 1:
+                    matches &= {
+                        eid
+                        for label, eid, original in variety_labels
+                        if tag_entities(chunk.content, [(label, eid, original)])
+                    }
+            else:
+                matches = allowed & {
+                    eid
+                    for label, eid, original in variety_labels
+                    if tag_entities(chunk.content, [(label, eid, original)])
+                }
+            chunk.variety_id = next(iter(matches)) if len(matches) == 1 else None
             affected |= chunk.entity_ids
             ids.append(
                 repo.insert_chunk(

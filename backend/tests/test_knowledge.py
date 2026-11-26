@@ -168,6 +168,7 @@ def test_intent_mapping_and_search(monkeypatch):
     assert doc_types_for_intent('origin') == ['origin', 'specialty']
     with pytest.raises(ValueError):
         doc_types_for_intent('unknown')
+    monkeypatch.setattr('app.knowledge.retriever.match_variety', lambda *args: None)
     match = MagicMock(return_value=[])
     monkeypatch.setattr(repo, 'match_chunks', match)
     search(None, FakeProvider(), '대파', entity_ids=['item:green_onion'], intent='store')

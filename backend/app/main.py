@@ -11,6 +11,7 @@ from app.schemas.market import PublicConfig
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.logging import setup_logging
 from app.routers import (
+    ontology,
     recommend,
     ask,
     scan,
@@ -32,6 +33,7 @@ from app.routers import (
 
 setup_logging()
 routers = [
+    ontology.router,
     recommend.router,
     ask.router,
     scan.router,
