@@ -7,6 +7,14 @@ export default function ModelLabel({
 }) {
   const label =
     cachedLabel ||
-    (model?.startsWith('gemma4:') ? 'Gemma' : model?.startsWith('openai:') ? 'GPT' : model);
+    (model?.startsWith('gemma4:')
+      ? 'Gemma'
+      : model?.startsWith('openai:')
+        ? 'GPT'
+        : model?.startsWith('gemini:')
+          ? 'Gemini'
+          : model === 'google-vision'
+            ? 'Google Vision'
+            : model);
   return label ? <small>{label}</small> : null;
 }

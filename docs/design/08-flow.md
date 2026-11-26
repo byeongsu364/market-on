@@ -20,8 +20,8 @@ flowchart LR
   subgraph 서버["서버 (FastAPI)"]
     R[routers] --> S[services]
     S --> K["knowledge<br/>온톨로지 · RAG · 사실 확인"]
-    S --> L["llm/router<br/>Gemma 먼저 → 부족하면 GPT"]
-    S --> CL["clients<br/>aT 시세 · 네이버 지도"]
+    S --> L["llm/router (역할별)<br/>답: Gemma → Gemini → GPT<br/>도구·정리·이유: Gemini → GPT"]
+    S --> CL["clients<br/>aT 시세 · 네이버 지도 · 구글 비전"]
   end
   subgraph 저장소["PostgreSQL + pgvector"]
     DB1[(온톨로지<br/>entities · relations)]
@@ -31,15 +31,17 @@ flowchart LR
   end
   subgraph 외부
     G[Gemma · bge-m3<br/>Ollama, Tailscale 서버]
+    GM[Google Gemini]
     O[OpenAI GPT]
+    V[구글 비전<br/>사진 품목·가격표 글자]
     AT[aT 전통시장 시세]
     NV[네이버 지도]
   end
   C & M & A --> FE --> R
   K --> DB1 & DB2
   S --> DB3 & DB4
-  L --> G & O
-  CL --> AT & NV
+  L --> G & GM & O
+  CL --> AT & NV & V
   classDef u fill:#fff3d6,stroke:#c08a00
 ```
 
@@ -88,46 +90,59 @@ flowchart TD
 
 ## 3. 결과 화면 안에서 일어나는 일 (요청별)
 
+작업 지시서 040 (2026-11-27): 사진 품목 인식은 **구글 비전만**, 젬마는 **헤드 에이전트(최종 한국어 답)**, 제미나이 → GPT는 젬마가 맡기는 일(도구 고르기·긴 근거 정리·장보기 이유·실패 시 대신 답하기).
+
 ```mermaid
 sequenceDiagram
   autonumber
   participant F as 화면
   participant API as 서버
+  participant V as 구글 비전
   participant ON as 온톨로지
   participant RAG as RAG 검색
-  participant LLM as Gemma→GPT
+  participant G as 젬마 (route·write)
+  participant X as 제미나이→GPT (plan·extract·reason)
   participant AT as aT 시세
 
   F->>API: POST /recognize (사진)
-  API->>ON: 품목 목록
-  API->>LLM: 목록 안에서 고르기 + 가격표 읽기
-  Note right of LLM: Gemma 결과가 부족할 때만 GPT
-  API-->>F: item_id, 후보, price_tag(가격·단위·품종 글자)
+  API->>API: 위치·기기 정보 지우기 (동의 시 대략 위치만)
+  API->>V: 라벨 + 글자 한 번에 (하루·한 달 한도)
+  API->>ON: 비전 라벨 → 품목 후보 (vision 라벨)
+  API->>API: 가격표 글자 → 가격·단위(정규식)·품종(온톨로지 라벨)
+  Note right of V: AI 모델은 사진을 보지 않음. 비전이 안 되면 후보 없이 → 화면에서 직접 고르기
+  API-->>F: 후보, price_tag, model=google-vision
 
   F->>API: GET /prices?item&variety&market
   API->>AT: 이 시장(없으면 지역·전국) 시세
   API-->>F: 기준시세, 단위 환산, ±%, 출처·조사일
 
-  F->>API: GET /markets/{id}/items
-  API-->>F: 품목별 판매 점포 (상가정보 업종 추정은 "추정" 표시)
-
   F->>API: POST /ask (품목 + 의도/질문)
+  API->>API: 의도: 키워드 규칙
+  opt 규칙으로 못 나눔
+    API->>G: route (의도 나누기)
+  end
   alt 제철·수확·산지
     API->>ON: inSeason · harvestPeriod · producedIn
-    API-->>F: 템플릿 문장 + 출처 (LLM 없음)
+    API-->>F: 템플릿 문장 + 출처 (AI 없음)
   else 시세·어디서 파는지
-    API-->>F: DB 값으로 바로 답 (LLM 없음)
+    API-->>F: DB 값으로 바로 답 (AI 없음)
   else 고르는 법·보관·손질·특징
     API->>API: 응답 캐시 확인
     API->>RAG: 의도별 문서 종류로 검색 (유사도 0.45 이상)
-    API->>LLM: 근거만으로 답하기
-    API->>API: 사실 확인 (숫자·단위·판정어 문장 삭제)
-    API-->>F: 답 + 실제로 쓴 근거 출처
+    opt 근거 4개 이상 또는 2,000자 이상
+      API->>X: extract (필요한 사실만, 근거 번호 유지)
+    end
+    API->>G: write (근거만으로 한국어 답)
+    API->>API: 사실 확인 (원래 근거로, 숫자·단위·판정어 문장 삭제)
+    Note right of G: 실패하거나 확인 못 넘으면 write 다음 모델 (제미나이 → GPT)
+    API-->>F: 답 + 실제로 쓴 근거 출처 + steps
   end
 ```
 
-- **장보기 추천** `POST /recommend`: 품목·수량·가격은 코드가 계산 → LLM은 이유 문장만 (근거 = 용도별 RAG 문서 + 온톨로지 제철 문장).
-- **대화** `POST /chat`: GPT 먼저. 도구 6개(품목 찾기·기준시세·판매 점포·마감세일·지식 질문·장보기 구성)를 최대 4번 부르고, 마지막 답을 도구 결과와 대조.
+- **장보기 추천** `POST /recommend`: 품목·수량·가격은 코드가 계산 → reason(제미나이 → GPT → 젬마)은 이유 문장만 → 사실 확인.
+- **대화** `POST /chat`: plan(제미나이 → GPT)이 도구 6개(품목 찾기·기준시세·판매 점포·마감세일·지식 질문·장보기 구성)를 최대 4번 부름 → write(젬마)가 도구 결과로 한국어 답 → 도구 결과와 대조 → 실패하면 write 다음 모델, 그래도 안 되면 plan 모델의 답을 같은 검사로.
+- **기다리는 동안**: 답은 사실 확인 뒤 한 번에 와서 글자 스트리밍은 안 해요. 화면은 "근거 찾는 중 → 정리 중 → 답 쓰는 중"을 차례로 보여 주고, 응답의 `steps`에 실제로 거친 단계가 와요.
+- **기록**: 모든 호출은 `llm_calls`에 역할(`role`: route·plan·extract·write·reason·vision)과 모델로 남아요. 발표 때 "최종 답(write)의 몇 %를 젬마가 썼나"를 여기서 셉니다.
 
 ---
 
