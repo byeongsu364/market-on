@@ -1,0 +1,4195 @@
+# 자동 생성: python -m scripts.build_at_items · 감자·고구마·버섯은 장보기 기준 채소
+entities:
+- id: cat:grain
+  type: category
+  name_ko: 곡물
+  labels:
+    ko:
+    - 곡물
+  attrs: {}
+- id: cat:special
+  type: category
+  name_ko: 특용작물
+  labels:
+    ko:
+    - 특용작물
+  attrs: {}
+- id: cat:livestock
+  type: category
+  name_ko: 축산물
+  labels:
+    ko:
+    - 축산물
+  attrs: {}
+- id: cat:seafood
+  type: category
+  name_ko: 수산물
+  labels:
+    ko:
+    - 수산물
+  attrs: {}
+- id: item:rice
+  type: item
+  name_ko: 쌀
+  labels:
+    ko:
+    - 쌀
+    en:
+    - rice
+  kamis: &id001
+    ctgry_cd: '100'
+    item_cd: '111'
+    vrty_cd: '10'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '10'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:rice-01
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:rice-10
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg20
+    props:
+      factor_kg: 20
+  - p: soldBy
+    o: unit:kg10
+    props:
+      factor_kg: 10
+      default: true
+  - p: inSeason
+    o: season:11
+    source: src:nics-month-food-rice
+  criteria:
+  - key: p1
+    text: 쌀을 구입할 때, 포장지의 &apos;품질표시사항&apos;에 적혀있는 품종, 등급, 생산년도, 도정날짜 등을 꼼꼼히 살펴보는 것이 중요하다. 쌀을 고를 때에는 금이 가지 않고 투명하며,
+      쌀 고유의 향기로운 냄새가 나는 것이 좋다. 잘 여문 쌀은 손으로 한 줌 쥐었을 때 묵직한 느낌이 든다. 쌀알이 통통하고 광택이 있으며, 가루가 묻어나지 않는 것이 신선하고 좋은 쌀이다.
+    source: src:nics-month-food-rice
+- id: variety:rice-01
+  type: variety
+  name_ko: 20kg
+  labels:
+    ko:
+    - 20kg
+  kamis:
+    ctgry_cd: '100'
+    item_cd: '111'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '20'
+  attrs: {}
+- id: variety:rice-10
+  type: variety
+  name_ko: 10kg
+  labels:
+    ko:
+    - 10kg
+  kamis: *id001
+  attrs: {}
+- id: item:glutinous_rice
+  type: item
+  name_ko: 찹쌀
+  labels:
+    ko:
+    - 찹쌀
+    en:
+    - glutinous rice
+  kamis: &id002
+    ctgry_cd: '100'
+    item_cd: '112'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:glutinous_rice-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:glutinous_rice-01
+  type: variety
+  name_ko: 일반계
+  labels:
+    ko:
+    - 일반계
+  kamis: *id002
+  attrs: {}
+- id: item:soybean
+  type: item
+  name_ko: 콩
+  labels:
+    ko:
+    - 콩
+    en:
+    - soybean
+  kamis: &id003
+    ctgry_cd: '100'
+    item_cd: '141'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '500'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:soybean-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g500
+    props:
+      factor_kg: 0.5
+      default: true
+- id: variety:soybean-01
+  type: variety
+  name_ko: 흰 콩(국산)
+  labels:
+    ko:
+    - 흰 콩(국산)
+  kamis: *id003
+  attrs: {}
+- id: item:red_bean
+  type: item
+  name_ko: 팥
+  labels:
+    ko:
+    - 팥
+    en:
+    - red bean
+  kamis: &id004
+    ctgry_cd: '100'
+    item_cd: '142'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '500'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:red_bean-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g500
+    props:
+      factor_kg: 0.5
+      default: true
+  - p: inSeason
+    o: season:12
+    source: src:nics-month-food-red-bean
+  criteria:
+  - key: p1
+    text: 붉은색이 짙고 윤기가 나며 알이 굵고 껍질이 얇은 것이 좋으며, 물에 뜨거나 알이 고르지 않은 것은 피하는 것이 좋다.
+    source: src:nics-month-food-red-bean
+- id: variety:red_bean-00
+  type: variety
+  name_ko: 붉은 팥(국산)
+  labels:
+    ko:
+    - 붉은 팥(국산)
+  kamis: *id004
+  attrs: {}
+- id: item:mung_bean
+  type: item
+  name_ko: 녹두
+  labels:
+    ko:
+    - 녹두
+    en:
+    - mung bean
+  kamis: &id005
+    ctgry_cd: '100'
+    item_cd: '143'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '500'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:mung_bean-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g500
+    props:
+      factor_kg: 0.5
+      default: true
+  - p: inSeason
+    o: season:10
+    source: src:nics-month-food-mung-bean
+  criteria:
+  - key: p1
+    text: 녹색 빛이 진하면서 갈색 낱알이 섞여 있으며, 낱알이 충실하고 고른 것이 좋다. 특히 덜 여문 낱알은 좁쌀처럼 작아 물에 불리거나 조리해도 딱딱하므로 되도록 크기가 고른 것을 구입해야
+      한다.
+    source: src:nics-month-food-mung-bean
+- id: variety:mung_bean-00
+  type: variety
+  name_ko: 국산
+  labels:
+    ko:
+    - 국산
+  kamis: *id005
+  attrs: {}
+- id: item:sweet_potato
+  type: item
+  name_ko: 고구마
+  labels:
+    ko:
+    - 고구마
+    en:
+    - sweet potato
+  kamis: &id006
+    ctgry_cd: '100'
+    item_cd: '151'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:sweet_potato-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+  - p: inSeason
+    o: season:12
+    source: src:nics-month-food-sweet-potato
+  criteria:
+  - key: p1
+    text: 모양이 고르고 표면이 매끈하고 단단하며 흠집이 없을 것이 좋음
+    source: src:nics-month-food-sweet-potato
+- id: variety:sweet_potato-00
+  type: variety
+  name_ko: 밤
+  labels:
+    ko:
+    - 밤
+  kamis: *id006
+  attrs: {}
+- id: item:potato
+  type: item
+  name_ko: 감자
+  labels:
+    ko:
+    - 감자
+    en:
+    - potato
+  kamis: &id007
+    ctgry_cd: '100'
+    item_cd: '152'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:potato-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:potato-01
+  type: variety
+  name_ko: 수미(노지)
+  labels:
+    ko:
+    - 수미(노지)
+  kamis: *id007
+  attrs: {}
+- id: item:brown_rice
+  type: item
+  name_ko: 현미
+  labels:
+    ko:
+    - 현미
+    en:
+    - brown rice
+  kamis: &id008
+    ctgry_cd: '100'
+    item_cd: '115'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:brown_rice-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:brown_rice-01
+  type: variety
+  name_ko: 찰현미
+  labels:
+    ko:
+    - 찰현미
+  kamis: *id008
+  attrs: {}
+- id: item:barley
+  type: item
+  name_ko: 보리쌀
+  labels:
+    ko:
+    - 보리쌀
+    en:
+    - barley
+  kamis: &id009
+    ctgry_cd: '100'
+    item_cd: '121'
+    vrty_cd: '04'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:barley-04
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:barley-04
+  type: variety
+  name_ko: 찰보리
+  labels:
+    ko:
+    - 찰보리
+  kamis: *id009
+  attrs: {}
+- id: item:mixed_grains
+  type: item
+  name_ko: 혼식곡
+  labels:
+    ko:
+    - 혼식곡
+    en:
+    - mixed grains
+  kamis: &id010
+    ctgry_cd: '100'
+    item_cd: '113'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:grain
+  - p: hasGrade
+    o: variety:mixed_grains-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:mixed_grains-01
+  type: variety
+  name_ko: 국산
+  labels:
+    ko:
+    - 국산
+  kamis: *id010
+  attrs: {}
+- id: item:napa_cabbage
+  type: item
+  name_ko: 배추
+  labels:
+    ko:
+    - 배추
+    en:
+    - napa cabbage
+  kamis: &id011
+    ctgry_cd: '200'
+    item_cd: '211'
+    vrty_cd: '03'
+    grd_cd: '04'
+    unit: 포기
+    unit_sz: '1'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:napa_cabbage-03
+    props:
+      default: true
+  - p: soldBy
+    o: unit:head
+    props:
+      count: 1
+      default: true
+  - p: inSeason
+    o: season:11
+    source: src:nics-month-food-napa-cabbage
+  criteria:
+  - key: p1
+    text: 먼저 잎의 두께가 얇고 잎맥이 얇아 부드러운 것이 좋은 배추다. 뿌리 부위와 줄기 부위의 둘레가 비슷한 장구형이면서 흰 부분을 눌렀을 때 단단하고 수분이 많으며 싱싱한 것을 고르도록
+      한다. 속의 잎은 연백색을 띠면서 뿌리가 완전히 제거된 것, 각 잎이 중심부로 모이면서 잎 끝이 서로 겹치지 않는 것이 좋다. 또 속의 잎을 씹어보았을 때 달고 고소한 맛이 나야 한다. 잘랐을
+      때는 속이 꽉 차 있고 내부가 노란색을 띠는 것이 좋은데, 너무 진한 노란색이나 흰색은 피하는 것이 좋다.
+    source: src:nics-month-food-napa-cabbage
+- id: variety:napa_cabbage-03
+  type: variety
+  name_ko: 가을
+  labels:
+    ko:
+    - 가을
+  kamis: *id011
+  attrs: {}
+- id: item:cabbage
+  type: item
+  name_ko: 양배추
+  labels:
+    ko:
+    - 양배추
+    en:
+    - cabbage
+  kamis: &id012
+    ctgry_cd: '200'
+    item_cd: '212'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 포기
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:cabbage-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:head
+    props:
+      count: 1
+      default: true
+- id: variety:cabbage-00
+  type: variety
+  name_ko: 양배추
+  labels:
+    ko:
+    - 양배추
+  kamis: *id012
+  attrs: {}
+- id: item:spinach
+  type: item
+  name_ko: 시금치
+  labels:
+    ko:
+    - 시금치
+    en:
+    - spinach
+  kamis: &id013
+    ctgry_cd: '200'
+    item_cd: '213'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:spinach-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+  - p: inSeason
+    o: season:12
+    source: src:nics-month-food-spinach
+  criteria:
+  - key: p1
+    text: 잎이 두껍고 진한 녹색을 띠고 윤택이 나는 것이 좋다. 뿌리는 붉고 색이 선명하며 길이는 10~15cm인 것을 고른다. 시금치는 사용 용도에 따라 무침용, 국거리용으로 구분할 수 있는데
+      무침용은 길이가 짧고 뿌리 부분이 선명한 붉은색을 띠는 것이 좋으며 국거리용은 줄기가 연하고 길며 잎이 넓은 것이 좋다. 잎이 건조하거나 황갈색으로 변한 것은 질소의 함량이 낮아 신선도가 떨어지는
+      것이다.
+    source: src:nics-month-food-spinach
+- id: variety:spinach-00
+  type: variety
+  name_ko: 시금치
+  labels:
+    ko:
+    - 시금치
+  kamis: *id013
+  attrs: {}
+- id: item:lettuce
+  type: item
+  name_ko: 상추
+  labels:
+    ko:
+    - 상추
+    en:
+    - lettuce
+  kamis: &id014
+    ctgry_cd: '200'
+    item_cd: '214'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:lettuce-01
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:lettuce-02
+    props:
+      default: false
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:lettuce-01
+  type: variety
+  name_ko: 적
+  labels:
+    ko:
+    - 적
+  kamis: *id014
+  attrs: {}
+- id: variety:lettuce-02
+  type: variety
+  name_ko: 청
+  labels:
+    ko:
+    - 청
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '214'
+    vrty_cd: '02'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: item:young_napa_cabbage
+  type: item
+  name_ko: 얼갈이배추
+  labels:
+    ko:
+    - 얼갈이배추
+    en:
+    - young napa cabbage
+  kamis: &id015
+    ctgry_cd: '200'
+    item_cd: '215'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:young_napa_cabbage-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:young_napa_cabbage-00
+  type: variety
+  name_ko: 얼갈이배추
+  labels:
+    ko:
+    - 얼갈이배추
+  kamis: *id015
+  attrs: {}
+- id: item:watermelon
+  type: item
+  name_ko: 수박
+  labels:
+    ko:
+    - 수박
+    en:
+    - watermelon
+  kamis: &id016
+    ctgry_cd: '200'
+    item_cd: '221'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:watermelon-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+- id: variety:watermelon-00
+  type: variety
+  name_ko: 수박
+  labels:
+    ko:
+    - 수박
+  kamis: *id016
+  attrs: {}
+- id: item:cucumber
+  type: item
+  name_ko: 오이
+  labels:
+    ko:
+    - 오이
+    en:
+    - cucumber
+  kamis: &id017
+    ctgry_cd: '200'
+    item_cd: '223'
+    vrty_cd: '02'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:cucumber-01
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:cucumber-02
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:cucumber-03
+    props:
+      default: false
+  - p: soldBy
+    o: unit:piece10
+    props:
+      count: 10
+      default: true
+- id: variety:cucumber-01
+  type: variety
+  name_ko: 가시계통
+  labels:
+    ko:
+    - 가시계통
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '223'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '10'
+  attrs: {}
+- id: variety:cucumber-02
+  type: variety
+  name_ko: 다다기계통
+  labels:
+    ko:
+    - 다다기계통
+  kamis: *id017
+  attrs: {}
+- id: variety:cucumber-03
+  type: variety
+  name_ko: 취청
+  labels:
+    ko:
+    - 취청
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '223'
+    vrty_cd: '03'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '10'
+  attrs: {}
+- id: item:squash
+  type: item
+  name_ko: 호박
+  labels:
+    ko:
+    - 호박
+    en:
+    - squash
+  kamis: &id018
+    ctgry_cd: '200'
+    item_cd: '224'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:squash-01
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:squash-02
+    props:
+      default: false
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+  - p: inSeason
+    o: season:10
+    source: src:nics-month-food-squash
+  criteria:
+  - key: p1
+    text: '애호박: 표면이 고르고 흠집이 없으며 꼭지가 신선한 상태로 달려 있는 것이 좋음. 잘랐을 때 씨앗이 너무 크거나 누렇게 들뜬 것은 오래된 것이며, 손으로 눌러 보아 탄력이 없는 것은
+      바람이 든 것이므로 피해야 함'
+    source: src:nics-month-food-squash
+  - key: p2
+    text: '단호박: 색깔이 고르게 짙고 단단하며 크기에 비해 무거운 것이 좋음'
+    source: src:nics-month-food-squash
+  - key: p3
+    text: '늙은 호박: 크기가 매우 크며 몸체의 윤기가 있고 담황색을 띤 것. 껍질이 단단한 것이 좋음'
+    source: src:nics-month-food-squash
+- id: variety:squash-01
+  type: variety
+  name_ko: 애호박
+  labels:
+    ko:
+    - 애호박
+  kamis: *id018
+  attrs: {}
+- id: variety:squash-02
+  type: variety
+  name_ko: 쥬키니
+  labels:
+    ko:
+    - 쥬키니
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '224'
+    vrty_cd: '02'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs: {}
+- id: item:tomato
+  type: item
+  name_ko: 토마토
+  labels:
+    ko:
+    - 토마토
+    en:
+    - tomato
+  kamis: &id019
+    ctgry_cd: '200'
+    item_cd: '225'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:tomato-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:tomato-00
+  type: variety
+  name_ko: 토마토
+  labels:
+    ko:
+    - 토마토
+  kamis: *id019
+  attrs: {}
+- id: item:strawberry
+  type: item
+  name_ko: 딸기
+  labels:
+    ko:
+    - 딸기
+    en:
+    - strawberry
+  kamis: &id020
+    ctgry_cd: '200'
+    item_cd: '226'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '500'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:strawberry-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g500
+    props:
+      factor_kg: 0.5
+      default: true
+- id: variety:strawberry-00
+  type: variety
+  name_ko: 설향
+  labels:
+    ko:
+    - 설향
+  kamis: *id020
+  attrs: {}
+- id: item:radish
+  type: item
+  name_ko: 무
+  labels:
+    ko:
+    - 무
+    en:
+    - radish
+  kamis: &id021
+    ctgry_cd: '200'
+    item_cd: '231'
+    vrty_cd: '03'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:radish-03
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+  - p: inSeason
+    o: season:11
+    source: src:nics-month-food-radish
+  criteria:
+  - key: p1
+    text: 표면이 희고 매끄러우며 단단하고 무거운 것(뿌리 쪽이 통통하며 잎쪽은 파란 무가 맛있음).
+    source: src:nics-month-food-radish
+  - key: p2
+    text: 모양이 곧고, 갈라지거나 터지거나 잔뿌리가 많지 않은 것.
+    source: src:nics-month-food-radish
+- id: variety:radish-03
+  type: variety
+  name_ko: 가을
+  labels:
+    ko:
+    - 가을
+  kamis: *id021
+  attrs: {}
+- id: item:carrot
+  type: item
+  name_ko: 당근
+  labels:
+    ko:
+    - 당근
+    en:
+    - carrot
+  kamis: &id022
+    ctgry_cd: '200'
+    item_cd: '232'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:carrot-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:carrot-01
+  type: variety
+  name_ko: 무세척(국산)
+  labels:
+    ko:
+    - 무세척(국산)
+  kamis: *id022
+  attrs: {}
+- id: item:young_radish
+  type: item
+  name_ko: 열무
+  labels:
+    ko:
+    - 열무
+    en:
+    - young radish
+  kamis: &id023
+    ctgry_cd: '200'
+    item_cd: '233'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:young_radish-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:young_radish-00
+  type: variety
+  name_ko: 열무
+  labels:
+    ko:
+    - 열무
+  kamis: *id023
+  attrs: {}
+- id: item:dried_chili
+  type: item
+  name_ko: 건고추
+  labels:
+    ko:
+    - 건고추
+    en:
+    - dried chili
+  kamis: &id024
+    ctgry_cd: '200'
+    item_cd: '241'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '600'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:dried_chili-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g600
+    props:
+      factor_kg: 0.6
+      default: true
+- id: variety:dried_chili-00
+  type: variety
+  name_ko: 화건
+  labels:
+    ko:
+    - 화건
+  kamis: *id024
+  attrs: {}
+- id: item:green_chili
+  type: item
+  name_ko: 풋고추
+  labels:
+    ko:
+    - 풋고추
+    en:
+    - green chili
+  kamis: &id025
+    ctgry_cd: '200'
+    item_cd: '242'
+    vrty_cd: '02'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:green_chili-00
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:green_chili-02
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:green_chili-03
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:green_chili-04
+    props:
+      default: false
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:green_chili-00
+  type: variety
+  name_ko: 풋고추(녹광 등)
+  labels:
+    ko:
+    - 풋고추(녹광 등)
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '242'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:green_chili-02
+  type: variety
+  name_ko: 꽈리고추
+  labels:
+    ko:
+    - 꽈리고추
+  kamis: *id025
+  attrs: {}
+- id: variety:green_chili-03
+  type: variety
+  name_ko: 청양고추
+  labels:
+    ko:
+    - 청양고추
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '242'
+    vrty_cd: '03'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:green_chili-04
+  type: variety
+  name_ko: 오이맛고추
+  labels:
+    ko:
+    - 오이맛고추
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '242'
+    vrty_cd: '04'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: item:red_chili
+  type: item
+  name_ko: 붉은고추
+  labels:
+    ko:
+    - 붉은고추
+    en:
+    - red chili
+  kamis: &id026
+    ctgry_cd: '200'
+    item_cd: '243'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:red_chili-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:red_chili-00
+  type: variety
+  name_ko: 붉은고추
+  labels:
+    ko:
+    - 붉은고추
+  kamis: *id026
+  attrs: {}
+- id: item:peeled_garlic
+  type: item
+  name_ko: 깐마늘
+  labels:
+    ko:
+    - 깐마늘
+    en:
+    - peeled garlic
+  kamis: &id027
+    ctgry_cd: '200'
+    item_cd: '258'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:peeled_garlic-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:peeled_garlic-01
+  type: variety
+  name_ko: 깐마늘(국산)
+  labels:
+    ko:
+    - 깐마늘(국산)
+  kamis: *id027
+  attrs: {}
+- id: item:ginger
+  type: item
+  name_ko: 생강
+  labels:
+    ko:
+    - 생강
+    en:
+    - ginger
+  kamis: &id028
+    ctgry_cd: '200'
+    item_cd: '247'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:ginger-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+  - p: inSeason
+    o: season:10
+    source: src:nics-month-food-ginger
+  criteria:
+  - key: p1
+    text: 육질이 단단하고 크며, 황토색을 나타내는 것으로 한 덩어리에 여러 조각이 붙어 있는 것이 좋음.
+    source: src:nics-month-food-ginger
+  - key: p2
+    text: 알이 굵고 넓으며 껍질에 주름이 적으며 잘 벗겨지는 것.
+    source: src:nics-month-food-ginger
+  - key: p3
+    text: 고유의 매운맛과 향기가 강하며 색이 다소 짙고, 모양이 울퉁불퉁한 것.
+    source: src:nics-month-food-ginger
+- id: variety:ginger-00
+  type: variety
+  name_ko: 국산
+  labels:
+    ko:
+    - 국산
+  kamis: *id028
+  attrs: {}
+- id: item:eggplant
+  type: item
+  name_ko: 가지
+  labels:
+    ko:
+    - 가지
+    en:
+    - eggplant
+  kamis: &id029
+    ctgry_cd: '200'
+    item_cd: '251'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '3'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:eggplant-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece3
+    props:
+      count: 3
+      default: true
+- id: variety:eggplant-00
+  type: variety
+  name_ko: 가지
+  labels:
+    ko:
+    - 가지
+  kamis: *id029
+  attrs: {}
+- id: item:water_dropwort
+  type: item
+  name_ko: 미나리
+  labels:
+    ko:
+    - 미나리
+    en:
+    - water dropwort
+  kamis: &id030
+    ctgry_cd: '200'
+    item_cd: '252'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:water_dropwort-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:water_dropwort-00
+  type: variety
+  name_ko: 미나리
+  labels:
+    ko:
+    - 미나리
+  kamis: *id030
+  attrs: {}
+- id: item:perilla_leaves
+  type: item
+  name_ko: 깻잎
+  labels:
+    ko:
+    - 깻잎
+    en:
+    - perilla leaves
+  kamis: &id031
+    ctgry_cd: '200'
+    item_cd: '253'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '50'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:perilla_leaves-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g50
+    props:
+      factor_kg: 0.05
+      default: true
+- id: variety:perilla_leaves-00
+  type: variety
+  name_ko: 깻잎
+  labels:
+    ko:
+    - 깻잎
+  kamis: *id031
+  attrs: {}
+- id: item:chives
+  type: item
+  name_ko: 부추
+  labels:
+    ko:
+    - 부추
+    en:
+    - chives
+  kamis: &id032
+    ctgry_cd: '200'
+    item_cd: '254'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:chives-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:chives-00
+  type: variety
+  name_ko: 부추
+  labels:
+    ko:
+    - 부추
+  kamis: *id032
+  attrs: {}
+- id: item:bell_pepper
+  type: item
+  name_ko: 피망
+  labels:
+    ko:
+    - 피망
+    en:
+    - bell pepper
+  kamis: &id033
+    ctgry_cd: '200'
+    item_cd: '255'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:bell_pepper-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:bell_pepper-00
+  type: variety
+  name_ko: 청
+  labels:
+    ko:
+    - 청
+  kamis: *id033
+  attrs: {}
+- id: item:paprika
+  type: item
+  name_ko: 파프리카
+  labels:
+    ko:
+    - 파프리카
+    en:
+    - paprika
+  kamis: &id034
+    ctgry_cd: '200'
+    item_cd: '256'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:paprika-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+- id: variety:paprika-00
+  type: variety
+  name_ko: 파프리카
+  labels:
+    ko:
+    - 파프리카
+  kamis: *id034
+  attrs: {}
+- id: item:melon
+  type: item
+  name_ko: 멜론
+  labels:
+    ko:
+    - 멜론
+    en:
+    - melon
+  kamis: &id035
+    ctgry_cd: '200'
+    item_cd: '257'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:melon-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+- id: variety:melon-00
+  type: variety
+  name_ko: 멜론
+  labels:
+    ko:
+    - 멜론
+  kamis: *id035
+  attrs: {}
+- id: item:chili_powder
+  type: item
+  name_ko: 고춧가루
+  labels:
+    ko:
+    - 고춧가루
+    en:
+    - chili powder
+  kamis: &id036
+    ctgry_cd: '200'
+    item_cd: '248'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:chili_powder-00
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:chili_powder-01
+    props:
+      default: false
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:chili_powder-00
+  type: variety
+  name_ko: 국산
+  labels:
+    ko:
+    - 국산
+  kamis: *id036
+  attrs: {}
+- id: variety:chili_powder-01
+  type: variety
+  name_ko: 중국
+  labels:
+    ko:
+    - 중국
+  kamis:
+    ctgry_cd: '200'
+    item_cd: '248'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: item:mustard_greens
+  type: item
+  name_ko: 갓
+  labels:
+    ko:
+    - 갓
+    en:
+    - mustard greens
+  kamis: &id037
+    ctgry_cd: '200'
+    item_cd: '216'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:mustard_greens-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:mustard_greens-00
+  type: variety
+  name_ko: 갓
+  labels:
+    ko:
+    - 갓
+  kamis: *id037
+  attrs: {}
+- id: item:cherry_tomato
+  type: item
+  name_ko: 방울토마토
+  labels:
+    ko:
+    - 방울토마토
+    en:
+    - cherry tomato
+  kamis: &id038
+    ctgry_cd: '200'
+    item_cd: '422'
+    vrty_cd: '02'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:cherry_tomato-02
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:cherry_tomato-02
+  type: variety
+  name_ko: 대추방울토마토
+  labels:
+    ko:
+    - 대추방울토마토
+  kamis: *id038
+  attrs: {}
+- id: item:baby_napa_cabbage
+  type: item
+  name_ko: 알배기배추
+  labels:
+    ko:
+    - 알배기배추
+    - 배추
+    en:
+    - baby napa cabbage
+  kamis: &id039
+    ctgry_cd: '200'
+    item_cd: '279'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 포기
+    unit_sz: '1'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:baby_napa_cabbage-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:head
+    props:
+      count: 1
+      default: true
+  - p: inSeason
+    o: season:11
+    source: src:nics-month-food-napa-cabbage
+  criteria:
+  - key: p1
+    text: 먼저 잎의 두께가 얇고 잎맥이 얇아 부드러운 것이 좋은 배추다. 뿌리 부위와 줄기 부위의 둘레가 비슷한 장구형이면서 흰 부분을 눌렀을 때 단단하고 수분이 많으며 싱싱한 것을 고르도록
+      한다. 속의 잎은 연백색을 띠면서 뿌리가 완전히 제거된 것, 각 잎이 중심부로 모이면서 잎 끝이 서로 겹치지 않는 것이 좋다. 또 속의 잎을 씹어보았을 때 달고 고소한 맛이 나야 한다. 잘랐을
+      때는 속이 꽉 차 있고 내부가 노란색을 띠는 것이 좋은데, 너무 진한 노란색이나 흰색은 피하는 것이 좋다.
+    source: src:nics-month-food-napa-cabbage
+- id: variety:baby_napa_cabbage-00
+  type: variety
+  name_ko: 알배기배추
+  labels:
+    ko:
+    - 알배기배추
+  kamis: *id039
+  attrs: {}
+- id: item:broccoli
+  type: item
+  name_ko: 브로콜리
+  labels:
+    ko:
+    - 브로콜리
+    en:
+    - broccoli
+  kamis: &id040
+    ctgry_cd: '200'
+    item_cd: '280'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs:
+    criteria_style: source_quote
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:broccoli-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+  - p: inSeason
+    o: season:12
+    source: src:nics-month-food-broccoli
+  criteria:
+  - key: p1
+    text: 송이가 단단하면서 중간이 볼록하게 솟아 있는 것이 좋으며, 줄기를 잘랐을 때 단면이 싱싱하고 머리 부분은 짙은 녹색이나 옅은 보라색을 띠는 것이 좋다.
+    source: src:nics-month-food-broccoli
+- id: variety:broccoli-00
+  type: variety
+  name_ko: 브로콜리(국산)
+  labels:
+    ko:
+    - 브로콜리(국산)
+  kamis: *id040
+  attrs: {}
+- id: item:sesame
+  type: item
+  name_ko: 참깨
+  labels:
+    ko:
+    - 참깨
+    en:
+    - sesame
+  kamis: &id041
+    ctgry_cd: '300'
+    item_cd: '312'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '500'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:special
+  - p: hasGrade
+    o: variety:sesame-01
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:sesame-02
+    props:
+      default: false
+  - p: soldBy
+    o: unit:g500
+    props:
+      factor_kg: 0.5
+      default: true
+- id: variety:sesame-01
+  type: variety
+  name_ko: 백색(국산)
+  labels:
+    ko:
+    - 백색(국산)
+  kamis: *id041
+  attrs: {}
+- id: variety:sesame-02
+  type: variety
+  name_ko: 중국
+  labels:
+    ko:
+    - 중국
+  kamis:
+    ctgry_cd: '300'
+    item_cd: '312'
+    vrty_cd: '02'
+    grd_cd: '05'
+    unit: g
+    unit_sz: '500'
+  attrs: {}
+- id: item:peanut
+  type: item
+  name_ko: 땅콩
+  labels:
+    ko:
+    - 땅콩
+    en:
+    - peanut
+  kamis: &id042
+    ctgry_cd: '300'
+    item_cd: '314'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:special
+  - p: hasGrade
+    o: variety:peanut-01
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:peanut-02
+    props:
+      default: false
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:peanut-01
+  type: variety
+  name_ko: 국산
+  labels:
+    ko:
+    - 국산
+  kamis: *id042
+  attrs: {}
+- id: variety:peanut-02
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis:
+    ctgry_cd: '300'
+    item_cd: '314'
+    vrty_cd: '02'
+    grd_cd: '05'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: item:oyster_mushroom
+  type: item
+  name_ko: 느타리버섯
+  labels:
+    ko:
+    - 느타리버섯
+    en:
+    - oyster mushroom
+  kamis: &id043
+    ctgry_cd: '300'
+    item_cd: '315'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:oyster_mushroom-00
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:oyster_mushroom-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:oyster_mushroom-00
+  type: variety
+  name_ko: 느타리버섯
+  labels:
+    ko:
+    - 느타리버섯
+  kamis:
+    ctgry_cd: '300'
+    item_cd: '315'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:oyster_mushroom-01
+  type: variety
+  name_ko: 애느타리버섯
+  labels:
+    ko:
+    - 애느타리버섯
+  kamis: *id043
+  attrs: {}
+- id: item:enoki_mushroom
+  type: item
+  name_ko: 팽이버섯
+  labels:
+    ko:
+    - 팽이버섯
+    en:
+    - enoki mushroom
+  kamis: &id044
+    ctgry_cd: '300'
+    item_cd: '316'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '150'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:enoki_mushroom-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g150
+    props:
+      factor_kg: 0.15
+      default: true
+- id: variety:enoki_mushroom-00
+  type: variety
+  name_ko: 팽이버섯
+  labels:
+    ko:
+    - 팽이버섯
+  kamis: *id044
+  attrs: {}
+- id: item:king_oyster_mushroom
+  type: item
+  name_ko: 새송이버섯
+  labels:
+    ko:
+    - 새송이버섯
+    en:
+    - king oyster mushroom
+  kamis: &id045
+    ctgry_cd: '300'
+    item_cd: '317'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:vegetable
+  - p: hasGrade
+    o: variety:king_oyster_mushroom-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:king_oyster_mushroom-00
+  type: variety
+  name_ko: 새송이버섯
+  labels:
+    ko:
+    - 새송이버섯
+  kamis: *id045
+  attrs: {}
+- id: item:walnut
+  type: item
+  name_ko: 호두
+  labels:
+    ko:
+    - 호두
+    en:
+    - walnut
+  kamis: &id046
+    ctgry_cd: '300'
+    item_cd: '318'
+    vrty_cd: '00'
+    grd_cd: '05'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:special
+  - p: hasGrade
+    o: variety:walnut-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:walnut-00
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id046
+  attrs: {}
+- id: item:almond
+  type: item
+  name_ko: 아몬드
+  labels:
+    ko:
+    - 아몬드
+    en:
+    - almond
+  kamis: &id047
+    ctgry_cd: '300'
+    item_cd: '319'
+    vrty_cd: '00'
+    grd_cd: '05'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:special
+  - p: hasGrade
+    o: variety:almond-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:almond-00
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id047
+  attrs: {}
+- id: item:banana
+  type: item
+  name_ko: 바나나
+  labels:
+    ko:
+    - 바나나
+    en:
+    - banana
+  kamis: &id048
+    ctgry_cd: '400'
+    item_cd: '418'
+    vrty_cd: '02'
+    grd_cd: '04'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:banana-02
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:banana-02
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id048
+  attrs: {}
+- id: item:lemon
+  type: item
+  name_ko: 레몬
+  labels:
+    ko:
+    - 레몬
+    en:
+    - lemon
+  kamis: &id049
+    ctgry_cd: '400'
+    item_cd: '424'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:lemon-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece10
+    props:
+      count: 10
+      default: true
+- id: variety:lemon-00
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id049
+  attrs: {}
+- id: item:pineapple
+  type: item
+  name_ko: 파인애플
+  labels:
+    ko:
+    - 파인애플
+    en:
+    - pineapple
+  kamis: &id050
+    ctgry_cd: '400'
+    item_cd: '420'
+    vrty_cd: '02'
+    grd_cd: '05'
+    unit: 개
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:pineapple-02
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+- id: variety:pineapple-02
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id050
+  attrs: {}
+- id: item:mango
+  type: item
+  name_ko: 망고
+  labels:
+    ko:
+    - 망고
+    en:
+    - mango
+  kamis: &id051
+    ctgry_cd: '400'
+    item_cd: '428'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:mango-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+- id: variety:mango-00
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id051
+  attrs: {}
+- id: item:orange
+  type: item
+  name_ko: 오렌지
+  labels:
+    ko:
+    - 오렌지
+    en:
+    - orange
+  kamis: &id052
+    ctgry_cd: '400'
+    item_cd: '421'
+    vrty_cd: '06'
+    grd_cd: '05'
+    unit: 개
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:orange-06
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece10
+    props:
+      count: 10
+      default: true
+- id: variety:orange-06
+  type: variety
+  name_ko: 네이블 호주
+  labels:
+    ko:
+    - 네이블 호주
+  kamis: *id052
+  attrs: {}
+- id: item:grape
+  type: item
+  name_ko: 포도
+  labels:
+    ko:
+    - 포도
+    en:
+    - grape
+  kamis: &id053
+    ctgry_cd: '400'
+    item_cd: '414'
+    vrty_cd: '12'
+    grd_cd: '24'
+    unit: kg
+    unit_sz: '2'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:grape-12
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg2
+    props:
+      factor_kg: 2
+      default: true
+- id: variety:grape-12
+  type: variety
+  name_ko: 샤인머스켓
+  labels:
+    ko:
+    - 샤인머스켓
+  kamis: *id053
+  attrs: {}
+- id: item:avocado
+  type: item
+  name_ko: 아보카도
+  labels:
+    ko:
+    - 아보카도
+    en:
+    - avocado
+  kamis: &id054
+    ctgry_cd: '400'
+    item_cd: '430'
+    vrty_cd: '00'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:avocado-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece
+    props:
+      count: 1
+      default: true
+- id: variety:avocado-00
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id054
+  attrs: {}
+- id: item:blueberry
+  type: item
+  name_ko: 블루베리
+  labels:
+    ko:
+    - 블루베리
+    en:
+    - blueberry
+  kamis: &id055
+    ctgry_cd: '400'
+    item_cd: '429'
+    vrty_cd: '02'
+    grd_cd: '04'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:blueberry-02
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:blueberry-02
+  type: variety
+  name_ko: 수입(냉동)
+  labels:
+    ko:
+    - 수입(냉동)
+  kamis: *id055
+  attrs: {}
+- id: item:kiwi
+  type: item
+  name_ko: 키위
+  labels:
+    ko:
+    - 키위
+    en:
+    - kiwi
+  kamis: &id056
+    ctgry_cd: '400'
+    item_cd: '437'
+    vrty_cd: '01'
+    grd_cd: '04'
+    unit: 개
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:fruit
+  - p: hasGrade
+    o: variety:kiwi-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:piece10
+    props:
+      count: 10
+      default: true
+- id: variety:kiwi-01
+  type: variety
+  name_ko: 골드
+  labels:
+    ko:
+    - 골드
+  kamis: *id056
+  attrs: {}
+- id: item:beef
+  type: item
+  name_ko: 소
+  labels:
+    ko:
+    - 소
+    en:
+    - beef
+  kamis: &id057
+    ctgry_cd: '500'
+    item_cd: '4301'
+    vrty_cd: '21'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:livestock
+  - p: hasGrade
+    o: variety:beef-21
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:beef-22
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:beef-36
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:beef-40
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:beef-50
+    props:
+      default: false
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:beef-21
+  type: variety
+  name_ko: 안심
+  labels:
+    ko:
+    - 안심
+  kamis: *id057
+  attrs: {}
+- id: variety:beef-22
+  type: variety
+  name_ko: 등심
+  labels:
+    ko:
+    - 등심
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4301'
+    vrty_cd: '22'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:beef-36
+  type: variety
+  name_ko: 설도
+  labels:
+    ko:
+    - 설도
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4301'
+    vrty_cd: '36'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:beef-40
+  type: variety
+  name_ko: 양지
+  labels:
+    ko:
+    - 양지
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4301'
+    vrty_cd: '40'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:beef-50
+  type: variety
+  name_ko: 갈비
+  labels:
+    ko:
+    - 갈비
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4301'
+    vrty_cd: '50'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: item:pork
+  type: item
+  name_ko: 돼지
+  labels:
+    ko:
+    - 돼지
+    en:
+    - pork
+  kamis: &id058
+    ctgry_cd: '500'
+    item_cd: '4304'
+    vrty_cd: '25'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:livestock
+  - p: hasGrade
+    o: variety:pork-25
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:pork-27
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:pork-28
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:pork-68
+    props:
+      default: false
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:pork-25
+  type: variety
+  name_ko: 앞다리
+  labels:
+    ko:
+    - 앞다리
+  kamis: *id058
+  attrs: {}
+- id: variety:pork-27
+  type: variety
+  name_ko: 삼겹살
+  labels:
+    ko:
+    - 삼겹살
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4304'
+    vrty_cd: '27'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:pork-28
+  type: variety
+  name_ko: 갈비
+  labels:
+    ko:
+    - 갈비
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4304'
+    vrty_cd: '28'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:pork-68
+  type: variety
+  name_ko: 목심
+  labels:
+    ko:
+    - 목심
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4304'
+    vrty_cd: '68'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: item:imported_beef
+  type: item
+  name_ko: 수입 소고기
+  labels:
+    ko:
+    - 수입 소고기
+    en:
+    - imported beef
+  kamis: &id059
+    ctgry_cd: '500'
+    item_cd: '4401'
+    vrty_cd: '31'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:livestock
+  - p: hasGrade
+    o: variety:imported_beef-31
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:imported_beef-37
+    props:
+      default: false
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:imported_beef-31
+  type: variety
+  name_ko: 갈비
+  labels:
+    ko:
+    - 갈비
+  kamis: *id059
+  attrs: {}
+- id: variety:imported_beef-37
+  type: variety
+  name_ko: 갈비살
+  labels:
+    ko:
+    - 갈비살
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '4401'
+    vrty_cd: '37'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: item:imported_pork
+  type: item
+  name_ko: 수입 돼지고기
+  labels:
+    ko:
+    - 수입 돼지고기
+    en:
+    - imported pork
+  kamis: &id060
+    ctgry_cd: '500'
+    item_cd: '4402'
+    vrty_cd: '27'
+    grd_cd: '1'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:livestock
+  - p: hasGrade
+    o: variety:imported_pork-27
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:imported_pork-27
+  type: variety
+  name_ko: 삼겹살
+  labels:
+    ko:
+    - 삼겹살
+  kamis: *id060
+  attrs: {}
+- id: item:chicken
+  type: item
+  name_ko: 닭
+  labels:
+    ko:
+    - 닭
+    en:
+    - chicken
+  kamis: &id061
+    ctgry_cd: '500'
+    item_cd: '9901'
+    vrty_cd: '99'
+    grd_cd: '1'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:livestock
+  - p: hasGrade
+    o: variety:chicken-05
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:chicken-99
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:chicken-04
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:chicken-03
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:chicken-02
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:chicken-01
+    props:
+      default: false
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:chicken-05
+  type: variety
+  name_ko: 육계12호
+  labels:
+    ko:
+    - 육계12호
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '9901'
+    vrty_cd: '05'
+    grd_cd: '1'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: variety:chicken-99
+  type: variety
+  name_ko: 육계(kg)
+  labels:
+    ko:
+    - 육계(kg)
+  kamis: *id061
+  attrs: {}
+- id: variety:chicken-04
+  type: variety
+  name_ko: 육계11호
+  labels:
+    ko:
+    - 육계11호
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '9901'
+    vrty_cd: '04'
+    grd_cd: '1'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: variety:chicken-03
+  type: variety
+  name_ko: 육계10호
+  labels:
+    ko:
+    - 육계10호
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '9901'
+    vrty_cd: '03'
+    grd_cd: '1'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: variety:chicken-02
+  type: variety
+  name_ko: 육계9호
+  labels:
+    ko:
+    - 육계9호
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '9901'
+    vrty_cd: '02'
+    grd_cd: '1'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: variety:chicken-01
+  type: variety
+  name_ko: 토종닭17호
+  labels:
+    ko:
+    - 토종닭17호
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '9901'
+    vrty_cd: '01'
+    grd_cd: '1'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: item:egg
+  type: item
+  name_ko: 계란
+  labels:
+    ko:
+    - 계란
+    en:
+    - egg
+  kamis: &id062
+    ctgry_cd: '500'
+    item_cd: '9903'
+    vrty_cd: '21'
+    grd_cd: '1'
+    unit: 구
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:livestock
+  - p: hasGrade
+    o: variety:egg-21
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:egg-23
+    props:
+      default: false
+  - p: soldBy
+    o: unit:egg10
+    props:
+      count: 10
+      default: true
+  - p: soldBy
+    o: unit:egg30
+    props:
+      count: 30
+- id: variety:egg-21
+  type: variety
+  name_ko: XL10구
+  labels:
+    ko:
+    - XL10구
+  kamis: *id062
+  attrs: {}
+- id: variety:egg-23
+  type: variety
+  name_ko: XL30구
+  labels:
+    ko:
+    - XL30구
+  kamis:
+    ctgry_cd: '500'
+    item_cd: '9903'
+    vrty_cd: '23'
+    grd_cd: '1'
+    unit: 구
+    unit_sz: '30'
+  attrs: {}
+- id: item:milk
+  type: item
+  name_ko: 우유
+  labels:
+    ko:
+    - 우유
+    en:
+    - milk
+  kamis: &id063
+    ctgry_cd: '500'
+    item_cd: '9908'
+    vrty_cd: '01'
+    grd_cd: '1'
+    unit: L
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:livestock
+  - p: hasGrade
+    o: variety:milk-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:liter
+    props:
+      volume_l: 1
+      default: true
+- id: variety:milk-01
+  type: variety
+  name_ko: 흰우유
+  labels:
+    ko:
+    - 흰우유
+  kamis: *id063
+  attrs: {}
+- id: item:mackerel
+  type: item
+  name_ko: 고등어
+  labels:
+    ko:
+    - 고등어
+    en:
+    - mackerel
+  kamis: &id064
+    ctgry_cd: '600'
+    item_cd: '611'
+    vrty_cd: '03'
+    grd_cd: '30'
+    unit: 손
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:mackerel-03
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:mackerel-05
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:mackerel-08
+    props:
+      default: false
+  - p: soldBy
+    o: unit:pair
+    props:
+      count: 2
+      default: true
+  - p: soldBy
+    o: unit:fish
+    props:
+      count: 1
+- id: variety:mackerel-03
+  type: variety
+  name_ko: 국산(염장)
+  labels:
+    ko:
+    - 국산(염장)
+  kamis: *id064
+  attrs: {}
+- id: variety:mackerel-05
+  type: variety
+  name_ko: 국산(신선 냉장)
+  labels:
+    ko:
+    - 국산(신선 냉장)
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '611'
+    vrty_cd: '05'
+    grd_cd: '20'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+- id: variety:mackerel-08
+  type: variety
+  name_ko: 수입산(염장)
+  labels:
+    ko:
+    - 수입산(염장)
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '611'
+    vrty_cd: 08
+    grd_cd: '20'
+    unit: 손
+    unit_sz: '1'
+  attrs: {}
+- id: item:dried_anchovy
+  type: item
+  name_ko: 마른멸치
+  labels:
+    ko:
+    - 마른멸치
+    en:
+    - dried anchovy
+  kamis: &id065
+    ctgry_cd: '600'
+    item_cd: '638'
+    vrty_cd: '00'
+    grd_cd: '27'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:dried_anchovy-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:dried_anchovy-00
+  type: variety
+  name_ko: 마른멸치
+  labels:
+    ko:
+    - 마른멸치
+  kamis: *id065
+  attrs: {}
+- id: item:dried_squid
+  type: item
+  name_ko: 마른오징어
+  labels:
+    ko:
+    - 마른오징어
+    en:
+    - dried squid
+  kamis: &id066
+    ctgry_cd: '600'
+    item_cd: '640'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: 마리
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:dried_squid-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish10
+    props:
+      count: 10
+      default: true
+- id: variety:dried_squid-00
+  type: variety
+  name_ko: 마른오징어
+  labels:
+    ko:
+    - 마른오징어
+  kamis: *id066
+  attrs: {}
+- id: item:laver
+  type: item
+  name_ko: 김
+  labels:
+    ko:
+    - 김
+    en:
+    - laver
+  kamis: &id067
+    ctgry_cd: '600'
+    item_cd: '641'
+    vrty_cd: '01'
+    grd_cd: '30'
+    unit: 장
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:laver-00
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:laver-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:sheet10
+    props:
+      count: 10
+      default: true
+- id: variety:laver-00
+  type: variety
+  name_ko: 마른김
+  labels:
+    ko:
+    - 마른김
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '641'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: 장
+    unit_sz: '10'
+  attrs: {}
+- id: variety:laver-01
+  type: variety
+  name_ko: 구운김
+  labels:
+    ko:
+    - 구운김
+  kamis: *id067
+  attrs: {}
+- id: item:dried_seaweed
+  type: item
+  name_ko: 마른미역
+  labels:
+    ko:
+    - 마른미역
+    en:
+    - dried seaweed
+  kamis: &id068
+    ctgry_cd: '600'
+    item_cd: '642'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:dried_seaweed-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:dried_seaweed-00
+  type: variety
+  name_ko: 마른미역
+  labels:
+    ko:
+    - 마른미역
+  kamis: *id068
+  attrs: {}
+- id: item:oyster
+  type: item
+  name_ko: 굴
+  labels:
+    ko:
+    - 굴
+    en:
+    - oyster
+  kamis: &id069
+    ctgry_cd: '600'
+    item_cd: '644'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:oyster-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:oyster-00
+  type: variety
+  name_ko: 굴
+  labels:
+    ko:
+    - 굴
+  kamis: *id069
+  attrs: {}
+- id: item:imported_croaker
+  type: item
+  name_ko: 수입조기
+  labels:
+    ko:
+    - 수입조기
+    en:
+    - imported croaker
+  kamis: &id070
+    ctgry_cd: '600'
+    item_cd: '649'
+    vrty_cd: '04'
+    grd_cd: '30'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:imported_croaker-04
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish
+    props:
+      count: 1
+      default: true
+- id: variety:imported_croaker-04
+  type: variety
+  name_ko: 부세수입(냉동)
+  labels:
+    ko:
+    - 부세수입(냉동)
+  kamis: *id070
+  attrs: {}
+- id: item:salted_shrimp
+  type: item
+  name_ko: 새우젓
+  labels:
+    ko:
+    - 새우젓
+    en:
+    - salted shrimp
+  kamis: &id071
+    ctgry_cd: '600'
+    item_cd: '650'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:salted_shrimp-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:salted_shrimp-00
+  type: variety
+  name_ko: 새우젓
+  labels:
+    ko:
+    - 새우젓
+  kamis: *id071
+  attrs: {}
+- id: item:anchovy_sauce
+  type: item
+  name_ko: 멸치액젓
+  labels:
+    ko:
+    - 멸치액젓
+    en:
+    - anchovy sauce
+  kamis: &id072
+    ctgry_cd: '600'
+    item_cd: '651'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:anchovy_sauce-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:anchovy_sauce-00
+  type: variety
+  name_ko: 멸치액젓
+  labels:
+    ko:
+    - 멸치액젓
+  kamis: *id072
+  attrs: {}
+- id: item:sea_salt
+  type: item
+  name_ko: 천일염
+  labels:
+    ko:
+    - 천일염
+    en:
+    - sea salt
+  kamis: &id073
+    ctgry_cd: '600'
+    item_cd: '652'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '5'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:sea_salt-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg5
+    props:
+      factor_kg: 5
+      default: true
+- id: variety:sea_salt-00
+  type: variety
+  name_ko: 천일염
+  labels:
+    ko:
+    - 천일염
+  kamis: *id073
+  attrs: {}
+- id: item:abalone
+  type: item
+  name_ko: 전복
+  labels:
+    ko:
+    - 전복
+    en:
+    - abalone
+  kamis: &id074
+    ctgry_cd: '600'
+    item_cd: '653'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: 마리
+    unit_sz: '5'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:abalone-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish5
+    props:
+      count: 5
+      default: true
+- id: variety:abalone-00
+  type: variety
+  name_ko: 냉장
+  labels:
+    ko:
+    - 냉장
+  kamis: *id074
+  attrs: {}
+- id: item:shrimp
+  type: item
+  name_ko: 새우
+  labels:
+    ko:
+    - 새우
+    en:
+    - shrimp
+  kamis: &id075
+    ctgry_cd: '600'
+    item_cd: '654'
+    vrty_cd: '01'
+    grd_cd: '30'
+    unit: 마리
+    unit_sz: '10'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:shrimp-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish10
+    props:
+      count: 10
+      default: true
+- id: variety:shrimp-01
+  type: variety
+  name_ko: 흰다리(수입)
+  labels:
+    ko:
+    - 흰다리(수입)
+  kamis: *id075
+  attrs: {}
+- id: item:saury
+  type: item
+  name_ko: 꽁치
+  labels:
+    ko:
+    - 꽁치
+    en:
+    - saury
+  kamis: &id076
+    ctgry_cd: '600'
+    item_cd: '612'
+    vrty_cd: '01'
+    grd_cd: '30'
+    unit: 마리
+    unit_sz: '5'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:saury-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish5
+    props:
+      count: 5
+      default: true
+- id: variety:saury-01
+  type: variety
+  name_ko: 냉동(수입)
+  labels:
+    ko:
+    - 냉동(수입)
+  kamis: *id076
+  attrs: {}
+- id: item:squid
+  type: item
+  name_ko: 물오징어
+  labels:
+    ko:
+    - 물오징어
+    en:
+    - squid
+  kamis: &id077
+    ctgry_cd: '600'
+    item_cd: '619'
+    vrty_cd: '05'
+    grd_cd: '21'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:squid-04
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:squid-05
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish
+    props:
+      count: 1
+      default: true
+- id: variety:squid-04
+  type: variety
+  name_ko: 연근해(냉동)
+  labels:
+    ko:
+    - 연근해(냉동)
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '619'
+    vrty_cd: '04'
+    grd_cd: '21'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+- id: variety:squid-05
+  type: variety
+  name_ko: 원양(냉동)
+  labels:
+    ko:
+    - 원양(냉동)
+  kamis: *id077
+  attrs: {}
+- id: item:hairtail
+  type: item
+  name_ko: 갈치
+  labels:
+    ko:
+    - 갈치
+    en:
+    - hairtail
+  kamis: &id078
+    ctgry_cd: '600'
+    item_cd: '613'
+    vrty_cd: '03'
+    grd_cd: '21'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:hairtail-03
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:hairtail-04
+    props:
+      default: false
+  - p: soldBy
+    o: unit:fish
+    props:
+      count: 1
+      default: true
+- id: variety:hairtail-03
+  type: variety
+  name_ko: 국산(냉장)
+  labels:
+    ko:
+    - 국산(냉장)
+  kamis: *id078
+  attrs: {}
+- id: variety:hairtail-04
+  type: variety
+  name_ko: 국산(냉동)
+  labels:
+    ko:
+    - 국산(냉동)
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '613'
+    vrty_cd: '04'
+    grd_cd: '21'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+- id: item:pollock
+  type: item
+  name_ko: 명태
+  labels:
+    ko:
+    - 명태
+    en:
+    - pollock
+  kamis: &id079
+    ctgry_cd: '600'
+    item_cd: '615'
+    vrty_cd: '04'
+    grd_cd: '20'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:pollock-04
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:pollock-05
+    props:
+      default: false
+  - p: soldBy
+    o: unit:fish
+    props:
+      count: 1
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+- id: variety:pollock-04
+  type: variety
+  name_ko: 냉동(원양수입통합)
+  labels:
+    ko:
+    - 냉동(원양수입통합)
+  kamis: *id079
+  attrs: {}
+- id: variety:pollock-05
+  type: variety
+  name_ko: 냉동가공
+  labels:
+    ko:
+    - 냉동가공
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '615'
+    vrty_cd: '05'
+    grd_cd: '21'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: item:croaker
+  type: item
+  name_ko: 조기
+  labels:
+    ko:
+    - 조기
+    en:
+    - croaker
+  kamis: &id080
+    ctgry_cd: '600'
+    item_cd: '614'
+    vrty_cd: '07'
+    grd_cd: '21'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:croaker-05
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:croaker-06
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:croaker-07
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish
+    props:
+      count: 1
+      default: true
+- id: variety:croaker-05
+  type: variety
+  name_ko: 참조기(신선 냉장)
+  labels:
+    ko:
+    - 참조기(신선 냉장)
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '614'
+    vrty_cd: '05'
+    grd_cd: '21'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+- id: variety:croaker-06
+  type: variety
+  name_ko: 참조기(냉동)
+  labels:
+    ko:
+    - 참조기(냉동)
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '614'
+    vrty_cd: '06'
+    grd_cd: '21'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+- id: variety:croaker-07
+  type: variety
+  name_ko: 굴비
+  labels:
+    ko:
+    - 굴비
+  kamis: *id080
+  attrs: {}
+- id: item:dried_kelp
+  type: item
+  name_ko: 건다시마
+  labels:
+    ko:
+    - 건다시마
+    en:
+    - dried kelp
+  kamis: &id081
+    ctgry_cd: '600'
+    item_cd: '660'
+    vrty_cd: '01'
+    grd_cd: '30'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:dried_kelp-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:dried_kelp-01
+  type: variety
+  name_ko: 완도산
+  labels:
+    ko:
+    - 완도산
+  kamis: *id081
+  attrs: {}
+- id: item:scallop
+  type: item
+  name_ko: 가리비
+  labels:
+    ko:
+    - 가리비
+    en:
+    - scallop
+  kamis: &id082
+    ctgry_cd: '600'
+    item_cd: '659'
+    vrty_cd: '01'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:scallop-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:scallop-01
+  type: variety
+  name_ko: 해만가리비(홍가리비)
+  labels:
+    ko:
+    - 해만가리비(홍가리비)
+  kamis: *id082
+  attrs: {}
+- id: item:mussel
+  type: item
+  name_ko: 홍합
+  labels:
+    ko:
+    - 홍합
+    en:
+    - mussel
+  kamis: &id083
+    ctgry_cd: '600'
+    item_cd: '658'
+    vrty_cd: '02'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:mussel-01
+    props:
+      default: false
+  - p: hasGrade
+    o: variety:mussel-02
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:mussel-01
+  type: variety
+  name_ko: 깐홍합(냉장)
+  labels:
+    ko:
+    - 깐홍합(냉장)
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '658'
+    vrty_cd: '01'
+    grd_cd: '30'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+- id: variety:mussel-02
+  type: variety
+  name_ko: 안깐홍합(냉장)
+  labels:
+    ko:
+    - 안깐홍합(냉장)
+  kamis: *id083
+  attrs: {}
+- id: item:blue_crab
+  type: item
+  name_ko: 꽃게
+  labels:
+    ko:
+    - 꽃게
+    en:
+    - blue crab
+  kamis: &id084
+    ctgry_cd: '600'
+    item_cd: '656'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:blue_crab-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:blue_crab-00
+  type: variety
+  name_ko: 냉동
+  labels:
+    ko:
+    - 냉동
+  kamis: *id084
+  attrs: {}
+- id: item:spanish_mackerel
+  type: item
+  name_ko: 삼치
+  labels:
+    ko:
+    - 삼치
+    en:
+    - spanish mackerel
+  kamis: &id085
+    ctgry_cd: '600'
+    item_cd: '616'
+    vrty_cd: '01'
+    grd_cd: '20'
+    unit: 마리
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:spanish_mackerel-01
+    props:
+      default: true
+  - p: soldBy
+    o: unit:fish
+    props:
+      count: 1
+      default: true
+- id: variety:spanish_mackerel-01
+  type: variety
+  name_ko: 냉장
+  labels:
+    ko:
+    - 냉장
+  kamis: *id085
+  attrs: {}
+- id: item:mackerel_fillet
+  type: item
+  name_ko: 고등어필렛
+  labels:
+    ko:
+    - 고등어필렛
+    en:
+    - mackerel fillet
+  kamis: &id086
+    ctgry_cd: '600'
+    item_cd: '662'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:mackerel_fillet-00
+    props:
+      default: true
+  - p: hasGrade
+    o: variety:mackerel_fillet-01
+    props:
+      default: false
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:mackerel_fillet-00
+  type: variety
+  name_ko: 수입
+  labels:
+    ko:
+    - 수입
+  kamis: *id086
+  attrs: {}
+- id: variety:mackerel_fillet-01
+  type: variety
+  name_ko: 국산
+  labels:
+    ko:
+    - 국산
+  kamis:
+    ctgry_cd: '600'
+    item_cd: '662'
+    vrty_cd: '01'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+- id: item:clam
+  type: item
+  name_ko: 바지락
+  labels:
+    ko:
+    - 바지락
+    en:
+    - clam
+  kamis: &id087
+    ctgry_cd: '600'
+    item_cd: '661'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:clam-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:clam-00
+  type: variety
+  name_ko: 냉장
+  labels:
+    ko:
+    - 냉장
+  kamis: *id087
+  attrs: {}
+- id: item:octopus
+  type: item
+  name_ko: 낙지
+  labels:
+    ko:
+    - 낙지
+    en:
+    - octopus
+  kamis: &id088
+    ctgry_cd: '600'
+    item_cd: '664'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: g
+    unit_sz: '100'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:octopus-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:g100
+    props:
+      factor_kg: 0.1
+      default: true
+- id: variety:octopus-00
+  type: variety
+  name_ko: 수입(냉동)
+  labels:
+    ko:
+    - 수입(냉동)
+  kamis: *id088
+  attrs: {}
+- id: item:cockle
+  type: item
+  name_ko: 꼬막
+  labels:
+    ko:
+    - 꼬막
+    en:
+    - cockle
+  kamis: &id089
+    ctgry_cd: '600'
+    item_cd: '665'
+    vrty_cd: '00'
+    grd_cd: '30'
+    unit: kg
+    unit_sz: '1'
+  attrs: {}
+  relations:
+  - p: isA
+    o: cat:seafood
+  - p: hasGrade
+    o: variety:cockle-00
+    props:
+      default: true
+  - p: soldBy
+    o: unit:kg
+    props:
+      factor_kg: 1
+      default: true
+- id: variety:cockle-00
+  type: variety
+  name_ko: 국산(새꼬막)
+  labels:
+    ko:
+    - 국산(새꼬막)
+  kamis: *id089
+  attrs: {}
+- id: unit:egg10
+  type: unit
+  name_ko: 10구
+  labels:
+    ko:
+    - 10구
+  attrs:
+    observation_unit: 구
+    observation_size: '10'
+- id: unit:egg30
+  type: unit
+  name_ko: 30구
+  labels:
+    ko:
+    - 30구
+  attrs:
+    observation_unit: 구
+    observation_size: '30'
+- id: unit:fish
+  type: unit
+  name_ko: 마리
+  labels:
+    ko:
+    - 마리
+  attrs:
+    observation_unit: 마리
+    observation_size: '1'
+- id: unit:fish10
+  type: unit
+  name_ko: 10마리
+  labels:
+    ko:
+    - 10마리
+  attrs:
+    observation_unit: 마리
+    observation_size: '10'
+- id: unit:fish5
+  type: unit
+  name_ko: 5마리
+  labels:
+    ko:
+    - 5마리
+  attrs:
+    observation_unit: 마리
+    observation_size: '5'
+- id: unit:g100
+  type: unit
+  name_ko: 100g
+  labels:
+    ko:
+    - 100g
+  attrs:
+    observation_unit: g
+    observation_size: '100'
+- id: unit:g150
+  type: unit
+  name_ko: 150g
+  labels:
+    ko:
+    - 150g
+  attrs:
+    observation_unit: g
+    observation_size: '150'
+- id: unit:g50
+  type: unit
+  name_ko: 50g
+  labels:
+    ko:
+    - 50g
+  attrs:
+    observation_unit: g
+    observation_size: '50'
+- id: unit:g500
+  type: unit
+  name_ko: 500g
+  labels:
+    ko:
+    - 500g
+  attrs:
+    observation_unit: g
+    observation_size: '500'
+- id: unit:g600
+  type: unit
+  name_ko: 600g
+  labels:
+    ko:
+    - 600g
+  attrs:
+    observation_unit: g
+    observation_size: '600'
+- id: unit:head
+  type: unit
+  name_ko: 포기
+  labels:
+    ko:
+    - 포기
+  attrs:
+    observation_unit: 포기
+    observation_size: '1'
+- id: unit:kg10
+  type: unit
+  name_ko: 10kg
+  labels:
+    ko:
+    - 10kg
+  attrs:
+    observation_unit: kg
+    observation_size: '10'
+- id: unit:kg2
+  type: unit
+  name_ko: 2kg
+  labels:
+    ko:
+    - 2kg
+  attrs:
+    observation_unit: kg
+    observation_size: '2'
+- id: unit:kg20
+  type: unit
+  name_ko: 20kg
+  labels:
+    ko:
+    - 20kg
+  attrs:
+    observation_unit: kg
+    observation_size: '20'
+- id: unit:kg5
+  type: unit
+  name_ko: 5kg
+  labels:
+    ko:
+    - 5kg
+  attrs:
+    observation_unit: kg
+    observation_size: '5'
+- id: unit:liter
+  type: unit
+  name_ko: L
+  labels:
+    ko:
+    - L
+  attrs:
+    observation_unit: L
+    observation_size: '1'
+- id: unit:pair
+  type: unit
+  name_ko: 손
+  labels:
+    ko:
+    - 손
+  attrs:
+    observation_unit: 손
+    observation_size: '1'
+- id: unit:piece10
+  type: unit
+  name_ko: 10개
+  labels:
+    ko:
+    - 10개
+  attrs:
+    observation_unit: 개
+    observation_size: '10'
+- id: unit:piece3
+  type: unit
+  name_ko: 3개
+  labels:
+    ko:
+    - 3개
+  attrs:
+    observation_unit: 개
+    observation_size: '3'
+- id: unit:sheet10
+  type: unit
+  name_ko: 10장
+  labels:
+    ko:
+    - 10장
+  attrs:
+    observation_unit: 장
+    observation_size: '10'

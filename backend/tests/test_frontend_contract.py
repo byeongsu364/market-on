@@ -1,7 +1,15 @@
 """HTTP responses expose precisely the frontend contract keys, without DB internals."""
 
-from tests.test_merchant_api import merchant, sale_payload
-from tests.test_auth_api import memory, signup, operator, HEADER
+from tests.test_auth_api import (
+    HEADER,
+    memory,  # noqa: F401 -- pytest fixture
+    operator,
+    signup,
+)
+from tests.test_merchant_api import (
+    merchant,  # noqa: F401 -- pytest fixture
+    sale_payload,
+)
 
 USER = {'id', 'login_id', 'role', 'status', 'store', 'market', 'created_at'}
 STORE = {
@@ -31,6 +39,7 @@ SALE = {
     'variety_name',
 }
 ITEM = {
+    'criteria_style',
     'variety_id',
     'item_id',
     'name',
@@ -50,7 +59,7 @@ def assert_sale(s, public=False):
     assert isinstance(s['view_count'], int)
 
 
-def test_auth_admin_contract(memory):
+def test_auth_admin_contract(memory):  # noqa: F811 -- imported fixture
     client = memory['client']
     response = signup(memory)
     user = response.json()['user']
@@ -65,7 +74,7 @@ def test_auth_admin_contract(memory):
         assert set(response.json()['user']) == USER
 
 
-def test_store_sale_poster_contract(merchant):
+def test_store_sale_poster_contract(merchant):  # noqa: F811 -- imported fixture
     client = merchant['client']
     assert set(client.get('/merchant/store').json()) == STORE
     assert set(client.patch('/merchant/store', headers=HEADER, json={}).json()) == STORE

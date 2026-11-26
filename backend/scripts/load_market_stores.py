@@ -1,9 +1,10 @@
 """상가정보 전체 응답으로 업종별 예시 지도를 적재한다 (실측 위치 아님)."""
 
 import argparse
-from collections import Counter
 import math
+from collections import Counter
 from statistics import mode
+
 import yaml
 
 from app.core import http
@@ -11,6 +12,7 @@ from app.core.config import settings
 from app.core.errors import AppError
 from app.db.pool import connection
 from app.db.repositories import store_repo
+
 from ._common import DATA, run
 
 URL = 'https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius'
@@ -25,15 +27,15 @@ def fetch_rows(config):
         while True:
             payload = http.get_sync(
                 URL,
-                params=dict(
-                    serviceKey=settings.DATA_GO_KR_KEY,
-                    radius=config['radius_m'],
-                    cx=config['center']['lng'],
-                    cy=config['center']['lat'],
-                    type='json',
-                    numOfRows=1000,
-                    pageNo=page,
-                ),
+                params={
+                    'serviceKey': settings.DATA_GO_KR_KEY,
+                    'radius': config['radius_m'],
+                    'cx': config['center']['lng'],
+                    'cy': config['center']['lat'],
+                    'type': 'json',
+                    'numOfRows': 1000,
+                    'pageNo': page,
+                },
             ).json()
             header = payload['header']
             if str(header.get('resultCode', header.get('resultCd'))) not in ('0', '00'):
@@ -50,7 +52,7 @@ def fetch_rows(config):
             if not items:
                 raise ValueError()
             page += 1
-    except Exception:
+    except Exception:  # noqa: BLE001 -- 외부 응답 오류를 안전한 공통 오류로 변환
         raise AppError(
             'SBIZ_API_ERROR', '상가정보 응답을 확인하세요. 저장하지 않았습니다.', 502
         ) from None
@@ -63,6 +65,13 @@ def prepare(config, rows, ontology_dir=DATA / 'ontology'):
         for e in yaml.safe_load(p.read_text())['entities']
     ]
     names = {e['id']: e['name_ko'] for e in entities}
+    rule_path = ontology_dir / 'item_store_categories.yaml'
+    rules = (
+        yaml.safe_load(rule_path.read_text()).get('item_store_categories', [])
+        if rule_path.exists()
+        else []
+    )
+    explicit = {r['item']: r['store_category'] for r in rules}
 
     def normalize(value):
         return ''.join(str(value or '').split())
@@ -107,45 +116,49 @@ def prepare(config, rows, ontology_dir=DATA / 'ontology'):
         x, y = 8 + index % 2 * 180, 8 + index // 2 * 180
         zone = f'zone:gd-{category.split(":")[1]}'
         zones.append(
-            dict(
-                id=zone,
-                market_id=config['market']['id'],
-                store_category_id=category,
-                name_ko=names[category],
-                x=x,
-                y=y,
-            )
+            {
+                'id': zone,
+                'market_id': config['market']['id'],
+                'store_category_id': category,
+                'name_ko': names[category],
+                'x': x,
+                'y': y,
+            }
         )
         item_ids = sorted(
             e['id']
             for e in entities
             if e['type'] == 'item'
-            and any(
-                r.get('p') == 'isA' and r.get('o') in config['category_items'].get(category, [])
-                for r in e.get('relations', [])
+            and (
+                explicit[e['id']] == category
+                if e['id'] in explicit
+                else any(
+                    r.get('p') == 'isA' and r.get('o') in config['category_items'].get(category, [])
+                    for r in e.get('relations', [])
+                )
             )
         )
         # Variable zone height keeps 72×54 store cells disjoint, even for large categories.
         for i, row in enumerate(members):
             sid = f'store:gd-{row["bizesId"]}'
             stores.append(
-                dict(
-                    id=sid,
-                    market_id=config['market']['id'],
-                    zone_id=zone,
-                    name_ko=row['bizesNm'],
-                    sbiz_id=str(row['bizesId']),
-                    lat=float(row['lat']),
-                    lng=float(row['lon']),
-                    location_verified=False,
-                    sbiz_industry=row['indsSclsNm'],
-                    floor=str(row.get('flrNo') or ''),
-                    store_category_id=category,
-                    map_x=x + 8 + i % 2 * 80,
-                    map_y=y + 40 + i // 2 * 60,
-                    source='sbiz',
-                    active=True,
-                )
+                {
+                    'id': sid,
+                    'market_id': config['market']['id'],
+                    'zone_id': zone,
+                    'name_ko': row['bizesNm'],
+                    'sbiz_id': str(row['bizesId']),
+                    'lat': float(row['lat']),
+                    'lng': float(row['lon']),
+                    'location_verified': False,
+                    'sbiz_industry': row['indsSclsNm'],
+                    'floor': str(row.get('flrNo') or ''),
+                    'store_category_id': category,
+                    'map_x': x + 8 + i % 2 * 80,
+                    'map_y': y + 40 + i // 2 * 60,
+                    'source': 'sbiz',
+                    'active': True,
+                }
             )
             guesses[sid] = item_ids
     # Rows of zones grow to fit their largest category.
@@ -172,13 +185,15 @@ def prepare(config, rows, ontology_dir=DATA / 'ontology'):
     if coordinates:
         lat, lng = mode(sorted(coordinates))
         market.update(lat=lat, lng=lng)
-    report = dict(
-        industries=dict(sorted(Counter(r['indsSclsNm'] for r in selected).items())),
-        buildings=dict(sorted(Counter(r.get('bldNm') or '' for r in selected).items())),
-        received_industries=dict(sorted(Counter(r.get('indsSclsNm') or '' for r in rows).items())),
-        guessed_items=sum(map(len, guesses.values())),
-        stores=len(stores),
-    )
+    report = {
+        'industries': dict(sorted(Counter(r['indsSclsNm'] for r in selected).items())),
+        'buildings': dict(sorted(Counter(r.get('bldNm') or '' for r in selected).items())),
+        'received_industries': dict(
+            sorted(Counter(r.get('indsSclsNm') or '' for r in rows).items())
+        ),
+        'guessed_items': sum(map(len, guesses.values())),
+        'stores': len(stores),
+    }
     return market, zones, stores, guesses, report
 
 

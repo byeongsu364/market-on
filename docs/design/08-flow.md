@@ -107,7 +107,7 @@ sequenceDiagram
   F->>API: POST /recognize (사진)
   API->>API: 위치·기기 정보 지우기 (동의 시 대략 위치만)
   API->>V: 라벨 + 글자 한 번에 (하루·한 달 한도)
-  API->>ON: 비전 라벨 → 품목 후보 (vision 라벨)
+  API->>ON: 비전 라벨 10개 → 품목 후보 (vision 라벨) + 사진 속 글자의 품목 이름(가격표·상자)
   API->>API: 가격표 글자 → 가격·단위(정규식)·품종(온톨로지 라벨)
   Note right of V: AI 모델은 사진을 보지 않음. 비전이 안 되면 후보 없이 → 화면에서 직접 고르기
   API-->>F: 후보, price_tag, model=google-vision

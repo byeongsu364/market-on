@@ -411,7 +411,7 @@ def vision_item_labels(conn):
 
     return rows(
         conn,
-        """select e.id,e.name_ko,l.label from entities e
+        """select e.id,e.name_ko,l.label,l.kind from entities e
         join entity_labels l on l.entity_id=e.id
         where e.type='item' and (l.kind='vision' or
         (l.lang='en' and l.kind in ('preferred','synonym')))

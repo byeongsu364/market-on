@@ -39,6 +39,7 @@ def get_item(conn, item_id, lang='ko'):
     if default and default not in units:
         units.append(default)
     return Item(
+        criteria_style=(entity.get('attrs') or {}).get('criteria_style'),
         item_id=item_id,
         name=preferred(labels, lang, preferred(labels, 'ko', entity['name_ko'])),
         synonyms=[

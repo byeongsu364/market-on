@@ -19,8 +19,10 @@ def test_sample_formats_and_kamis():
         for e in yaml.safe_load(path.read_text())['entities']
     ]
     # 기존 41개 + 귤 품목 1개 + 품종 2개
-    assert len([e for e in entities if e['type'] != 'recipe']) == 54
-    assert sum(e['type'] == 'category' for e in entities) == 2
+    assert (
+        len([e for e in entities if e['type'] != 'recipe']) == 292
+    )  # 047: 기존 54 + 새 명시 엔터티 238
+    assert sum(e['type'] == 'category' for e in entities) == 6
     assert sum(e['type'] == 'store_category' for e in entities) == 8
     # 품목 KAMIS 코드는 aT 소매 품목코드표(신태빈 정리, 2026-11-20)에 실제로 있는 조합이어야 해요
     code_table = list(
@@ -28,6 +30,18 @@ def test_sample_formats_and_kamis():
             io.StringIO((DATA / 'kamis/aT_소매_품목코드표_20261120.csv').read_text('utf-8-sig'))
         )
     )
+    at = __import__('json').loads((DATA / 'kamis/at_retail_items_20261127.json').read_text())[
+        'items'
+    ]
+    at_codes = {
+        (i['ctgry_cd'], i['item_cd'], v['vrty_cd'], g['grd_cd'], g['unit'], g['unit_sz'])
+        for i in at
+        for v in i['varieties']
+        for g in v['grades']
+    }
+    generated = {
+        e['id'] for e in yaml.safe_load((DATA / 'ontology/items_at.yaml').read_text())['entities']
+    }
     known = {(r['부류코드'], r['품목코드'], r['품종코드']) for r in code_table}
     for entity in entities:
         if entity['type'] in ('item', 'variety'):
@@ -46,7 +60,18 @@ def test_sample_formats_and_kamis():
                     'unit_sz': '10',
                 }
                 continue
-            assert (kamis['ctgry_cd'], kamis['item_cd'], kamis['vrty_cd']) in known, entity['id']
+            assert (kamis['ctgry_cd'], kamis['item_cd'], kamis['vrty_cd']) in known or entity[
+                'id'
+            ] in generated, entity['id']
+            if entity['id'] in generated:
+                assert (
+                    tuple(
+                        kamis[k]
+                        for k in ('ctgry_cd', 'item_cd', 'vrty_cd', 'grd_cd', 'unit', 'unit_sz')
+                    )
+                    in at_codes
+                )
+                continue
             # 감귤은 상품(04) 대신 M과(15)로 조사돼요
             assert kamis['grd_cd'] == ('15' if kamis['item_cd'] == '415' else '04')
             code_row = next(
@@ -67,9 +92,9 @@ def test_sample_formats_and_kamis():
         for doc in imported
     )
     # 품목 6개 × (고르는 법·보관·손질·품종 특징) + 연습용 긴 레시피 1개
-    assert len(docs) - len(imported) == 25
+    assert len(docs) - len(imported) == 58  # 047: 11품목 × 원문 문서 3종
     for kind in ('criterion', 'storage', 'prep', 'story'):
-        assert sum(doc.doc_type == kind for doc in docs) == 6
+        assert sum(doc.doc_type == kind for doc in docs) == (6 if kind == 'story' else 17)
     for doc in docs:
         assert doc.source_key in sources
         assert not doc.doc_key.startswith('/')
@@ -123,9 +148,9 @@ def test_criterion_expansion_without_db(monkeypatch):
     monkeypatch.setattr(repo, 'prune_generated_criteria', prune)
     conn = Mock(transaction=nullcontext)
     counts = load_ontology(conn)
-    assert counts['added'] == 78 + len(
+    assert counts['added'] == 332 + len(
         list((DATA / 'rag_docs/recipes').glob('foodsafety-*.md'))
-    )  # 명시 엔터티 54개 + 자동 확인 포인트 24개
+    )  # 047: 명시 엔터티 292개 + 자동 확인 포인트 40개
     assert saved['variety:apple-hongro']['type'] == 'variety'
     assert saved['item:mandarin']['name_ko'] == '귤'
     assert ('hasGrade', 'variety:mandarin-open', None, None, {'default': True}) in relations[
@@ -151,17 +176,18 @@ def test_criterion_expansion_without_db(monkeypatch):
     assert ('soldBy', 'unit:bunch', None, 42, {'factor_kg': 0.8, 'default': True}) in relations[
         'item:green_onion'
     ]
-    assert len(prune.call_args.args[1]) == 24  # 6품목 × 확인 포인트 4개
+    assert len(prune.call_args.args[1]) == 40  # 047: 기존 24 + 원문 인용 16
 
 
 def test_mandarin_catalog_and_documents():
     entities = yaml.safe_load((DATA / 'ontology/items.yaml').read_text())['entities']
     sources = yaml.safe_load((DATA / 'sources.yaml').read_text())
     assert sum(e['type'] == 'item' for e in entities) == 6
-    assert len(sources) == 16
+    assert len(sources) == 26  # 047: 공유 원문 출처 10개 추가
     item = next(e for e in entities if e['id'] == 'item:mandarin')
     assert item['labels'] == {'ko': ['귤', '감귤', '밀감'], 'en': ['mandarin', 'tangerine']}
-    assert not item.get('vision')
+    # 비전 라벨은 실제 구글 비전 응답에서 확인한 것만 (11/27, 귤 사진 3장)
+    assert item['vision'] == ['mandarin orange', 'clementine']
     assert len(item['criteria']) == 4
     assert all(c['source'] in sources for c in item['criteria'])
     grades = [r for r in item['relations'] if r['p'] == 'hasGrade']

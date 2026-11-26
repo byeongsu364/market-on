@@ -317,7 +317,7 @@ function MarketView({ market }: { market: Market }) {
           {t('mapNearest')}
         </Chip>
         {itemId &&
-          varieties.map((v) => (
+          varieties.slice(0, 8).map((v) => (
             <Chip
               key={v.variety_id}
               float={float}

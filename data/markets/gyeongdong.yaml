@@ -13,3 +13,4 @@ industries:
   떡/한과: store_category:snack
 category_items:
   store_category:produce: [cat:vegetable, cat:fruit]
+# 품목별 대표 업종은 ontology/item_store_categories.yaml을 우선 적용 (src:team-draft).

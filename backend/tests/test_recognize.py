@@ -88,7 +88,8 @@ def upload(client, data=JPEG):
     [
         (['scallion'], [('item:green_onion', 1.0)]),
         (['fuji apple'], [('item:apple', 0.7)]),
-        (['leek', 'green onion'], [('item:green_onion', 0.85), ('item:onion', 0.595)]),
+        # 사전에 없는 라벨(leek)은 자리를 차지하지 않고 건너뜀 → green onion이 1순위 가중치
+        (['leek', 'green onion'], [('item:green_onion', 1.0), ('item:onion', 0.7)]),
         (['unknown'], []),
         (['pineapple'], []),  # apple is not a complete token in pineapple.
         (['pear', 'apple'], [('item:pear', 1.0), ('item:apple', 0.85)]),
@@ -287,6 +288,10 @@ def test_eight_megabyte_boundary(api):
         ('3000', (3000.0, None, None)),  # "원" 없이 숫자만
         ('3000 / 5000', None),
         ('2kg 3개', None),  # 단위 붙은 숫자는 가격 아님
+        # 11/27 실제 사진: 상자 글씨 "4141", "3개"를 잘못 읽은 "374" → 10원 단위가 아니라 가격 아님
+        ('효돈감귤 4141', None),
+        ('신고배 374', None),
+        ('단감 (상서) 3000*', (3000.0, None, None)),
     ],
 )
 def test_price_tag_from_text(api, text, expected):
@@ -324,6 +329,9 @@ def test_variety_from_tag_text(api, monkeypatch, text, expected):
         for label in labels
     ]
     monkeypatch.setattr(knowledge_repo, 'label_dictionary', lambda *a: dictionary)
+    # 글자 속 품종 이름 → 품목 (부사·홍로 → 사과)
+    monkeypatch.setattr(knowledge_repo, 'variety_items', lambda c, ids: ['item:apple'])
+    monkeypatch.setattr(knowledge_repo, 'get_item', lambda c, i: {'name_ko': '사과'})
     annotate.return_value = seen(['apple'], text)
     tag = upload(client).json()['price_tag']
     assert tag['variety_id'] == expected and tag['price'] == 5000
@@ -407,3 +415,59 @@ def test_variety_without_price_response(api, monkeypatch):
     assert body['price_tag'] is None
     assert body['variety_id'] == 'variety:apple-fuji'
     assert body['variety_text'] == '부사'
+
+
+def test_items_in_sign_text(monkeypatch):
+    """가격표·상자 글자에서 품목 이름 찾기: 한 글자 이름은 그 낱말만, 영어는 안 봐요."""
+    from app.knowledge.ontology import normalize
+
+    labels = {
+        'item:green_onion': ['대파', '파'],
+        'item:onion': ['양파'],
+        'item:pear': ['배', 'pear'],
+        'item:mandarin': ['귤', '감귤'],
+        'variety:pear-shingo': ['신고배'],
+    }
+    rows = [(normalize(l), eid, l) for eid, ls in labels.items() for l in ls]
+    monkeypatch.setattr(knowledge_repo, 'label_dictionary', lambda c: rows)
+    monkeypatch.setattr(knowledge_repo, 'variety_items', lambda c, ids: ['item:pear'])
+    monkeypatch.setattr(knowledge_repo, 'get_item', lambda c, i: {'name_ko': i})
+    find = lambda text: scan_service.items_in_text(None, text)  # noqa: E731
+    assert find('대파2500 진도대파') == ['item:green_onion']
+    assert find('"스위티오 파인') == []  # '파인'의 '파'는 대파 아님
+    assert find('배추 1포기') == []  # '배추'의 '배'는 배 아님
+    assert find('배\n3개 10,000') == ['item:pear']
+    assert find('타이벡 귤 20,000') == ['item:mandarin']
+    assert find('효돈감귤') == ['item:mandarin']
+    assert find('신고배 1개 8,000') == ['item:pear']  # 품종 → 품목
+    assert find('appear pear') == []  # 영어 이름은 글자에서 안 봐요
+    assert find('양파 1.8kg / 대파') == ['item:onion', 'item:green_onion']
+
+
+def test_confirmed_vision_labels_beat_plain_names(monkeypatch):
+    """047 이후 '오렌지'도 품목: 귤 사진의 "Orange"(0.95)보다 확인된 비전 라벨 "Clementine"(0.93)이 먼저."""
+    rows = [
+        {'id': 'item:mandarin', 'name_ko': '귤', 'label': 'mandarin', 'kind': 'preferred'},
+        {'id': 'item:mandarin', 'name_ko': '귤', 'label': 'clementine', 'kind': 'vision'},
+        {'id': 'item:mandarin', 'name_ko': '귤', 'label': 'mandarin orange', 'kind': 'vision'},
+        {'id': 'item:orange', 'name_ko': '오렌지', 'label': 'orange', 'kind': 'preferred'},
+        {
+            'id': 'item:sweet_persimmon',
+            'name_ko': '단감',
+            'label': 'sweet persimmon',
+            'kind': 'preferred',
+        },
+    ]
+    monkeypatch.setattr(knowledge_repo, 'vision_item_labels', lambda c: rows)
+    monkeypatch.setattr(knowledge_repo, 'similar_items', lambda *a: [])
+    monkeypatch.setattr(
+        knowledge_repo, 'label_dictionary', lambda c: [('단감', 'item:sweet_persimmon', '단감')]
+    )
+    monkeypatch.setattr(knowledge_repo, 'get_item', lambda c, i: {'name_ko': '단감'})
+    top = lambda labels, text='': scan_service.candidates_from(None, labels, text)[0]['item_id']  # noqa: E731
+    assert top(['fruit', 'citrus', 'orange', 'clementine']) == 'item:mandarin'
+    # "mandarin orange"가 있으면 그 안의 넓은 "orange"는 뺌
+    assert top(['orange', 'valencia orange', 'mandarin orange']) == 'item:mandarin'
+    assert top(['orange']) == 'item:orange'  # 확인된 라벨이 없으면 영어 이름으로
+    # 영어 이름으로만 맞은 "Orange"보다 가격표 글자 "단감"이 먼저
+    assert top(['citrus', 'orange'], '단감 (상서) 3000') == 'item:sweet_persimmon'

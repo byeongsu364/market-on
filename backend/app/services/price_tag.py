@@ -2,6 +2,7 @@
 
 - 가격: "3,000원", "3000", "3천원", "1만원", "1만 5천원", "₩3,000" → 정수
   "원"이 붙은 값을 먼저 보고, 서로 다른 값이 여럿이면 고르지 않아요(None → 사용자가 직접 입력)
+  "원" 없는 숫자는 100 이상이고 10원 단위(끝자리 0)일 때만 가격으로 봐요
 - 수량·단위: "3개", "1kg", "한 단", "1봉" → 온톨로지 단위 라벨(match_unit)과 맞는 것만
 - 품종: 글자 전체를 온톨로지 품종 라벨(match_variety)과 맞춰요 ("부사" → 후지)
 - 응답 모양은 예전과 같아요: {price, unit_text, quantity, unit, variety_id}. 가격을 못 읽으면 None
@@ -53,7 +54,9 @@ def read_price(text: str) -> int | None:
         if after and re.match(rf'(?:{NOT_PRICE_UNITS})', after, re.IGNORECASE):
             continue
         value = float(number)
-        if _valid(value) and value >= 100:  # 두 자리 숫자는 개수·번호일 때가 많아 빼요
+        # 두 자리 숫자는 개수·번호일 때가 많아 빼고, 시장 가격은 10원 단위라 끝자리가 0인 것만
+        # (11/27 실제 사진: 상자 글씨 "4141", "3개"를 잘못 읽은 "374"를 가격으로 받았던 것 방지)
+        if _valid(value) and value >= 100 and value % 10 == 0:
             bare.add(value)
     return int(bare.pop()) if len(bare) == 1 else None
 

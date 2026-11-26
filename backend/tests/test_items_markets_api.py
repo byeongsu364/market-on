@@ -5,13 +5,15 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
+from fastapi.testclient import TestClient
+
 from app.db.repositories import knowledge_repo, price_repo, sale_repo, store_repo
 from app.deps import get_db
 from app.main import app
-from fastapi.testclient import TestClient
 from scripts import seed_demo_market as seed
 
 ITEM_KEYS = {
+    'criteria_style',
     'variety_id',
     'item_id',
     'name',

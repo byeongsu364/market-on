@@ -10,6 +10,7 @@ class Criterion(BaseModel):
 
 
 class Item(BaseModel):
+    criteria_style: str | None = None
     variety_id: str | None = None
     item_id: str
     name: str

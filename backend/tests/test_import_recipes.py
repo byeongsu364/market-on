@@ -44,15 +44,18 @@ ROWS = [
 def test_match_items_short_labels_need_boundaries():
     labels = ir.item_labels()
     assert ir.match_items('대파 50g, 파 10g', labels) == ['item:green_onion']
-    assert ir.match_items('배추 200g, 파프리카 1개, 쪽파 10g', labels) == []
+    assert ir.match_items('배추 200g, 파프리카 1개, 쪽파 10g', labels) == [
+        'item:napa_cabbage',
+        'item:paprika',
+    ]  # 047 새 품목
     assert ir.match_items('사과 1개, 배 1/4개', labels) == ['item:apple', 'item:pear']
 
 
 def test_render_matches_template_and_loader(tmp_path):
     chosen = ir.select(ROWS, ir.item_labels())
-    assert sorted(chosen) == ['10', '13']  # 배추·파프리카·쪽파는 우리 품목 아님, 이름 없는 건 제외
+    assert sorted(chosen) == ['10', '11', '12', '13']  # 047 배추·파프리카 추가, 이름 없는 건 제외
     counts = ir.write_docs(chosen, tmp_path)
-    assert counts['added'] == 2
+    assert counts['added'] == 4
     text = (tmp_path / 'foodsafety-10.md').read_text(encoding='utf-8')
     assert '## 재료\n- 대파 50g(1/2대)\n- 달걀 100g(2개)\n- 양념 : 소금 약간' in text
     assert '## 만드는 법\n1. 대파는 송송 썰어요.\n2. 달걀을 풀어 함께 볶아요.' in text
@@ -72,11 +75,11 @@ def test_render_matches_template_and_loader(tmp_path):
 def test_rerun_is_stable_and_prune_only_touches_generated(tmp_path):
     chosen = ir.select(ROWS, ir.item_labels())
     ir.write_docs(chosen, tmp_path)
-    assert ir.write_docs(chosen, tmp_path) == {'skipped': 2}  # 같은 입력이면 다시 임베딩 안 함
+    assert ir.write_docs(chosen, tmp_path) == {'skipped': 4}  # 같은 입력이면 다시 임베딩 안 함
     (tmp_path / 'hand-written.md').write_text('---\n---\n', encoding='utf-8')
     only_one = {'10': chosen['10']}
     counts = ir.write_docs(only_one, tmp_path, prune=True)
-    assert counts['deleted'] == 1
+    assert counts['deleted'] == 3
     assert sorted(p.name for p in tmp_path.iterdir()) == ['foodsafety-10.md', 'hand-written.md']
 
 

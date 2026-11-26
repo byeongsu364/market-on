@@ -337,11 +337,13 @@ export function PriceHistoryChart({
 /** 확인 포인트. 손님이 한 체크만 셈("4개 중 3개 확인"). 신선도 결론은 붙이지 않음 */
 export function ChecklistSection({
   criteria,
+  sourceQuote,
   checked,
   onToggle,
   collapsed,
 }: {
   criteria: Criterion[];
+  sourceQuote?: boolean;
   checked: string[];
   onToggle: (key: string) => void;
   collapsed?: boolean;
@@ -354,6 +356,7 @@ export function ChecklistSection({
   const body = (
     <>
       <div>
+        {sourceQuote && <span className={s.note}>원문</span>}
         {criteria.map((c) => (
           <label className={s.check} key={c.key}>
             <input

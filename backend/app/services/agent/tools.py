@@ -1,5 +1,7 @@
 """Read-only adapters: all data access goes through existing services."""
 
+import logging
+
 from pydantic import BaseModel, Field
 
 from app.core.errors import AppError
@@ -14,6 +16,8 @@ from app.services import (
     recommend_service,
     sale_service,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Search(BaseModel):
@@ -118,3 +122,6 @@ def execute(conn, market_id, device_id, name, arguments):
         return recommend_service.recommend(conn, data, device_id, consume=False)
     except (ValueError, AppError) as exc:
         return {'error': exc.message if isinstance(exc, AppError) else '도구 인자를 확인해 주세요.'}
+    except Exception:  # noqa: BLE001 - 도구 하나의 오류로 대화 전체(plan)가 실패하지 않게
+        logger.exception('대화 도구 %s 실행 실패', name)
+        return {'error': '이 도구를 지금 쓸 수 없어요.'}

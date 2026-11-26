@@ -452,3 +452,19 @@ def test_reference_price_variety_argument_and_result(monkeypatch, env):
     assert captured.call_args.kwargs['variety_id'] == 'variety:apple-hongro'
     schema = next(t for t in tools.get_tools() if t['function']['name'] == 'reference_price')
     assert 'variety_id' in schema['function']['parameters']['properties']
+
+
+def test_unexpected_tool_error_becomes_tool_result(monkeypatch, caplog):
+    """도구 안에서 예상 못 한 오류가 나도 대화 전체가 실패하지 않고 도구 결과 오류로 돌아가요."""
+    monkeypatch.setattr(
+        tools.recommend_service, 'recommend', Mock(side_effect=RuntimeError('db constraint'))
+    )
+    value = tools.execute(
+        None,
+        'market:demo',
+        'd',
+        'compose_shopping',
+        {'purpose': '집밥', 'budget': 30000, 'headcount': 4},
+    )
+    assert value == {'error': '이 도구를 지금 쓸 수 없어요.'}
+    assert 'compose_shopping' in caplog.text

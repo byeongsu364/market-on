@@ -150,6 +150,7 @@ export default function Result() {
   const checklist = item && (
     <ChecklistSection
       criteria={item.criteria}
+      sourceQuote={item.criteria_style === 'source_quote'}
       checked={checked}
       onToggle={toggle}
       collapsed={storesFirst}
