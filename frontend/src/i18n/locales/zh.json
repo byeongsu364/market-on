@@ -206,7 +206,7 @@
   "mePwMismatch": "密码不一样。",
   "meCaptcha": "自动注册防护",
   "meCaptchaRefresh": "更改为其他数字",
-  "meCaptchaPlaceholder": "숫자 5자리",
+  "meCaptchaPlaceholder": "5位数字",
   "meCaptchaImage": "自动输入防数字",
   "meTerms": "我同意使用条款和个人信息处理政策",
   "meTermsRequired": "请同意条款。",

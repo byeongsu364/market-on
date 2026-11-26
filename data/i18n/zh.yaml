@@ -237,7 +237,7 @@ entities:
     text: 糙米
     reviewed: false
   variety:brown_rice-01:
-    text: ''
+    text: 察贤米
     reviewed: false
   item:barley:
     text: 大麦米
@@ -306,7 +306,7 @@ entities:
     text: 达达系统
     reviewed: false
   variety:cucumber-03:
-    text: ''
+    text: 猎头
     reviewed: false
   item:squash:
     text: 南瓜
@@ -723,7 +723,7 @@ entities:
     text: 卷
     reviewed: false
   variety:oyster-00:
-    text: ''
+    text: 蚝
     reviewed: false
   item:imported_croaker:
     text: 提前进口

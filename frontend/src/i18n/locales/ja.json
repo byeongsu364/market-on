@@ -478,7 +478,7 @@
   "mapCompareVarieties": "{item} 品種を比較する",
   "mapRouteTitle": "{name}までご案内します",
   "mapRouteStoreText": "네이버 지도가 열려 점포 앞까지 안내해요. → 네이버 지도가 열려서 店舗の前にまで案内します。",
-  "mapRouteMarketText": "네이버 지도가 열려 시장까지 안내해요.",
+  "mapRouteMarketText": "네이버 지도가 열려 시장까지 안내해요.\n→\n네이버 지도가 열려 시장까지 안내합니다.",
   "mapRouteApprox": "店舗の場所がまだないので、市場の場所をご案内します。",
   "mapRouteWalk": "歩いて{minutes}分、約{meters}mです。",
   "mapRouteNaver": "네이버 지도로 길 안내",

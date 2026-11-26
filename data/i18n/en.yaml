@@ -216,7 +216,10 @@ entities:
     text: mung bean
     reviewed: false
   crit:mung_bean-p1:
-    text: ''
+    text: The green color should be deep and mixed with brown grains; it is good if
+      the grains are plump and even. Especially, underripe grains are as small as
+      millet, so they remain hard even when soaked or cooked, so you should purchase
+      ones that are as uniform in size as possible.
     reviewed: false
   variety:mung_bean-00:
     text: Domestic
@@ -730,7 +733,7 @@ entities:
     text: oyster
     reviewed: false
   variety:oyster-00:
-    text: ''
+    text: Oyster
     reviewed: false
   item:imported_croaker:
     text: imported croaker
@@ -1164,7 +1167,8 @@ phrases:
     reviewed: false
 templates:
   season_featured:
-    text: Korea's Rural Development Administration ('Food of the Month') lists {name} for months {months}.
+    text: Korea's Rural Development Administration ('Food of the Month') lists {name}
+      for months {months}.
     reviewed: false
   season_harvest:
     text: '{name} is harvested {period}{note}.'
