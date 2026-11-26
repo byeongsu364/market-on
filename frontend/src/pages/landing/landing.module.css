@@ -1,6 +1,8 @@
 /* PC 소개·브랜딩 페이지. 흰 바탕·검은 글자, 주황은 제목의 한 줄에만(DESIGN.md 2장). 머리 부분만 옅은 면(랜딩 예외) */
 .page {
   min-height: 100dvh;
+  /* 머리 배경(::before가 좌우로 화면 끝까지)이 가로 스크롤을 만들지 않게 */
+  overflow-x: clip;
   background: var(--color-canvas);
   color: var(--color-ink);
 }
