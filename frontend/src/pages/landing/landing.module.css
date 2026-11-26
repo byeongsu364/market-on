@@ -313,3 +313,194 @@
     height: 520px;
   }
 }
+
+/* 위 메뉴: 기능별 소개 페이지(2026-11-27) ------------------------------ */
+.nav {
+  gap: 26px;
+}
+.nav a {
+  position: relative;
+  padding: 8px 0;
+  white-space: nowrap;
+}
+.navOn {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.navOn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-ink);
+}
+.navLogin {
+  margin-left: 6px;
+  padding: 8px 16px !important;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-strong);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+.footerNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 14px;
+}
+.footerNav a:hover {
+  color: var(--color-ink);
+}
+
+/* 기능 페이지 ----------------------------------------------------------- */
+.featureHero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 72px 40px 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 56px;
+  align-items: center;
+  position: relative;
+}
+.featureHero::before {
+  content: '';
+  position: absolute;
+  inset: 0 -100vw;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--color-canvas) 0%, var(--color-wash-light) 100%);
+}
+.featureTitle {
+  font-size: 52px;
+  line-height: 1.15;
+  letter-spacing: -2px;
+  font-weight: 700;
+}
+.featureShot {
+  justify-self: center;
+  width: 300px;
+  height: auto;
+  border-radius: 36px;
+  border: 8px solid var(--color-surface-dark);
+  background: var(--color-surface-dark);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 16%);
+}
+.featureSections {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+.featureRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 64px;
+  align-items: center;
+}
+.featureRow[data-flip='true'] {
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+.featureRow[data-flip='true'] .featureCopy {
+  order: 2;
+}
+.featureBlock {
+  max-width: 760px;
+}
+.featureCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.featureCopy .h3 {
+  font-size: 28px;
+}
+.featureSideShot {
+  width: 300px;
+  height: auto;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-hairline);
+}
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-body);
+}
+.points li {
+  position: relative;
+  padding-left: 18px;
+}
+.points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+}
+.nextBand {
+  border-top: 1px solid var(--color-hairline);
+}
+.nextLink {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.nextTitle {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  flex: 1 1 auto;
+}
+.nextLink:hover .nextTitle {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* 첫 화면의 기능 둘러보기 -------------------------------------------------- */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.featureTile {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-hairline);
+  background: var(--color-surface-card);
+}
+.featureTile strong {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+.featureTile:hover {
+  border-color: var(--color-ink);
+}
+.more {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+  font-weight: 600;
+}

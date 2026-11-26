@@ -29,6 +29,7 @@ import Poster from './pages/merchant/Poster';
 import AdminHome from './pages/admin/AdminHome';
 import MarketAdmin from './pages/MarketAdmin';
 import Store from './pages/map/Store';
+import FeaturePage from './pages/landing/FeaturePage';
 function MerchantGuard() {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -61,6 +62,8 @@ function AppRoutes() {
   const t = useT();
   return (
     <Routes>
+      {/* PC 소개 사이트의 기능별 페이지(앱 틀 밖) */}
+      <Route path="intro/:slug" element={<FeaturePage />} />
       <Route element={<PageLayout />}>
         {/* 지도 홈: 시장 밖 / ?market= 시장 안 / ?market=&item= 검색 결과 */}
         <Route index element={<MapHome />} />

@@ -1,9 +1,12 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Icon from '../../components/common/Icon';
 import { ButtonLink } from '../../components/common/Button';
 import { useQrSvg } from '../../hooks/usePoster';
 import { useMarket } from '../../hooks/useMarkets';
 import { PC_APP_KEY } from '../../components/layout/desktopGate';
+import BrandLayout from './BrandLayout';
+import { FEATURES } from './features';
 import s from './landing.module.css';
 
 /**
@@ -62,6 +65,11 @@ export default function Landing() {
   const url = typeof window !== 'undefined' ? window.location.origin + '/' : '/';
   const qr = useQrSvg(url);
   const market = useMarket('market:gyeongdong');
+  const { hash } = useLocation();
+  // 기능 페이지의 "휴대폰으로 열기"(/#open)로 오면 QR 자리로
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView?.();
+  }, [hash]);
   const stores = market.data?.store_count;
   const openOnPc = () => {
     try {
@@ -73,20 +81,7 @@ export default function Landing() {
   };
 
   return (
-    // 소개 페이지는 늘 밝은 화면(로고·캡처가 흰 바탕 기준)
-    <div className={s.page} data-theme="light">
-      <header className={s.header}>
-        <Link to="/" className={s.logo} aria-label="Market-On 처음으로">
-          <img src="/brand/logo-light.svg" alt="" />
-        </Link>
-        <nav className={s.nav} aria-label="소개 페이지">
-          <a href="#how">이렇게 써요</a>
-          <a href="#principles">원칙</a>
-          <a href="#merchants">상인·시장</a>
-          <Link to="/login">로그인</Link>
-        </nav>
-      </header>
-
+    <BrandLayout>
       <main id="main">
         <section className={s.hero} aria-labelledby="hero-title">
           <div className={s.heroText}>
@@ -178,6 +173,26 @@ export default function Landing() {
           </div>
         </section>
 
+        <section className={s.section} aria-labelledby="features-title">
+          <h2 id="features-title" className={s.h2}>
+            기능 둘러보기
+          </h2>
+          <ul className={s.featureGrid}>
+            {FEATURES.map((f) => (
+              <li key={f.slug}>
+                <Link to={`/intro/${f.slug}`} className={s.featureTile}>
+                  <span className={s.label}>{f.menu}</span>
+                  <strong>{f.title}</strong>
+                  <span className={s.body}>{f.lead}</span>
+                  <span className={s.more}>
+                    자세히 보기 <Icon name="chevronRight" size={16} />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section id="merchants" className={s.section} aria-labelledby="merchants-title">
           <h2 id="merchants-title" className={s.h2}>
             상인과 시장을 위해
@@ -215,15 +230,6 @@ export default function Landing() {
           </div>
         </section>
       </main>
-
-      <footer className={s.footer}>
-        <img src="/brand/logo-light.svg" alt="Market-On" className={s.footerLogo} />
-        <p>경복대학교 Market-On 팀 · 2026 AID 전환 바이브톤 경진대회 출품작</p>
-        <p className={s.footerNote}>
-          화면 캡처는 실제 서비스 화면이에요. 가격은 aT 조사값이며 점포의 실제 판매가와 다를 수
-          있어요.
-        </p>
-      </footer>
-    </div>
+    </BrandLayout>
   );
 }
