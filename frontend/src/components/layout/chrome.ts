@@ -4,5 +4,7 @@ export function chromeFor(pathname: string) {
   const map = pathname === '/';
   const tabbar = map || pathname === '/markets' || pathname === '/shop';
   const bleed = map || pathname === '/shop/route';
-  return { tabbar, bleed };
+  // 로그인·회원가입 PC 시안은 머리말 없이 왼쪽 검정 면 + 오른쪽 폼
+  const webHeader = !['/login', '/signup'].includes(pathname);
+  return { tabbar, bleed, webHeader };
 }

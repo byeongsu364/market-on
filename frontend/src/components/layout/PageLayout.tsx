@@ -44,12 +44,12 @@ export default function PageLayout() {
     <div
       className="app-shell"
       data-tabbar={chrome.tabbar && !desktop ? 'on' : 'off'}
-      data-bleed={chrome.bleed ? 'on' : 'off'}
+      data-bleed={chrome.bleed || (desktop && !chrome.webHeader) ? 'on' : 'off'}
     >
       <a href="#main" className={s.skip}>
         본문으로 건너뛰기
       </a>
-      {desktop && <WebHeader />}
+      {desktop && chrome.webHeader && <WebHeader />}
       <main id="main" className="app-main">
         <Outlet />
       </main>

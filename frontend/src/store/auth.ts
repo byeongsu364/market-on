@@ -6,6 +6,7 @@ export type AuthState = {
   me: () => Promise<void>;
   login: (q: AuthRequest) => Promise<User>;
   signup: (q: AuthRequest) => Promise<void>;
+  signupCustomer: (q: AuthRequest) => Promise<void>;
   logout: () => Promise<void>;
 };
 export const AuthContext = createContext<AuthState | null>(null);

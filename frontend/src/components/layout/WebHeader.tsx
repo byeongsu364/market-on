@@ -4,9 +4,8 @@ import Icon from '../common/Icon';
 import { useAuth } from '../../hooks/useAuth';
 import { useSession } from '../../store/session';
 import { useShoppingContext } from '../../hooks/useShoppingContext';
+import { LANGUAGE_NAMES } from '../../pages/me/languages';
 import s from './layout.module.css';
-
-const LANGUAGE_NAMES = { ko: '한국어', en: 'English', zh: '中文', ja: '日本語', vi: 'Tiếng Việt' };
 
 // PC 머리말: 로고, 지도·장보기·상인·시장, 검색창, 언어, 로그인, 사진으로 확인하기
 export default function WebHeader() {

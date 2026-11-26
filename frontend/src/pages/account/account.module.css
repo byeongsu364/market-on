@@ -1,0 +1,248 @@
+/* 로그인·회원가입(Login, Signup, WebLogin, WebSignup 시안) */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 8px var(--space-5) 0;
+}
+.mainSignup {
+  gap: 22px;
+  padding-bottom: 120px;
+}
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 12px;
+}
+.mark {
+  width: 53px;
+  height: 30px;
+}
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.title {
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.7px;
+}
+.lead {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-body);
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.browse {
+  display: flex;
+  justify-content: center;
+}
+.browse a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--color-control-border);
+}
+.groupLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* 시안의 큰 세그먼트(높이 44, 모서리 10, 판 14) */
+.seg {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-strong);
+}
+.seg > * {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: 15px;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--color-body);
+}
+.seg > [aria-checked='true'],
+.seg > [aria-current='page'] {
+  font-weight: 600;
+  background: var(--color-surface-card);
+  color: var(--color-ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+}
+.note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-body);
+}
+.captchaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.captchaImage {
+  flex: none;
+  width: 132px;
+  height: 54px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-strong);
+  object-fit: contain;
+}
+.captchaInput {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 54px;
+  padding: 0 16px;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-card);
+  font-size: 16px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-size: 15px;
+}
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 12px var(--space-5) calc(26px + var(--safe-bottom));
+  background: var(--color-surface-card);
+  border-top: 1px solid var(--color-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footerInner {
+  width: 100%;
+  max-width: calc(var(--app-max) - 40px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* PC: 왼쪽 검정 면(차양 + 문구) + 오른쪽 폼 */
+.web {
+  min-height: 820px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.hero {
+  flex: 1 1 420px;
+  min-width: 0;
+  min-height: 520px;
+  background: var(--color-surface-dark);
+  color: var(--color-on-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+}
+.awning {
+  display: flex;
+  flex-direction: column;
+}
+.awningBar {
+  height: 12px;
+  background: var(--color-on-dark);
+}
+.awningCells {
+  display: flex;
+  gap: 12px;
+}
+.awningCells span {
+  flex: 1 1 0;
+  height: 150px;
+  border-radius: 0 0 9999px 9999px;
+  background: var(--color-awning-dark);
+}
+.awningCells span:nth-child(2) {
+  background: var(--color-signal-dark);
+}
+.heroBody {
+  padding: 0 48px 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.heroLogo {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.heroTitle {
+  font-size: 44px;
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -1.6px;
+  max-width: 520px;
+}
+.heroLead {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--color-on-dark-soft);
+  max-width: 460px;
+}
+.panel {
+  flex: 1 1 420px;
+  min-width: 0;
+  padding: 48px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.panelInner {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.panelInnerSignup {
+  gap: 22px;
+}
+.webTitle {
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.9px;
+}
