@@ -9,6 +9,7 @@ import Result from './pages/Result';
 import MarketMap from './pages/MarketMap';
 import MarketSelect from './pages/MarketSelect';
 import Recommend from './pages/Recommend';
+import Chat from './pages/Chat';
 import { AuthProvider } from './store/AuthProvider';
 import { useAuth } from './hooks/useAuth';
 import MerchantStart from './pages/merchant/MerchantStart';
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="map" element={<MarketMap />} />
         <Route path="join" element={<Join />} />
         <Route path="markets" element={<MarketSelect />} />
+        <Route path="chat" element={<Chat />} />
         <Route path="recommend" element={<Recommend />} />
         <Route path="merchant" element={<MerchantStart />} />
         <Route path="merchant/login" element={<MerchantLogin />} />

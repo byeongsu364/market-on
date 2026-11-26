@@ -4,11 +4,19 @@ import hashlib
 import math
 import re
 from typing import Literal
+
 from app.core.config import settings
+
 from .base import LLMProvider
 
 
 class FakeProvider(LLMProvider):
+    def __init__(self, chat_responses=None):
+        self.chat_responses = iter(chat_responses or [])
+
+    def chat(self, messages, tools):
+        return next(self.chat_responses)
+
     def generate(self, prompt, *, images=None, system=None):
         raise NotImplementedError
 

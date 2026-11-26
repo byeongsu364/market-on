@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import settings
-from app.db.repositories import knowledge_repo, media_repo
+from app.db.repositories import knowledge_repo, media_repo, price_repo
 from app.deps import get_db
 from app.llm import json_output, router
 from app.main import app
@@ -19,6 +19,7 @@ JPEG = b'\xff\xd8\xffsample'
 
 @pytest.fixture
 def api(monkeypatch, tmp_path):
+    monkeypatch.setattr(price_repo, 'varieties', lambda *a: [])
     conn = Mock()
     conn.transaction.side_effect = nullcontext
     monkeypatch.setattr(settings, 'MEDIA_DIR', tmp_path)
@@ -302,7 +303,7 @@ def test_price_tag(api, monkeypatch, tag, expected):
     if expected is None:
         assert body['price_tag'] is None
     else:
-        assert set(body['price_tag']) == {'price', 'unit_text', 'unit', 'quantity'}
+        assert set(body['price_tag']) == {'price', 'unit_text', 'unit', 'quantity', 'variety_id'}
         assert (body['price_tag']['unit'], body['price_tag']['quantity']) == expected
         assert body['price_tag']['price'] == float(tag['price'])
 
@@ -363,3 +364,53 @@ def test_low_confidence_escalates(api, monkeypatch):
     body = upload(client).json()
     assert body['model'] == 'openai:test-model'
     assert router.llm_call_repo.record.call_args.kwargs['reason'] == 'low_confidence'
+
+
+@pytest.mark.parametrize(
+    ('tag', 'expected'),
+    [
+        ({'price': 5000, 'unit_text': '부사 3개', 'quantity': 3}, 'variety:apple-fuji'),
+        ({'price': 5000, 'unit_text': '3개', 'variety_text': '홍로'}, 'variety:apple-hongro'),
+        ({'price': 5000, 'unit_text': '3개'}, None),
+        ({'price': 5000, 'unit_text': '신고배 3개'}, None),
+    ],
+)
+def test_recognize_variety_from_tag(api, monkeypatch, tag, expected):
+    import json
+    from tests.test_variety_prices import choices
+    from app.knowledge.ontology import normalize
+
+    client, provider, _, _ = api
+    monkeypatch.setattr(price_repo, 'varieties', lambda *a: choices())
+    monkeypatch.setattr(knowledge_repo, 'unit_labels', lambda *a: [])
+    dictionary = [
+        (normalize(label), v['id'], label)
+        for v in choices()
+        for labels in v['labels'].values()
+        for label in labels
+    ]
+    monkeypatch.setattr(knowledge_repo, 'label_dictionary', lambda *a: dictionary)
+    provider.generate.return_value = json.dumps({'labels': ['apple'], 'price_tag': tag})
+    response = upload(client)
+    assert response.status_code == 200
+    assert response.json()['price_tag']['variety_id'] == expected
+    assert 'variety_text' not in response.json()['price_tag']
+
+
+@pytest.mark.parametrize(
+    'raw',
+    [
+        # 2026-11-26 실제 Gemma 응답: price_tag를 두 번 쓰거나 품종을 바깥 키에 둠
+        '{"labels":["apple"],"price_tag":{"price":5000,"unit_text":"개","quantity":3},'
+        '"price_tag":{"variety_text":"부사"}}',
+        '{"labels":["apple"],"price_tag":{"price":5000,"unit_text":"개","quantity":3},'
+        '"price_tag_variety_text":"부사"}',
+        '{"labels":["apple"],"price_tag":{"price":5000,"unit_text":"3개","quantity":3},'
+        '"variety_text":"부사"}',
+    ],
+)
+def test_variety_text_placements_keep_price(raw):
+    from app.llm.json_output import parse_recognition
+
+    tag = parse_recognition(raw)['price_tag']
+    assert tag['price'] == 5000 and tag['variety_text'] == '부사'

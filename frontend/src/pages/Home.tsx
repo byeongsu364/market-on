@@ -95,6 +95,7 @@ export default function Home() {
         </Link>
         <p>가격표가 함께 보이게 찍어 주세요</p>
       </section>
+      <Link to="/chat">궁금한 걸 물어보세요</Link>
       <ManualInput />
       <section>
         <h2>{t('prices')}</h2>

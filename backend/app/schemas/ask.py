@@ -28,6 +28,7 @@ class AskRequest(BaseModel):
 
 
 class Citation(BaseModel):
+    draft: bool = False
     title: str
     publisher: str | None
     url: str | None

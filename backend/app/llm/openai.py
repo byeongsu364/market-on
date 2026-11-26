@@ -1,10 +1,12 @@
 """OpenAI Chat Completions through the shared HTTP transport."""
 
 import base64
+import json
 
 from app.core import http
 from app.core.config import settings
 from app.core.errors import AppError
+
 from .base import LLMProvider
 from .limits import http_timeout
 
@@ -36,9 +38,34 @@ class OpenAIProvider(LLMProvider):
                 json={'model': settings.OPENAI_CHAT_MODEL, 'messages': messages},
                 timeout=http_timeout('openai'),
             ).json()['choices'][0]['message']['content']
-        except Exception:
+        except Exception:  # noqa: BLE001 - sanitize transport errors that may contain credentials
             # Transport exceptions can contain arbitrary server text, including credentials.
             raise AppError('OPENAI_UNAVAILABLE', 'OpenAI 요청에 실패했습니다.', 503) from None
 
     def embed(self, texts, *, task):
         raise NotImplementedError
+
+    def chat(self, messages, tools):
+        try:
+            body = {'model': settings.OPENAI_CHAT_MODEL, 'messages': messages}
+            if tools:
+                body['tools'] = tools
+            message = http.post_sync(
+                settings.OPENAI_BASE_URL.rstrip('/') + '/chat/completions',
+                headers={'Authorization': f'Bearer {settings.OPENAI_API_KEY}'},
+                json=body,
+                timeout=http_timeout('openai'),
+            ).json()['choices'][0]['message']
+            return {
+                'content': message.get('content'),
+                'tool_calls': [
+                    {
+                        'id': c['id'],
+                        'name': c['function']['name'],
+                        'arguments': json.loads(c['function']['arguments']),
+                    }
+                    for c in message.get('tool_calls', [])
+                ],
+            }
+        except Exception:  # noqa: BLE001 - sanitize transport errors that may contain credentials
+            raise AppError('OPENAI_UNAVAILABLE', 'OpenAI 요청에 실패했습니다.', 503) from None

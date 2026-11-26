@@ -11,7 +11,7 @@ from starlette.concurrency import run_in_threadpool
 from app.core.config import settings
 from app.core.errors import AppError
 from app.db.repositories import knowledge_repo, media_repo
-from app.knowledge.ontology import match_unit, match_vision_labels
+from app.knowledge.ontology import match_unit, match_variety, match_vision_labels
 from app.llm.json_output import recognize_labels
 
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
@@ -67,8 +67,17 @@ async def recognize(conn, image: bytes) -> dict:
     routed = await recognize_labels(image, vocabulary, accept)
     result = routed.value
     labels = result['labels']
+    candidates = await run_in_threadpool(match_vision_labels, conn, labels)
     price_tag = result['price_tag']
     if price_tag is not None:
+        text = ' '.join(
+            [price_tag['unit_text'], price_tag.pop('variety_text', None) or '', *labels]
+        )
+        price_tag['variety_id'] = (
+            await run_in_threadpool(match_variety, conn, candidates[0]['item_id'], text)
+            if candidates
+            else None
+        )
         price_tag['unit'] = await run_in_threadpool(match_unit, conn, price_tag['unit_text'])
         if price_tag['quantity'] is None:
             number = re.search(r'\d+(?:\.\d+)?', price_tag['unit_text'])

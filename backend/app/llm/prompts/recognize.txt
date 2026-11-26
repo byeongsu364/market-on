@@ -5,5 +5,6 @@
 상태·신선도·품질을 평가하지 말 것. 가격을 추정하지 말 것.
 사진에 가격표·가격 표시가 보이면 그 상품의 가격을 읽어 price_tag에 넣으세요: price(원, 숫자만 — '5천원'은 5000), unit_text(가격표에 적힌 단위 그대로, 예: '1단', '3개', '1kg', '한 바구니'), quantity(숫자로 읽히면, 아니면 null). 가격이 안 보이거나 확실하지 않으면 price_tag는 null. 추측하지 마세요.
 여러 가격이 보이면 사진 가운데 상품의 가격 하나만 반환하세요.
-JSON만 반환하세요: {"labels": ["green onion", "leek"], "price_tag": {"price": 3000, "unit_text": "1단", "quantity": 1}}
-식재료가 없으면 {"labels": [], "price_tag": null}을 반환하세요.
+가격표 글자에 품종 이름(예: 부사, 홍로)이 적혀 있으면 variety_text에 그 글자 그대로, 없으면 null. 사진 모양으로 품종을 추측하지 마세요.
+JSON만, 키는 한 번씩만: {"labels": ["apple"], "price_tag": {"price": 5000, "unit_text": "3개", "quantity": 3}, "variety_text": "부사"}
+식재료가 없으면 {"labels": [], "price_tag": null, "variety_text": null}을 반환하세요.

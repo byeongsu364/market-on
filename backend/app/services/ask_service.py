@@ -17,9 +17,9 @@ from .price_report_service import hash_device
 TOPICS = {'select': '확인 포인트', 'store': '보관', 'prep': '손질', 'season': '제철'}
 
 
-def ask(conn, data, device_id, *, embedder=None):
-    if not ask_repo.consume_quota(conn, hash_device(device_id)):
-        raise AppError('TOO_MANY_QUESTIONS', '한 시간에 60회까지 질문할 수 있어요.', 429)
+def ask(conn, data, device_id, *, embedder=None, consume=True):
+    if consume:
+        consume_quota(conn, device_id)
     intent = data.intent or ask_intent.rule_intent(data.question) or ask_llm.classify(data.question)
     if intent not in ask_intent.INTENTS:
         return AskResponse(kind='out_of_scope')
@@ -91,7 +91,9 @@ def ask(conn, data, device_id, *, embedder=None):
             or 'answer' not in value
         ):
             return 'invalid_json'
-        used = value['used']
+        # Gemma는 근거 번호를 "1"처럼 문자열로 줄 때가 있어 숫자로 맞춤
+        used = [int(i) if isinstance(i, str) and i.strip().isdigit() else i for i in value['used']]
+        value['used'] = used
         if not used or any(type(i) is not int or not 1 <= i <= len(chunks) for i in used):
             return 'unsupported'
         answer, removed = fact_check.check(
@@ -121,3 +123,8 @@ def ask(conn, data, device_id, *, embedder=None):
     result.citations = citation.attach_citations(conn, [chunks[i - 1] for i in checked['used']])
     answer_cache.save(conn, key, result.model_dump(mode='json'), routed.model)
     return result
+
+
+def consume_quota(conn, device_id):
+    if not ask_repo.consume_quota(conn, hash_device(device_id)):
+        raise AppError('TOO_MANY_QUESTIONS', '한 시간에 60회까지 질문할 수 있어요.', 429)

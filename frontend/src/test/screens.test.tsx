@@ -11,6 +11,10 @@ const show = (path: string) =>
 it('결과의 실제 체크박스와 가격 비교를 표시하고 판정 표현을 사용하지 않는다', async () => {
   const { container } = show('/items/item:green_onion');
   await screen.findByRole('heading', { name: '대파' });
+  expect(screen.getByRole('link', { name: '대화로 더 묻기' })).toHaveAttribute(
+    'href',
+    '/chat?item_id=item%3Agreen_onion',
+  );
   const checkbox = screen.getAllByRole('checkbox')[0];
   fireEvent.click(checkbox);
   expect(checkbox).toBeChecked();
@@ -65,13 +69,13 @@ it('시장 미선택이면 선택 화면을 거쳐 원래 흐름으로 돌아온
     expect(screen.getByRole('heading', { name: '사진으로 품목 찾기' })).toBeInTheDocument(),
   );
 });
-it('추천 조건을 제출하면 샘플 품목 3개와 출처를 표시한다', async () => {
+it('선물 구성은 과일 품목과 출처를 표시한다', async () => {
   show('/recommend');
   fireEvent.click(screen.getByRole('button', { name: '선물' }));
   fireEvent.click(screen.getByRole('button', { name: '구성 보기' }));
-  expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();
-  expect(screen.getAllByRole('link', { name: '점포 보기' })).toHaveLength(3);
-  expect(screen.getAllByText('팀 구성 예시 · 샘플')).toHaveLength(3);
+  expect(await screen.findByRole('heading', { name: '사과' })).toBeInTheDocument();
+  expect(screen.getAllByRole('link', { name: '점포 보기' })).toHaveLength(2);
+  expect(screen.getAllByText('팀 구성 예시 · 샘플')).toHaveLength(2);
 });
 it('비로그인 상인은 보호된 화면에서 상인 시작으로 이동한다', async () => {
   show('/merchant/sale/new');

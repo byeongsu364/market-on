@@ -4,10 +4,12 @@ export default function ChipGroup<T extends string | number>({
   value,
   onChange,
   display,
+  disabled = false,
 }: {
+  disabled?: boolean;
   label: string;
   options: T[];
-  value: T;
+  value: T | '';
   onChange: (v: T) => void;
   display?: (v: T) => string;
 }) {
@@ -17,6 +19,7 @@ export default function ChipGroup<T extends string | number>({
       <div className="chips">
         {options.map((v) => (
           <button
+            disabled={disabled}
             type="button"
             className="chip"
             aria-pressed={value === v}

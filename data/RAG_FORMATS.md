@@ -34,6 +34,8 @@ python -m scripts.search "파 고르는 법" --lang ko --k 5
 허용 doc_type: `criterion`, `grade`, `storage`, `prep`, `story`, `season`, `origin`, `safety`, `context`, `specialty`, `guide`, `recipe`, `merchant_tip`.
 검색 intent 대응표는 `knowledge/intents.py`에서 관리합니다. intent와 doc_types를 같이 주면 교집합으로 검색하며 알 수 없는 intent는 오류입니다.
 
-`entities.kamis`는 문자열 필드 `{ctgry_cd, item_cd, vrty_cd, grd_cd, unit, unit_sz}`입니다. 선행 0을 보존합니다. 등급은 상품 `04`, 단위는 원본 단위명과 수량을 분리합니다(사과: `개`, `10`). 사과는 기존 우선순위 1 홍로(07)를 유지합니다. `sync_kamis_codes`는 비어 있는 품목의 이름 후보만 출력합니다.
+`entities.kamis`는 문자열 필드 `{ctgry_cd, item_cd, vrty_cd, grd_cd, unit, unit_sz}`입니다. 선행 0을 보존합니다. 등급은 상품 `04`, 단위는 원본 단위명과 수량을 분리합니다(사과: `개`, `10`). 사과 기본 품종은 후지(05)입니다. 품종은 `variety:<품목>-<품종>` 엔터티와 품목의 `hasGrade` 관계로 연결하며 기본 관계는 `props: {default: true}`입니다. `sync_kamis_codes`는 비어 있는 품목의 이름 후보만 출력합니다.
 `update_prices --days 7 --date 2026-11-24 --item item:green_onion`으로 기간 수집합니다. 실제 API 응답 단위를 관측값에 저장합니다. `PriceView.compare`는 판매 단위당 전통시장 평균(없으면 전체) 대비 백분율이며 음수는 저렴함입니다. 개수 단위는 무게로 환산하지 않습니다.
 온톨로지 prune은 조각 태그만 참조하는 엔터티를 삭제하고 영향 문서 해시를 고유한 `retag:<document id>`로 바꿉니다. 다음 문서 적재에서 다시 태깅합니다. 운영 데이터와 다른 엔터티의 목적어 참조는 삭제를 막습니다.
+
+품종별 수집은 `python -m scripts.update_prices --days 7 --item item:apple`로 실행합니다. `hasGrade`의 모든 품종을 수집하고 관측값에 부모 `item_id`와 `variety_id`를 저장합니다. 기존 행은 온톨로지 적재 후 `python -m scripts.update_prices --backfill-varieties`로 품목·품종 코드를 대조해 한 번 채웁니다 (`--item`으로 범위 제한 가능, 이미 채운 행은 보존, API 호출 없음). 이 명령들은 이번 구현 검증에서 실제 DB에 실행하지 않았습니다.

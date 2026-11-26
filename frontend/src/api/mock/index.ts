@@ -43,7 +43,7 @@ export const recognize = (file: File): Promise<RecognizeResponse> =>
   mock(() => ({
     media_id: '00000000-0000-4000-8000-000000000001',
     price_tag: file.name.includes('price')
-      ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1 }
+      ? { price: 3000, unit_text: '1단', unit: 'unit:bunch', quantity: 1, variety_id: null }
       : null,
     model: 'gemma4:e4b',
     vision_labels: ['green onion', 'scallion'],
@@ -68,9 +68,42 @@ export const search = (q: string) =>
 export const price = (q: PriceRequest): Promise<Price> =>
   mock(() => {
     const base = q.item_id === 'item:green_onion' ? 2576 : q.item_id === 'item:onion' ? 2100 : 3200;
-    const reference_price = Math.round(convertUnit(base, 'kg', q.unit));
+    const varieties =
+      q.item_id === 'item:apple'
+        ? [
+            {
+              variety_id: 'variety:apple-fuji',
+              name: '후지',
+              reference_price: 3200,
+              default: true,
+            },
+            {
+              variety_id: 'variety:apple-hongro',
+              name: '홍로',
+              reference_price: 3500,
+              default: false,
+            },
+            {
+              variety_id: 'variety:apple-shinano-gold',
+              name: '시나노골드',
+              reference_price: null,
+              default: false,
+            },
+          ].map((v) => ({
+            ...v,
+            unit: q.unit,
+            observed_on: v.reference_price === null ? null : '2026-11-20',
+            count: v.reference_price === null ? 0 : 15,
+          }))
+        : [];
+    const selected = varieties.find((v) => v.variety_id === q.variety_id) ?? varieties[0];
+    const reference_price =
+      selected?.reference_price ?? Math.round(convertUnit(base, 'kg', q.unit));
     return {
       ...q,
+      variety_id: selected?.variety_id ?? null,
+      variety_name: selected?.name ?? null,
+      varieties,
       reference_price,
       diff_pct: q.seen_price == null ? null : diffPct(q.seen_price, reference_price),
       region: '서울',
@@ -107,15 +140,39 @@ export const map = (market_id: string, item_id?: string, unit?: string): Promise
       ),
   }));
 export const recommend = (q: RecommendRequest): Promise<RecommendResponse> =>
-  mock(() => ({
-    items: items.slice(0, 3).map((i) => ({
-      item_id: i.item_id,
-      name: i.name,
-      reason: `${q.purpose} · ${q.headcount}명 · 예산 ${q.budget.toLocaleString()}원에 맞춘 구성 예시 · 샘플`,
-      stores: stores.filter((s) => s.sells.includes(i.item_id)).map((s) => s.store_id),
-      sources: ['팀 구성 예시 · 샘플'],
-    })),
-  }));
+  mock(() => {
+    const chosen = items
+      .filter((i) => q.purpose !== '선물' || ['item:apple', 'item:pear'].includes(i.item_id))
+      .slice(0, 3);
+    const quantity = 1;
+    const unit_price = 1000;
+    const total = chosen.length * unit_price;
+    return {
+      items: chosen.map((i) => ({
+        item_id: i.item_id,
+        name: i.name,
+        quantity,
+        unit: i.default_unit,
+        unit_label:
+          i.default_unit === 'unit:bunch' ? '단' : i.default_unit === 'unit:kg' ? 'kg' : '개',
+        unit_price,
+        subtotal: unit_price,
+        reason: `${q.purpose}에 맞춰 넣은 구성 예시예요.`,
+        stores: stores
+          .filter((s) => s.sells.includes(i.item_id))
+          .slice(0, 3)
+          .map((s) => ({ store_id: s.store_id, name: s.name })),
+        sources: [
+          { title: '팀 구성 예시 · 샘플', publisher: null, url: null, license: null, draft: true },
+        ],
+      })),
+      total,
+      budget: q.budget,
+      left: q.budget - total,
+      note: '기준시세로 계산한 예상 금액이에요. 실제 가격은 가게마다 달라요',
+      model: null,
+    };
+  });
 
 export async function ask(
   data: import('../../types/contract').AskRequest,
@@ -169,6 +226,7 @@ export async function ask(
       citations: [
         {
           title: '이달의 식재료 - 움파(대파) · 샘플',
+          draft: true,
           publisher: '농촌진흥청 농사로',
           url: null,
           license: null,
@@ -176,4 +234,33 @@ export async function ask(
       ],
     }));
   return mock(() => ({ ...base, kind: 'no_evidence', answer: '이 품목의 자료가 아직 없어요.' }));
+}
+
+export async function chat(
+  data: import('../../types/contract').ChatRequest,
+): Promise<import('../../types/contract').ChatResponse> {
+  const question = data.messages.at(-1)?.content ?? '';
+  if (question.includes('대파') || data.item_id === 'item:green_onion') {
+    const result = await ask({
+      item_id: 'item:green_onion',
+      intent: 'store',
+      market_id: data.market_id,
+    });
+    return {
+      reply: result.answer ?? '이 품목의 자료가 아직 없어요.',
+      citations: result.citations,
+      tools: [{ name: 'ask_knowledge', label: '근거 자료 찾기' }],
+      items: [{ item_id: 'item:green_onion', name: '대파' }],
+      model: result.model,
+      removed: 0,
+    };
+  }
+  return mock(() => ({
+    reply: '이 시장 장보기 질문을 도와드릴 수 있어요',
+    citations: [],
+    tools: [],
+    items: [],
+    model: null,
+    removed: 0,
+  }));
 }

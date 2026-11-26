@@ -14,3 +14,6 @@ class LLMProvider(ABC):
     @abstractmethod
     def embed(self, texts: list[str], *, task: Literal['document', 'query']) -> list[list[float]]:
         raise NotImplementedError
+
+    def chat(self, messages, tools):
+        raise NotImplementedError

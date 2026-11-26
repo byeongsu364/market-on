@@ -27,6 +27,7 @@ export type RecognizeResponse = {
   media_id: string | null;
   price_tag: {
     price: number;
+    variety_id: string | null;
     unit_text: string;
     unit: string | null;
     quantity: number | null;
@@ -42,7 +43,19 @@ export type Stat = {
   price: number;
   count: number;
 };
+export type VarietyPrice = {
+  variety_id: string;
+  name: string;
+  reference_price: number | null;
+  unit: string;
+  observed_on: string | null;
+  count: number;
+  default: boolean;
+};
 export type Price = {
+  variety_id: string | null;
+  variety_name: string | null;
+  varieties: VarietyPrice[];
   item_id: string;
   unit: string;
   reference_price: number;
@@ -62,6 +75,7 @@ export type Price = {
   };
 };
 export type PriceRequest = {
+  variety_id?: string;
   item_id: string;
   market_id: string;
   unit: string;
@@ -91,20 +105,32 @@ export type MarketMap = {
   stores: Store[];
 };
 export type RecommendRequest = {
-  purpose: string;
-  relation?: string;
+  purpose: '집밥' | '선물' | '모임';
+  relation?: '가족' | '친구' | '나';
   event?: string;
   budget: number;
   headcount: number;
+  market_id: string;
+};
+export type RecommendItem = {
+  item_id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  unit_label: string;
+  unit_price: number | null;
+  subtotal: number | null;
+  reason: string;
+  stores: { store_id: string; name: string }[];
+  sources: Citation[];
 };
 export type RecommendResponse = {
-  items: {
-    item_id: string;
-    name: string;
-    reason: string;
-    stores: string[];
-    sources: string[];
-  }[];
+  items: RecommendItem[];
+  total: number;
+  budget: number;
+  left: number;
+  note: string;
+  model: string | null;
 };
 export type ApiError = {
   code: string;
@@ -232,6 +258,7 @@ export type AskRequest = {
   lang?: 'ko';
 };
 export type Citation = {
+  draft: boolean;
   title: string;
   publisher: string | null;
   url: string | null;
@@ -250,5 +277,16 @@ export type AskResponse = {
   stores?: { store_id: string; name: string }[];
   model: string | null;
   cached: boolean;
+  removed: number;
+};
+
+export type ChatMessage = { role: 'user' | 'assistant'; content: string };
+export type ChatRequest = { messages: ChatMessage[]; market_id: string; item_id?: string };
+export type ChatResponse = {
+  reply: string;
+  citations: Citation[];
+  tools: { name: string; label: string }[];
+  items: { item_id: string; name: string }[];
+  model: string | null;
   removed: number;
 };

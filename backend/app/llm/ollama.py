@@ -1,10 +1,13 @@
 """Ollama 대화·임베딩. 외부 HTTP는 core.http를 통해서만 호출해요."""
 
 import base64
+import json
 from typing import Literal
+
 from app.core import http
 from app.core.config import settings
 from app.core.errors import AppError
+
 from .base import LLMProvider
 from .limits import http_timeout
 
@@ -61,3 +64,42 @@ class OllamaProvider(LLMProvider):
             },
             timeout=http_timeout('gemma'),
         ).json()['message']['content']
+
+    def chat(self, messages, tools):
+        messages = [dict(m) for m in messages]
+        for message in messages:
+            message['content'] = message.get('content') or ''
+            if message.get('tool_calls'):
+                message['tool_calls'] = [
+                    {
+                        'function': {
+                            'name': c['function']['name'],
+                            'arguments': json.loads(c['function']['arguments'])
+                            if isinstance(c['function']['arguments'], str)
+                            else c['function']['arguments'],
+                        }
+                    }
+                    for c in message['tool_calls']
+                ]
+        message = http.post_sync(
+            self._url('/api/chat'),
+            json={
+                'model': settings.OLLAMA_CHAT_MODEL,
+                'messages': messages,
+                'tools': tools,
+                'stream': False,
+                'think': False,
+            },
+            timeout=http_timeout('gemma'),
+        ).json()['message']
+        return {
+            'content': message.get('content'),
+            'tool_calls': [
+                {
+                    'id': str(i),
+                    'name': c['function']['name'],
+                    'arguments': c['function']['arguments'],
+                }
+                for i, c in enumerate(message.get('tool_calls', []))
+            ],
+        }

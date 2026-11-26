@@ -323,7 +323,7 @@ def item_relations(conn, item_id):
         """select r.*,e.name_ko,e.type,s.title as source_title
         from entity_relations r join entities e on e.id=r.object_id
         left join sources s on s.id=r.source_id
-        where r.subject_id=%s and r.predicate in ('hasCriterion','soldBy') order by r.id""",
+        where r.subject_id=%s and r.predicate in ('hasCriterion','soldBy','isA') order by r.id""",
         (item_id,),
     )
 

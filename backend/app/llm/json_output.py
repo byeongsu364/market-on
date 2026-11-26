@@ -15,11 +15,27 @@ PROMPT = Path(__file__).with_name('prompts').joinpath('recognize.txt')
 
 def parse_recognition(text: str) -> dict:
     start, end = text.find('{'), text.rfind('}')
-    value = json.loads(text[start : end + 1])
+    value = json.loads(text[start : end + 1], object_pairs_hook=_merge_duplicate_keys)
     labels = value.get('labels') if isinstance(value, dict) else None
     if not isinstance(labels, list) or not all(isinstance(label, str) for label in labels):
         raise ValueError('labels must be a string array')
-    return {'labels': labels[:3], 'price_tag': parse_price_tag(value.get('price_tag'))}
+    tag = parse_price_tag(value.get('price_tag'))
+    if tag is not None and tag['variety_text'] is None:
+        # 모델이 품종을 바깥 키에 두는 경우도 받음 ("variety_text", "price_tag_variety_text")
+        outer = value.get('variety_text', value.get('price_tag_variety_text'))
+        tag['variety_text'] = outer if isinstance(outer, str) else None
+    return {'labels': labels[:3], 'price_tag': tag}
+
+
+def _merge_duplicate_keys(pairs):
+    # Gemma가 "price_tag"를 두 번 쓰면(가격 + 품종) 나중 것이 앞을 덮지 않게 합침
+    result = {}
+    for key, value in pairs:
+        if isinstance(result.get(key), dict) and isinstance(value, dict):
+            result[key] = result[key] | {k: v for k, v in value.items() if v is not None}
+        else:
+            result[key] = value
+    return result
 
 
 def _generate_labels(provider, image: bytes, vocabulary: list[str]) -> dict:
@@ -73,4 +89,11 @@ def parse_price_tag(value):
             return None
     except (KeyError, TypeError, ValueError, OverflowError):
         return None
-    return {'price': price, 'unit_text': value['unit_text'], 'quantity': quantity}
+    return {
+        'price': price,
+        'unit_text': value['unit_text'],
+        'quantity': quantity,
+        'variety_text': value.get('variety_text')
+        if isinstance(value.get('variety_text'), str)
+        else None,
+    }

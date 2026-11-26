@@ -17,8 +17,8 @@ def test_sample_formats_and_kamis():
         for path in sorted((DATA / 'ontology').glob('*.yaml'))
         for e in yaml.safe_load(path.read_text())['entities']
     ]
-    # items.yaml 10개 (+ unit:kg, unit:piece) + store_categories.yaml 6개
-    assert len(entities) == 16
+    # 기존 엔터티 16개 + 품종 7개
+    assert len(entities) == 23
     assert sum(e['type'] == 'category' for e in entities) == 2
     assert sum(e['type'] == 'store_category' for e in entities) == 6
     # 품목 KAMIS 코드는 aT 소매 품목코드표(신태빈 정리, 2026-11-20)에 실제로 있는 조합이어야 해요
@@ -29,10 +29,17 @@ def test_sample_formats_and_kamis():
     )
     known = {(r['부류코드'], r['품목코드'], r['품종코드']) for r in code_table}
     for entity in entities:
-        if entity['type'] == 'item':
+        if entity['type'] in ('item', 'variety'):
             kamis = entity['kamis']
             assert (kamis['ctgry_cd'], kamis['item_cd'], kamis['vrty_cd']) in known, entity['id']
             assert kamis['grd_cd'] == '04'
+            code_row = next(
+                r
+                for r in code_table
+                if (r['부류코드'], r['품목코드'], r['품종코드'])
+                == (kamis['ctgry_cd'], kamis['item_cd'], kamis['vrty_cd'])
+            )
+            assert kamis['unit_sz'] + kamis['unit'] == code_row['조사단위(대표)']
         else:
             assert entity.get('kamis') is None
     directory = DATA / 'rag_docs'
@@ -93,7 +100,12 @@ def test_criterion_expansion_without_db(monkeypatch):
     monkeypatch.setattr(repo, 'prune_generated_criteria', prune)
     conn = Mock(transaction=nullcontext)
     counts = load_ontology(conn)
-    assert counts['added'] == 19  # + store_categories 6
+    assert counts['added'] == 26  # 품종 7개 + 자동 확인 포인트 3개 포함
+    assert saved['variety:apple-hongro']['type'] == 'variety'
+    assert ('hasGrade', 'variety:apple-fuji', None, None, {'default': True}) in relations[
+        'item:apple'
+    ]
+    assert ('hasGrade', 'variety:apple-hongro', None, None, None) in relations['item:apple']
     criterion = saved['crit:green_onion-leaf']
     assert criterion['type'] == 'criterion'
     assert criterion['name_ko'] == '잎 끝이 마르지 않고 누런 잎이 없어요'
