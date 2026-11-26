@@ -7,6 +7,8 @@
 >
 > 연결 문서: [`Market-On_Ontology_Architecture.md`](./Market-On_Ontology_Architecture.md) — 청크 메타데이터의 `item_id` · `node_type`은 온톨로지 노드 이름과 똑같이 써요.
 
+
+정밀 재현성 때문에 
 ---
 
 ## 1. 온톨로지와 RAG의 역할 구분
