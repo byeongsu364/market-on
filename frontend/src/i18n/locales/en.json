@@ -120,5 +120,16 @@
   "closingSales": "",
   "closingBadge": "",
   "merchantSource": "",
-  "qrError": ""
+  "qrError": "",
+  "welcomeContinue": "Continue",
+  "welcomeSkip": "Skip",
+  "welcomeNext": "Next",
+  "welcomeBack": "Back",
+  "welcomeStart": "Get started",
+  "welcomeStep1Title": "Find a traditional market on the map",
+  "welcomeStep1Body": "We show the markets near you. Tap Explore to step inside a market.",
+  "welcomeStep2Title": "Stores inside, pinned by trade",
+  "welcomeStep2Body": "Find stores by type: produce, seafood, meat and more. Pick an item and only the stores selling it stay on the map.",
+  "welcomeStep3Title": "Snap, compare, and decide yourself",
+  "welcomeStep3Body": "Photograph the item and its price tag to see what it is, today's reference price and what to check. We never grade freshness."
 }

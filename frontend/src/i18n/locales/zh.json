@@ -120,5 +120,16 @@
   "closingSales": "",
   "closingBadge": "",
   "merchantSource": "",
-  "qrError": ""
+  "qrError": "",
+  "welcomeContinue": "继续",
+  "welcomeSkip": "跳过",
+  "welcomeNext": "下一步",
+  "welcomeBack": "上一步",
+  "welcomeStart": "开始使用",
+  "welcomeStep1Title": "在地图上找附近的传统市场",
+  "welcomeStep1Body": "显示您附近的市场。点击“浏览”即可进入市场。",
+  "welcomeStep2Title": "市场里的店铺按类别标注",
+  "welcomeStep2Body": "按蔬果、水产、肉类等类别找店铺。选择商品后，只显示出售该商品的店铺。",
+  "welcomeStep3Title": "拍照比价，自己判断",
+  "welcomeStep3Body": "拍下商品和价签，即可看到品名、今日参考价和挑选要点。我们不评定新鲜度。"
 }

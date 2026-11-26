@@ -120,5 +120,16 @@
   "closingSales": "",
   "closingBadge": "",
   "merchantSource": "",
-  "qrError": ""
+  "qrError": "",
+  "welcomeContinue": "Tiếp tục",
+  "welcomeSkip": "Bỏ qua",
+  "welcomeNext": "Tiếp",
+  "welcomeBack": "Quay lại",
+  "welcomeStart": "Bắt đầu",
+  "welcomeStep1Title": "Tìm chợ truyền thống trên bản đồ",
+  "welcomeStep1Body": "Ứng dụng hiển thị các chợ gần bạn. Nhấn Khám phá để vào trong chợ.",
+  "welcomeStep2Title": "Cửa hàng trong chợ được ghim theo ngành hàng",
+  "welcomeStep2Body": "Tìm cửa hàng theo loại: rau quả, hải sản, thịt… Chọn một mặt hàng thì chỉ còn các cửa hàng bán mặt hàng đó.",
+  "welcomeStep3Title": "Chụp ảnh, so giá và tự quyết định",
+  "welcomeStep3Body": "Chụp sản phẩm và bảng giá để xem tên hàng, giá tham chiếu hôm nay và những điểm cần kiểm tra. Chúng tôi không chấm điểm độ tươi."
 }

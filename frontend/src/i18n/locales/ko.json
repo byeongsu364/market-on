@@ -659,5 +659,16 @@
   "reviewCancel": "취소",
   "reviewMine": "내 리뷰",
   "reviewMarketAverage": "시장 평균",
-  "reviewSurvey": " · aT {month}월 {day}일 조사"
+  "reviewSurvey": " · aT {month}월 {day}일 조사",
+  "welcomeContinue": "계속",
+  "welcomeSkip": "건너뛰기",
+  "welcomeNext": "다음",
+  "welcomeBack": "이전",
+  "welcomeStart": "시작하기",
+  "welcomeStep1Title": "가까운 전통시장을 지도에서 찾아요",
+  "welcomeStep1Body": "지금 있는 곳에서 가까운 시장을 보여 드려요. 둘러보기를 누르면 시장 안으로 들어가요.",
+  "welcomeStep2Title": "시장 안 점포는 업종별 핀으로",
+  "welcomeStep2Body": "채소·과일, 수산, 정육처럼 업종별로 점포를 찾아요. 품목을 고르면 그 품목을 파는 점포만 남아요.",
+  "welcomeStep3Title": "찍어서 시세와 견주고, 판단은 직접",
+  "welcomeStep3Body": "상품과 가격표를 찍으면 품목과 오늘 기준시세, 확인할 점을 보여 드려요. 신선도 등급은 매기지 않아요."
 }
