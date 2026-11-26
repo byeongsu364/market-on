@@ -5,7 +5,7 @@ import { CATEGORY_LABELS } from '../../utils/category';
 // 지도 위 표시물의 HTML. 네이버 지도(HTML 마커)와 약도가 같은 문자열을 씀(디자인 시스템 "색" 핀 규칙).
 // 모든 표시물은 끝점(또는 가운데)이 좌표에 오도록 margin으로 맞춤.
 
-/** small: 핀이 많을 때(30개 넘게) 겹치지 않게 업종 색 작은 점으로 그림 */
+/** small: 핀이 많을 때(30개 넘게) 한 단계 작은 물방울 핀 */
 export type PinState = 'default' | 'selected' | 'dim' | 'small';
 export type MapPin = LatLng & {
   id: string;
@@ -67,10 +67,13 @@ export function markerInner(m: MapMarker): string {
   switch (m.type) {
     case 'pin': {
       if (m.state === 'dim') return '<span class="mo-dot"></span>';
-      if (m.state === 'small')
-        return `<span class="mo-dot mo-dot-cat" style="background:${m.category ? pinColor[m.category] : '#8b8d93'}"></span>`;
       const selected = m.state === 'selected';
-      const [w, h, g, gx, gy] = selected ? [44, 55, 23, 10.5, 9.8] : [30, 37.5, 16, 7, 6.5];
+      // small: 핀이 많을 때 한 단계 작은 물방울 핀(아이콘은 그대로)
+      const [w, h, g, gx, gy] = selected
+        ? [44, 55, 23, 10.5, 9.8]
+        : m.state === 'small'
+          ? [24, 30, 13, 5.5, 5.2]
+          : [30, 37.5, 16, 7, 6.5];
       const fill = m.category ? pinColor[m.category] : '#8b8d93';
       const icon = m.category
         ? `<svg width="${g}" height="${g}" viewBox="0 0 24 24" aria-hidden="true">${glyph[m.category]}</svg>`

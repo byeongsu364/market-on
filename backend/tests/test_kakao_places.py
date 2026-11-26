@@ -55,7 +55,7 @@ def test_kakao_locations_reach_the_map_and_survive_reload(db):
         names = {s['id']: s['name_ko'] for s in store_repo.list_stores(db, market_id)}
         # 두 번째 점포는 상인이 이미 위치를 확인함: 카카오 결과로 덮지 않음
         db.execute(
-            'update stores set lat=37.5811,lng=127.0411,location_verified=true where id=%s',
+            "update stores set lat=37.5811,lng=127.0411,location_verified=true,location_source='merchant' where id=%s",
             (second,),
         )
         found = {names[first]: doc(names[first], x='127.0399', y='37.5795', pid='kakao-1')}
@@ -86,4 +86,10 @@ def test_kakao_locations_reach_the_map_and_survive_reload(db):
         # 상가정보를 다시 적재해도 카카오 위치는 남음
         load_market_stores(db, config, rows)
         assert store_repo.get_store(db, first)['lat'] == 37.5795
+        # --reset: 카카오 출처를 지우고 다시 찾음(이번엔 못 찾음) → 상가정보 재적재로 건물 좌표 복귀
+        load_kakao_places(db, market_id, reset=True, searcher=lambda *_: [])
+        assert store_repo.get_store(db, first)['location_source'] is None
+        load_market_stores(db, config, rows)
+        assert store_repo.get_store(db, first)['lat'] != 37.5795
+        assert store_repo.get_store(db, second)['location_source'] == 'merchant'
         raise Rollback()

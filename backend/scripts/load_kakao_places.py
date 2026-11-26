@@ -4,7 +4,11 @@
 카카오 로컬 "키워드로 장소 검색"을 시장 중심 반경 안에서 부르고, 이름이 맞는 장소만 `location_source='kakao'`로
 저장한다. 상인이 확인한 위치(location_verified)는 건드리지 않는다. 못 찾은 점포는 그대로 두고, 화면은 예시 핀을 쓴다.
 
-    python -m scripts.load_kakao_places --market market:gyeongdong [--radius 600] [--dry-run]
+    python -m scripts.load_kakao_places --market market:gyeongdong [--radius 300] [--dry-run] [--reset]
+
+--reset: 전에 저장한 카카오 위치를 지우고(출처만 비움) 다시 찾는다. 상가정보 건물 좌표로 되돌리려면 그 뒤에
+scripts.load_market_stores를 한 번 더 돌린다(위치 출처가 없는 점포는 상가정보 좌표로 다시 채워짐).
+반경은 300m가 기본: 600m로는 "서울상회"처럼 흔한 상호가 시장 밖 다른 가게로 잡혔음(2026-11-27).
 """
 
 import argparse
@@ -63,10 +67,18 @@ def find_place(name: str, market_name: str, lat: float, lng: float, radius: int,
     return None
 
 
-def load_kakao_places(conn, market_id: str, *, radius: int = 600, dry_run=False, searcher=search):
+def load_kakao_places(
+    conn, market_id: str, *, radius: int = 300, dry_run=False, reset=False, searcher=search
+):
     market = store_repo.get_market(conn, market_id)
     if not market or market['lat'] is None or market['lng'] is None:
         raise AppError('MARKET_NOT_FOUND', f'{market_id}: 시장 좌표가 없습니다.', 404)
+    if reset and not dry_run:
+        conn.execute(
+            'update stores set location_source=null,kakao_place_id=null '
+            "where market_id=%s and location_source='kakao'",
+            (market_id,),
+        )
     found = skipped = missing = 0
     for store in store_repo.list_stores(conn, market_id):
         if not store['active'] or store.get('location_verified'):
@@ -92,13 +104,16 @@ def load_kakao_places(conn, market_id: str, *, radius: int = 600, dry_run=False,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--market', required=True)
-    parser.add_argument('--radius', type=int, default=600)
+    parser.add_argument('--radius', type=int, default=300)
     parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--reset', action='store_true')
     args = parser.parse_args()
     if not settings.KAKAO_REST_API_KEY:
         raise AppError('KAKAO_NOT_CONFIGURED', 'KAKAO_REST_API_KEY가 필요합니다.', 503)
     with connection() as conn, conn.transaction():
-        load_kakao_places(conn, args.market, radius=args.radius, dry_run=args.dry_run)
+        load_kakao_places(
+            conn, args.market, radius=args.radius, dry_run=args.dry_run, reset=args.reset
+        )
 
 
 if __name__ == '__main__':

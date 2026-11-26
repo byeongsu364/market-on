@@ -210,13 +210,14 @@ function MarketView({ market }: { market: Market }) {
     });
   const marketOnly = `/?market=${encodeURIComponent(market.market_id)}`;
 
-  // 위치를 확인한 점포는 실제 좌표, 나머지는 업종별 예시 자리(helpers.examplePositions)
+  // 실제 위치(상인 확인·카카오맵)가 있는 점포만 핀. 한 곳도 없는 시장만 업종별 예시 자리를 씀
+  // (2026-11-27: 위치 없는 56곳을 예시 자리에 섞어 찍으니 시장 가운데 덩어리가 생겨 이상했음)
   const example = useMemo(
     () =>
-      market.lat != null && market.lng != null
+      !hasCoords && market.lat != null && market.lng != null
         ? examplePositions(views, { lat: market.lat, lng: market.lng })
         : new Map<string, { lat: number; lng: number }>(),
-    [views, market.lat, market.lng],
+    [views, hasCoords, market.lat, market.lng],
   );
   const pinAt = (v: StoreView) =>
     v.store.lat != null && v.store.lng != null
@@ -244,19 +245,18 @@ function MarketView({ market }: { market: Market }) {
           };
         })
     : [];
-  // 핀이 30개를 넘으면 겹쳐서 덩어리가 되므로 고른 점포만 큰 핀, 나머지는 업종 색 작은 점
+  // 핀이 30개를 넘으면 한 단계 작은 물방울 핀(고른 점포는 큰 핀)
   const crowded = pinList.filter((p) => p.state === 'default').length > 30;
   const pins: MapPin[] = crowded
     ? pinList.map((p) => (p.state === 'default' ? { ...p, state: 'small' } : p))
     : pinList;
   const kakaoPins = views.filter((v) => v.store.location_source === 'kakao').length;
+  const unplaced = views.filter((v) => v.store.lat == null || v.store.lng == null).length;
   const sampleNote =
     example.size > 0
-      ? kakaoPins > 0
-        ? '일부 핀 위치는 예시 · 나머지는 카카오맵 기준'
-        : true
+      ? true
       : kakaoPins > 0
-        ? '점포 위치는 카카오맵 기준'
+        ? `카카오맵 기준 위치${unplaced ? ` · ${unplaced}곳은 위치 확인 전이라 목록에만` : ''}`
         : hasCoords && map.data?.layout === 'schematic';
 
   const top = (
