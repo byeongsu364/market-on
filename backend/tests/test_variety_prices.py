@@ -231,7 +231,8 @@ def test_seed_and_remove_mock(monkeypatch):
     conn.execute.return_value.rowcount = 7
     assert script.seed(conn, remove=True) == {'deleted': 7, 'inserted': 0}
     assert "source='mock'" in conn.execute.call_args.args[0]
-    conn.execute.return_value.fetchall.return_value = [
+    # 기준 행은 사전 행 커서로 읽어요 (upsert_observations는 기본 튜플 행 연결을 그대로 씀)
+    conn.cursor.return_value.execute.return_value.fetchall.return_value = [
         {
             'source': 'at_period_retail',
             'price': 1000,
@@ -245,6 +246,7 @@ def test_seed_and_remove_mock(monkeypatch):
         script, 'upsert_observations', lambda c, rows: (saved.extend(rows) or len(rows), 0)
     )
     script.seed(conn, today=date(2026, 11, 27))
+    assert conn.cursor.call_args.kwargs['row_factory'] is script.dict_row
     assert all(r['source'] == 'mock' for r in saved)
     assert saved[0]['price'] == 850
 
