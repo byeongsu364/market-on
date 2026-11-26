@@ -20,7 +20,8 @@ from app.db.pool import connection
 
 from ._common import run
 
-MARKET = 'market:gyeongdong'
+# 시장은 DB에 있는 것 중 고름: 경동시장 → 시연 시장 → 아무거나 (--market로 지정 가능)
+PREFERRED_MARKETS = ('market:gyeongdong', 'market:demo')
 ASKS = [
     ('item:green_onion', 'store', '대파 오래 두려면 어떻게 보관해요?'),
     ('item:apple', 'select', '사과 고를 때 뭘 봐요?'),
@@ -51,6 +52,35 @@ def timed(client, path, body):
     return seconds, response.status_code, data
 
 
+def pick_market(conn, wanted):
+    from app.db.repositories import store_repo
+
+    ids = [m['id'] for m in store_repo.list_markets(conn)]
+    if wanted:
+        if wanted not in ids:
+            raise SystemExit(f'시장 {wanted}이 DB에 없어요. 있는 시장: {", ".join(ids) or "없음"}')
+        return wanted
+    for market_id in PREFERRED_MARKETS:
+        if market_id in ids:
+            return market_id
+    if not ids:
+        raise SystemExit('DB에 시장이 없어요. python -m scripts.seed_demo_market 먼저 실행해요.')
+    return ids[0]
+
+
+def embed_seconds(rounds=3):
+    """물어보기에서 근거 찾기 전에 질문을 숫자로 바꾸는 시간 (bge-m3, 학교 서버)."""
+    from app.llm.factory import get_embedder
+
+    embedder = get_embedder()
+    times = []
+    for i in range(rounds):
+        start = time.monotonic()
+        embedder.embed([f'대파 보관 방법 {i}'], task='query')
+        times.append(time.monotonic() - start)
+    return statistics.median(times)
+
+
 def median(values):
     return f'{statistics.median(values):.1f}초' if values else '-'
 
@@ -59,19 +89,24 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base', default='http://localhost:8000')
     parser.add_argument('--rounds', type=int, default=1)
+    parser.add_argument('--market', help='시장 ID (비우면 DB에서 고름)')
+    parser.add_argument('--skip-ask', action='store_true', help='대화만 재기')
     args = parser.parse_args()
+    with connection() as conn:
+        market = pick_market(conn, args.market)
+    print(f'시장: {market}')
     started = datetime.now(UTC)
     headers = {'X-Requested-With': 'market-on', 'X-Device-Id': str(uuid.uuid4())}
     ask_times, chat_times = [], []
     with httpx.Client(base_url=args.base, headers=headers, timeout=120) as client:
         print('| 물어보기 | 시간 | 상태 | 모델 | 단계 | 저장된 답 |\n|---|---|---|---|---|---|')
-        for _ in range(args.rounds):
+        for _ in range(0 if args.skip_ask else args.rounds):
             for item_id, intent, question in ASKS:
                 body = {
                     'question': question,
                     'intent': intent,
                     'item_id': item_id,
-                    'market_id': MARKET,
+                    'market_id': market,
                 }
                 seconds, status, data = timed(client, '/ask', body)
                 cached = bool(data.get('cached'))
@@ -85,7 +120,7 @@ def main():
         print('\n| 대화 | 시간 | 상태 | 모델 | 단계 |\n|---|---|---|---|---|')
         for _ in range(args.rounds):
             for question in CHATS:
-                body = {'messages': [{'role': 'user', 'content': question}], 'market_id': MARKET}
+                body = {'messages': [{'role': 'user', 'content': question}], 'market_id': market}
                 seconds, status, data = timed(client, '/chat', body)
                 if status == 200:
                     chat_times.append(seconds)
@@ -94,8 +129,12 @@ def main():
                     f'{data.get("model") or "-"} | '
                     f'{"→".join(data.get("steps") or []) or "-"} |'
                 )
+    try:
+        print(f'\n질문 임베딩(bge-m3) 중앙값 {embed_seconds():.1f}초 · 물어보기 시간에 포함')
+    except Exception as exc:  # noqa: BLE001 - 측정 보조라 실패해도 계속
+        print(f'\n질문 임베딩 시간을 재지 못했어요: {type(exc).__name__}')
     print(
-        f'\n물어보기 중앙값 {median(ask_times)} (기준 7초) · 대화 중앙값 {median(chat_times)} (기준 12초)'
+        f'물어보기 중앙값 {median(ask_times)} (기준 7초) · 대화 중앙값 {median(chat_times)} (기준 12초)'
     )
     with connection() as conn:
         rows = conn.execute(
