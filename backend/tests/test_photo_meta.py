@@ -3,6 +3,7 @@
 import struct
 import zlib
 from contextlib import nullcontext
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -196,10 +197,21 @@ def api(monkeypatch, tmp_path):
             {'id': 'market:nowhere', 'lat': None, 'lng': None},
         ],
     )
-    provider = Mock()
-    provider.generate.return_value = '{"labels": ["scallion"]}'
-    monkeypatch.setattr(router, '_provider', lambda name: provider)
-    monkeypatch.setattr(router.llm_call_repo, 'record', Mock())
+    from app.clients import vision
+    from app.services import scan_service
+
+    # 040: 사진은 구글 비전에만 가요. AI 모델(젬마·제미나이·GPT)은 사진을 받지 않음
+    sent = []
+    monkeypatch.setattr(settings, 'GOOGLE_VISION_API_KEY', 'test-vision')
+    monkeypatch.setattr(
+        vision,
+        'annotate',
+        lambda image: sent.append(image) or {'labels': [('Scallion', 0.9)], 'text': ''},
+    )
+    monkeypatch.setattr(scan_service.vision_usage, 'take', lambda: None)
+    monkeypatch.setattr(scan_service.llm_call_repo, 'record', Mock())
+    monkeypatch.setattr(router, '_provider', Mock(side_effect=AssertionError('no LLM for photos')))
+    provider = SimpleNamespace(sent=sent)
     app.dependency_overrides[get_db] = lambda: conn
     try:
         with TestClient(app) as client:
@@ -223,7 +235,7 @@ def test_without_consent_location_dropped(api, form):
     image = jpeg_with_gps()
     body = post(client, image, **form).json()
     assert body['photo_location'] is None
-    sent = provider.generate.call_args.kwargs['images'][0]
+    sent = provider.sent[0]
     assert sent == saved_bytes(root) == strip_metadata(image, 'jpg')
     assert read_gps(sent, 'jpg') is None
     assert not {'photo_market_id', 'photo_lat', 'photo_lng'} & set(media.call_args.kwargs)
@@ -238,7 +250,7 @@ def test_with_consent_only_coarse_location_kept(api):
         37.56,
         126.91,
     )
-    assert read_gps(provider.generate.call_args.kwargs['images'][0], 'jpg') is None
+    assert read_gps(provider.sent[0], 'jpg') is None
     assert read_gps(saved_bytes(root), 'jpg') is None
 
 
@@ -264,6 +276,6 @@ def test_unreadable_photo_rejected_before_saving_or_sending(api):
     response = post(client, b'\xff\xd8\xffbroken')
     assert response.status_code == 415
     assert response.json()['error']['code'] == 'UNREADABLE_IMAGE'
-    provider.generate.assert_not_called()
+    assert not provider.sent
     media.assert_not_called()
     assert not list(root.glob('photos/*/*'))
