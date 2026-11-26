@@ -315,5 +315,8 @@ def recommend(conn, data, device_id, *, embedder=None, consume=True):
     result.items = [
         type(item)(**i18n.localize(conn, item.model_dump(), data.lang)) for item in result.items
     ]
-    answer_cache.save(conn, key, result.model_dump(mode='json'), model)
+    # AI 이유 문장 없이 끝난 결과(품목 없음·이유 쓰기 실패)는 저장하지 않아요.
+    # 저장 칸(model)이 비면 DB가 거부해서 500이 났고, 시세·모델이 돌아오면 다시 만들어야 해서예요
+    if model is not None:
+        answer_cache.save(conn, key, result.model_dump(mode='json'), model)
     return result

@@ -124,3 +124,9 @@ export function itemImage(itemId?: string | null, varietyId?: string | null): st
     (varietyId && varieties[varietyId]) || (itemId && (items[itemId] || ITEM_CATEGORIES[itemId]));
   return name ? `/items/${name}.svg` : null;
 }
+
+/** 품목 그림 판의 연한 바탕색(시안 Search·Store의 품목별 면). tokens.css의 --tint-* 변수, 없으면 회색 면 */
+export function itemTint(itemId?: string | null, varietyId?: string | null): string {
+  const name = (varietyId && varieties[varietyId]) || (itemId && items[itemId]);
+  return name ? `var(--tint-${name}, var(--color-surface-strong))` : 'var(--color-surface-strong)';
+}

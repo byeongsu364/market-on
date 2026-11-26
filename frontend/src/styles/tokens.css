@@ -63,6 +63,14 @@
 }
 
 [data-theme='dark'] {
+  --tint-apple: #2a1d1e;
+  --tint-apple-hongro: #2a1d1e;
+  --tint-apple-shinano-gold: #29261a;
+  --tint-pear: #29251a;
+  --tint-persimmon: #2b2017;
+  --tint-green-onion: #1b261b;
+  --tint-onion: #2a2419;
+  --tint-mandarin: #2b2017;
   --color-canvas: #111113;
   --color-canvas-soft: #161618;
   --color-surface-card: #19191b;
@@ -92,6 +100,14 @@
 /* 사용자가 직접 고르지 않았을 때 기기 설정을 따름 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
+    --tint-apple: #2a1d1e;
+    --tint-apple-hongro: #2a1d1e;
+    --tint-apple-shinano-gold: #29261a;
+    --tint-pear: #29251a;
+    --tint-persimmon: #2b2017;
+    --tint-green-onion: #1b261b;
+    --tint-onion: #2a2419;
+    --tint-mandarin: #2b2017;
     --color-canvas: #111113;
     --color-canvas-soft: #161618;
     --color-surface-card: #19191b;
@@ -126,6 +142,16 @@
   --pin-meat: #e0484e;
   --pin-ricecake: #d2488f;
   --pin-default: #8b8d93;
+
+  /* 품목 그림 판 바탕(시안의 품목별 연한 면). 다크 화면에서는 아래에서 회색 면으로 바꿈 */
+  --tint-apple: #fdecec;
+  --tint-apple-hongro: #fbe6e7;
+  --tint-apple-shinano-gold: #fdf4d4;
+  --tint-pear: #fbf2dc;
+  --tint-persimmon: #fff0e1;
+  --tint-green-onion: #eaf5e6;
+  --tint-onion: #fbf0df;
+  --tint-mandarin: #fff0e1;
   --color-on-pin: #ffffff;
 
   /* 예전 구역 미니맵용(새 화면에는 쓰지 않음, MiniMap 대체 화면에서만) */

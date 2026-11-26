@@ -36,8 +36,8 @@ it('적재 단계, 검사, 평가 지표와 미측정을 표시한다', async ()
     </SessionProvider>,
   );
   expect(await screen.findByText('온톨로지 연결')).toBeInTheDocument();
-  expect(screen.getByText('통과')).toBeInTheDocument();
-  expect(screen.getByText('실패')).toBeInTheDocument();
+  expect(screen.getByText('✓ 통과')).toBeInTheDocument();
+  expect(screen.getByText('✕ 실패')).toBeInTheDocument();
   expect(screen.getByText('25/25 (100.0%)')).toBeInTheDocument();
   expect(screen.getAllByText('측정 못 함')).toHaveLength(3);
   expect(screen.getByText('응답 시간')).toBeInTheDocument();

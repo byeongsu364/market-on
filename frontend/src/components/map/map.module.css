@@ -12,9 +12,13 @@
   top: 0;
   pointer-events: none;
 }
+/* 네이버 지도는 이 칸에 inline으로 position: relative를 씌워 inset이 무시되고 높이가 0이 됨
+   (2026-11-27 휴대폰·PC 모두 지도 빈 화면). 크기를 직접 주고 position을 지킴 */
 .naver {
-  position: absolute;
+  position: absolute !important;
   inset: 0;
+  width: 100%;
+  height: 100%;
 }
 .corner {
   position: absolute;

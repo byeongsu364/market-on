@@ -87,7 +87,9 @@ it('renders decision card strings in the selected language without changing sour
   expect(card.title).toBe('リンゴ');
   expect(card.prices).toEqual(['参考価格の情報なし']);
   expect(card.footer).toBe('鮮度は自分で確認しました');
-  expect(card.bandLabels[1]).toBe('参考と同程度');
+  // 가격 자리 이름은 많이 낮음·낮음·조금 높음·높음(2026-11-27 요청, 판정 대신 위치)
+  expect(card.bandLabels[1]).toBe('低い');
+  expect(card.labels.basisTitle).toBe(ja.cardBasisTitle);
 });
 
 it('restores account language at login and saves a changed preference', async () => {

@@ -40,7 +40,7 @@ const show = (path = '/items/item:green_onion') =>
     </MemoryRouter>,
   );
 async function openCard() {
-  const button = await screen.findByRole('button', { name: '판단 카드 만들기' });
+  const button = await screen.findByRole('button', { name: '안심On 만들기' });
   // 기준시세를 기본 품종으로 한 번 더 받는 동안 버튼이 잠깐 다시 꺼짐 → 켜졌을 때 눌러 시트가 열릴 때까지
   await waitFor(
     () => {
@@ -63,11 +63,13 @@ it('버튼으로 시트를 열고 Canvas 호출·체크·파일 이름·미지�
     expect.any(HTMLCanvasElement),
     expect.objectContaining({ photo: undefined, count: expect.stringContaining('1개 확인') }),
   );
-  expect(screen.getByRole('link', { name: '이미지 저장' })).toHaveAttribute(
+  expect(screen.getByRole('link', { name: '저장' })).toHaveAttribute(
     'download',
     expect.stringMatching(/^market-on-대파-\d{4}-\d{2}-\d{2}\.png$/),
   );
-  expect(screen.queryByRole('button', { name: '공유하기' })).not.toBeInTheDocument();
+  expect(
+    within(screen.getByRole('dialog')).queryByRole('button', { name: '공유' }),
+  ).not.toBeInTheDocument();
 });
 it('파일 공유가 지원되면 생성한 PNG File을 공유한다', async () => {
   const share = vi.fn().mockResolvedValue(undefined);
@@ -75,7 +77,7 @@ it('파일 공유가 지원되면 생성한 PNG File을 공유한다', async () 
   Object.defineProperty(navigator, 'canShare', { configurable: true, value: vi.fn(() => true) });
   show();
   await openCard();
-  fireEvent.click(screen.getByRole('button', { name: '공유하기' }));
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: '공유' }));
   expect(share).toHaveBeenCalledWith({
     files: [
       expect.objectContaining({
@@ -90,7 +92,9 @@ it('파일 공유 불가면 공유 버튼을 숨긴다', async () => {
   Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => false });
   show();
   await openCard();
-  expect(screen.queryByRole('button', { name: '공유하기' })).not.toBeInTheDocument();
+  expect(
+    within(screen.getByRole('dialog')).queryByRole('button', { name: '공유' }),
+  ).not.toBeInTheDocument();
 });
 it('품목이 바뀌면 체크가 초기화된다', async () => {
   show();
@@ -111,7 +115,7 @@ it('생성 중 로딩과 생성 실패를 표시한다', async () => {
     }),
   );
   show();
-  const button = await screen.findByRole('button', { name: '판단 카드 만들기' });
+  const button = await screen.findByRole('button', { name: '안심On 만들기' });
   await waitFor(
     () => {
       if (!(button as HTMLButtonElement).disabled) fireEvent.click(button);
@@ -148,4 +152,15 @@ it('시트를 닫으면 미리보기 Object URL을 해제한다', async () => {
   fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: '닫기' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:sample');
+});
+it('시트 머리에 안심On·저장이 있고 레시피 보기는 없다', async () => {
+  show();
+  await screen.findByRole('heading', { name: '대파' });
+  await openCard();
+  const dialog = screen.getByRole('dialog');
+  expect(within(dialog).getByRole('heading', { name: '안심On' })).toHaveTextContent('안심On');
+  expect(within(dialog).getByRole('link', { name: '저장' })).toBeInTheDocument();
+  expect(within(dialog).queryByRole('button', { name: /레시피 보기/ })).toBeNull();
+  // 제철은 이달의 식재료로 채워서 그림
+  await waitFor(() => expect(vi.mocked(drawCard).mock.calls.at(-1)?.[1]).toHaveProperty('season'));
 });

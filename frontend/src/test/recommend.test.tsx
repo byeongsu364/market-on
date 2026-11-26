@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Recommend from '../pages/shop/Shop';
 import { SessionContext, useSessionState } from '../store/session';
@@ -35,6 +35,12 @@ function Wrapper({ children }: { children: React.ReactNode }) {
     </MemoryRouter>
   );
 }
+// 장바구니 대화: 용도 → 인원 → 예산 빠른 답을 차례로 누르면 구성을 요청함
+const compose = (purpose = '집밥') => {
+  fireEvent.click(screen.getByRole('button', { name: purpose }));
+  fireEvent.click(screen.getByRole('button', { name: '2명' }));
+  fireEvent.click(screen.getByRole('button', { name: '2만원' }));
+};
 beforeEach(() => {
   vi.mocked(recommend).mockReset().mockResolvedValue(response);
 });
@@ -44,7 +50,7 @@ it('현재 시장 요청과 카드·수량·합계·근거·모델을 표시한�
       <Recommend />
     </Wrapper>,
   );
-  fireEvent.click(screen.getByRole('button', { name: '구성 보기' }));
+  compose();
   await screen.findByText('껍질을 확인해요.');
   expect(recommend).toHaveBeenCalledWith({
     purpose: '집밥',
@@ -81,7 +87,7 @@ it('로딩과 빈 구성 note를 표시한다', async () => {
       <Recommend />
     </Wrapper>,
   );
-  fireEvent.click(screen.getByRole('button', { name: '구성 보기' }));
+  compose();
   expect(screen.getByText(/구성을 만들고 있어요/)).toBeInTheDocument();
   resolve({
     ...response,
@@ -101,6 +107,38 @@ it('오류를 표시한다', async () => {
       <Recommend />
     </Wrapper>,
   );
-  fireEvent.click(screen.getByRole('button', { name: '구성 보기' }));
+  compose();
   expect(await screen.findByRole('alert')).toHaveTextContent('질문이 많아요');
+});
+it('장바구니는 도우미가 차례로 묻고, 구성 뒤 조건 하나만 바꿔 다시 짠다', async () => {
+  render(
+    <Wrapper>
+      <Recommend />
+    </Wrapper>,
+  );
+  expect(screen.getByRole('heading', { name: '장바구니' })).toBeInTheDocument();
+  expect(screen.getByText('어떤 용도로 사세요?')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '모임용' }));
+  expect(screen.getByText('몇 명이 드세요?')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('인원 직접 입력'), { target: { value: '12' } });
+  fireEvent.click(screen.getByRole('button', { name: '확인' }));
+  expect(screen.getByText('12명')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('예산 직접 입력'), { target: { value: '45000' } });
+  fireEvent.click(screen.getByRole('button', { name: '확인' }));
+  await screen.findByText('껍질을 확인해요.');
+  expect(recommend).toHaveBeenLastCalledWith(
+    expect.objectContaining({ purpose: '모임', headcount: 12, budget: 45000 }),
+  );
+  fireEvent.click(screen.getByRole('button', { name: '예산 바꾸기' }));
+  fireEvent.click(screen.getByRole('button', { name: '3만원' }));
+  await waitFor(() => expect(recommend).toHaveBeenCalledTimes(2));
+  expect(recommend).toHaveBeenLastCalledWith(
+    expect.objectContaining({ purpose: '모임', headcount: 12, budget: 30000 }),
+  );
+  await waitFor(() =>
+    expect(screen.getAllByRole('heading', { name: '이렇게 사면 돼요' })).toHaveLength(2),
+  );
+  fireEvent.click(screen.getByRole('button', { name: '처음부터' }));
+  expect(screen.queryByRole('heading', { name: '이렇게 사면 돼요' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '집밥' })).toBeInTheDocument();
 });

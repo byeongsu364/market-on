@@ -64,10 +64,12 @@ it('상인 홈은 조회·길 안내 숫자와 날짜별 그래프를 표시하�
       <App />
     </MemoryRouter>,
   );
-  expect(await screen.findByText('오늘 38번 조회')).toBeInTheDocument();
+  expect(await screen.findByText('38회')).toBeInTheDocument();
   expect(screen.getByText('5회')).toBeInTheDocument();
-  expect(screen.getByText('38회 조회')).toBeInTheDocument();
-  expect(screen.getByRole('img', { name: '날짜별 조회 수와 길 안내 횟수' })).toBeInTheDocument();
+  // 날짜별 막대는 화면 읽기용 표로도 있음
+  const table = screen.getByRole('table', { name: '최근 7일 조회 수와 길 안내 횟수' });
+  expect(table).toHaveTextContent('조회 38회');
+  expect(table).toHaveTextContent('길 안내 5회');
   expect(screen.queryByText('단골 수')).not.toBeInTheDocument();
 });
 

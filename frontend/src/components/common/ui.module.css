@@ -312,10 +312,6 @@
 .searchInput::placeholder {
   color: var(--color-muted);
 }
-.search:focus-within {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
 
 /* Segmented --------------------------------------------------------- */
 .segmented {
@@ -401,6 +397,8 @@
 }
 .toggle[aria-checked='true'] .toggleThumb {
   transform: translateX(20px);
+  /* 켜진 막대가 ink(다크 모드에선 흰색)라 손잡이는 바탕색으로(다크 모드에서 안 보이던 것) */
+  background: var(--color-canvas);
 }
 
 /* Stepper ----------------------------------------------------------- */

@@ -42,37 +42,63 @@ export default function MerchantHome() {
     [itemName(sale.item_id), sale.unit_id ? unitLabel(sale.unit_id) : ''].filter(Boolean).join(' ');
   const views = (n: number) => `${n}회`;
 
+  // 통계: 오늘 숫자 두 칸 + 최근 7일 막대(조회는 검정, 길 안내는 회색). 숫자는 막대 위, 0이면 바닥선만(2026-11-27 다듬기)
+  const days = f.stats.data?.days ?? [];
+  const peak = Math.max(1, ...days.map((d) => Math.max(d.views, d.directions)));
   const stats = f.stats.data && (
     <>
       <div className={desktop ? s.webStats : s.stats}>
-        <Stat value={`오늘 ${f.stats.data.today.views}번 조회`} label={t('storeViews')} />
-        <Stat value={`${f.stats.data.today.directions}회`} label="오늘 길 안내" />
-        <Stat value={`${f.stats.data.favorites}명`} label="단골로 저장한 손님" />
+        <Stat value={views(f.stats.data.today.views)} label="오늘 조회" />
+        <Stat value={views(f.stats.data.today.directions)} label="오늘 길 안내" />
+        <Stat value={`${f.stats.data.favorites ?? 0}명`} label="단골 손님" />
       </div>
-      <Section title="최근 7일 조회·길 안내">
-        <div className={s.chart} role="img" aria-label="날짜별 조회 수와 길 안내 횟수">
-          {f.stats.data.days.map((day) => (
-            <div key={day.day} className={s.chartDay}>
+      <Section title="최근 7일">
+        <div className={s.chartLegend} aria-hidden="true">
+          <span>
+            <i className={s.chartViews} /> 조회
+          </span>
+          <span>
+            <i className={s.chartDirections} /> 길 안내
+          </span>
+        </div>
+        <div className={s.chart} aria-hidden="true">
+          {days.map((day, i) => (
+            <div key={day.day} className={s.chartDay} data-today={i === days.length - 1}>
               <span className={s.chartBars}>
-                <span
-                  className={s.chartViews}
-                  style={{
-                    height: `${(day.views / Math.max(1, ...f.stats.data!.days.map((d) => Math.max(d.views, d.directions)))) * 100}%`,
-                  }}
-                />
-                <span
-                  className={s.chartDirections}
-                  style={{
-                    height: `${(day.directions / Math.max(1, ...f.stats.data!.days.map((d) => Math.max(d.views, d.directions)))) * 100}%`,
-                  }}
-                />
+                <span className={s.chartBar}>
+                  {day.views > 0 && <b>{day.views}</b>}
+                  <span
+                    className={s.chartViews}
+                    style={{ height: `${(day.views / peak) * 100}%` }}
+                  />
+                </span>
+                <span className={s.chartBar}>
+                  {day.directions > 0 && <b>{day.directions}</b>}
+                  <span
+                    className={s.chartDirections}
+                    style={{ height: `${(day.directions / peak) * 100}%` }}
+                  />
+                </span>
               </span>
-              <span>{day.day.slice(5)}</span>
-              <span>{day.views}회 조회</span>
-              <span>길 안내 {day.directions}회</span>
+              <span className={s.chartDate}>
+                {Number(day.day.slice(5, 7))}/{Number(day.day.slice(8, 10))}
+              </span>
             </div>
           ))}
         </div>
+        {/* 화면 읽기용 표 */}
+        <table className="sr-only">
+          <caption>최근 7일 조회 수와 길 안내 횟수</caption>
+          <tbody>
+            {days.map((day) => (
+              <tr key={day.day}>
+                <th scope="row">{day.day}</th>
+                <td>조회 {day.views}회</td>
+                <td>길 안내 {day.directions}회</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Section>
     </>
   );

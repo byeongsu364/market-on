@@ -1,0 +1,531 @@
+/*
+ * 소개 사이트(PC 발표용) 공통 틀 — 디자인 시안 marketon_site_v1(2026-11-27)의 인라인 스타일을 토큰으로 옮김.
+ * 발표 예외: 프로젝터 가독성 때문에 히어로 76px, 섹션 제목 60px, 기능 제목 40~44px(이 사이트에서만).
+ * 1024px 미만·720px 미만에서도 가로 스크롤 없이 한 단으로 읽히게 줄임.
+ */
+
+/* 소개 사이트가 떠 있는 동안 문서(html)에: 섹션 머리에 가까우면 붙음 */
+.docRoot {
+  scroll-snap-type: y proximity;
+}
+
+.page {
+  --brand-head: 72px;
+  --brand-pad: 64px;
+  --brand-max: 1312px;
+  --brand-section-y: 112px;
+  min-height: 100vh;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  overflow-x: clip;
+}
+.page a {
+  color: var(--color-link);
+}
+.page a:hover {
+  color: var(--color-link);
+  text-decoration-thickness: 2px;
+}
+
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 20;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-on-primary) !important;
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip:focus {
+  top: 12px;
+}
+
+/* ---------- 머리말: 탭 4개 + [웹으로 시작하기] ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-canvas);
+  border-bottom: 1px solid var(--color-hairline);
+}
+.headerRow {
+  max-width: var(--brand-max);
+  margin: 0 auto;
+  padding: 0 var(--brand-pad);
+  box-sizing: border-box;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  color: var(--color-ink) !important;
+  text-decoration: none;
+}
+.logo img {
+  display: block;
+  width: 33px;
+  height: auto;
+}
+.logoText {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.tabs {
+  flex: 1;
+  display: flex;
+  gap: 32px;
+  font-size: 16px;
+  min-width: 0;
+}
+.tab {
+  height: 72px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  color: var(--color-body) !important;
+  text-decoration: none;
+}
+.tab:hover {
+  color: var(--color-ink) !important;
+}
+.tab[aria-current='page'] {
+  color: var(--color-ink) !important;
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--color-ink);
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-signal);
+}
+.headerCta {
+  height: 38px;
+  padding: 0 16px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-strong);
+  color: var(--color-ink) !important;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* ---------- 섹션 틀 ---------- */
+.stop {
+  scroll-margin-top: calc(var(--brand-head) + var(--toc-h, 0px));
+  scroll-snap-align: start;
+}
+.main:focus {
+  outline: none;
+}
+.inner {
+  max-width: var(--brand-max);
+  margin: 0 auto;
+  padding: var(--inner-top, var(--brand-section-y)) var(--brand-pad) var(--brand-section-y);
+  box-sizing: border-box;
+  display: flex;
+  /* 다른 모듈의 꾸밈 클래스는 변수만 바꿈(CSS 순서와 상관없게) */
+  flex-direction: var(--inner-dir, column);
+  gap: var(--inner-gap, 48px);
+}
+.soft {
+  background: var(--color-canvas-soft);
+}
+.white {
+  background: var(--color-canvas);
+}
+.headBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 960px;
+}
+.headTight {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- 글자 ---------- */
+.kicker {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.88px;
+  color: var(--color-body);
+}
+.kickerSignal {
+  color: var(--color-signal-text);
+}
+.h1 {
+  margin: 0;
+  font-size: 64px;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -1.9px;
+}
+.h2 {
+  margin: 0;
+  font-size: 60px;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -1.8px;
+}
+.h2sm {
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -1.3px;
+}
+.lead {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--color-body);
+}
+.leadSm {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--color-body);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.stat {
+  font-size: 48px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -1.4px;
+  font-variant-numeric: tabular-nums;
+}
+.source {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+.note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+/* 카운트업 숫자: 최종 값 폭을 미리 잡아 둠 */
+.count {
+  display: inline-grid;
+}
+.countGhost,
+.countLive {
+  grid-area: 1 / 1;
+}
+.countGhost {
+  visibility: hidden;
+}
+
+/* ---------- 버튼 ---------- */
+.btnRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.btn {
+  height: 54px;
+  padding: 0 28px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.12s ease-out;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btnPrimary {
+  background: var(--color-primary);
+  color: var(--color-on-primary) !important;
+}
+.btnSurface {
+  padding: 0 24px;
+  background: var(--color-surface-strong);
+  color: var(--color-ink) !important;
+}
+.btnOnDark {
+  background: var(--color-canvas);
+  color: var(--color-ink) !important;
+}
+.btnDarkSoft {
+  padding: 0 24px;
+  background: var(--color-gauge-off-dark);
+  color: var(--color-on-dark) !important;
+}
+.textLink {
+  align-self: flex-start;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink) !important;
+}
+
+/* ---------- 칩·꼬리표 ---------- */
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  height: 38px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-strong);
+  color: var(--color-ink) !important;
+  font-size: 15px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.chipWhite {
+  background: var(--color-canvas);
+}
+.tag {
+  height: 24px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-strong);
+  color: var(--color-body);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* ---------- 표 ---------- */
+.tableWrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.table thead tr {
+  border-bottom: 2px solid var(--color-ink);
+}
+.table tbody tr {
+  border-bottom: 1px solid var(--color-hairline);
+  vertical-align: top;
+}
+.table th[scope='col'] {
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.88px;
+  color: var(--color-body);
+}
+.table th[scope='col']:first-child {
+  padding-left: 0;
+}
+
+/* ---------- 마무리 띠(시안의 어두운 면) ---------- */
+.closing {
+  background: var(--color-surface-dark);
+  color: var(--color-on-dark);
+}
+.closing :focus-visible {
+  outline-color: var(--color-on-dark);
+}
+.closingInner {
+  --inner-gap: 32px;
+}
+.closingTitle {
+  margin: 0;
+  font-size: 60px;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -1.8px;
+}
+.closingLead {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--color-on-dark-soft);
+}
+.btnRowWide {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* ---------- 아래 끝 줄 ---------- */
+.footer {
+  background: var(--color-canvas-soft);
+  border-top: 1px solid var(--color-hairline);
+}
+.footerInner {
+  max-width: var(--brand-max);
+  margin: 0 auto;
+  padding: 48px var(--brand-pad);
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footerLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.footerLogo img {
+  display: block;
+  width: 33px;
+  height: auto;
+}
+.footerLogo span {
+  font-size: 17px;
+  font-weight: 600;
+}
+.footerTag {
+  font-size: 14px;
+  color: var(--color-body);
+}
+.footerNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  font-size: 14px;
+}
+.footerNav a {
+  color: var(--color-body) !important;
+  text-decoration: none;
+}
+.footerNav a:hover {
+  color: var(--color-ink) !important;
+}
+.footerSources {
+  font-size: 13px;
+  color: var(--color-muted) !important;
+}
+
+/* ---------- 폭이 좁을 때 ---------- */
+@media (max-width: 1100px) {
+  .page {
+    --brand-pad: 40px;
+  }
+  .h2,
+  .closingTitle {
+    font-size: 48px;
+    letter-spacing: -1.4px;
+  }
+  .h1 {
+    font-size: 52px;
+    letter-spacing: -1.5px;
+  }
+  .headerRow {
+    gap: 28px;
+  }
+  .tabs {
+    gap: 24px;
+  }
+}
+@media (max-width: 720px) {
+  .page {
+    --brand-head: 105px;
+    --brand-pad: 20px;
+    --brand-section-y: 72px;
+  }
+  .headerRow {
+    flex-wrap: wrap;
+    gap: 0 16px;
+    min-height: 56px;
+  }
+  .logo {
+    height: 56px;
+    flex: 1;
+  }
+  .tabs {
+    order: 3;
+    flex: 1 1 100%;
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab {
+    height: 48px;
+  }
+  .inner {
+    gap: min(var(--inner-gap, 48px), 40px);
+  }
+  .h1 {
+    font-size: 38px;
+    letter-spacing: -1px;
+  }
+  .h2,
+  .closingTitle {
+    font-size: 34px;
+    letter-spacing: -0.9px;
+  }
+  .h2sm {
+    font-size: 30px;
+    letter-spacing: -0.8px;
+  }
+  .lead {
+    font-size: 17px;
+  }
+  .leadSm {
+    font-size: 16px;
+  }
+  .stat {
+    font-size: 38px;
+  }
+  .btn {
+    height: 50px;
+    padding: 0 20px;
+    font-size: 15px;
+  }
+  .footerInner {
+    padding: 40px var(--brand-pad);
+  }
+}
+
+.bare {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

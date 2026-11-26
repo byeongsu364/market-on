@@ -6,6 +6,8 @@ vi.stubEnv('VITE_API_MODE', 'mock');
 beforeEach(() => {
   resetMock();
   localStorage.clear();
+  // 처음 온 손님 안내(언어·튜토리얼)는 welcome.test.tsx에서만 확인
+  localStorage.setItem('welcomed', '1');
   localStorage.setItem(
     'market-day',
     JSON.stringify(

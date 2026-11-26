@@ -2,18 +2,13 @@ import type { Price, PriceBand } from '../types/contract';
 
 // 가격 구간(지시서 030 6장, 기획서 "살까 말까"). 문구는 AI가 아니라 이 코드가 고름.
 // 구간은 화면에 보이는 diff_pct(반올림한 정수, utils/diffPct.ts)로 정함.
-export const BAND_LABELS = [
-  '기준보다 많이 낮음',
-  '기준과 비슷',
-  '기준보다 조금 높음',
-  '기준보다 높음',
-] as const;
-export const BAND_MESSAGES: Record<PriceBand, string> = {
-  1: '기준시세보다 많이 낮아요 · 상태를 함께 확인해 보세요',
-  2: '기준시세와 비슷해요',
-  3: '기준시세보다 조금 높아요',
-  4: '기준시세보다 높아요',
-};
+// 2026-11-27 요청: 판정처럼 읽히는 문구("살 만한 가격이에요", "높은 편이에요") 대신 비교 수치만.
+export const BAND_LABELS = ['많이 낮음', '낮음', '조금 높음', '높음'] as const;
+/** 기준시세와의 차이(%)만 말하는 문장 */
+export const diffMessage = (diff: number) =>
+  diff === 0
+    ? '기준시세와 같아요'
+    : `기준시세보다 ${Math.abs(diff)}% ${diff < 0 ? '낮아요' : '높아요'}`;
 export const NO_BAND_MESSAGE = '비교는 참고만 하세요';
 export const FALLBACK_LABELS: Record<NonNullable<Price['fallback']>, string> = {
   region_avg: '같은 지역 평균',
@@ -66,7 +61,7 @@ export function priceBand(
   const band = price.band ?? bandOf(diff);
   return {
     band,
-    message: band ? BAND_MESSAGES[band] : NO_BAND_MESSAGE,
+    message: band && diff != null ? diffMessage(diff) : NO_BAND_MESSAGE,
     fallbackNote,
     diff: diff ?? null,
     reference,

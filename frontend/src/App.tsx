@@ -30,6 +30,11 @@ import Poster from './pages/merchant/Poster';
 import AdminHome from './pages/admin/AdminHome';
 import MarketAdmin from './pages/MarketAdmin';
 import Store from './pages/map/Store';
+import Landing from './pages/landing/Landing';
+import FeaturesPage from './pages/landing/FeaturesPage';
+import DownloadPage from './pages/landing/DownloadPage';
+import TeamPage from './pages/landing/TeamPage';
+import IntroRedirect from './pages/landing/IntroRedirect';
 function MerchantGuard() {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -62,6 +67,13 @@ function AppRoutes() {
   const t = useT();
   return (
     <Routes>
+      {/* 소개 사이트(앱 틀 밖, 어느 폭에서나). PC의 / 는 PageLayout이 같은 홈을 보임(desktopGate) */}
+      <Route path="intro" element={<Landing />} />
+      <Route path="intro/features" element={<FeaturesPage />} />
+      <Route path="intro/download" element={<DownloadPage />} />
+      <Route path="intro/team" element={<TeamPage />} />
+      {/* 예전 기능별 소개 주소(/intro/map 등)는 기능 페이지의 섹션으로 */}
+      <Route path="intro/:slug" element={<IntroRedirect />} />
       <Route element={<PageLayout />}>
         {/* 지도 홈: 시장 밖 / ?market= 시장 안 / ?market=&item= 검색 결과 */}
         <Route index element={<MapHome />} />

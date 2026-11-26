@@ -28,7 +28,7 @@ it('결과·Shop 공통 카드가 시장과 품목으로 목록을 요청한다'
     limit: 3,
   });
   expect(screen.getByRole('heading', { name: '이 재료로 만드는 요리' })).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: fixture.name })).toHaveAttribute(
+  expect(screen.getByRole('link', { name: new RegExp(fixture.name) })).toHaveAttribute(
     'href',
     `/recipes/${encodeURIComponent(fixture.recipe_id)}?market=m`,
   );
@@ -74,7 +74,15 @@ it('상세는 원문 조리법과 시장·카테고리·시장 밖 재료를 표
     </SessionProvider>,
   );
   await screen.findByRole('heading', { name: fixture.name });
-  expect(screen.getByText((_, e) => e?.textContent === fixture.steps)).toBeInTheDocument();
+  // 조리법은 원문을 줄마다 한 단계로(번호는 화면이 붙임)
+  const steps = document.querySelectorAll('ol li');
+  expect([...steps].map((li) => li.textContent).join('\n')).toBe(
+    fixture.steps
+      .split(/\n+/)
+      .map((l) => l.trim().replace(/^\d+\.\s*/, ''))
+      .filter(Boolean)
+      .join('\n'),
+  );
   expect(screen.getByRole('link', { name: '이 시장 2곳' })).toHaveAttribute(
     'href',
     '/?market=m&item=item%3Agreen_onion',

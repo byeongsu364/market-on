@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Button from '../../components/common/Button';
 import Icon from '../../components/common/Icon';
 import { ItemTile, List } from '../../components/common/parts';
 import Resource from '../../components/common/Resource';
@@ -12,7 +13,7 @@ import { useT } from '../../i18n';
 import { fill } from '../../utils/josa';
 import { formatPrice } from '../../utils/formatPrice';
 import { unitLabel } from '../../utils/convertUnit';
-import type { ActiveSale, Item, Market, MarketItem } from '../../types/contract';
+import type { ActiveSale, Item, Market, MarketItem, Price } from '../../types/contract';
 import { SaleRow } from './parts';
 import s from './map.module.css';
 
@@ -109,6 +110,7 @@ export function InfoTab({ market }: { market: Market }) {
             {t('prices')}
           </h2>
         </div>
+        <p className="caption">{t('mapPriceMartNote')}</p>
         <Resource state={items}>
           <List>
             {(morePrices ? priced : priced.slice(0, 12)).map(({ item }) => (
@@ -116,9 +118,9 @@ export function InfoTab({ market }: { market: Market }) {
             ))}
           </List>
           {!morePrices && priced.length > 12 && (
-            <button type="button" onClick={() => setMorePrices(true)}>
+            <Button variant="surface" size="md" wide onClick={() => setMorePrices(true)}>
               품목 더 보기 ({priced.length})
-            </button>
+            </Button>
           )}
         </Resource>
       </section>
@@ -126,7 +128,7 @@ export function InfoTab({ market }: { market: Market }) {
   );
 }
 
-/** 품목의 오늘 기준시세 한 줄(품종별 기준시세가 있으면 품종마다 한 줄). 숫자 아래 출처와 조사일 */
+/** 품목의 오늘 기준시세(품종별 기준시세가 있으면 품종마다 한 줄). 숫자 아래 출처와 조사일 */
 function PriceRows({ item, market }: { item: Item; market: Market }) {
   const t = useT();
   const price = usePrice({
@@ -139,36 +141,25 @@ function PriceRows({ item, market }: { item: Item; market: Market }) {
   const rows = p.varieties.length
     ? p.varieties
         .filter((v) => v.reference_price != null)
+        // 품종 이름이 품목 이름과 같으면(대파·양파처럼 품종 구분이 없는 품목) 한 번만
         .map((v) => ({
           key: v.variety_id,
-          name: `${item.name} ${v.name}`,
-          value: v.reference_price!,
+          name: v.name === item.name ? item.name : `${item.name} ${v.name}`,
           variety: v.variety_id,
         }))
-    : [{ key: item.item_id, name: item.name, value: p.reference_price, variety: undefined }];
-  const source = p.source.includes(p.observed_on)
-    ? p.source
-    : fill(t('mapPriceSource'), { source: p.source, date: p.observed_on });
+    : [{ key: item.item_id, name: item.name, variety: undefined }];
   return (
     <>
       {rows.map((r) => (
-        <li key={r.key}>
-          <Link
-            to={`/items/${encodeURIComponent(item.item_id)}?${new URLSearchParams({
-              market: market.market_id,
-              ...(r.variety ? { variety: r.variety } : {}),
-            }).toString()}`}
-            className={s.row}
-          >
-            <ItemTile itemId={item.item_id} varietyId={r.variety} size={44} />
-            <span className={s.rowBody}>
-              <span className={s.rowTitle}>{r.name}</span>
-              <span className={s.rowSub}>{unitLabel(p.unit)}</span>
-              <span className={s.caption12}>{source}</span>
-            </span>
-            <span className={s.price17}>{formatPrice(r.value)}</span>
-          </Link>
-        </li>
+        <PriceRow
+          key={r.key}
+          item={item}
+          market={market}
+          name={r.name}
+          variety={r.variety}
+          base={p}
+          t={t}
+        />
       ))}
       {rows.length > 1 && (
         <li>
@@ -182,5 +173,69 @@ function PriceRows({ item, market }: { item: Item; market: Market }) {
         </li>
       )}
     </>
+  );
+}
+
+/**
+ * 한 줄: 전통시장 기준시세(크게)와 대형마트 평균(aT 대형유통, 업체명 비공개)을 나란히(2026-11-27 요청).
+ * 품종이 있으면 그 품종으로 다시 받아 품종별 대형마트 값을 씀. 백화점은 aT 조사에 따로 없어 넣지 않음.
+ */
+function PriceRow({
+  item,
+  market,
+  name,
+  variety,
+  base,
+  t,
+}: {
+  item: Item;
+  market: Market;
+  name: string;
+  variety?: string;
+  base: Price;
+  t: ReturnType<typeof useT>;
+}) {
+  // 품종이 없으면 item_id를 비워 다시 받지 않음(usePrice는 빈 값이면 null)
+  const own = usePrice({
+    item_id: variety ? item.item_id : '',
+    market_id: market.market_id,
+    unit: item.default_unit,
+    variety_id: variety,
+  });
+  const p = (variety ? own.data : base) ?? base;
+  const traditional = p.by_market_type?.traditional?.price ?? p.reference_price;
+  const mart = p.by_market_type?.large_retail;
+  const source = p.source.includes(p.observed_on)
+    ? p.source
+    : fill(t('mapPriceSource'), { source: p.source, date: p.observed_on });
+  return (
+    <li>
+      <Link
+        to={`/items/${encodeURIComponent(item.item_id)}?${new URLSearchParams({
+          market: market.market_id,
+          ...(variety ? { variety } : {}),
+        }).toString()}`}
+        className={s.row}
+      >
+        <ItemTile itemId={item.item_id} varietyId={variety} size={44} />
+        <span className={s.rowBody}>
+          <span className={s.rowTitle}>{name}</span>
+          <span className={s.rowSub}>{unitLabel(p.unit)}</span>
+          <span className={s.caption12}>{source}</span>
+        </span>
+        <span className={s.marketPrices}>
+          <span className={s.marketPrice}>
+            <span className={s.marketLabel}>{t('mapPriceTraditional')}</span>
+            <span className={s.price17}>{formatPrice(traditional)}</span>
+          </span>
+          {mart && (
+            <span className={s.marketPrice}>
+              <span className={s.marketLabel}>{t('mapPriceMart')}</span>
+              <span className={s.priceMart}>{formatPrice(mart.price)}</span>
+            </span>
+          )}
+        </span>
+      </Link>
+    </li>
   );
 }

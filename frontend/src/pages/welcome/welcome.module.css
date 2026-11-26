@@ -1,0 +1,140 @@
+/* 처음 들어온 손님 화면: 언어 고르기 → 안내 3장. 흰 바탕·검은 글자, 켜진 것만 진하게 */
+.page {
+  min-height: 100dvh;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  padding: calc(var(--safe-top) + 24px) var(--space-5) calc(var(--safe-bottom) + 112px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--color-canvas);
+}
+.logo {
+  width: 150px;
+  height: auto;
+  margin: 24px 0 12px;
+}
+.pickTitle {
+  font-size: 28px;
+  line-height: 1.25;
+  letter-spacing: -0.8px;
+  font-weight: 700;
+}
+.pickOthers {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+.langs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.lang {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+  padding: 0 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-strong);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lang input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+.lang[data-checked='true'] {
+  background: var(--color-surface-card);
+  box-shadow: inset 0 0 0 2px var(--color-ink);
+}
+.lang[data-checked='true']::after {
+  content: '✓';
+  margin-left: auto;
+  font-size: 20px;
+}
+.lang:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.bottom {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--app-max);
+  display: flex;
+  gap: 8px;
+  padding: 16px var(--space-5) calc(var(--safe-bottom) + 20px);
+  background: var(--color-canvas);
+}
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+.counter {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+.skip {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.shot {
+  align-self: center;
+  width: min(68%, 260px);
+  aspect-ratio: 390 / 600;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 6px solid var(--color-surface-dark);
+  background: var(--color-surface-dark);
+}
+.shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.title {
+  margin-top: 8px;
+  font-size: 26px;
+  line-height: 1.3;
+  letter-spacing: -0.7px;
+  font-weight: 700;
+}
+.body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-body);
+}
+.dots {
+  display: flex;
+  gap: 6px;
+}
+.dots li {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-gauge-off);
+}
+.dots li[data-on='true'] {
+  width: 22px;
+  background: var(--color-ink);
+}

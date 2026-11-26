@@ -1161,7 +1161,8 @@ phrases:
     reviewed: false
 templates:
   season_featured:
-    text: Cục Phát triển Nông thôn Hàn Quốc (Thực phẩm của tháng) giới thiệu {name} cho các tháng {months}.
+    text: Cục Phát triển Nông thôn Hàn Quốc (Thực phẩm của tháng) giới thiệu {name}
+      cho các tháng {months}.
     reviewed: false
   season_harvest:
     text: '{name} được thu hoạch {period}{note}.'

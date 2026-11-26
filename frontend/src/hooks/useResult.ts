@@ -57,6 +57,14 @@ export function useResult() {
     unit,
     seen_price: seen,
   });
+  // 고른 품종에 기준시세가 없으면(예: 귤 시설은 aT 조사값이 없어 404) 응답이 비어 품종 칩까지 사라져
+  // 다른 품종으로 돌아갈 수 없었음(2026-11-27) → 그때만 기본 품종 시세를 한 번 더 받아 품종 목록을 유지
+  const base = usePrice({
+    item_id: itemId,
+    market_id: marketId,
+    unit: price.error && ctx.varietyId ? unit : '',
+  });
+  const varieties = price.data?.varieties ?? base.data?.varieties ?? [];
   const map = useMarketMap(marketId, itemId, unit);
   // 고른 품종의 응답이 왔을 때만 결론을 냄(품종을 바꾸는 동안 이전 품종 값이 섞이지 않게)
   const data = price.data;
@@ -109,6 +117,7 @@ export function useResult() {
     seen,
     price,
     current,
+    varieties,
     varietyId,
     varietyChosen: !!ctx.varietyId,
     varietyFrom: nav.varietyFrom,

@@ -1,9 +1,9 @@
 import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { PriceBand, StoreCategory } from '../../types/contract';
-import { BAND_LABELS } from '../../utils/priceBand';
+import { useT, type Key } from '../../i18n';
 import { categoryColor } from '../../utils/category';
-import { itemImage } from '../../utils/itemImage';
+import { itemImage, itemTint } from '../../utils/itemImage';
 import Icon, { CategoryGlyph } from './Icon';
 import s from './ui.module.css';
 
@@ -286,20 +286,20 @@ export function PriceGauge({
   dark?: boolean;
   label?: string;
 }) {
+  const t = useT();
+  // 가격 자리 이름(많이 낮음·낮음·조금 높음·높음)은 고른 언어로(045)
+  const names = [1, 2, 3, 4].map((i) => t(`cardBand${i}` as Key));
   return (
     <div
       className={[s.gauge, dark ? s.gaugeDark : ''].join(' ')}
       role="img"
       aria-label={
-        label ??
-        (band
-          ? `기준시세와 견준 가격 자리: ${BAND_LABELS[band - 1]}`
-          : '기준시세가 없어 비교하지 않아요')
+        label ?? (band ? t('scanGaugeAt').replace('{band}', names[band - 1]) : t('scanGaugeOff'))
       }
     >
       <span className={s.gaugeBar} />
       <span className={s.gaugeCells}>
-        {BAND_LABELS.map((name, i) => (
+        {names.map((name, i) => (
           <span key={name} className={s.gaugeCell} data-on={band === i + 1}>
             <span className={s.gaugeFill} />
             <span className={s.gaugeLabel}>{name}</span>
@@ -311,11 +311,16 @@ export function PriceGauge({
 }
 /** 목록용 작은 눈금(5×14px 네 칸) */
 export function MiniGauge({ band }: { band: PriceBand | null }) {
+  const t = useT();
   return (
     <span
       className={s.mini}
       role="img"
-      aria-label={band ? `가격 자리: ${BAND_LABELS[band - 1]}` : '비교 없음'}
+      aria-label={
+        band
+          ? t('mapMiniGauge').replace('{band}', t(`cardBand${band}` as Key))
+          : t('mapMiniGaugeOff')
+      }
     >
       {[1, 2, 3, 4].map((i) => (
         <span key={i} className={s.miniCell} data-on={band === i} />
@@ -336,7 +341,11 @@ export function ItemTile({
 }) {
   const src = itemImage(itemId, varietyId);
   return (
-    <span className={s.itemTile} style={{ width: size, height: size }} aria-hidden="true">
+    <span
+      className={s.itemTile}
+      style={{ width: size, height: size, background: itemTint(itemId, varietyId) }}
+      aria-hidden="true"
+    >
       {src && <img src={src} alt="" width={size / 1.5} height={size / 1.5} />}
     </span>
   );

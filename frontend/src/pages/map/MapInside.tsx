@@ -35,7 +35,7 @@ import {
   StoreLinkRow,
   StoreResultRow,
 } from './parts';
-import { priceWho, storeBand, type StoreView } from './helpers';
+import { examplePositions, priceWho, storeBand, type StoreView } from './helpers';
 import { InfoTab, SalesTab } from './MarketTabs';
 import s from './map.module.css';
 
@@ -192,7 +192,8 @@ function MarketView({ market }: { market: Market }) {
     near && listed.some((v) => v.distance !== null)
       ? [...listed].sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
       : listed;
-  const shown = more ? sorted : sorted.slice(0, LIST_LIMIT);
+  // 시트를 끝까지 펴면 목록도 끝까지("더 보기" 없이), 접혀 있을 때만 앞 10곳
+  const shown = more || expanded ? sorted : sorted.slice(0, LIST_LIMIT);
   const hasCoords = views.some((v) => v.store.lat != null && v.store.lng != null);
   const categories = (Object.keys(CATEGORY_LABELS) as StoreCategory[])
     .map((c) => ({ c, n: views.filter((v) => v.category === c).length }))
@@ -215,16 +216,31 @@ function MarketView({ market }: { market: Market }) {
     });
   const marketOnly = `/?market=${encodeURIComponent(market.market_id)}`;
 
-  const pins: MapPin[] = hasCoords
+  // 실제 위치(상인 확인·카카오맵)가 있는 점포만 핀. 한 곳도 없는 시장만 업종별 예시 자리를 씀
+  // (2026-11-27: 위치 없는 56곳을 예시 자리에 섞어 찍으니 시장 가운데 덩어리가 생겨 이상했음)
+  const example = useMemo(
+    () =>
+      !hasCoords && market.lat != null && market.lng != null
+        ? examplePositions(views, { lat: market.lat, lng: market.lng })
+        : new Map<string, { lat: number; lng: number }>(),
+    [views, hasCoords, market.lat, market.lng],
+  );
+  const pinAt = (v: StoreView) =>
+    v.store.lat != null && v.store.lng != null
+      ? { lat: v.store.lat, lng: v.store.lng }
+      : example.get(v.store.store_id);
+  const onMap = hasCoords || example.size > 0;
+  const pinList: MapPin[] = onMap
     ? views
-        .filter((v) => v.store.lat != null && v.store.lng != null)
+        .filter((v) => pinAt(v))
         .map((v) => {
           const isSelected = v.store.store_id === ctx.storeId;
+          const at = pinAt(v)!;
           return {
             id: v.store.store_id,
             name: v.store.name,
-            lat: v.store.lat!,
-            lng: v.store.lng!,
+            lat: at.lat,
+            lng: at.lng,
             category: v.category,
             sale: !!v.store.active_sale,
             state: isSelected ? 'selected' : matches(v) ? 'default' : 'dim',
@@ -235,6 +251,22 @@ function MarketView({ market }: { market: Market }) {
           };
         })
     : [];
+  // 핀이 30개를 넘으면 한 단계 작은 물방울 핀(고른 점포는 큰 핀)
+  const crowded = pinList.filter((p) => p.state === 'default').length > 30;
+  const pins: MapPin[] = crowded
+    ? pinList.map((p) => (p.state === 'default' ? { ...p, state: 'small' } : p))
+    : pinList;
+  const count = (src: string) => views.filter((v) => v.store.location_source === src).length;
+  const unplaced = views.filter((v) => v.store.lat == null || v.store.lng == null).length;
+  const placeSources = [count('naver') && '네이버 지도', count('kakao') && '카카오맵']
+    .filter(Boolean)
+    .join('·');
+  const sampleNote =
+    example.size > 0
+      ? true
+      : placeSources
+        ? `${placeSources} 기준 위치${unplaced ? ` · ${unplaced}곳은 위치 확인 전이라 목록에만` : ''}`
+        : hasCoords && map.data?.layout === 'schematic';
 
   const top = (
     <>
@@ -333,7 +365,7 @@ function MarketView({ market }: { market: Market }) {
       onRoute={() => setRoute(selected)}
     />
   );
-  const moreButton = sorted.length > LIST_LIMIT && !more && (
+  const moreButton = sorted.length > LIST_LIMIT && !more && !expanded && (
     <Button variant="surface" size="md" wide onClick={() => setMore(true)}>
       {t('mapMore')}
     </Button>
@@ -502,7 +534,7 @@ function MarketView({ market }: { market: Market }) {
 
   const boundary = map.data?.boundary ?? market.boundary;
   const mapNode =
-    !map.data || hasCoords ? (
+    !map.data || onMap ? (
       <MapView
         key={attempt}
         label={fill(t('mapMarketLabel'), { name: market.name })}
@@ -512,7 +544,7 @@ function MarketView({ market }: { market: Market }) {
         pins={pins}
         me={position ?? null}
         center={market}
-        sample={hasCoords && map.data?.layout === 'schematic'}
+        sample={sampleNote}
         onSelect={(id, type) => type === 'pin' && select(id)}
         topInset={desktop ? 0 : 120}
         bottomInset={desktop ? 0 : 300}

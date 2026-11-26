@@ -122,6 +122,10 @@ it('`/?market=market:demo`는 약도에 경계·핀·편의시설과 점포 목�
   fireEvent.click(screen.getByRole('tab', { name: '제철과 시세' }));
   expect(here()).toHaveTextContent('tab=info');
   expect(await screen.findByRole('heading', { name: '오늘 기준시세' })).toBeInTheDocument();
+  // 전통시장 기준시세와 대형마트 평균을 같이 보여 줌
+  expect((await screen.findAllByText('대형마트')).length).toBeGreaterThan(0);
+  expect(screen.getAllByText('전통시장').length).toBeGreaterThan(0);
+  expect(screen.getByText(/백화점 시세는 aT 조사에 따로 없어요/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('tab', { name: '마감세일 1' }));
   expect(await screen.findByRole('heading', { name: '지금 마감세일' })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /점포 A-05/ })).toHaveAttribute(
@@ -271,7 +275,7 @@ it('준비 중 시장은 요청 화면과 지금 쓸 수 있는 시장을 보인
   );
 });
 
-it('점포에 좌표가 없으면(live) 지도 자리에 평면도와 안내 문구를 두고 시장 위치로 안내한다', async () => {
+it('점포에 좌표가 없으면(live) 실제 지도에 업종별 예시 핀을 찍고 길 안내는 시장 위치로 한다', async () => {
   vi.spyOn(storesApi, 'getMarketMap').mockImplementation(async (id, item, unit) => {
     const map = await mock.map(id, item, unit);
     return {
@@ -287,12 +291,19 @@ it('점포에 좌표가 없으면(live) 지도 자리에 평면도와 안내 문
     };
   });
   const { container } = show('/?market=market:demo&item=item:green_onion');
+  // 평면도 대신 지도(테스트는 약도)에 핀을 찍고 "핀 위치는 예시"를 표시
+  expect(await screen.findByText('핀 위치는 예시')).toBeInTheDocument();
+  expect(container.querySelector('[data-map]')).not.toBeNull();
   expect(
-    await screen.findByText('배치는 업종별 예시예요 · 실제 위치는 현장에서 확인해 주세요'),
-  ).toBeInTheDocument();
-  expect(container.querySelector('[data-map]')).toBeNull();
-  expect(container.querySelectorAll('[data-highlight="true"]')).toHaveLength(3);
-  fireEvent.click(screen.getByRole('button', { name: '점포 A-05 · 판매 점포' }));
+    screen.queryByText('배치는 업종별 예시예요 · 실제 위치는 현장에서 확인해 주세요'),
+  ).toBeNull();
+  const pinsOnMap = container.querySelectorAll('[data-map] button');
+  expect(pinsOnMap.length).toBeGreaterThanOrEqual(3);
+  fireEvent.click(
+    within(container.querySelector('[data-map]') as HTMLElement).getAllByRole('button', {
+      name: /점포 A-05/,
+    })[0],
+  );
   const card = await screen.findByRole('region', { name: '고른 점포 점포 A-05' });
   fireEvent.click(within(card).getByRole('button', { name: '길 안내' }));
   const dialog = screen.getByRole('dialog');
@@ -305,7 +316,7 @@ it('점포에 좌표가 없으면(live) 지도 자리에 평면도와 안내 문
   );
 });
 
-it('강조 점포가 가장 많은 구역으로 viewBox를 맞추고 구역별 개수를 표시한다', async () => {
+it('강조 점포가 가장 많은 구역의 줄부터 보여 주되 평면도 폭은 줄이지 않는다', async () => {
   const map = await mock.map('market:demo', 'item:green_onion');
   const target = map.zones[3];
   map.stores.slice(0, 5).forEach((s) => {
@@ -314,8 +325,15 @@ it('강조 점포가 가장 많은 구역으로 viewBox를 맞추고 구역별 �
   });
   const { container } = render(<MiniMap map={map} itemName="대파" />);
   expect(container.querySelector('svg')).toHaveAttribute('data-focused-zone', target.id);
-  expect(container.querySelector('svg')?.getAttribute('viewBox')).not.toMatch(/^0 0 376/);
+  const [x, y, w] = (container.querySelector('svg')?.getAttribute('viewBox') ?? '')
+    .split(' ')
+    .map(Number);
+  expect([x, w]).toEqual([0, 376]);
+  expect(y).toBe(Math.max(0, target.y - 8));
   expect(screen.getByText('대파 5곳')).toBeInTheDocument();
+  // 평면도 칸은 Tab 순서에서 빠짐(아래 목록이 같은 점포 버튼)
+  const clickable = render(<MiniMap map={map} onStore={() => {}} />);
+  expect(within(clickable.container).getAllByRole('button')[0]).toHaveAttribute('tabindex', '-1');
 });
 
 it('길 안내는 목적지 이름을 인코딩하고 출발 위치를 받지 않는다', () => {

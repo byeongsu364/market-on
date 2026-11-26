@@ -23,10 +23,12 @@ async function login(id = 'demo_a05') {
 it('로그인한 상인에게 조회 수와 대기 상인에게 승인 안내를 보여 준다', async () => {
   await login();
   await screen.findByRole('heading', { name: '점포 A-05' });
-  expect(await screen.findByText('오늘 조회 수')).toBeInTheDocument();
+  expect(await screen.findByText('오늘 조회')).toBeInTheDocument();
   expect(screen.getByText('오늘 길 안내')).toBeInTheDocument();
-  expect(screen.getByText('오늘 0번 조회')).toBeInTheDocument();
-  expect(screen.getByRole('img', { name: '날짜별 조회 수와 길 안내 횟수' })).toBeInTheDocument();
+  expect(screen.getAllByText('0회').length).toBeGreaterThanOrEqual(2);
+  expect(
+    screen.getByRole('table', { name: '최근 7일 조회 수와 길 안내 횟수' }),
+  ).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '로그아웃' }));
   await screen.findByRole('heading', { name: '로그인' });
   cleanup();

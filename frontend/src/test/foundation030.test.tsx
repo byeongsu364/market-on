@@ -6,6 +6,7 @@ import { categoryOfZone } from '../utils/category';
 import { itemImage } from '../utils/itemImage';
 import { shoppingHref } from '../hooks/useShoppingContext';
 import { PriceGauge, MiniGauge, Field, Toggle } from '../components/common/parts';
+import { SessionProvider } from '../store/SessionProvider';
 import Button, { ButtonLink } from '../components/common/Button';
 import { getPrice } from '../api/price';
 import SketchMap from '../components/map/SketchMap';
@@ -25,7 +26,7 @@ describe('가격 구간(지시서 030)', () => {
     const fuji = await getPrice({ ...q, variety_id: 'variety:apple-fuji' });
     expect(fuji.diff_pct).toBe(-28);
     expect(priceBand(fuji).band).toBe(2);
-    expect(priceBand(fuji).message).toBe('기준시세와 비슷해요');
+    expect(priceBand(fuji).message).toBe('기준시세보다 28% 낮아요');
     const hongro = await getPrice({ ...q, variety_id: 'variety:apple-hongro' });
     expect(hongro.diff_pct).toBe(-34);
     expect(priceBand(hongro).band).toBe(1);
@@ -62,15 +63,17 @@ it('장보기 맥락은 주소 쿼리로 넘기고 null은 지운다', () => {
 });
 
 it('가격 눈금은 한 칸만 켜고 기준시세가 없으면 모두 끈다', () => {
-  const { container, rerender } = render(<PriceGauge band={2} />);
+  // 눈금 칸 이름은 고른 언어로 나오므로 언어(세션)가 필요함(045)
+  const wrap = (node: React.ReactNode) => <SessionProvider>{node}</SessionProvider>;
+  const { container, rerender } = render(wrap(<PriceGauge band={2} />));
   expect(
-    screen.getByRole('img', { name: '기준시세와 견준 가격 자리: 기준과 비슷' }),
+    screen.getByRole('img', { name: '기준시세와 비교한 가격 자리: 낮음' }),
   ).toBeInTheDocument();
   expect(container.querySelectorAll('[data-on="true"]')).toHaveLength(1);
-  rerender(<PriceGauge band={null} />);
+  rerender(wrap(<PriceGauge band={null} />));
   expect(container.querySelectorAll('[data-on="true"]')).toHaveLength(0);
-  rerender(<MiniGauge band={4} />);
-  expect(screen.getByRole('img', { name: '가격 자리: 기준보다 높음' })).toBeInTheDocument();
+  rerender(wrap(<MiniGauge band={4} />));
+  expect(screen.getByRole('img', { name: '가격 자리: 높음' })).toBeInTheDocument();
 });
 
 it('공용 부품은 실제 button·a·input+label을 쓴다', () => {

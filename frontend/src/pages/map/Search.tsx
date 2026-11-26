@@ -71,7 +71,8 @@ export default function Search() {
   );
   const recent = readRecent();
   const { name, price } = parseSearch(q);
-  const all = catalog.data ?? [];
+  // 가나다순. 서버 DB 정렬(en_US)을 그대로 쓰면 "배, 단감, 대파, 사과"처럼 섞여 나왔음(2026-11-27)
+  const all = [...(catalog.data ?? [])].sort((a, b) => a.name.localeCompare(b.name, 'ko'));
   const sold = marketItems.data
     ? all.filter((i) => marketItems.data!.some((m) => m.item_id === i.item_id))
     : all;

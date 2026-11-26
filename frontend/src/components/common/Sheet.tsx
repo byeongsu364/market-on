@@ -7,11 +7,17 @@ export default function Sheet({
   onClose,
   children,
   hideTitle = false,
+  heading,
+  actions,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   hideTitle?: boolean;
+  /** 보이는 제목을 글자 대신 꾸민 요소로(화면 읽기 이름은 title) */
+  heading?: ReactNode;
+  /** 제목 줄 오른쪽, 닫기 앞에 둘 버튼들 */
+  actions?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -53,8 +59,14 @@ export default function Sheet({
       <div className={s.modal} ref={ref} role="dialog" aria-modal="true" aria-label={title}>
         <span className={s.grabber} aria-hidden="true" />
         <div className={s.modalHead}>
-          <h2 className={hideTitle ? 'sr-only' : s.modalTitle}>{title}</h2>
+          <h2
+            className={hideTitle ? 'sr-only' : s.modalTitle}
+            aria-label={heading ? title : undefined}
+          >
+            {heading ?? title}
+          </h2>
           {hideTitle && <span style={{ flex: 1 }} />}
+          {actions}
           <button className={s.iconButton} onClick={onClose} aria-label="닫기">
             <Icon name="close" />
           </button>

@@ -1,0 +1,209 @@
+/*
+ * 소개 사이트에서만 쓰는 움직임(개발 전달 메모 "모션" ①~⑥). 앱 화면은 가이드대로 240ms · 0.97만.
+ * prefers-reduced-motion이면 모두 끄고, 끝난 모습(켜진 칸·밑줄)만 보여 줌.
+ */
+
+/* ① 히어로 차양 4칸이 위에서 내려오고 3번째 칸이 주황으로 켜짐 */
+@keyframes drop {
+  from {
+    transform: translateY(-105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes on {
+  0%,
+  55% {
+    background: var(--color-ink);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  70% {
+    background: var(--color-signal);
+    box-shadow: 0 0 64px 12px color-mix(in srgb, var(--color-signal) 45%, transparent);
+  }
+  100% {
+    background: var(--color-signal);
+    box-shadow: 0 0 32px 4px color-mix(in srgb, var(--color-signal) 25%, transparent);
+  }
+}
+.drop {
+  animation: drop 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.drop:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.drop:nth-child(3) {
+  animation:
+    drop 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.24s both,
+    on 2.4s ease-out 0.6s both;
+}
+.drop:nth-child(4) {
+  animation-delay: 0.36s;
+}
+
+/* ② "내가 판단해요" 밑줄 번짐 */
+@keyframes mark {
+  to {
+    background-size: 100% 38%;
+  }
+}
+.mark {
+  background-image: linear-gradient(var(--color-signal-soft), var(--color-signal-soft));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 0% 38%;
+  animation: mark 0.8s ease-out 1.4s forwards;
+}
+
+/* ③ 폰 화면 천천히 떠오름 */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+.floatLate {
+  animation: float 6s ease-in-out 1.5s infinite;
+}
+
+/* ④ 가격 눈금이 "낮음" 칸에 켜지는 반복 */
+@keyframes cell1 {
+  0%,
+  8% {
+    background: var(--color-gauge-off);
+  }
+  12%,
+  22% {
+    background: var(--color-signal);
+  }
+  28%,
+  100% {
+    background: var(--color-gauge-off);
+  }
+}
+@keyframes cell2 {
+  0%,
+  24% {
+    background: var(--color-gauge-off);
+  }
+  30%,
+  92% {
+    background: var(--color-signal);
+  }
+  100% {
+    background: var(--color-gauge-off);
+  }
+}
+@keyframes cellLabel {
+  0%,
+  26% {
+    color: var(--color-muted);
+    font-weight: 400;
+  }
+  30%,
+  92% {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  100% {
+    color: var(--color-muted);
+  }
+}
+.cell1 {
+  animation: cell1 4s ease-in-out infinite;
+}
+.cell2 {
+  animation: cell2 4s ease-in-out infinite;
+}
+.cellLabel {
+  animation: cellLabel 4s ease-in-out infinite;
+}
+
+/* ⑤ 기술 6단계 · 상인 고리 4단계를 차례로 비추는 주황 하이라이트 */
+@keyframes scan {
+  0%,
+  22%,
+  100% {
+    background: var(--color-canvas);
+    border-color: var(--color-hairline-strong);
+  }
+  6%,
+  16% {
+    background: var(--color-signal-soft);
+    border-color: var(--color-signal);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-signal) 35%, transparent);
+  }
+}
+.scan {
+  animation: scan 6s ease-in-out infinite;
+}
+.scanSlow {
+  animation: scan 7.2s ease-in-out infinite;
+}
+.pulse {
+  animation: pulse 7.2s ease-in-out 6s infinite;
+}
+
+/* ⑥ 스크롤하면 제목·카드가 아래에서 올라옴(지원하는 브라우저만) */
+@keyframes up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop,
+  .drop:nth-child(3),
+  .mark,
+  .float,
+  .floatLate,
+  .cell1,
+  .cell2,
+  .cellLabel,
+  .scan,
+  .scanSlow,
+  .pulse,
+  .reveal {
+    animation: none !important;
+  }
+  .drop:nth-child(3) {
+    background: var(--color-signal);
+  }
+  .mark {
+    background-size: 100% 38%;
+  }
+  .cell2 {
+    background: var(--color-signal) !important;
+  }
+  .cellLabel {
+    color: var(--color-ink) !important;
+    font-weight: 600 !important;
+  }
+}

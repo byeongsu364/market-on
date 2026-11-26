@@ -1,24 +1,59 @@
 /* 찍기, 확인, 직접 입력(시안 Scan, ScanConfirm, ScanManual, WebScan) */
 
-/* 모바일 카메라 화면: 어두운 바탕에 사진 자리, 아래 촬영 막대 */
+/* 모바일 카메라 화면: 카메라 영상이 화면 전체를 채우고, 닫기·안내·촬영 막대는 영상 위에 겹침(2026-11-27 요청) */
 .camera {
-  position: relative;
-  min-height: 100dvh;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  height: 100dvh;
   overflow: hidden;
-  background: var(--color-photo-placeholder);
+  background: var(--color-surface-dark);
   color: var(--color-on-dark);
 }
 .photo {
   position: absolute;
-  inset: 52px 0 184px;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.photo img {
+.photo img,
+.video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+/* 화면 안 카메라: 켜지기 전에는 영상 자리를 비워 둠(검은 바탕) */
+.video:not([data-live='true']) {
+  visibility: hidden;
+}
+.webPhoto .video {
+  visibility: visible;
+}
+.shutter {
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.webShutter {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 85%);
+  border-radius: var(--radius-pill);
+}
+.webCameraNote {
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgb(0 0 0 / 55%);
+  color: var(--color-on-dark);
+  font-size: 14px;
 }
 .shade {
   position: absolute;
@@ -32,7 +67,7 @@
 .round {
   position: absolute;
   left: 16px;
-  top: calc(var(--safe-top) + 48px);
+  top: calc(var(--safe-top) + 20px);
   z-index: 2;
   display: flex;
   align-items: center;
@@ -91,8 +126,9 @@
   right: 0;
   bottom: 0;
   min-height: 184px;
-  padding: 18px 20px calc(var(--safe-bottom) + 18px);
-  background: var(--color-surface-dark);
+  padding: 40px 20px calc(var(--safe-bottom) + 18px);
+  /* 영상 위에 겹치므로 아래로 갈수록 어둡게(버튼·글자가 보이게) */
+  background: linear-gradient(rgb(0 0 0 / 0%), rgb(0 0 0 / 62%) 45%);
   display: flex;
   flex-direction: column;
   gap: 14px;

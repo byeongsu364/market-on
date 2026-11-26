@@ -1,5 +1,6 @@
 """Ordered model routing with bounded attempts and metadata-only auditing."""
 
+import logging
 from collections.abc import Callable
 from concurrent.futures import Future
 from dataclasses import dataclass
@@ -17,6 +18,7 @@ from .factory import _provider
 from .limits import EXTERNAL_PROVIDERS, PROVIDER_TIMEOUTS
 
 T = TypeVar('T')
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -110,6 +112,10 @@ def run(
         except Exception as exc:  # noqa: BLE001 - model failures advance the configured route
             last_error = exc
             reason = 'error'
+            # 질문·답 내용은 남기지 않고 오류 종류만 (예: GEMINI_UNAVAILABLE, ReadTimeout)
+            logger.warning(
+                '%s 역할 %s 실패: %s', role, name, getattr(exc, 'code', None) or type(exc).__name__
+            )
         finally:
             record(
                 task=task,

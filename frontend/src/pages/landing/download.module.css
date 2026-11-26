@@ -1,0 +1,261 @@
+/* 다운로드(/intro/download) — 시안 download.html(스토어 배지 대신 홈 화면에 추가) */
+
+.hero {
+  background: linear-gradient(
+    160deg,
+    var(--color-canvas) 0%,
+    var(--color-wash-light) 60%,
+    var(--color-wash-mid) 100%
+  );
+}
+.heroInner {
+  max-width: var(--brand-max);
+  margin: 0 auto;
+  padding: 96px var(--brand-pad);
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 64px;
+  align-items: center;
+}
+.heroText {
+  flex: 1 1 560px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.qrCard {
+  flex: 0 1 380px;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+  border-radius: var(--radius-xxl);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-hairline-strong);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+.qr {
+  width: 240px;
+  height: 240px;
+  max-width: 100%;
+}
+.qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  shape-rendering: crispEdges;
+}
+.qrTitle {
+  font-size: 18px;
+  font-weight: 600;
+}
+.qrText {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-body);
+}
+.qrHost {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--color-body);
+}
+.copy {
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-strong);
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease-out;
+}
+.copy:active {
+  transform: scale(0.97);
+}
+
+/* 홈 화면에 추가하는 법 */
+.installGrid,
+.roleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+.installCard,
+.roleCard {
+  min-width: 0;
+  padding: 32px;
+  box-sizing: border-box;
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.installCard {
+  background: var(--color-surface-strong);
+}
+.roleCard {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-hairline-strong);
+}
+.cardLabel {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.88px;
+  color: var(--color-muted);
+}
+.cardTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+}
+.installSteps {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.installSteps li {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--color-body);
+}
+.stepNo {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  align-self: flex-start;
+  margin-top: 1px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-dark);
+  color: var(--color-on-dark);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 홈 화면 설치와 웹 */
+.split {
+  --inner-dir: row;
+  --inner-gap: 64px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.splitHead {
+  flex: 1 1 400px;
+  min-width: 0;
+}
+.splitTable {
+  flex: 1 1 520px;
+  min-width: 0;
+}
+.compare {
+  min-width: 520px;
+}
+.compare thead th[scope='col'] {
+  padding: 14px 16px;
+  font-size: 16px;
+  letter-spacing: 0;
+  color: var(--color-ink);
+}
+.compare th[scope='row'] {
+  padding: 18px 16px 18px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.compare td {
+  padding: 18px 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-body);
+}
+
+/* 상인과 시장 관리자 */
+.innerMid {
+  --inner-gap: 40px;
+}
+.roleText {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-body);
+}
+.roleLink {
+  margin-top: 8px;
+  align-self: flex-start;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink) !important;
+}
+
+/* 자주 묻는 질문 */
+.faqSplit {
+  align-items: flex-start;
+}
+.faqHead {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+.faq {
+  flex: 2 1 560px;
+  min-width: 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+.faq details {
+  padding: 20px 0;
+  border-top: 1px solid var(--color-hairline);
+}
+.faq summary {
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.faq p {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-body);
+}
+
+@media (max-width: 720px) {
+  .heroInner {
+    padding-top: 56px;
+    padding-bottom: 56px;
+    gap: 40px;
+  }
+  .qrCard {
+    padding: 24px;
+  }
+  .installCard,
+  .roleCard {
+    padding: 24px;
+  }
+  .installGrid,
+  .roleGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .split {
+    --inner-gap: 32px;
+  }
+  .faq summary {
+    font-size: 17px;
+  }
+}

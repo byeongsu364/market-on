@@ -70,7 +70,13 @@ def env(monkeypatch):
     monkeypatch.setattr(svc.store_repo, 'market_items', lambda *a: [{'item_id': 'item:apple'}])
     monkeypatch.setattr(svc.ask_repo, 'document_version', lambda *a: version)
     monkeypatch.setattr(svc.ask_repo, 'get_cache', lambda c, k: cache.get(k))
-    monkeypatch.setattr(svc.ask_repo, 'put_cache', lambda c, k, v, m: cache.update({k: v}))
+
+    def put_cache(c, k, v, m):
+        # 실제 DB처럼 model 칸이 비면 거부 (11/27 노트북에서 500 났던 버그)
+        assert m is not None, 'response_cache.model은 비울 수 없어요'
+        cache.update({k: v})
+
+    monkeypatch.setattr(svc.ask_repo, 'put_cache', put_cache)
     monkeypatch.setattr(svc.sale_repo, 'latest_active_by_store', lambda *a: [{'store_id': 'z'}])
     monkeypatch.setattr(
         svc.market_service,
@@ -196,6 +202,8 @@ def test_no_candidates_or_evidence(env, monkeypatch):
     result = request(env)
     assert result.items == [] and result.total == 0 and result.left == 10000
     assert result.note == '이 시장에서 파는 품목의 시세가 아직 없어요'
+    # AI 이유 없이 끝난 결과는 저장하지 않음 (시세·모델이 돌아오면 다시 만들어요)
+    assert env.cache == {}
 
 
 def test_http(env, monkeypatch):

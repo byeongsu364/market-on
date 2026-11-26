@@ -70,6 +70,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-strong);
 }
 .statNum {
   font-size: 26px;
@@ -751,7 +754,9 @@
   border-top: 1px solid var(--color-hairline);
   font-size: 15px;
   vertical-align: middle;
-  white-space: nowrap;
+  /* 긴 내용은 줄바꿈(잘리지 않게) */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .table td.num {
   font-variant-numeric: tabular-nums;
@@ -765,6 +770,8 @@
 @media (min-width: 1024px) {
   .main {
     padding: 8px 0 0;
+    /* PC에서 입력칸이 화면 폭(1140px)을 꽉 채우지 않게(2026-11-27 다듬기) */
+    max-width: 640px;
   }
 }
 @media (max-width: 1023px) {
@@ -856,8 +863,9 @@
 
 .chart {
   display: flex;
-  gap: 8px;
-  padding: 16px 0;
+  gap: 6px;
+  padding: 8px 0 0;
+  border-bottom: 1px solid var(--color-hairline-strong);
 }
 .chartDay {
   flex: 1;
@@ -865,23 +873,67 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 8px;
 }
 .chartBars {
-  height: 100px;
+  height: 120px;
   display: flex;
   align-items: flex-end;
-  gap: 3px;
-  width: 100%;
   justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+.chartBar {
+  height: 100%;
+  width: 34%;
+  max-width: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+}
+.chartBar b {
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-body);
 }
 .chartViews,
 .chartDirections {
-  width: 30%;
-  background: var(--color-primary, #287a55);
-  border-radius: 3px 3px 0 0;
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--color-ink);
 }
 .chartDirections {
-  background: #d79742;
+  background: var(--color-control-border);
+}
+.chartDate {
+  font-size: 12px;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 8px;
+}
+.chartDay[data-today='true'] .chartDate {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+.chartLegend {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--color-body);
+}
+.chartLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chartLegend i {
+  width: 10px;
+  height: 10px;
+  min-height: 0;
+  border-radius: 3px;
 }

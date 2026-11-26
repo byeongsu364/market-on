@@ -86,7 +86,7 @@ export default function Result() {
   const price = f.current;
   const verdict = f.verdict;
   const band = verdict?.band ?? null;
-  const variety = price?.varieties.find((v) => v.variety_id === f.varietyId);
+  const variety = f.varieties.find((v) => v.variety_id === f.varietyId);
   const name = [...new Set([item?.name, variety?.name])].filter(Boolean).join(' ');
   const reference = variety ? variety.reference_price : (price?.reference_price ?? null);
   const cheaper =
@@ -140,11 +140,8 @@ export default function Result() {
         ? verdict.fallbackNote
         : verdict?.diff == null || reference == null
           ? t('scanNoReferenceSub').replace('{name}', josa(varietyLabel, '은', '는'))
-          : verdict.diff === 0
-            ? t('scanSameAsReference').replace('{name}', varietyLabel)
-            : t(verdict.diff < 0 ? 'scanLowerThan' : 'scanHigherThan')
-                .replace('{name}', varietyLabel)
-                .replace('{pct}', String(Math.abs(verdict.diff)));
+          : // 제목이 이미 "기준시세보다 N% 낮아요"라서, 아래 줄은 무엇과 비교했는지만
+            `${varietyLabel} 기준시세 ${reference.toLocaleString('ko-KR')}원과 비교했어요`;
 
   const toggle = (key: string) =>
     setChecks({
@@ -288,7 +285,7 @@ export default function Result() {
                 )}
               </div>
 
-              {!!price && price.varieties.length >= 2 && (
+              {f.varieties.length >= 2 && (
                 <div className={s.group}>
                   <div className={s.groupHead}>
                     <span className={s.groupLabel} id="variety-label">
@@ -300,7 +297,7 @@ export default function Result() {
                     </Link>
                   </div>
                   <ChipRow wrap label={t('scanVariety')}>
-                    {price.varieties.map((v) => (
+                    {f.varieties.map((v) => (
                       <Chip
                         key={v.variety_id}
                         pressed={v.variety_id === f.varietyId}

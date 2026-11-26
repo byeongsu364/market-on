@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useSearchParams } from 'react-router-dom';
 import TabBar from './TabBar';
 import WebHeader from './WebHeader';
@@ -7,6 +7,10 @@ import { useSession } from '../../store/session';
 import { getMarkets } from '../../api/markets';
 import s from './layout.module.css';
 import { chromeFor } from './chrome';
+import { showLanding } from './desktopGate';
+import Landing from '../../pages/landing/Landing';
+import Welcome from '../../pages/welcome/Welcome';
+import { markWelcomed, needsWelcome, readWelcomed } from './firstRun';
 
 /** 주소의 market이 세션과 다르면 세션 시장을 주소에 맞춤(주소가 이김) */
 function useUrlMarket() {
@@ -40,6 +44,20 @@ export default function PageLayout() {
   useEffect(() => {
     window.scrollTo?.(0, 0);
   }, [pathname]);
+  const [welcomed, setWelcomed] = useState(readWelcomed);
+  if (showLanding(pathname, desktop)) return <Landing />;
+  // 처음 온 손님: 언어 고르기 → 단계별 안내(한 번만)
+  if (needsWelcome(pathname, welcomed))
+    return (
+      <main id="main" className="app-shell">
+        <Welcome
+          onDone={() => {
+            markWelcomed();
+            setWelcomed(true);
+          }}
+        />
+      </main>
+    );
   return (
     <div
       className="app-shell"

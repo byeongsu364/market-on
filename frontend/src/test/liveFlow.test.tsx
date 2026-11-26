@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import { getMarket, getMarkets } from '../api/markets';
@@ -55,10 +55,13 @@ function locate(denied = false) {
     },
   });
 }
-it('1km 이내 시장을 자동으로 선택해 지도 홈에서 그 시장 안을 보인다', async () => {
+it('1km 이내 시장을 자동으로 골라도 첫 화면은 지도 홈(시장 카드와 둘러보기)이다', async () => {
   locate();
   show();
-  expect(await screen.findByRole('heading', { name: '가까운 시장', level: 1 })).toBeInTheDocument();
+  expect(await screen.findByRole('link', { name: '둘러보기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
   expect(getMarkets).toHaveBeenCalledWith(37.57, 126.99);
 });
 it.each([false, true])(
@@ -121,7 +124,7 @@ it('직접 입력에서 가격을 비우면 제보하지 않고 확인 포인트
   fireEvent.click(await screen.findByRole('radio', { name: '대파' }));
   fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   expect(
-    await screen.findByRole('heading', { name: '가격을 넣으면 시세와 견줘 드려요' }),
+    await screen.findByRole('heading', { name: '가격을 넣으면 시세와 비교해 드려요' }),
   ).toBeInTheDocument();
   expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
   expect(postPriceReport).not.toHaveBeenCalled();
@@ -209,7 +212,11 @@ it('어제 선택한 시장은 새 위치로 다시 확인한다', async () => {
     },
   });
   show();
-  expect(await screen.findByRole('heading', { name: '가까운 시장', level: 1 })).toBeInTheDocument();
+  // 새 위치로 다시 고른 시장이 지도 홈의 가까운 시장 카드로 나옴(첫 화면은 시장 안으로 바로 들어가지 않음)
+  expect(await screen.findByRole('link', { name: '둘러보기' })).toHaveAttribute(
+    'href',
+    '/?market=market%3Ademo',
+  );
 });
 it('가격 제보 실패에도 결과 화면을 유지한다', async () => {
   vi.mocked(postPriceReport).mockRejectedValue(new Error('offline'));
@@ -365,11 +372,14 @@ it('판매 점포는 5곳부터 펼치고 추정 품목을 표시한다', async 
   const spy = vi.spyOn(storesApi, 'getMarketMap').mockResolvedValue(map);
   try {
     const { container } = show('/items/item:green_onion', { method: 'manual' });
-    const more = await screen.findByRole('button', { name: '더 보기' });
-    expect(container.querySelectorAll('#selling-stores li')).toHaveLength(5);
+    await waitFor(() => expect(container.querySelectorAll('#selling-stores li')).toHaveLength(5));
     expect(screen.getAllByText('업종 기준 · 상인 확인 전')).toHaveLength(5);
-    fireEvent.click(more);
-    expect(container.querySelectorAll('#selling-stores li')).toHaveLength(8);
+    fireEvent.click(
+      within(container.querySelector('#selling-stores') as HTMLElement).getByRole('button', {
+        name: '더 보기',
+      }),
+    );
+    await waitFor(() => expect(container.querySelectorAll('#selling-stores li')).toHaveLength(8));
   } finally {
     spy.mockRestore();
   }

@@ -33,6 +33,19 @@ function Conversation({ marketId, itemId }: { marketId: string; itemId?: string 
         }
       />
       <div className={s.chat} aria-live="polite">
+        {/* 처음엔 빈 흰 화면 대신 무엇을 물어볼 수 있는지 안내(2026-11-27 다듬기) */}
+        {!f.entries.length && !f.loading && (
+          <section className={s.chatEmpty} aria-label={t('askTitle')}>
+            <span className={s.chatEmptyIcon} aria-hidden="true">
+              <Icon name="send" size={26} />
+            </span>
+            <h2>시장에서 궁금한 걸 물어보세요</h2>
+            <p>
+              고르는 법, 보관, 손질, 제철, 시세, 파는 점포를 물어보면 출처가 있는 자료에서 찾아
+              답해요. 자료에 없는 내용은 모른다고 답해요.
+            </p>
+          </section>
+        )}
         {f.entries.map((e, i) =>
           e.role === 'user' ? (
             <article key={i} className={s.bubbleMe} aria-label={t('shopMyQuestion')}>

@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useT } from '../../i18n';
 import a from '../account/account.module.css';
 import s from './merchant.module.css';
+import BrandLogo from '../../components/common/BrandLogo';
 
 /** PC 머리말(WebMerchant·WebMarketAdmin·WebAdmin): 로고, 역할 꼬리표, 이름, 로그아웃 */
 export function RoleHeader({ role, name }: { role: string; name?: ReactNode }) {
@@ -15,7 +16,7 @@ export function RoleHeader({ role, name }: { role: string; name?: ReactNode }) {
   return (
     <header className={s.roleHeader}>
       <Link to="/" className={s.roleLogo} aria-label="Market-On 지도 홈">
-        <img src="/brand/logo-light.svg" alt="" />
+        <BrandLogo alt="" />
       </Link>
       <Tag>{role}</Tag>
       <div className={s.roleEnd}>

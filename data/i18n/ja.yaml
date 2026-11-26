@@ -243,7 +243,7 @@ entities:
     text: 大麦
     reviewed: false
   variety:barley-04:
-    text: ''
+    text: 裸麦
     reviewed: false
   item:mixed_grains:
     text: 混食曲
@@ -366,16 +366,16 @@ entities:
     text: 乾燥唐辛子
     reviewed: false
   variety:dried_chili-00:
-    text: ''
+    text: 火建
     reviewed: false
   item:green_chili:
-    text: ''
+    text: 青唐辛子
     reviewed: false
   variety:green_chili-00:
     text: 青唐辛子（緑光など）
     reviewed: false
   variety:green_chili-02:
-    text: ''
+    text: ピーマン
     reviewed: false
   variety:green_chili-03:
     text: 青唐辛子
@@ -519,7 +519,7 @@ entities:
     text: アヌタリキノコ
     reviewed: false
   item:enoki_mushroom:
-    text: ''
+    text: えのきだけ
     reviewed: false
   variety:enoki_mushroom-00:
     text: えのき茸
@@ -720,10 +720,10 @@ entities:
     text: 乾燥わかめ
     reviewed: false
   item:oyster:
-    text: ''
+    text: しじみ
     reviewed: false
   variety:oyster-00:
-    text: ''
+    text: しじみ
     reviewed: false
   item:imported_croaker:
     text: 輸入早期

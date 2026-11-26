@@ -91,7 +91,7 @@ export default function My() {
       <Row icon="store" title={t('meAdminHome')} to="/admin" />
     ) : (
       <>
-        <Row icon="store" title={t('meStartMerchant')} to="/signup/merchant" />
+        <Row icon="tag" title={t('meStartMerchant')} to="/signup/merchant" />
         <Row icon="plus" title={t('meJoinMarket')} to="/join" />
       </>
     );
@@ -127,7 +127,7 @@ export default function My() {
           </div>
         )}
         <ul className={s.rows}>
-          <Row icon="tag" title={t('meSaved')} to="/me/saved" />
+          <Row icon="store" title={t('meSaved')} to="/me/saved" />
           <Row
             icon="globe"
             title={t('meSettings')}
