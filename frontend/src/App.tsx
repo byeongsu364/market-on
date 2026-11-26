@@ -5,11 +5,11 @@ import PageLayout from './components/layout/PageLayout';
 import Join from './pages/Join';
 import Scan from './pages/Scan';
 import Result from './pages/Result';
-import MarketMap from './pages/MarketMap';
-import MarketSelect from './pages/MarketSelect';
+import MapHome from './pages/map/MapHome';
+import Markets from './pages/map/Markets';
 import Recommend from './pages/Recommend';
 import Chat from './pages/Chat';
-import Search from './pages/Search';
+import Search from './pages/map/Search';
 import Variety from './pages/scan/Variety';
 import ShopRoute from './pages/shop/ShopRoute';
 import My from './pages/me/My';
@@ -27,7 +27,7 @@ import StorePin from './pages/merchant/StorePin';
 import Poster from './pages/merchant/Poster';
 import AdminHome from './pages/admin/AdminHome';
 import MarketAdmin from './pages/MarketAdmin';
-import StorePage from './pages/StorePage';
+import Store from './pages/map/Store';
 function MerchantGuard() {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -62,10 +62,10 @@ function AppRoutes() {
     <Routes>
       <Route element={<PageLayout />}>
         {/* 지도 홈: 시장 밖 / ?market= 시장 안 / ?market=&item= 검색 결과 */}
-        <Route index element={<MarketMap />} />
+        <Route index element={<MapHome />} />
         <Route path="search" element={<Search />} />
-        <Route path="markets" element={<MarketSelect />} />
-        <Route path="s/:storeId" element={<StorePage />} />
+        <Route path="markets" element={<Markets />} />
+        <Route path="s/:storeId" element={<Store />} />
         <Route path="scan" element={<Scan />} />
         <Route path="items/:itemId" element={<Result />} />
         <Route path="items/:itemId/varieties" element={<Variety />} />

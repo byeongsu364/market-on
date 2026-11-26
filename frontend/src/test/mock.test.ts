@@ -22,7 +22,10 @@ it('mock 계약과 지정 시세·온톨로지 문장을 유지한다', async ()
   expect(price.source).toContain('샘플');
   expect(price.observed_on).toBe('2026-11-20');
   const map: MarketMap = await api.map('market:demo', item.item_id);
+  // 030: 시연 시장에는 경계와 편의시설(예시 값)이 더해짐
   expect(Object.keys(map).sort()).toEqual([
+    'boundary',
+    'facilities',
     'layout',
     'market_id',
     'source_note',

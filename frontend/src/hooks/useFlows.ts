@@ -1,6 +1,6 @@
 import { postPriceReport } from '../api/priceReports';
 import { useCallback, useEffect, useState, useRef } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { searchItems } from '../api/items';
 import { recommend } from '../api/recommend';
 import { useResource, useAction } from './useResource';
@@ -8,7 +8,6 @@ import { useSession } from '../store/session';
 import { useMarketMap } from './useMarketMap';
 import { useItem } from './useItem';
 import { usePrice } from './usePrice';
-import type { Store } from '../types/contract';
 export const useItemCatalog = () => useResource(useCallback(() => searchItems(''), []));
 export function useResultFlow() {
   const { itemId = '' } = useParams();
@@ -96,27 +95,6 @@ export function useResultFlow() {
     hasStoreContext: storeContext?.market_id === market?.market_id && !!storeContext,
   };
 }
-export function useMapFlow() {
-  const { market, setStoreContext } = useSession();
-  const [params] = useSearchParams();
-  const item = params.get('item') ?? undefined;
-  const map = useMarketMap(market?.market_id ?? '', item, params.get('unit') ?? undefined);
-  const [selected, setSelected] = useState<Store | null>(null);
-  const [trigger, setTrigger] = useState<Element | null>(null);
-  const close = useCallback(() => setSelected(null), []);
-  return {
-    item,
-    map,
-    selected,
-    trigger,
-    close,
-    select: (store: Store, element: Element) => {
-      if (market) setStoreContext({ store_id: store.store_id, market_id: market.market_id });
-      setSelected(store);
-      setTrigger(element);
-    },
-  };
-}
 export function useMarketChoice() {
   const session = useSession();
   const navigate = useNavigate();
@@ -128,7 +106,8 @@ export function useMarketChoice() {
         from?: string;
       } | null
     )?.from;
-    navigate(from ?? '/', { replace: true });
+    // 돌아갈 화면이 없으면 고른 시장 안 지도로
+    navigate(from ?? `/?market=${encodeURIComponent(market.market_id)}`, { replace: true });
   };
 }
 export function useRecommendFlow() {

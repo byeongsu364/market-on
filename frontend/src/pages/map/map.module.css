@@ -1,0 +1,809 @@
+/* 묶음 A 지도 화면(지도 홈, 검색, 시장 고르기, 점포, 단골). 값은 시안 html/<화면>.html 인라인 스타일에서 옮김. 색은 토큰만. */
+
+/* 틀: 모바일 지도 + 바텀시트 ------------------------------------------ */
+.stage {
+  position: relative;
+  height: calc(100dvh - var(--tabbar-h) - var(--safe-bottom));
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--color-map-ground);
+}
+.mapArea {
+  position: absolute;
+  inset: 0;
+}
+.top {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(var(--safe-top) + 12px);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  max-height: 48%;
+  padding-bottom: 0;
+  gap: 8px;
+  transition: max-height 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.sheet[data-expanded='true'] {
+  max-height: calc(100% - 84px);
+}
+.sheetBody {
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: var(--space-5);
+  overscroll-behavior: contain;
+}
+.miniMapArea {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: calc(var(--safe-top) + 128px) var(--space-5) 52%;
+  background: var(--color-canvas);
+}
+
+/* 틀: PC 왼쪽 패널 + 오른쪽 지도 ---------------------------------------- */
+.split {
+  display: flex;
+  min-height: calc(100dvh - 67px);
+}
+.panel {
+  flex: 1 1 420px;
+  max-width: 460px;
+  min-width: 0;
+  padding: 28px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-right: 1px solid var(--color-hairline);
+  overflow-y: auto;
+  max-height: calc(100dvh - 67px);
+  position: sticky;
+  top: 67px;
+}
+.mapSection {
+  flex: 999 1 560px;
+  min-width: 0;
+  position: sticky;
+  top: 67px;
+  height: calc(100dvh - 67px);
+  min-height: 600px;
+  overflow: hidden;
+  background: var(--color-map-ground);
+}
+.mapSection .miniMapArea {
+  padding: 24px;
+}
+
+/* 지도 위 검색창(흰 면 54px, 모서리 16) -------------------------------- */
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 54px;
+  padding: 0 6px 0 10px;
+  background: var(--color-surface-card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+}
+.pillIcon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -6px;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+}
+.pillText,
+.pillValue {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  font-size: 16px;
+  color: var(--color-muted);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.pillValue {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.pillMe {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+.pillMe > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-strong);
+}
+.roundBack {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-card);
+  box-shadow: var(--shadow-soft);
+}
+.floatChips {
+  margin: 0 -16px;
+  padding: 0 16px;
+}
+.count {
+  font-weight: 400;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+[aria-pressed='true'] .count {
+  color: inherit;
+  opacity: 0.72;
+}
+
+/* 글자 ------------------------------------------------------------- */
+.title {
+  font-size: 26px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.7px;
+}
+.title24 {
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.7px;
+}
+.titleWeb {
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -1px;
+}
+.h2 {
+  font-size: 19px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.h2Row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  font-size: 19px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.lead {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-body);
+}
+.body15 {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+.sub14 {
+  font-size: 14px;
+  color: var(--color-body);
+}
+.sub15 {
+  font-size: 15px;
+  color: var(--color-body);
+}
+.label14 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+.noteTop {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  padding-top: 12px;
+  border-top: 1px solid var(--color-hairline);
+}
+.center {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+.caption12 {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+
+/* 묶음 간격 --------------------------------------------------------- */
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.heading6 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.panelStack,
+.panelStack14,
+.panelStack20 {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.panelStack14 {
+  gap: 14px;
+}
+.panelStack20 {
+  gap: 20px;
+}
+.stack2 {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stack6 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stack8 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stack10 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stack16 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nameRow > h1 {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.backLink,
+.textAction,
+.rowAction {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-body);
+}
+.textAction {
+  gap: 2px;
+  flex: none;
+}
+.chipWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+}
+.chipNote {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* 목록 줄 ----------------------------------------------------------- */
+.row,
+.row72,
+.row76 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 66px;
+  padding: 10px 0;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: inherit;
+}
+.row72 {
+  min-height: 72px;
+  padding: 12px 0;
+}
+.row76 {
+  min-height: 76px;
+  padding: 12px 0;
+}
+.row[aria-pressed='true'] .rowTitle {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.rowBody {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rowTitle {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.rowSub {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-body);
+}
+.rowSale {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-signal-text);
+}
+.rowEnd {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-muted);
+}
+.rowPrice {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.rowUnit {
+  font-size: 13px;
+  color: var(--color-body);
+}
+.countEnd {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-body);
+}
+.available {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.preparing {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+}
+
+/* 가격 숫자(700은 가격에만) ----------------------------------------- */
+.price16,
+.price17,
+.price18,
+.price20 {
+  font-weight: 700;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.4px;
+  white-space: nowrap;
+}
+.price16 {
+  font-size: 16px;
+}
+.price17 {
+  font-size: 17px;
+}
+.price18 {
+  font-size: 18px;
+}
+.price20 {
+  font-size: 20px;
+}
+.strike {
+  font-size: 14px;
+  color: var(--color-muted);
+  text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 시장 밖 시트(시안 Main) ------------------------------------------- */
+.summaryHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.summaryName {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.summaryDistance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.walk {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.4px;
+  font-variant-numeric: tabular-nums;
+}
+.meters {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.locateBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 16px;
+  background: var(--color-surface-strong);
+}
+.locateText {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* 지도 실패(시안 Error) --------------------------------------------- */
+.errorStage {
+  position: relative;
+  min-height: calc(100dvh - var(--tabbar-h) - var(--safe-bottom));
+  background: var(--color-surface-strong);
+}
+.errorScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: inherit;
+  padding: 140px 32px 48px;
+}
+.errorBox {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 시장 안: 편의시설, 결과 머리 ----------------------------------------- */
+.amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.amenities li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+.resultHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+.resultHead > h2 {
+  flex: none;
+}
+.resultCount {
+  flex: 1 1 auto;
+  font-size: 16px;
+  color: var(--color-body);
+}
+.tabSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+/* 고른 점포 카드(signal-soft 면) ------------------------------------- */
+.selected {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-xl);
+  background: var(--color-signal-soft);
+}
+.selectedHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.selectedBody {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.selectedName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.selectedName h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.selectedPrice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.priceLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.priceCaption {
+  font-size: 12px;
+  color: var(--color-body);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 마감세일 줄(시안 Sales) ------------------------------------------- */
+.saleRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  color: var(--color-muted);
+}
+.saleStore {
+  font-size: 14px;
+  color: var(--color-body);
+}
+.saleLine {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--color-ink);
+}
+.saleItem {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+/* 검색(시안 Search, SearchEmpty) ------------------------------------ */
+.searchPage {
+  padding: calc(var(--safe-top) + 12px) 16px 0;
+  display: flex;
+  flex-direction: column;
+}
+.searchPageWeb {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+}
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 54px;
+  padding: 0 6px 0 10px;
+  border-radius: 16px;
+  background: var(--color-surface-strong);
+  box-shadow: inset 0 0 0 2px transparent;
+}
+.searchBox:focus-within {
+  background: var(--color-surface-card);
+  box-shadow: inset 0 0 0 2px var(--color-ink);
+}
+.searchInput {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  height: 44px;
+  min-height: 0;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 16px;
+  color: var(--color-ink);
+}
+.searchInput:not(:placeholder-shown) {
+  font-weight: 600;
+}
+.searchInput::placeholder {
+  color: var(--color-muted);
+}
+.searchInput::-webkit-search-cancel-button {
+  display: none;
+}
+.searchForm {
+  display: block;
+}
+.searchMain {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 4px 0;
+}
+.searchHint {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+.scanCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--color-surface-strong);
+}
+.scanIcon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* 점포 상세(시안 Store · WebStore) ---------------------------------- */
+.storePage {
+  width: 100%;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  padding-bottom: calc(110px + var(--safe-bottom));
+}
+.storeBody {
+  padding: 8px var(--space-5) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.headerIcon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+}
+.headerIcon:last-child {
+  margin-right: -10px;
+}
+.storeHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.storeMap {
+  position: relative;
+  height: 136px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--color-surface-strong);
+}
+.storeMap .fill {
+  min-height: 0;
+}
+.bigMap {
+  position: absolute;
+  inset: 0;
+}
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.priceEnd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.infoList > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  color: var(--color-ink);
+}
+.infoList > li + li {
+  border-top: 1px solid var(--color-hairline);
+}
+.infoTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.bottomBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  padding: 12px var(--space-5) calc(26px + var(--safe-bottom));
+  background: var(--color-surface-card);
+  border-top: 1px solid var(--color-hairline);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
+}
