@@ -15,6 +15,7 @@ export function useResultFlow() {
   const { market, storeContext } = useSession();
   const location = useLocation();
   const initial = (location.state ?? {}) as {
+    photo?: File;
     variety_id?: string;
     price?: number;
     unit?: string;
@@ -77,6 +78,8 @@ export function useResultFlow() {
   ]);
   return {
     item,
+    market,
+    photo: initial.photo,
     price,
     value,
     setValue,
