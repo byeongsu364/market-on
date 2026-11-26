@@ -19,7 +19,7 @@ export function directionUrls(dest: Destination, origin: string) {
  * 없으면 "시장 이름 점포 이름"으로 찾게 함. 점포 좌표가 없으면(지금의 live) 시장 좌표로 대신하고 approximate.
  */
 export function storeDestination(
-  store: { name: string; naver_name?: string; lat?: number; lng?: number },
+  store: { name: string; naver_name?: string; lat?: number | null; lng?: number | null },
   market: Destination,
 ): Destination & { approximate: boolean } {
   const exact = store.lat != null && store.lng != null;

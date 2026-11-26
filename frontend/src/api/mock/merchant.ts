@@ -45,6 +45,8 @@ const passwords = new Map(users.map((u) => [u.login_id, password]));
 let current: User | null = null;
 const hours = new Map<string, { open: string; close: string }>();
 const views = new Map<string, number>();
+const details = new Map<string, Pick<MerchantStore, 'payments' | 'intro'>>();
+export const storeDetails = (id: string) => details.get(id) ?? {};
 export const sales: ClosingSale[] = [
   {
     id: 1,
@@ -151,6 +153,7 @@ function info(id: string): MerchantStore {
   const s = stores.find((s) => s.store_id === id);
   if (!s) throw new Error('점포를 찾을 수 없어요.');
   return {
+    ...details.get(id),
     store_id: id,
     name: s.name,
     market_id: markets[0].market_id,
@@ -167,8 +170,18 @@ function info(id: string): MerchantStore {
 export async function getStore() {
   return info(merchant().store_id);
 }
-export async function updateStore(q: Partial<Pick<MerchantStore, 'hours' | 'item_ids'>>) {
+export async function updateStore(
+  q: Partial<Pick<MerchantStore, 'hours' | 'item_ids' | 'payments' | 'intro'>>,
+) {
   const id = merchant().store_id;
+  if (q.intro != null && q.intro.length > 80) throw new Error('소개는 80자 이내로 입력하세요.');
+  if (q.payments?.some((p) => !['card', 'cash', 'transfer', 'onnuri'].includes(p)))
+    throw new Error('결제 수단을 확인하세요.');
+  details.set(id, {
+    ...details.get(id),
+    ...('intro' in q ? { intro: q.intro } : {}),
+    ...(q.payments ? { payments: q.payments } : {}),
+  });
   if (q.hours) hours.set(id, q.hours);
   if (q.item_ids) stores.find((s) => s.store_id === id)!.sells = q.item_ids;
   return info(id);
@@ -278,6 +291,7 @@ export function resetMock() {
   passwords.clear();
   users.forEach((u) => passwords.set(u.login_id, password));
   hours.clear();
+  details.clear();
   views.clear();
   sales.splice(1);
   sales[0].status = 'active';

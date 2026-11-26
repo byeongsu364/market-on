@@ -196,3 +196,18 @@ it('PC 상인 홈은 역할 머리말, 가격 표, 오른쪽 마감세일 면을
   expect(await screen.findByRole('row', { name: /양파 1kg 1,800원/ })).toBeInTheDocument();
   cleanup();
 });
+
+it('점포 정보에서 결제 수단과 한 줄 소개를 저장한다', async () => {
+  await mock.login(mock.demoCredentials());
+  show('/merchant/store');
+  const intro = await screen.findByLabelText('한 줄 소개');
+  fireEvent.change(intro, { target: { value: '매일 신선하게 준비해요' } });
+  fireEvent.click(screen.getByRole('button', { name: '카드' }));
+  fireEvent.click(screen.getByRole('button', { name: '온누리상품권' }));
+  fireEvent.click(screen.getByRole('button', { name: '저장' }));
+  await waitFor(async () => {
+    const store = await mock.getStore();
+    expect(store.payments).toEqual(['card', 'onnuri']);
+    expect(store.intro).toBe('매일 신선하게 준비해요');
+  });
+});

@@ -40,11 +40,21 @@ def request_market(market_id: str, x_device_id: UUID = Header(), conn=Depends(ge
 
 @router.get('/{market_id}/map', response_model=MarketMap)
 def market_map(
-    market_id: str, item_id: str | None = None, unit: str | None = None, conn=Depends(get_db)
+    market_id: str,
+    item_id: str | None = None,
+    unit: str | None = None,
+    lat: float | None = Query(default=None, ge=-90, le=90),
+    lng: float | None = Query(default=None, ge=-180, le=180),
+    conn=Depends(get_db),
 ):
-    return market_service.market_map(conn, market_id, item_id, unit)
+    return market_service.market_map(conn, market_id, item_id, unit, lat, lng)
 
 
 @router.get('/{market_id}/items', response_model=list[MarketItem])
 def market_items(market_id: str, conn=Depends(get_db)):
     return market_service.market_items(conn, market_id)
+
+
+@router.get('/{market_id}', response_model=Market)
+def detail(market_id: str, conn=Depends(get_db)):
+    return market_service.market_detail(conn, market_id)

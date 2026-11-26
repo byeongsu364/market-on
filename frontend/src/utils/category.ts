@@ -22,7 +22,9 @@ export function categoryOfZone(zoneName: string | undefined): StoreCategory | nu
   return byZone.find(([re]) => re.test(zoneName))?.[1] ?? null;
 }
 export function storeCategory(store: Pick<Store, 'category'>, zoneName?: string) {
-  return store.category ?? categoryOfZone(zoneName);
+  const value = store.category?.replace('store_category:', '');
+  const category = value === 'side_dish' ? 'side' : value === 'snack' ? 'ricecake' : value;
+  return (category as StoreCategory | undefined) ?? categoryOfZone(zoneName);
 }
 export const categoryColor = (c: StoreCategory | null) =>
   c ? `var(--pin-${c})` : 'var(--pin-default)';

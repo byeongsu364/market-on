@@ -13,3 +13,12 @@ export const getPublicConfig = () =>
   isMock && import.meta.env.VITE_PUBLIC_CONFIG !== 'live'
     ? mock.publicConfig()
     : request<PublicConfig>('/config/public');
+
+export const getMarket = (id: string): Promise<Market> =>
+  isMock
+    ? mock.nearby().then((list) => {
+        const market = list.find((m) => m.market_id === id);
+        if (!market) throw new Error('시장을 찾을 수 없어요.');
+        return market;
+      })
+    : request<Market>(`/markets/${encodeURIComponent(id)}`);

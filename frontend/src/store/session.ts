@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { getMarkets } from '../api/markets';
+import { getMarkets, getMarket } from '../api/markets';
 import { seoulDay } from '../utils/sale';
 import type { Language, Market } from '../types/contract';
 type Theme = 'system' | 'light' | 'dark';
@@ -46,9 +46,9 @@ export const useSessionState = () => {
     let active = true;
     const requested = new URLSearchParams(window.location.search).get('market');
     if (requested) {
-      void getMarkets()
-        .then((markets) => {
-          const selected = markets.find((m) => m.market_id === requested && m.status === 'active');
+      void getMarket(requested)
+        .then((value) => {
+          const selected = value.status === 'active' ? value : null;
           if (active && !manuallyChosen.current && selected) {
             setMarket(selected);
           }

@@ -35,6 +35,7 @@ def public_user(conn, user):
     store = store_repo.get_store(conn, user['store_id']) if user['store_id'] else None
     market = store_repo.get_market(conn, user['market_id']) if user.get('market_id') else None
     return {key: user[key] for key in ('id', 'login_id', 'role', 'status')} | {
+        'created_at': user.get('created_at'),
         'store': {
             'store_id': store['id'],
             'name': store['name_ko'],

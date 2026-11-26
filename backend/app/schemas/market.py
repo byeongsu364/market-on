@@ -13,6 +13,10 @@ class Market(BaseModel):
     lat: float
     lng: float
     distance_m: int | None = None
+    address: str | None = None
+    store_count: int = 0
+    requests: int = 0
+    amenities: dict[str, bool] | None = None
 
 
 class Zone(BaseModel):
@@ -40,6 +44,15 @@ class StorePrice(BaseModel):
 
 
 class Store(BaseModel):
+    lat: float | None = None
+    lng: float | None = None
+    category: str | None = None
+    naver_name: str = ''
+    verified: bool = False
+    open_now: bool | None = None
+    payments: list[str] = []
+    intro: str | None = None
+    distance_m: int | None = None
     items_basis: Literal['merchant', 'sbiz_guess', 'mixed'] = 'merchant'
     source: Literal['manual', 'sbiz'] = 'manual'
     guessed_item_ids: list[str] = []

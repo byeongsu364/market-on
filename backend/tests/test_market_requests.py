@@ -38,6 +38,7 @@ def requests(memory, monkeypatch):
         for mid, status in [('listed', 'listed'), ('active', 'active')]
     }
     records, entries = set(), {}
+    monkeypatch.setattr(store_repo, 'market_extras', lambda *a: dict(store_count=0, requests=0))
     original = user_repo.create
 
     def create(c, lid, digest, *, role='merchant', store_id=None, market_id=None, status=None):
@@ -124,7 +125,18 @@ def test_nearby_requests_privacy_and_contract(requests, monkeypatch):
     for _ in range(2):
         nearby = c.get('/markets/nearby?lat=37.57&lng=126.99', headers=device).json()
         assert {v['status'] for v in nearby} == {'listed', 'active'}
-        assert set(nearby[0]) == {'market_id', 'name', 'status', 'lat', 'lng', 'distance_m'}
+        assert set(nearby[0]) == {
+            'market_id',
+            'name',
+            'status',
+            'lat',
+            'lng',
+            'distance_m',
+            'address',
+            'store_count',
+            'requests',
+            'amenities',
+        }
     assert len(requests['records']) == 1
     assert c.post('/markets/listed/requests', headers=device).status_code == 403
     assert c.post('/markets/listed/requests', headers=HEADER).status_code == 422

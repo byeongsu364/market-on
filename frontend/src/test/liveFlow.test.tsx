@@ -2,13 +2,14 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
-import { getMarkets } from '../api/markets';
+import { getMarket, getMarkets } from '../api/markets';
 import { recognize } from '../api/scan';
 import { getPrice } from '../api/price';
 import { postPriceReport } from '../api/priceReports';
 import * as mock from '../api/mock';
 vi.mock('../api/markets', () => ({
   getMarkets: vi.fn(),
+  getMarket: vi.fn(),
   // 지도(MapView)와 시장 품목은 mock 그대로
   getPublicConfig: vi.fn(() => Promise.resolve({ naver_map_client_id: null })),
   getMarketItems: vi.fn(() => Promise.resolve([])),
@@ -35,6 +36,7 @@ function show(path = '/', state?: object) {
 }
 beforeEach(() => {
   vi.mocked(getMarkets).mockReset().mockResolvedValue([market]);
+  vi.mocked(getMarket).mockReset().mockResolvedValue(market);
   vi.mocked(getPrice).mockImplementation(mock.price);
   vi.mocked(postPriceReport).mockReset().mockResolvedValue({ id: 1, updated: false });
   vi.mocked(recognize).mockReset();

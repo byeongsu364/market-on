@@ -11,7 +11,8 @@ import type {
 } from '../../types/contract';
 import { record } from './marketRequests';
 import { items, markets, stores, source } from './data';
-import { activeForStore, storePrice } from './merchant';
+import { activeForStore, storePrice, storeDetails } from './merchant';
+import { storeLocation } from './merchant030';
 import { zones } from '../../constants/zones';
 import { demoMarketExtra, demoBoundary, demoFacilities, storeExtra } from './geo';
 import { convertUnit } from '../../utils/convertUnit';
@@ -186,6 +187,8 @@ export const map = async (
         ...(market_id === 'market:demo'
           ? storeExtra(s, i, zones.find((z) => z.id === s.zone_id)?.name ?? '')
           : {}),
+        ...storeDetails(s.store_id),
+        ...storeLocation(s.store_id),
         highlight: !!item_id && s.sells.includes(item_id),
         active_sale: activeForStore(s.store_id, item_id),
         price:

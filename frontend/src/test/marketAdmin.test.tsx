@@ -69,7 +69,7 @@ it('QR 시장은 저장된 시장보다 우선하고 그날 유지된다', async
     lat: 0,
     lng: 0,
   };
-  vi.spyOn(markets, 'getMarkets').mockResolvedValue([market]);
+  vi.spyOn(markets, 'getMarket').mockResolvedValue(market);
   const { result, unmount } = renderHook(() => useSessionState());
   await waitFor(() => expect(result.current.market?.market_id).toBe('market:test'));
   expect(result.current.automatic).toBe(false);

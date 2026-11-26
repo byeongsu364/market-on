@@ -35,6 +35,7 @@ def public(monkeypatch):
         market_service, 'get_price', lambda *a, **kw: SimpleNamespace(this_market=None)
     )
     markets, zones, stores, items = {}, {}, {}, {}
+    monkeypatch.setattr(store_repo, 'market_extras', lambda *a: dict(store_count=0, requests=0))
     for name, target in [
         ('upsert_market', markets),
         ('upsert_zone', zones),
@@ -160,7 +161,20 @@ def test_markets_contract(public, caplog):
     result = c.get('/markets/nearby?lat=37.57&lng=126.99').json()
     assert [m['market_id'] for m in result] == ['market:demo', 'far']
     assert all(
-        set(m) == {'market_id', 'name', 'status', 'lat', 'lng', 'distance_m'} for m in result
+        set(m)
+        == {
+            'market_id',
+            'name',
+            'status',
+            'lat',
+            'lng',
+            'distance_m',
+            'address',
+            'store_count',
+            'requests',
+            'amenities',
+        }
+        for m in result
     )
     same = c.get('/markets/nearby?lat=37.6&lng=127').json()
     assert same[0]['market_id'] == 'far' and same[0]['distance_m'] == 0
@@ -204,6 +218,15 @@ def test_markets_contract(public, caplog):
             'highlight',
             'active_sale',
             'price',
+            'lat',
+            'lng',
+            'category',
+            'naver_name',
+            'verified',
+            'open_now',
+            'payments',
+            'intro',
+            'distance_m',
         }
         z = result['zones'][i // 4]
         assert s['map_x'] == z['x'] + 8 + (i % 2) * 80
@@ -245,3 +268,45 @@ def test_map_missing_hours_and_no_item(public):
     result = c.get('/markets/market:demo/map').json()
     assert result['stores'][0]['hours'] == ''
     assert not any(s['highlight'] for s in result['stores'])
+
+
+def test_live_store_map_fields_and_distance(public):
+    c, markets, stores = public
+    store = stores['store:demo-A01']
+    store.update(
+        lat=37.57,
+        lng=126.99,
+        location_verified=True,
+        payments=['card'],
+        intro='소개',
+        store_category_id='store_category:produce',
+    )
+    result = c.get('/markets/market:demo/map?lat=37.57&lng=126.99').json()['stores']
+    value = next(s for s in result if s['store_id'] == store['id'])
+    assert (value['lat'], value['lng'], value['verified'], value['distance_m']) == (
+        37.57,
+        126.99,
+        True,
+        0,
+    )
+    assert (value['category'], value['naver_name'], value['payments'], value['intro']) == (
+        'store_category:produce',
+        store['name_ko'],
+        ['card'],
+        '소개',
+    )
+    assert next(s for s in result if s['store_id'] != store['id'])['distance_m'] is None
+    # 상인이 확인하지 않은 건물 단위 좌표는 핀으로 내보내지 않고 거리만 계산
+    store['location_verified'] = False
+    result = c.get('/markets/market:demo/map?lat=37.57&lng=126.99').json()['stores']
+    value = next(s for s in result if s['store_id'] == store['id'])
+    assert (value['lat'], value['lng'], value['verified'], value['distance_m']) == (
+        None,
+        None,
+        False,
+        0,
+    )
+    store['location_verified'] = True
+    assert c.get('/markets/absent').status_code == 404
+    detail = c.get('/markets/market:demo').json()
+    assert detail['market_id'] == 'market:demo' and detail['amenities'] is None

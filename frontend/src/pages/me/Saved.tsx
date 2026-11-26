@@ -23,7 +23,7 @@ import { CATEGORY_LABELS, storeCategory } from '../../utils/category';
 import type { Favorite, StoreCategory } from '../../types/contract';
 import s from '../map/map.module.css';
 
-type Row = Favorite & { category: StoreCategory | null; marketName: string; open?: boolean };
+type Row = Favorite & { category: StoreCategory | null; marketName: string; open?: boolean | null };
 
 /** 단골 점포와 알림(시안 Saved). 백엔드가 없어 mock에서만 열고, live에서는 준비 중 안내만 보임 */
 export default function Saved() {

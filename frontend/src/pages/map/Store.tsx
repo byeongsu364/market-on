@@ -12,7 +12,7 @@ import StoreReviews from '../../components/domain/StoreReviews';
 import RouteSheet from '../../components/domain/RouteSheet';
 import { usePublicStore } from '../../hooks/useSales';
 import { useMarketMap } from '../../hooks/useMarketMap';
-import { useMarkets } from '../../hooks/useMarkets';
+import { useMarket } from '../../hooks/useMarkets';
 import { usePosition } from '../../hooks/usePosition';
 import { usePrice } from '../../hooks/usePrice';
 import { useItemCatalog } from '../../hooks/useFlows';
@@ -26,6 +26,7 @@ import {
   removeFavorite,
   saveFavorite,
 } from '../../api/favorites';
+import { isMock } from '../../api/client';
 import { useT } from '../../i18n';
 import { fill } from '../../utils/josa';
 import { CATEGORY_LABELS, storeCategory } from '../../utils/category';
@@ -47,10 +48,9 @@ export default function Store() {
   const state = usePublicStore(storeId);
   const marketId = state.data?.store.market_id ?? '';
   const map = useMarketMap(marketId, ctx.itemId, ctx.unit);
-  const markets = useMarkets();
+  const detail = useMarket(marketId);
   const market: Market | null =
-    markets.data?.find((m) => m.market_id === marketId) ??
-    (session.market?.market_id === marketId ? session.market : null);
+    detail.data ?? (session.market?.market_id === marketId ? session.market : null);
   const { position } = usePosition();
   const catalog = useItemCatalog();
   const [route, setRoute] = useState(false);
@@ -60,11 +60,11 @@ export default function Store() {
   useEffect(() => {
     if (!state.data) return;
     session.setStoreContext({ store_id: storeId, market_id: state.data.store.market_id });
-    const found = markets.data?.find((m) => m.market_id === state.data?.store.market_id);
+    const found = detail.data;
     if (found && found.status === 'active' && session.market?.market_id !== found.market_id)
       session.setMarket(found);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.data?.store.market_id, storeId, markets.data]);
+  }, [state.data?.store.market_id, storeId, detail.data]);
 
   const zones = useMemo(() => map.data?.zones ?? [], [map.data]);
   const mapStore = map.data?.stores.find((x) => x.store_id === storeId);
@@ -263,6 +263,7 @@ export default function Store() {
           ))}
         </div>
       </section>
+      {(mapStore?.intro || data.store.intro) && <p>{mapStore?.intro || data.store.intro}</p>}
       <ul className={s.infoList}>
         <li>
           <Icon name="clock" />
@@ -280,7 +281,7 @@ export default function Store() {
             <Icon name="card" />
             <span className={s.rowBody}>
               <span className={s.infoTitle}>{t('mapOnnuriTitle')}</span>
-              <span className={s.rowSub}>{t('mapPaymentsSample')}</span>
+              {isMock && <span className={s.rowSub}>{t('mapPaymentsSample')}</span>}
             </span>
           </li>
         )}

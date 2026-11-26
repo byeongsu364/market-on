@@ -150,6 +150,7 @@ export type ApiError = {
 };
 
 export type User = {
+  created_at?: string;
   id: string;
   login_id: string;
   role: 'merchant' | 'operator' | 'market_admin' | 'customer';
@@ -182,6 +183,10 @@ export type ClosingSale = SaleRequest & {
 };
 export type ActiveSale = ClosingSale & { store_name: string; item_name: string };
 export type MerchantStore = {
+  payments?: PaymentMethod[];
+  intro?: string | null;
+  location?: LatLng | null;
+  location_confirmed?: boolean;
   store_id: string;
   name: string;
   market_id: string;
@@ -339,20 +344,25 @@ export type MarketExtra = {
   /** 시장 경계(좌표 목록, 닫힌 다각형) */
   boundary?: LatLng[];
   facilities?: Facility[];
-  amenities?: { parking: boolean; toilet: boolean; onnuri: boolean };
-  address?: string;
+  amenities?: { parking: boolean; toilet: boolean; onnuri: boolean } | null;
+  address?: string | null;
   store_count?: number;
   /** 준비 중 시장의 요청 수 */
   requests?: number;
 };
 export type PaymentMethod = 'card' | 'cash' | 'transfer' | 'onnuri';
 export type StoreExtra = {
-  lat?: number;
-  lng?: number;
-  category?: StoreCategory;
+  lat?: number | null;
+  lng?: number | null;
+  category?:
+    | StoreCategory
+    | `store_category:${'produce' | 'dried' | 'seafood' | 'side_dish' | 'meat' | 'snack'}`
+    | null;
   naver_name?: string;
   verified?: boolean;
-  open_now?: boolean;
+  open_now?: boolean | null;
+  intro?: string | null;
+  distance_m?: number | null;
   payments?: PaymentMethod[];
   /** 점포가 파는 품종 id */
   varieties?: string[];
@@ -378,10 +388,10 @@ export type PriceHistory = {
 };
 export type Favorite = { store_id: string; name: string; market_id: string; notify: boolean };
 export type MultiItemMap = MarketMap & { item_ids: string[] };
-/** 030 상인 화면의 mock 전용 값(백엔드 없음: 단골 수, 오늘 품절, 가게 위치 확인) */
+/** 위치 확인은 live 지원. 단골 수·오늘 품절은 mock 전용 선택 값. */
 export type MerchantExtras = {
-  favorites: number;
-  sold_out_item_ids: string[];
+  favorites?: number;
+  sold_out_item_ids?: string[];
   location: LatLng | null;
   location_confirmed: boolean;
 };

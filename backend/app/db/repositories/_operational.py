@@ -7,7 +7,7 @@ from psycopg.types.json import Jsonb
 TABLE_FIELDS = {
     'markets': 'id name_ko region_id address lat lng at_mrkt_cd at_sgg_nm floorplan_svg source',
     'zones': 'id market_id store_category_id name_ko svg_path x y',
-    'stores': 'id market_id zone_id name_ko store_category_id sbiz_id sbiz_industry floor map_x map_y hours source active',
+    'stores': 'id market_id zone_id name_ko store_category_id sbiz_id sbiz_industry floor map_x map_y hours source active lat lng location_verified payments intro',
     'price_reports': 'market_id store_id item_id unit_id quantity price method media_id reported_at device_hash',
     'media': 'id kind path mime bytes',
 }
@@ -25,7 +25,15 @@ def save(conn, table, values, *, upsert=False):
     )
     if upsert:
         updates = [
-            sql.SQL('{}=excluded.{}').format(sql.Identifier(f), sql.Identifier(f))
+            (
+                sql.SQL(
+                    '{}=CASE WHEN stores.location_verified THEN stores.{} ELSE excluded.{} END'
+                ).format(sql.Identifier(f), sql.Identifier(f), sql.Identifier(f))
+                if table == 'stores'
+                and values.get('source') == 'sbiz'
+                and f in ('lat', 'lng', 'location_verified')
+                else sql.SQL('{}=excluded.{}').format(sql.Identifier(f), sql.Identifier(f))
+            )
             for f in fields
             if f != 'id'
         ]
