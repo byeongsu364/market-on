@@ -672,7 +672,6 @@
 }
 .searchBox:focus-within {
   background: var(--color-surface-card);
-  box-shadow: inset 0 0 0 2px var(--color-ink);
 }
 .searchInput {
   flex: 1 1 0;

@@ -104,10 +104,6 @@
   background: var(--color-surface-strong);
   color: var(--color-muted);
 }
-.webSearch:focus-within {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
 .webSearch input {
   flex: 1 1 0;
   width: 0;

@@ -74,6 +74,11 @@ legend {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+/* 검색창은 눌러도 바깥 포커스 선을 그리지 않음(2026-11-27 요청). 검색 상자 자체의 테두리·커서로 위치가 보임 */
+input[type='search']:focus,
+input[type='search']:focus-visible {
+  outline: none;
+}
 .sr-only {
   position: absolute !important;
   width: 1px;
