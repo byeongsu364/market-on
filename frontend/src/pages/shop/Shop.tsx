@@ -1,3 +1,4 @@
+import Recipes from '../../components/domain/Recipes';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { recommend } from '../../api/recommend';
@@ -64,6 +65,7 @@ export default function Shop() {
         {!desktop && <IconButton icon="user" label={t('shopMe')} round to="/me" />}
       </div>
       <p className={s.lead}>{t('shopLead')}</p>
+      <Recipes />
       <form
         className={s.form}
         onSubmit={(e) => {

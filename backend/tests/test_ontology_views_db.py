@@ -144,6 +144,12 @@ def test_views_types_counts_provenance_and_privacy(graph_db):
         'quote_only',
         'chunk_hash',
         'lang',
+        # 039 레시피 청크 메타데이터
+        'main_item_id',
+        'dish_type',
+        'cook_method',
+        'season_months',
+        'weather_tags',
     ]
     types = {r[0] for r in conn.execute('select distinct type from onto_node')}
     assert {

@@ -34,6 +34,10 @@ def read_document(path, directory):
         published=meta.get('published'),
         review_status=meta.get('review_status', 'draft'),
         varieties=meta.get('varieties', []),
+        main_item=meta.get('main_item'),
+        main_items=meta.get('main_items', []),
+        dish_type=meta.get('dish_type', ''),
+        cook_method=meta.get('cook_method', ''),
     )
 
 

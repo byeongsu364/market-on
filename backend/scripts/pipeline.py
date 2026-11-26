@@ -28,6 +28,7 @@ from app.knowledge.fact_check import extract_numbers, normalize_values
 from app.knowledge.ingest import _hash, chunk_document, tag_entities
 from app.knowledge.intents import DOC_TYPE_TO_INTENT
 from app.knowledge.ontology import normalize as normalize_label
+from app.knowledge.recipes import metadata as recipe_metadata
 
 from ._common import DATA, run
 
@@ -208,8 +209,13 @@ def ontology_index(ontology_dir: Path) -> dict:
     entities = {
         e['id']: e
         for path in sorted(ontology_dir.glob('*.yaml'))
-        for e in yaml.safe_load(path.read_text())['entities']
+        for e in yaml.safe_load(path.read_text()).get('entities', [])
     }
+    for path in sorted(ontology_dir.glob('*.yaml')):
+        for relation in yaml.safe_load(path.read_text()).get('relations', []):
+            if relation.get('s') not in entities:
+                raise ValueError(f'{path}: 알 수 없는 주어 {relation.get("s")}')
+            entities[relation['s']].setdefault('relations', []).append(relation)
     varieties = {}
     for e in entities.values():
         for relation in e.get('relations', []):
@@ -302,6 +308,19 @@ def chunk_rows(docs: list, index: dict) -> list[dict]:
                     'source_key': doc.source_key,
                     'chunk_hash': _hash(doc.doc_key, chunk.chunk_index, chunk.content),
                     'content': chunk.content,
+                    'props': recipe_metadata(
+                        doc,
+                        {
+                            eid: [
+                                int(r['o'].split(':')[-1])
+                                for r in entity.get('relations', [])
+                                if r['p'] == 'inSeason'
+                            ]
+                            for eid, entity in index['entities'].items()
+                        },
+                    )
+                    if doc.doc_type == 'recipe'
+                    else {},
                 }
             )
     return rows

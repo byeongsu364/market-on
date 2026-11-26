@@ -14,6 +14,8 @@ def source_id(conn, key):
 def upsert_source(conn, key, value):
     fields = ('title', 'publisher', 'url', 'license', 'kind', 'retrieved_at', 'quote_only')
     value = {'quote_only': False, **value}
+    if key == 'src:foodsafety-cookrcp01':
+        value['quote_only'] = True
     values = tuple(value.get(k) for k in fields)
     old = conn.execute(
         'select title,publisher,url,license,kind,retrieved_at,quote_only from sources where source_key=%s',
@@ -161,7 +163,7 @@ def insert_document(conn, doc, digest):
 
 def insert_chunk(conn, did, doc, chunk, digest):
     cid = conn.execute(
-        'insert into chunks(document_id,chunk_index,content,doc_type,lang,content_hash,variety_id,numbers) values(%s,%s,%s,%s,%s,%s,%s,%s) returning id',
+        'insert into chunks(document_id,chunk_index,content,doc_type,lang,content_hash,variety_id,numbers,props) values(%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id',
         (
             did,
             chunk.chunk_index,
@@ -171,6 +173,7 @@ def insert_chunk(conn, did, doc, chunk, digest):
             digest,
             chunk.variety_id,
             chunk.numbers,
+            Jsonb(chunk.props),
         ),
     ).fetchone()[0]
     for eid in sorted(chunk.entity_ids):
@@ -197,7 +200,7 @@ def match_chunks(conn, vector, entity_ids, doc_types, lang, k, minimum, variety_
         # Keep the existing HNSW iterative-scan path for ordinary vector searches.
         return conn.execute(
             """select m.chunk_id,m.content,m.similarity,m.doc_type,m.document_title,
-            m.store_id,m.source_title,m.source_url,m.license,s.quote_only,d.published,d.market_id
+            m.store_id,m.source_title,m.source_url,m.license,(s.quote_only or d.doc_type='recipe'),d.published,d.market_id
             from match_chunks(%s,%s,%s,%s,%s,%s) with ordinality as m
             join chunks c on c.id=m.chunk_id
             join documents d on d.id=c.document_id
@@ -206,7 +209,7 @@ def match_chunks(conn, vector, entity_ids, doc_types, lang, k, minimum, variety_
         ).fetchall()
     return conn.execute(
         """select c.id,c.content,1-(c.embedding <=> %(vector)s),c.doc_type,
-        d.title,d.store_id,s.title,s.url,s.license,s.quote_only,d.published,d.market_id
+        d.title,d.store_id,s.title,s.url,s.license,(s.quote_only or d.doc_type='recipe'),d.published,d.market_id
         from chunks c join documents d on d.id=c.document_id
         join sources s on s.id=d.source_id
         where d.review_status <> 'rejected' and c.embedding is not null

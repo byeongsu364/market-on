@@ -79,6 +79,10 @@ def evaluate(conn, *, data_dir: Path = DATA, questions=None, embedder=None) -> d
                 raise_unavailable=True,
             )
             row.update(kind=result.kind, seconds=time.monotonic() - began)
+            if result.kind == 'recipes':
+                row['cited'] = bool(result.citations)
+                row['recipe_count'] = len(result.recipes or [])
+                row['values_pass'] = result.answer is None
             if result.kind == 'answer':
                 row['cited'] = bool(result.citations)
                 # Check against the actual cited documents, including ontology shortcuts.

@@ -1,0 +1,9 @@
+# 팀 작성: 요청된 날씨에 따른 정렬 규칙. 날씨 API·건강 판단을 사용하지 않음.
+source: src:team-draft
+entities: []
+rules:
+  cold: {max_temp_c: 5, dish_types: ['국&찌개'], cook_methods: [끓이기], reason: '추운 날 끓이는'}
+  hot: {require_dish_types: [후식], exclude_method: 찌기, reason: '더운 날 만드는'}
+  rain: {cook_methods: [부침, 굽기], reason: '비 오는 날 만드는'}
+  snow: {dish_types: ['국&찌개'], reason: '눈 오는 날 만드는'}
+  clear: {}

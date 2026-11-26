@@ -2,12 +2,13 @@
 
 import csv
 import io
+
 import pytest
 
 yaml = pytest.importorskip('yaml')
-from scripts.load_documents import read_document
-from scripts._common import DATA
 from app.knowledge.ingest import chunk_document
+from scripts._common import DATA
+from scripts.load_documents import read_document
 
 
 def test_sample_formats_and_kamis():
@@ -18,7 +19,7 @@ def test_sample_formats_and_kamis():
         for e in yaml.safe_load(path.read_text())['entities']
     ]
     # 기존 41개 + 귤 품목 1개 + 품종 2개
-    assert len(entities) == 44
+    assert len([e for e in entities if e['type'] != 'recipe']) == 44
     assert sum(e['type'] == 'category' for e in entities) == 2
     assert sum(e['type'] == 'store_category' for e in entities) == 8
     # 품목 KAMIS 코드는 aT 소매 품목코드표(신태빈 정리, 2026-11-20)에 실제로 있는 조합이어야 해요
@@ -98,8 +99,9 @@ def test_frontmatter_metadata(tmp_path):
 def test_criterion_expansion_without_db(monkeypatch):
     from contextlib import nullcontext
     from unittest.mock import Mock
-    from scripts.load_ontology import load_ontology
+
     from app.db.repositories import knowledge_repo as repo
+    from scripts.load_ontology import load_ontology
 
     saved = {}
     relations = {}
@@ -118,7 +120,9 @@ def test_criterion_expansion_without_db(monkeypatch):
     monkeypatch.setattr(repo, 'prune_generated_criteria', prune)
     conn = Mock(transaction=nullcontext)
     counts = load_ontology(conn)
-    assert counts['added'] == 68  # 명시 엔터티 44개 + 자동 확인 포인트 24개
+    assert counts['added'] == 68 + len(
+        list((DATA / 'rag_docs/recipes').glob('foodsafety-*.md'))
+    )  # 명시 엔터티 44개 + 자동 확인 포인트 24개
     assert saved['variety:apple-hongro']['type'] == 'variety'
     assert saved['item:mandarin']['name_ko'] == '귤'
     assert ('hasGrade', 'variety:mandarin-open', None, None, {'default': True}) in relations[

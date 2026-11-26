@@ -1,3 +1,4 @@
+import { RecipePage } from './components/domain/Recipes';
 import { useT } from './i18n';
 import { Route, Routes, Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { SessionProvider } from './store/SessionProvider';
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="scan" element={<Scan />} />
         <Route path="items/:itemId" element={<Result />} />
         <Route path="items/:itemId/varieties" element={<Variety />} />
+        <Route path="recipes/:recipeId" element={<RecipePage />} />
         <Route path="shop" element={<Shop />} />
         <Route path="shop/route" element={<ShopRoute />} />
         <Route path="chat" element={<Chat />} />

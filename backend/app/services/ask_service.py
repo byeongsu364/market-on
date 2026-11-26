@@ -20,7 +20,7 @@ from app.llm import ask as ask_llm
 from app.llm.factory import get_embedder
 from app.schemas.ask import AskResponse
 
-from . import item_service, market_service, price_service
+from . import item_service, market_service, price_service, recipe_service
 from .price_report_service import hash_device
 
 TOPICS = {
@@ -49,6 +49,15 @@ def ask(
         varieties = [eid for eid in resolved if eid.startswith('variety:')]
         if not ids and varieties:
             ids = knowledge_repo.variety_items(conn, varieties)
+    if intent == 'recipe' and not ids:
+        result.kind = 'recipes'
+        result.recipes = recipe_service.find_recipes(
+            conn, market_id=data.market_id, q=data.question, embedder=embedder
+        )
+        result.citations = list(
+            {r['source']['title']: r['source'] for r in result.recipes}.values()
+        )
+        return result
     if len(ids) != 1:
         candidates = {}
         for query in [data.question or '', *re.findall(r'[가-힣A-Za-z]+', data.question or '')]:
@@ -60,6 +69,15 @@ def ask(
     if not item:
         raise AppError('ITEM_NOT_FOUND', '품목을 찾을 수 없습니다.', 404)
     result.item_id, result.item_name = ids[0], item['name_ko']
+    if intent == 'recipe':
+        result.kind = 'recipes'
+        result.recipes = recipe_service.find_recipes(
+            conn, item_id=ids[0], market_id=data.market_id, q=data.question, embedder=embedder
+        )
+        result.citations = list(
+            {r['source']['title']: r['source'] for r in result.recipes}.values()
+        )
+        return result
     if intent == 'price':
         result.kind = 'price'
         result.price = price_service.get_price(conn, ids[0], market_id=data.market_id)

@@ -21,6 +21,7 @@ import yaml
 
 from app.core import http
 from app.core.config import settings
+from app.knowledge.recipes import ingredient_lines, main_items, parse_ingredients
 
 from ._common import DATA, run, summary
 
@@ -72,12 +73,7 @@ def _clean(value) -> str:
 
 
 def _ingredients(parts: str) -> list[str]:
-    lines = []
-    for piece in re.split(r'[,\n]', _clean(parts)):
-        piece = re.sub(r'^[●•·\-\s]+', '', piece).strip()
-        if piece:
-            lines.append(piece)
-    return lines
+    return ingredient_lines(_clean(parts))
 
 
 def _lines(value) -> list[str]:
@@ -98,6 +94,9 @@ def _step(text: str) -> str:
 
 def render(row: dict, items: list[str]) -> str:
     """양식(data/templates/recipe.md)과 같은 모양의 md. 같은 입력이면 항상 같은 결과."""
+    mains = main_items(
+        _clean(row.get('RCP_NM')), _ingredients(row.get('RCP_PARTS_DTLS')), item_labels()
+    )
     meta = {
         'source': SOURCE_KEY,
         'doc_type': 'recipe',
@@ -105,6 +104,11 @@ def render(row: dict, items: list[str]) -> str:
         'title': _clean(row.get('RCP_NM')),
         'entities': items,
         'store_id': None,
+        'main_item': mains[0] if mains else None,
+        'main_items': mains,
+        'dish_type': _clean(row.get('RCP_PAT2')),
+        'cook_method': _clean(row.get('RCP_WAY2')),
+        'quote_only': True,
     }
     info = []
     if _clean(row.get('RCP_PAT2')):
@@ -120,9 +124,6 @@ def render(row: dict, items: list[str]) -> str:
         body += [' · '.join(info), '']
     body += ['## 재료', *[f'- {line}' for line in _ingredients(row.get('RCP_PARTS_DTLS'))], '']
     body += ['## 만드는 법', *[f'{n}. {s}' for n, s in enumerate(steps, 1)], '']
-    tips = _lines(row.get('RCP_NA_TIP'))
-    if tips:
-        body += ['## 팁', *[f'- {tip}' for tip in tips], '']
     body.append('출처: 조리식품의 레시피 DB (식품의약품안전처 식품안전나라)')
     front = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False, default_flow_style=None)
     return f'---\n{front}---\n' + '\n'.join(body) + '\n'
@@ -141,10 +142,9 @@ def select(rows, labels, *, only_items=None, max_per_item=5):
         if not seq.isdigit() or not _clean(row.get('RCP_NM')):
             continue
         items = match_items(_clean(row.get('RCP_PARTS_DTLS')), labels)
-        if only_items:
-            items = [i for i in items if i in only_items]
-        wanted = [i for i in items if per_item[i] < max_per_item]
-        if not wanted:
+        mains = main_items(_clean(row['RCP_NM']), _ingredients(row.get('RCP_PARTS_DTLS')), labels)
+        wanted = [i for i in items if i in mains and (not only_items or i in only_items)]
+        if not wanted or any(per_item[i] >= max_per_item for i in wanted):
             continue
         per_item.update(wanted)
         chosen[seq] = (row, items)
@@ -171,6 +171,42 @@ def write_docs(chosen, out_dir: Path = OUT_DIR, *, prune=False) -> Counter:
                 path.unlink()
                 counts['deleted'] += 1
     return counts
+
+
+def write_ontology(chosen, path=DATA / 'ontology' / 'recipes.yaml'):
+    entities, relations = [], []
+    for seq, (row, _) in chosen.items():
+        rid = f'recipe:foodsafety-{seq}'
+        entities.append(
+            {
+                'id': rid,
+                'type': 'recipe',
+                'name_ko': _clean(row['RCP_NM']),
+                'source': SOURCE_KEY,
+                'attrs': {
+                    'dish_type': row.get('RCP_PAT2', ''),
+                    'cook_method': row.get('RCP_WAY2', ''),
+                    'kcal': row.get('INFO_ENG', ''),
+                    'doc_key': f'recipes/foodsafety-{seq}.md',
+                },
+            }
+        )
+        for ingredient in parse_ingredients(row['RCP_NM'], _ingredients(row.get('RCP_PARTS_DTLS'))):
+            if ingredient['item_id']:
+                relations.append(
+                    {
+                        's': ingredient['item_id'],
+                        'p': 'usedIn',
+                        'o': rid,
+                        'props': {'role': ingredient['role'], 'amount_text': ingredient['text']},
+                        'source': SOURCE_KEY,
+                    }
+                )
+    path.write_text(
+        yaml.safe_dump(
+            {'entities': entities, 'relations': relations}, allow_unicode=True, sort_keys=False
+        )
+    )
 
 
 def rows_from_file(path: Path) -> list[dict]:
@@ -200,7 +236,7 @@ def _fetch_pages(key: str, suffix: str) -> list[dict]:
         url = API.format(key=quote(key, safe=''), start=start, end=start + PAGE - 1) + suffix
         try:
             data = http.get_sync(url, timeout=30.0).json()['COOKRCP01']
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - redact API key from every transport error
             message = str(exc).replace(key, '***').replace(quote(key, safe=''), '***')
             raise RuntimeError(f'식품안전나라 호출 실패: {message}') from None
         code = (data.get('RESULT') or {}).get('CODE')
@@ -228,6 +264,7 @@ def main():
     only = set(args.items.split(',')) if args.items else None
     chosen = select(rows, item_labels(), only_items=only, max_per_item=args.max_per_item)
     counts = write_docs(chosen, prune=args.prune)
+    write_ontology(chosen)
     print(f'레시피 {len(rows)}개 중 우리 품목이 들어간 {len(chosen)}개 → {OUT_DIR}')
     summary('recipes', counts)
     print('다음: python -m scripts.load_sources && python -m scripts.load_documents')

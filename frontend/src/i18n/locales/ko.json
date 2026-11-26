@@ -655,5 +655,16 @@
   "reviewCancel": "취소",
   "reviewMine": "내 리뷰",
   "reviewMarketAverage": "시장 평균",
-  "reviewSurvey": " · aT {month}월 {day}일 조사"
+  "reviewSurvey": " · aT {month}월 {day}일 조사",
+  "recipeForItem": "이 재료로 만드는 요리",
+  "recipeShopping": "레시피로 장보기",
+  "recipeEmpty": "이 재료가 주재료인 레시피는 아직 없어요.",
+  "recipeCoverage": "재료 {total}개 중 {available}개를 이 시장 {stores}곳에서",
+  "recipeIngredients": "재료",
+  "recipeSteps": "만드는 법 · 원문",
+  "recipeOutside": "시장 밖 재료",
+  "recipeItemStores": "이 시장 {count}곳",
+  "recipeCategoryStores": "{category} 점포 {count}곳",
+  "recipeSource": "출처: ",
+  "recipeSourceName": "식품의약품안전처 조리식품 레시피 DB"
 }

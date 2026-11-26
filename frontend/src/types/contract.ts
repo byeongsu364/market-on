@@ -289,7 +289,8 @@ export type MarketApplication = {
   demand: MarketDemand;
 };
 
-export type AskIntent = 'select' | 'store' | 'prep' | 'season' | 'story' | 'price' | 'where';
+export type AskIntent =
+  'select' | 'store' | 'prep' | 'season' | 'story' | 'price' | 'where' | 'recipe';
 export type AskRequest = {
   question?: string;
   intent?: AskIntent;
@@ -306,12 +307,13 @@ export type Citation = {
 };
 export type PriceView = Price;
 export type AskResponse = {
-  kind: 'answer' | 'no_evidence' | 'need_item' | 'price' | 'where' | 'out_of_scope';
+  kind: 'answer' | 'no_evidence' | 'need_item' | 'price' | 'where' | 'recipes' | 'out_of_scope';
   intent: AskIntent | null;
   item_id: string | null;
   item_name: string | null;
   answer: string | null;
   citations: Citation[];
+  recipes?: Recipe[];
   candidates?: { item_id: string; name: string }[];
   price?: PriceView;
   stores?: { store_id: string; name: string }[];
@@ -365,7 +367,7 @@ export type StoreExtra = {
   lng?: number | null;
   category?:
     | StoreCategory
-    | `store_category:${'produce' | 'dried' | 'seafood' | 'side_dish' | 'meat' | 'snack'}`
+    | `store_category:${'produce' | 'fruit' | 'vegetable' | 'dried' | 'seafood' | 'side_dish' | 'meat' | 'snack'}`
     | null;
   naver_name?: string;
   verified?: boolean;
@@ -451,3 +453,25 @@ export type ActiveMarketStats = {
   merchants_approved: number;
   views_week: number;
 };
+
+export type RecipeIngredient = {
+  text: string;
+  item_id: string | null;
+  store_category: string | null;
+  role: '주재료' | '부재료';
+  where: 'item' | 'category' | 'outside';
+  stores: number;
+};
+export type Recipe = {
+  recipe_id: string;
+  name: string;
+  dish_type: string;
+  cook_method: string;
+  kcal: string | null;
+  main_item_id: string | null;
+  reason: string;
+  coverage: { total: number; in_market: number; stores: number };
+  ingredients: RecipeIngredient[];
+  source: Omit<Citation, 'draft'>;
+};
+export type RecipeDetail = Recipe & { steps: string; ingredient_lines: string[] };

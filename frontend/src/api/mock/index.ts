@@ -1,3 +1,4 @@
+import { getRecipes } from './recipes';
 import { mockVarieties } from './varieties';
 import type {
   MarketMap,
@@ -229,13 +230,15 @@ export async function ask(
 ): Promise<import('../../types/contract').AskResponse> {
   const intent =
     data.intent ??
-    (['제철', '언제', '철', '품종', '산지'].some((w) => data.question?.includes(w))
-      ? 'season'
-      : ['특징', '종류', '맛이 어때', '차이'].some((w) => data.question?.includes(w))
-        ? 'story'
-        : data.question?.includes('가격')
-          ? 'price'
-          : 'store');
+    (['뭐 해 먹', '요리', '레시피'].some((w) => data.question?.includes(w))
+      ? 'recipe'
+      : ['제철', '언제', '철', '품종', '산지'].some((w) => data.question?.includes(w))
+        ? 'season'
+        : ['특징', '종류', '맛이 어때', '차이'].some((w) => data.question?.includes(w))
+          ? 'story'
+          : data.question?.includes('가격')
+            ? 'price'
+            : 'store');
   const item = items.find((i) => i.item_id === data.item_id || data.question?.includes(i.name));
   const base: import('../../types/contract').AskResponse = {
     kind: 'need_item',
@@ -253,6 +256,15 @@ export async function ask(
       ...base,
       candidates: items.slice(0, 5).map((i) => ({ item_id: i.item_id, name: i.name })),
     }));
+  if (intent === 'recipe') {
+    const recipes = await getRecipes({ item_id: item.item_id, market_id: data.market_id });
+    return {
+      ...base,
+      kind: 'recipes',
+      recipes,
+      citations: recipes.map((r) => ({ ...r.source, draft: false })),
+    };
+  }
   if (intent === 'price')
     return {
       ...base,

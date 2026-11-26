@@ -22,7 +22,7 @@ def parse(text):
 def classify(question):
     """규칙으로 못 나눈 질문만 여기로 와요 (route = 젬마)."""
     prompt = (
-        '다음 질문의 의도를 select, store, prep, season, story, price, where 중 하나로 분류하세요. 해당 없으면 out_of_scope. JSON만: {"intent":"..."}\n질문: '
+        '다음 질문의 의도를 select, store, prep, season, story, price, where, recipe 중 하나로 분류하세요. 해당 없으면 out_of_scope. JSON만: {"intent":"..."}\n질문: '
         + json.dumps(question, ensure_ascii=False)
     )
     routed = run(

@@ -1,3 +1,4 @@
+import Recipes from '../../components/domain/Recipes';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useResult } from '../../hooks/useResult';
@@ -384,6 +385,7 @@ export default function Result() {
               )}
 
               {!checksFirst && checklist}
+              <Recipes itemId={f.itemId} />
 
               <div className={s.group}>
                 <AskPanel key={`ask:${f.itemId}`} itemId={f.itemId} />

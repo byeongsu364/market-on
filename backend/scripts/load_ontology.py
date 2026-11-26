@@ -2,23 +2,39 @@
 
 import argparse
 from collections import Counter
+
 import yaml
+
 from app.db.pool import connection
 from app.db.repositories import knowledge_repo as repo
-from ._common import DATA, summary, run
+
+from ._common import DATA, run, summary
 
 
 def load_ontology(conn, directory=DATA / 'ontology', *, prune=False, cleanup=True):
     records = []
+    top_relations = []
     for path in sorted(directory.glob('*.yaml')):
         text = path.read_text()
         value = yaml.safe_load(text)
         node = yaml.compose(text)
-        entities_node = next(v for k, v in node.value if k.value == 'entities')
-        for entity, entity_node in zip(value['entities'], entities_node.value):
+        entities_node = next((v for k, v in node.value if k.value == 'entities'), None)
+        top_node = next((v for k, v in node.value if k.value == 'relations'), None)
+        for relation, rn in zip(value.get('relations', []), top_node.value if top_node else []):
+            top_relations.append((path, relation, rn.start_mark.line + 1))
+        for entity, entity_node in zip(
+            value.get('entities', []), entities_node.value if entities_node else []
+        ):
             relations_node = next((v for k, v in entity_node.value if k.value == 'relations'), None)
             lines = [n.start_mark.line + 1 for n in relations_node.value] if relations_node else []
             records.append((path, entity, lines))
+    by_id = {entity['id']: (entity, lines) for _, entity, lines in records}
+    for path, relation, line in top_relations:
+        if relation.get('s') not in by_id:
+            raise ValueError(f'{path}:{line}: 알 수 없는 주어 {relation.get("s")}')
+        entity, lines = by_id[relation['s']]
+        entity.setdefault('relations', []).append(relation)
+        lines.append((path, line))
     # Generated nodes carry an ownership marker so removed criteria can be pruned
     # without deleting manually authored criterion entities.
     generated = []
@@ -58,7 +74,7 @@ def load_ontology(conn, directory=DATA / 'ontology', *, prune=False, cleanup=Tru
         for path, entity, lines in records:
             relations = []
             for relation, line in zip(entity.get('relations', []), lines):
-                location = f'{path}:{line}'
+                location = f'{line[0]}:{line[1]}' if isinstance(line, tuple) else f'{path}:{line}'
                 if (
                     ('o' in relation) == ('v' in relation)
                     or relation.get('o', True) is None
@@ -101,7 +117,7 @@ def load_ontology(conn, directory=DATA / 'ontology', *, prune=False, cleanup=Tru
 def ontology_ids(directory):
     ids = set()
     for path in sorted(directory.glob('*.yaml')):
-        for entity in yaml.safe_load(path.read_text())['entities']:
+        for entity in yaml.safe_load(path.read_text()).get('entities', []):
             ids.add(entity['id'])
             ids.update(
                 f'crit:{entity["id"].removeprefix("item:")}-{c["key"]}'

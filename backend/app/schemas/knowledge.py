@@ -1,8 +1,8 @@
 """Shared ingestion and retrieval value types."""
 
 from dataclasses import dataclass, field
-from typing import Literal
 from datetime import date
+from typing import Literal
 
 
 @dataclass
@@ -20,6 +20,10 @@ class Document:
     entity_names: list[str] = field(default_factory=list)
     review_status: Literal['draft', 'reviewed', 'rejected'] = 'draft'
     varieties: list[str] = field(default_factory=list)
+    main_item: str | None = None
+    main_items: list[str] = field(default_factory=list)
+    dish_type: str = ''
+    cook_method: str = ''
 
 
 @dataclass
@@ -29,6 +33,7 @@ class Chunk:
     entity_ids: set[str] = field(default_factory=set)
     variety_id: str | None = None
     numbers: list[str] = field(default_factory=list)
+    props: dict = field(default_factory=dict)
 
 
 @dataclass

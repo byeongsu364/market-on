@@ -10,6 +10,7 @@ from app.schemas.knowledge import Chunk, Document, UpsertResult
 
 from .fact_check import extract_numbers
 from .ontology import load_label_dictionary, normalize
+from .recipes import metadata, without_tips
 
 TOPICS = {
     'criterion': '확인 포인트',
@@ -65,10 +66,15 @@ def chunk_document(doc: Document) -> list[Chunk]:
     topic = TOPICS[doc.doc_type]
     names = ', '.join(doc.entity_names)
     prefix = f'[{names + " · " if names else ""}{topic}] '
-    if doc.doc_type in WHOLE or len(doc.body) <= 600:
-        pieces = [doc.body]
+    body = without_tips(doc.body) if doc.doc_type == 'recipe' else doc.body
+    overview, separator, steps = body.partition('## 만드는 법')
+    if doc.doc_type == 'recipe' and separator and steps.strip():
+        # 레시피 = 개요·재료 1 + 만드는 법 1. 만드는 법 단락이 없으면 아래 일반 규칙(길면 나눔)
+        pieces = [doc.title + '\n' + overview.strip(), separator + steps]
+    elif doc.doc_type in WHOLE or len(body) <= 600:
+        pieces = [body]
     else:
-        sections = re.split(r'(?m)(?=^##\s+)', doc.body)
+        sections = re.split(r'(?m)(?=^##\s+)', body)
         pieces = [
             piece
             for section in sections
@@ -87,6 +93,12 @@ def _hash(*values):
 def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
     if doc.review_status not in {'draft', 'reviewed', 'rejected'}:
         raise ValueError('알 수 없는 review_status')
+    recipe_props = {}
+    if doc.doc_type == 'recipe':
+        from app.db.repositories.recipe_repo import seasons
+
+        recipe_props = metadata(doc, seasons(conn))
+        doc = replace(doc, body=without_tips(doc.body))
     digest = _hash(
         doc.review_status,
         doc.varieties,
@@ -99,6 +111,8 @@ def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
         doc.market_id,
         str(doc.published) if doc.published else None,
     )
+    if recipe_props:
+        digest = _hash(digest, recipe_props)
     with conn.transaction():
         # Serialize writers for the same stable key, including first insertion.
         repo.lock_document(conn, doc.doc_key)
@@ -118,6 +132,7 @@ def upsert_document(conn, doc: Document, *, embedder=None) -> UpsertResult:
         did = repo.insert_document(conn, doc, digest)
         ids = []
         for chunk in chunks:
+            chunk.props = recipe_props
             chunk.entity_ids |= tag_entities(chunk.content, dictionary)
             chunk.numbers = extract_numbers(chunk.content)
             if doc.varieties:

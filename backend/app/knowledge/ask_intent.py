@@ -1,7 +1,8 @@
 """Keyword-first closed-set intent resolution."""
 
-INTENTS = ('select', 'store', 'prep', 'season', 'price', 'where', 'story')
+INTENTS = ('select', 'store', 'prep', 'season', 'price', 'where', 'story', 'recipe')
 RULES = (
+    ('recipe', ('뭐 해 먹', '뭐 해먹', '뭐해먹', '요리', '레시피')),
     ('store', ('보관', '냉장', '냉동', '몇 도', '몇도', '온도', '며칠', '얼마나', '기간')),
     ('prep', ('손질', '씻', '다듬')),
     # 시기·산지를 묻는 말이 있으면 제철(온톨로지), 아니면 품종·특징은 특징 문서

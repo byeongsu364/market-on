@@ -57,11 +57,12 @@ def test_render_matches_template_and_loader(tmp_path):
     assert '## 재료\n- 대파 50g(1/2대)\n- 달걀 100g(2개)\n- 양념 : 소금 약간' in text
     assert '## 만드는 법\n1. 대파는 송송 썰어요.\n2. 달걀을 풀어 함께 볶아요.' in text
     assert '요리 종류: 반찬 · 조리 방법: 볶기 · 열량: 150kcal' in text
-    assert '<b>' not in text and '- 소금 대신 대파 향으로 간을 줄여요.' in text
+    assert '<b>' not in text and '## 팁' not in text
+    assert '소금 대신' not in text
     assert text.splitlines()[-1] == '출처: 조리식품의 레시피 DB (식품의약품안전처 식품안전나라)'
     salad = (tmp_path / 'foodsafety-13.md').read_text(encoding='utf-8')
     assert '1. 사과와 양파는 얇게 썰어요.' in salad
-    assert '## 팁\n- 첫째 팁이에요.\n- 둘째 팁이에요.' in salad
+    assert '## 팁' not in salad
     doc = read_document(tmp_path / 'foodsafety-13.md', tmp_path)
     assert doc.doc_type == 'recipe' and doc.source_key == ir.SOURCE_KEY
     assert doc.entities == ['item:apple', 'item:onion', 'item:pear']
@@ -82,7 +83,7 @@ def test_rerun_is_stable_and_prune_only_touches_generated(tmp_path):
 def test_max_per_item_and_item_filter():
     many = [row(100 + i, f'대파 요리 {i}', '대파 10g', ['1. 끝']) for i in range(8)]
     assert len(ir.select(many, ir.item_labels(), max_per_item=3)) == 3
-    assert ir.select(ROWS, ir.item_labels(), only_items={'item:pear'}).keys() == {'13'}
+    assert ir.select(ROWS, ir.item_labels(), only_items={'item:pear'}) == {}
 
 
 def test_rows_from_file_accepts_api_response(tmp_path):

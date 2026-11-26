@@ -141,3 +141,28 @@ questions:
 - id: origin
   question: 이 배가 나주산이라고 확실히 말할 수 있어요?
   expect: [no_evidence, out_of_scope, need_item]
+- id: green_onion-recipe
+  item_id: item:green_onion
+  intent: recipe
+  question: 대파로 뭐 해 먹지?
+  expect: recipes
+- id: onion-recipe
+  item_id: item:onion
+  intent: recipe
+  question: 양파로 뭐 해 먹지?
+  expect: recipes
+- id: apple-recipe
+  item_id: item:apple
+  intent: recipe
+  question: 사과로 뭐 해 먹지?
+  expect: recipes
+- id: pear-recipe
+  item_id: item:pear
+  intent: recipe
+  question: 배로 뭐 해 먹지?
+  expect: recipes
+- id: mandarin-recipe
+  item_id: item:mandarin
+  intent: recipe
+  question: 귤로 뭐 해 먹지?
+  expect: recipes
