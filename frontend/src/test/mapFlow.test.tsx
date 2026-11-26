@@ -122,6 +122,10 @@ it('`/?market=market:demo`는 약도에 경계·핀·편의시설과 점포 목�
   fireEvent.click(screen.getByRole('tab', { name: '제철과 시세' }));
   expect(here()).toHaveTextContent('tab=info');
   expect(await screen.findByRole('heading', { name: '오늘 기준시세' })).toBeInTheDocument();
+  // 전통시장 기준시세와 대형마트 평균을 같이 보여 줌
+  expect((await screen.findAllByText('대형마트')).length).toBeGreaterThan(0);
+  expect(screen.getAllByText('전통시장').length).toBeGreaterThan(0);
+  expect(screen.getByText(/백화점 시세는 aT 조사에 따로 없어요/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('tab', { name: '마감세일 1' }));
   expect(await screen.findByRole('heading', { name: '지금 마감세일' })).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /점포 A-05/ })).toHaveAttribute(

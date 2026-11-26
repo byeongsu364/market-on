@@ -821,3 +821,27 @@
     transition: none;
   }
 }
+
+/* 제철과 시세: 전통시장 기준시세와 대형마트 평균을 오른쪽에 위아래로(2026-11-27) */
+.marketPrices {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.marketPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.marketLabel {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.priceMart {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-body);
+  font-variant-numeric: tabular-nums;
+}
