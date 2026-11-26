@@ -115,7 +115,7 @@ def test_criterion_expansion_without_db(monkeypatch):
     criterion = saved['crit:green_onion-leaf']
     assert criterion['type'] == 'criterion'
     assert criterion['name_ko'] == '잎 끝까지 탄력 있어 보이고 마른 잎이 섞여 있지 않아요'
-    assert criterion['source'] == 'src:nongsaro-month-food-green-onion'
+    assert criterion['source'] == 'src:nics-month-food-green-onion'
     assert criterion['labels']['en'] == ['Healthy leaves']
     assert ('hasCriterion', 'crit:green_onion-leaf', None, 42, None) in relations[
         'item:green_onion'

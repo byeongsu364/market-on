@@ -1,5 +1,5 @@
 ---
-source: src:nongsaro-month-food-green-onion
+source: src:nics-month-food-green-onion
 doc_type: story
 lang: ko
 title: 대파 품종과 특징
@@ -12,4 +12,4 @@ store_id: null
 - 추위와 더위에 잘 견뎌 우리나라 전역에서 재배해요.
 - 품종은 한지형(추위에 강하고 잎집이 길어 연백재배에 맞음), 난지형(더위에 강하고 가늘며 잎파로 재배), 중간형으로 나뉘어요.
 
-출처: 이달의 식재료 - 움파(대파) (농촌진흥청 농사로)
+출처: 농식품 이달의 식재료 - 움파(대파) (농촌진흥청 국립식량과학원, 공공데이터포털)

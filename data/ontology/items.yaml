@@ -20,20 +20,20 @@ entities:
     labels: {"ko": ["대파", "파"]}
     vision: [green onion, scallion]
     criteria:
-      - {key: leaf, text: 잎 끝까지 탄력 있어 보이고 마른 잎이 섞여 있지 않아요, source: 'src:nongsaro-month-food-green-onion', labels: {en: [Healthy leaves]}}
-      - {key: stem, text: 줄기의 흰 부분이 많고 깨끗해요, source: 'src:nongsaro-month-food-green-onion'}
-      - {key: root, text: 흰 뿌리 쪽을 살짝 만지면 무르지 않고 탄력이 있어요, source: 'src:nongsaro-month-food-green-onion'}
-      - {key: bunch, text: 묶음 안의 길이와 굵기가 비슷해요, source: 'src:nongsaro-month-food-green-onion'}
+      - {key: leaf, text: 잎 끝까지 탄력 있어 보이고 마른 잎이 섞여 있지 않아요, source: 'src:nics-month-food-green-onion', labels: {en: [Healthy leaves]}}
+      - {key: stem, text: 줄기의 흰 부분이 많고 깨끗해요, source: 'src:nics-month-food-green-onion'}
+      - {key: root, text: 흰 뿌리 쪽을 살짝 만지면 무르지 않고 탄력이 있어요, source: 'src:nics-month-food-green-onion'}
+      - {key: bunch, text: 묶음 안의 길이와 굵기가 비슷해요, source: 'src:nics-month-food-green-onion'}
     relations:
       - {p: hasGrade, o: 'variety:green_onion-daepa', props: {default: true}}
       - {p: isA, o: 'cat:vegetable'}
       - {p: soldBy, o: 'unit:bunch', props: {factor_kg: 0.8, default: true}, source: 'src:team-draft'}
       - {p: soldBy, o: 'unit:kg', props: {factor_kg: 1}}
-      - {o: 'season:03', p: inSeason, source: 'src:nongsaro-month-food-list'}
-      - {p: harvestPeriod, source: 'src:nongsaro-month-food-green-onion', v: {label: 가을~겨울, note: 일반적으로 늦가을이나 초봄에 씨를 뿌려 수확}}
-      - {o: 'region:busan-myeongji', p: producedIn, source: 'src:nongsaro-month-food-green-onion'}
-      - {o: 'region:jeonnam-coast', p: producedIn, source: 'src:nongsaro-month-food-green-onion'}
-      - {o: 'region:chungnam-asan', p: producedIn, source: 'src:nongsaro-month-food-green-onion'}
+      - {o: 'season:03', p: inSeason, source: 'src:nics-month-food-list'}
+      - {p: harvestPeriod, source: 'src:nics-month-food-green-onion', v: {label: 가을~겨울, note: 일반적으로 늦가을이나 초봄에 씨를 뿌려 수확}}
+      - {o: 'region:busan-myeongji', p: producedIn, source: 'src:nics-month-food-green-onion'}
+      - {o: 'region:jeonnam-coast', p: producedIn, source: 'src:nics-month-food-green-onion'}
+      - {o: 'region:chungnam-asan', p: producedIn, source: 'src:nics-month-food-green-onion'}
   - id: item:onion
     type: "item"
     name_ko: "양파"
@@ -41,17 +41,17 @@ entities:
     attrs: {}
     labels: {"ko": ["양파"], "en": ["onion"]}
     criteria:
-      - {key: firm, text: 손으로 눌러 보면 무르지 않고 단단해요, source: 'src:nongsaro-month-food-onion'}
-      - {key: skin, text: 껍질이 잘 말라 있고 윤기가 있어요, source: 'src:nongsaro-month-food-onion'}
-      - {key: sprout, text: 싹이 나 있지 않아요, source: 'src:nongsaro-month-food-onion'}
-      - {key: weight, text: 들어 보면 크기에 비해 무게감이 있어요, source: 'src:nongsaro-month-food-onion'}
+      - {key: firm, text: 손으로 눌러 보면 무르지 않고 단단해요, source: 'src:nics-month-food-onion'}
+      - {key: skin, text: 껍질 색이 선명하고 잘 말라 있어요, source: 'src:nics-month-food-onion'}
+      - {key: sprout, text: 싹이 나 있지 않아요, source: 'src:nics-month-food-onion'}
+      - {key: weight, text: 들어 보면 크기에 비해 무게감이 있어요, source: 'src:nics-month-food-onion'}
     relations:
       - {p: hasGrade, o: 'variety:onion-onion', props: {default: true}}
       - {p: isA, o: 'cat:vegetable'}
       - {p: soldBy, o: 'unit:kg', props: {factor_kg: 1, default: true}}
-      - {o: 'season:06', p: inSeason, source: 'src:nongsaro-month-food-list'}
-      - {p: harvestPeriod, source: 'src:nongsaro-month-food-onion', v: {from: '04', label: 4~6월, note: 가을에 씨를 뿌려 이듬해 수확, to: '06'}}
-      - {p: harvestPeriod, source: 'src:nongsaro-month-food-onion-2', v: {from: '09', label: 9월 상·중순, note: 고랭지 여름양파, to: '09'}}
+      - {o: 'season:06', p: inSeason, source: 'src:nics-month-food-list'}
+      - {p: harvestPeriod, source: 'src:rda-early-onion-2022', v: {from: '04', label: 4~6월, note: 조생종 4월~5월 초, 중생종·만생종 5~6월, to: '06'}}
+      - {p: harvestPeriod, source: 'src:nics-month-food-onion', v: {from: '09', label: 9월 상·중순, note: 고랭지 여름양파, to: '09'}}
   - id: item:apple
     type: "item"
     name_ko: "사과"
@@ -59,18 +59,17 @@ entities:
     attrs: {}
     labels: {"ko": ["사과"], "en": ["apple"]}
     criteria:
-      - {key: color, text: 껍질 색이 고르고 밝아요, source: 'src:nongsaro-month-food-apple'}
-      - {key: stem, text: 꼭지에 푸른색이 돌고 물기가 있어 보여요, source: 'src:nongsaro-month-food-apple'}
-      - {key: surface, text: 흠집이나 병·벌레 자국이 없어요, source: 'src:nongsaro-month-food-apple'}
-      - {key: tap, text: 가볍게 두드리면 탄력 있고 꽉 찬 느낌이 나요, source: 'src:nongsaro-month-food-apple'}
+      - {key: color, text: 껍질 색이 고르고 밝아요, source: 'src:nics-month-food-apple'}
+      - {key: stem, text: 꼭지에 푸른색이 돌고 물기가 있어 보여요, source: 'src:nics-month-food-apple'}
+      - {key: surface, text: 흠집이나 병·벌레 자국이 없어요, source: 'src:nics-month-food-apple'}
+      - {key: tap, text: 가볍게 두드리면 탄력 있고 꽉 찬 느낌이 나요, source: 'src:nics-month-food-apple'}
     relations:
       - {p: hasGrade, o: 'variety:apple-fuji', props: {default: true}}
       - {p: hasGrade, o: 'variety:apple-hongro'}
       - {p: hasGrade, o: 'variety:apple-shinano-gold'}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
-      - {o: 'season:09', p: inSeason, source: 'src:nongsaro-month-food-list'}
-      - {o: 'season:10', p: inSeason, source: 'src:nongsaro-month-food-list'}
+      - {o: 'season:11', p: inSeason, source: 'src:nics-month-food-list'}
   - id: item:pear
     type: "item"
     name_ko: "배"
@@ -78,16 +77,15 @@ entities:
     attrs: {}
     labels: {"ko": ["배"], "en": ["pear"]}
     criteria:
-      - {key: color, text: 겉이 맑고 투명한 노란빛이에요, source: 'src:nongsaro-month-food-pear'}
-      - {key: skin, text: 껍질이 쭈글쭈글하지 않고 매끄러워요, source: 'src:nongsaro-month-food-pear'}
-      - {key: stem, text: 꼭지 부분이 깊숙이 들어가 있어요, source: 'src:nongsaro-month-food-pear'}
-      - {key: calyx, text: 꽃받침 부위가 파랗지 않고 노랗게 변해 있어요, source: 'src:nongsaro-month-food-pear'}
+      - {key: color, text: 겉이 맑고 투명한 노란빛이에요, source: 'src:nics-month-food-pear'}
+      - {key: skin, text: 껍질이 쭈글쭈글하지 않고 매끄러워요, source: 'src:nics-month-food-pear'}
+      - {key: bottom, text: 꼭지 반대쪽이 튀어나와 있지 않고 검은 잔금이 없어요, source: 'src:nics-month-food-pear'}
+      - {key: calyx, text: 꽃받침 부위가 파랗지 않고 노랗게 변해 있어요, source: 'src:rda-fruit-choose-store-2007'}
     relations:
       - {p: hasGrade, o: 'variety:pear-shingo', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
-      - {o: 'season:09', p: inSeason, source: 'src:nongsaro-month-food-list'}
-      - {o: 'season:10', p: inSeason, source: 'src:nongsaro-month-food-list'}
+      - {o: 'season:10', p: inSeason, source: 'src:nics-month-food-list'}
   - id: item:sweet_persimmon
     type: "item"
     name_ko: "단감"
@@ -95,15 +93,15 @@ entities:
     attrs: {}
     labels: {"ko": ["단감"], "en": ["sweet persimmon"]}
     criteria:
-      - {key: calyx, text: 꼭지와 과실 사이에 틈 없이 붙어 있어요, source: 'src:nongsaro-month-food-persimmon'}
-      - {key: spots, text: 전체적으로 얼룩이 없어요, source: 'src:nongsaro-month-food-persimmon'}
-      - {key: firm, text: 만져 보면 과육이 단단해요, source: 'src:nongsaro-month-food-persimmon'}
-      - {key: color, text: 껍질의 90% 이상이 황색으로 물들어 있어요, source: 'src:nongsaro-month-food-persimmon'}
+      - {key: calyx, text: 꼭지와 과실 사이에 틈 없이 붙어 있어요, source: 'src:nics-month-food-persimmon'}
+      - {key: spots, text: 전체적으로 얼룩이 없어요, source: 'src:nics-month-food-persimmon'}
+      - {key: firm, text: 만져 보면 과육이 단단해요, source: 'src:nics-month-food-persimmon'}
+      - {key: color, text: 껍질의 90% 이상이 황색으로 물들어 있어요, source: 'src:nics-month-food-persimmon'}
     relations:
       - {p: hasGrade, o: 'variety:sweet_persimmon-fuyu', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
-      - {o: 'season:11', p: inSeason, source: 'src:nongsaro-month-food-persimmon'}
+      - {o: 'season:11', p: inSeason, source: 'src:nics-month-food-list'}
   - id: unit:bunch
     type: unit
     name_ko: 단
@@ -129,7 +127,7 @@ entities:
     kamis: {ctgry_cd: "400", item_cd: "411", vrty_cd: "05", grd_cd: "04", unit: 개, unit_sz: "10"}
     attrs: {}
     relations:
-      - {p: harvestPeriod, source: 'src:nongsaro-month-food-apple', v: {from: '10', label: 10월 하순 이후, note: 만생종}}
+      - {p: harvestPeriod, source: 'src:nics-month-food-apple', v: {from: '10', label: 10월 하순 이후, note: 만생종}}
   - id: variety:apple-hongro
     type: variety
     name_ko: 홍로
@@ -137,7 +135,7 @@ entities:
     kamis: {ctgry_cd: "400", item_cd: "411", vrty_cd: "07", grd_cd: "04", unit: 개, unit_sz: "10"}
     attrs: {}
     relations:
-      - {p: harvestPeriod, source: 'src:nongsaro-month-food-apple', v: {from: '09', label: 9월 상·중순, note: 중생종, to: '09'}}
+      - {p: harvestPeriod, source: 'src:rda-hongro-2022', v: {from: '09', label: 9월 상·중순, note: 중생종 추석용 품종, to: '09'}}
   - id: variety:apple-shinano-gold
     type: variety
     name_ko: 시나노골드
@@ -157,7 +155,7 @@ entities:
     kamis: {ctgry_cd: "400", item_cd: "416", vrty_cd: "00", grd_cd: "04", unit: 개, unit_sz: "5"}
     attrs: {}
     relations:
-      - {p: harvestPeriod, source: 'src:nongsaro-month-food-persimmon', v: {from: '10', label: 10월 하순~11월 상순, note: 남부 주산지는 대개 11월 상순, to: '11'}}
+      - {p: harvestPeriod, source: 'src:rda-persimmon-postharvest', v: {from: '10', label: 10월 하순~11월 상순, note: 남부 주산지는 대개 11월 상순, to: '11'}}
   - id: variety:green_onion-daepa
     type: variety
     name_ko: 대파

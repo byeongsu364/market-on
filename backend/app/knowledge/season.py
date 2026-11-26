@@ -57,7 +57,7 @@ def season_statements(conn, item_id, name, *, variety_id=None, month=None):
         months = ', '.join(f'{m}월' for m in facts['featured_months'])
         statements.append(
             (
-                f"농사로 '이달의 식재료'에서 {name}{'을' if (ord(name[-1]) - 0xAC00) % 28 else '를'} {months} 식재료로 소개해요.",
+                f"농촌진흥청 '이달의 식재료'에서 {name}{'을' if (ord(name[-1]) - 0xAC00) % 28 else '를'} {months} 식재료로 소개해요.",
                 [_source(r) for r in featured],
             )
         )

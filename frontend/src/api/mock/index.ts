@@ -77,12 +77,12 @@ const varietyExtra: Record<string, VarietyExtra> = {
   'variety:apple-fuji': {
     description:
       '후지는 전국에서 재배할 수 있는 품종이고, 완전히 익으면 과육 속에 꿀이 생기고 저장성이 좋아요.',
-    description_source: '농촌진흥청 농사로 · 이달의 식재료 사과',
+    description_source: '농촌진흥청 · 농식품 이달의 식재료 사과',
     harvest: { label: '10월 하순 이후', from: '10' },
   },
   'variety:apple-hongro': {
     description: '홍로는 국내에서 처음 육성한 품종이에요.',
-    description_source: '농촌진흥청 농사로 · 이달의 식재료 사과',
+    description_source: '농촌진흥청 · 농식품 이달의 식재료 사과',
     harvest: { label: '9월 상·중순', from: '09', to: '09' },
   },
   'variety:apple-shinano-gold': { description: null, description_source: null, harvest: null },
@@ -291,13 +291,13 @@ export async function ask(
       { months: number[]; harvest: [string, string, string, string][]; regions?: string[] }
     > = {
       'item:apple': {
-        months: [9, 10],
+        months: [11],
         harvest: [
           ['후지', '10월 하순 이후', '만생종', 'apple'],
-          ['홍로', '9월 상·중순', '중생종', 'apple'],
+          ['홍로', '9월 상·중순', '중생종 추석용 품종', 'apple'],
         ],
       },
-      'item:pear': { months: [9, 10], harvest: [] },
+      'item:pear': { months: [10], harvest: [] },
       'item:sweet_persimmon': {
         months: [11],
         harvest: [['부유', '10월 하순~11월 상순', '남부 주산지는 대개 11월 상순', 'persimmon']],
@@ -305,8 +305,8 @@ export async function ask(
       'item:onion': {
         months: [6],
         harvest: [
-          ['양파', '4~6월', '가을에 씨를 뿌려 이듬해 수확', 'onion'],
-          ['양파', '9월 상·중순', '고랭지 여름양파', 'onion-2'],
+          ['양파', '4~6월', '조생종 4월~5월 초, 중생종·만생종 5~6월', 'onion'],
+          ['양파', '9월 상·중순', '고랭지 여름양파', 'onion'],
         ],
       },
       'item:green_onion': {
@@ -326,7 +326,7 @@ export async function ask(
     if (fact && !variety) {
       const particle = (item.name.charCodeAt(item.name.length - 1) - 0xac00) % 28 ? '을' : '를';
       statements.push(
-        `농사로 '이달의 식재료'에서 ${item.name}${particle} ${fact.months.map((m) => `${m}월`).join(', ')} 식재료로 소개해요.`,
+        `농촌진흥청 '이달의 식재료'에서 ${item.name}${particle} ${fact.months.map((m) => `${m}월`).join(', ')} 식재료로 소개해요.`,
       );
       sources.add(item.item_id === 'item:sweet_persimmon' ? 'persimmon' : 'list');
     }
@@ -346,10 +346,10 @@ export async function ask(
       answer: statements.join(' ') || '이 품목의 제철 자료가 아직 없어요',
       citations: [...sources].map((source) => ({
         draft: false,
-        title: `농사로 이달의 식재료 · ${source}`,
-        publisher: '농촌진흥청 농사로',
+        title: `농식품 이달의 식재료 · ${source}`,
+        publisher: '농촌진흥청 국립식량과학원 (공공데이터포털)',
         url: null,
-        license: '확인 필요',
+        license: '공공데이터포털 이용허락범위 제한 없음',
       })),
     }));
   }
@@ -362,9 +362,9 @@ export async function ask(
       model: 'mock',
       citations: [
         {
-          title: '이달의 식재료 - 움파(대파) · 샘플',
+          title: '농식품 이달의 식재료 - 움파(대파) · 샘플',
           draft: true,
-          publisher: '농촌진흥청 농사로',
+          publisher: '농촌진흥청 국립식량과학원 (공공데이터포털)',
           url: null,
           license: null,
         },
@@ -459,8 +459,8 @@ export async function getInSeason(
   ),
 ) {
   const featured = [
-    { item_id: 'item:apple', name: '사과', months: [9, 10] },
-    { item_id: 'item:pear', name: '배', months: [9, 10] },
+    { item_id: 'item:apple', name: '사과', months: [11] },
+    { item_id: 'item:pear', name: '배', months: [10] },
     { item_id: 'item:sweet_persimmon', name: '단감', months: [11] },
     { item_id: 'item:onion', name: '양파', months: [6] },
     { item_id: 'item:green_onion', name: '대파', months: [3] },
