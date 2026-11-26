@@ -22,7 +22,7 @@
   flex-direction: column;
   gap: 6px;
 }
-.sheet {
+.stage .sheet {
   position: absolute;
   left: 0;
   right: 0;
@@ -33,7 +33,7 @@
   gap: 8px;
   transition: max-height 240ms cubic-bezier(0.32, 0.72, 0, 1);
 }
-.sheet[data-expanded='true'] {
+.stage .sheet[data-expanded='true'] {
   max-height: calc(100% - 84px);
 }
 .sheetBody {
@@ -803,7 +803,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheet {
+  .stage .sheet {
     transition: none;
   }
 }
