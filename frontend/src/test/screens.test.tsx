@@ -13,17 +13,28 @@ it('결과의 실제 체크박스와 가격 비교를 표시하고 판정 표현
   await screen.findByRole('heading', { name: '대파' });
   expect(screen.getByRole('link', { name: '대화로 더 묻기' })).toHaveAttribute(
     'href',
-    '/chat?item_id=item%3Agreen_onion',
+    '/chat?market=market%3Ademo&item=item%3Agreen_onion',
   );
   const checkbox = screen.getAllByRole('checkbox')[0];
   fireEvent.click(checkbox);
   expect(checkbox).toBeChecked();
+  fireEvent.click(screen.getByRole('button', { name: '가격 입력하기' }));
   fireEvent.change(screen.getByLabelText('현장 가격'), { target: { value: '3500' } });
   expect(await screen.findByText('▲ 70%')).toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('현장 가격'), { target: { value: '1800' } });
   expect(await screen.findByText('▼ 13%')).toBeInTheDocument();
   expect(container.textContent).not.toMatch(
-    new RegExp(['신' + '선', '추천 ' + '구매', '등' + '급', '좋' + '음', '나' + '쁨'].join('|')),
+    // "신선도는 직접 확인했어요"처럼 손님에게 맡기는 말은 되고, 신선도 판정은 안 됨
+    new RegExp(
+      [
+        '신' + '선해요',
+        '신' + '선한',
+        '추천 ' + '구매',
+        '등' + '급',
+        '좋' + '음',
+        '나' + '쁨',
+      ].join('|'),
+    ),
   );
 });
 it('지도 3점포 강조와 바텀시트 닫기·포커스 복귀를 지원한다', async () => {
@@ -49,15 +60,14 @@ it('지도 3점포 강조와 바텀시트 닫기·포커스 복귀를 지원한�
 it('홈에서 파일 선택 후 결과와 지도로 이동한다', async () => {
   show('/');
   fireEvent.click(screen.getByRole('link', { name: '찍기' }));
-  const file = screen.getByLabelText('사진 촬영 또는 앨범 선택');
+  const file = await screen.findByLabelText('사진 찍기');
   fireEvent.change(file, {
     target: { files: [new File(['sample'], 'onion.jpg', { type: 'image/jpeg' })] },
   });
-  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
   await waitFor(() => expect(screen.getByRole('button', { name: '결과 보기' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   await screen.findByRole('heading', { name: '대파' });
-  fireEvent.click(screen.getByRole('link', { name: '파는 점포 보기' }));
+  fireEvent.click(await screen.findByRole('link', { name: '3곳 지도' }));
   expect(await screen.findByText('대파 파는 점포 3곳')).toBeInTheDocument();
 });
 it('시장 미선택이면 선택 화면을 거쳐 원래 흐름으로 돌아온다', async () => {
@@ -75,7 +85,7 @@ it('선물 구성은 과일 품목과 출처를 표시한다', async () => {
   fireEvent.click(screen.getByRole('button', { name: '구성 보기' }));
   expect(await screen.findByRole('heading', { name: '사과' })).toBeInTheDocument();
   expect(screen.getAllByRole('link', { name: '점포 보기' })).toHaveLength(2);
-  expect(screen.getAllByText('팀 구성 예시 · 샘플')).toHaveLength(2);
+  expect(screen.getAllByText(/팀 구성 예시 · 샘플/)).toHaveLength(2);
 });
 it('비로그인 상인은 보호된 화면에서 상인 시작으로 이동한다', async () => {
   show('/merchant/sale/new');
@@ -90,14 +100,18 @@ it('화면 오류를 설명하고 재시도 버튼을 표시한다', async () =>
 });
 it('낮은 신뢰도에서 후보와 동의어 검색으로 확정할 수 있다', async () => {
   show('/scan');
-  fireEvent.change(screen.getByLabelText('사진 촬영 또는 앨범 선택'), {
+  fireEvent.change(await screen.findByLabelText('사진 찍기'), {
     target: { files: [new File(['x'], 'uncertain.jpg', { type: 'image/jpeg' })] },
   });
-  fireEvent.click(screen.getByRole('button', { name: '품목 확인하기' }));
-  expect(await screen.findByRole('button', { name: '대파 65%' })).toBeInTheDocument();
+  // 신뢰도가 낮으면 후보를 미리 고르지 않음
+  const candidate = await screen.findByRole('button', { name: '대파' });
+  expect(candidate).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByRole('heading', { name: '어떤 품목인가요?' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '결과 보기' })).toBeDisabled();
   fireEvent.click(screen.getByRole('button', { name: '목록에 없어요' }));
   fireEvent.change(screen.getByRole('searchbox'), { target: { value: '파' } });
-  fireEvent.click(await screen.findByRole('button', { name: '대파' }));
+  const results = await screen.findByRole('group', { name: '검색 결과' });
+  fireEvent.click(await within(results).findByRole('button', { name: '대파' }));
   await waitFor(() => expect(screen.getByRole('button', { name: '결과 보기' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();

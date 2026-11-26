@@ -3,8 +3,8 @@ import { Route, Routes, Link, Navigate, Outlet, useLocation } from 'react-router
 import { SessionProvider } from './store/SessionProvider';
 import PageLayout from './components/layout/PageLayout';
 import Join from './pages/Join';
-import Scan from './pages/Scan';
-import Result from './pages/Result';
+import Scan from './pages/scan/Scan';
+import Result from './pages/scan/Result';
 import MarketMap from './pages/MarketMap';
 import MarketSelect from './pages/MarketSelect';
 import Recommend from './pages/Recommend';
