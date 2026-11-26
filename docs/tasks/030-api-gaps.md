@@ -31,3 +31,8 @@
 | 품종 동의어 | 직접 입력, 검색 | 품종에 `synonyms`(부사 ↔ 후지) | 품목 단위로만 검색 |
 | 레시피 목록과 재료-품목 연결 | Shop "레시피로 장보기" | `/recipes`, 재료별 `item_id` | 넣지 않음 |
 | 품목과 카테고리 연결 | SearchEmpty "수산 점포에서 찾아보세요" | 품목에 `store_category` | "{시장} 점포 지도에서 보기"로 대신 |
+| 운영자용 시장 목록 | WebAdmin "요청만 있는 시장", "이용 중인 시장" | `/admin/markets?status=` | 넣지 않음 |
+| 상인 주별·요일별 조회 수, 길 안내 연 횟수 | WebMerchant 막대그래프 | `/merchant/stats?weeks=` | 넣지 않고 "이 세일을 본 사람"만 |
+| 가입 날짜 | Pending "신청한 날" | `/auth/me`에 `created_at` | 뺌 |
+| 마감세일 품종 | SaleNew 품종 칩 | `SaleCreate`에 `variety_id` | 넣지 않음 |
+| 점포 결제 수단·한 줄 소개 저장 | StoreEdit | `PATCH /merchant/store`에 `payments`, `intro` | 넣지 않음 |
