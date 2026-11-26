@@ -125,3 +125,16 @@ def search(conn, q):
         for m in market_request_repo.search(conn, q.strip())
         if m['lat'] is not None and m['lng'] is not None
     ]
+
+
+def selling_stores(conn, market_id, item_id):
+    if store_repo.get_market(conn, market_id) is None:
+        raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
+    ids = {
+        r['store_id'] for r in store_repo.market_items(conn, market_id) if r['item_id'] == item_id
+    }
+    return [
+        {'store_id': s['id'], 'name': s['name_ko']}
+        for s in store_repo.list_stores(conn, market_id)
+        if s['active'] and s['id'] in ids
+    ]

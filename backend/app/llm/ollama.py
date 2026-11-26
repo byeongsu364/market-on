@@ -27,7 +27,8 @@ class OllamaProvider(LLMProvider):
                     'model': settings.OLLAMA_EMBEDDING_MODEL,
                     'input': batch,
                 },
-                timeout=120.0,
+                # 문서 적재는 오래 걸려도 되지만, 서버가 꺼져 있으면 연결 단계에서 빨리 포기
+                timeout=http_timeout('gemma', 120.0),
             ).json()['embeddings']
             if any(len(row) != settings.EMBEDDING_DIM for row in rows):
                 raise AppError('EMBEDDING_DIM_MISMATCH', '임베딩 차원이 설정과 다릅니다.')

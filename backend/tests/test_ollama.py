@@ -32,7 +32,10 @@ def test_batches(configured, monkeypatch, task):
     monkeypatch.setattr(http, 'post_sync', post)
     assert len(configured.embed(['x'] * 65, task=task)) == 65
     assert [len(c[1]['input']) for c in calls] == [32, 32, 1]
-    assert all(c[0] == 'http://localhost:11434/api/embed' and c[2] == 120 for c in calls)
+    assert all(
+        c[0] == 'http://localhost:11434/api/embed' and c[2] == http_timeout('gemma', 120.0)
+        for c in calls
+    )
     assert all(c[1]['model'] == settings.OLLAMA_EMBEDDING_MODEL for c in calls)
     assert configured.embed([], task=task) == []
     assert len(calls) == 3

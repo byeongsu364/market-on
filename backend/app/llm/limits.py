@@ -6,7 +6,7 @@ PROVIDER_TIMEOUTS = {'gemma': 45.0, 'ollama': 45.0, 'openai': 30.0}
 CONNECT_TIMEOUT = 5.0
 
 
-def http_timeout(name):
+def http_timeout(name, total=None):
     import httpx
 
-    return httpx.Timeout(PROVIDER_TIMEOUTS[name], connect=CONNECT_TIMEOUT)
+    return httpx.Timeout(total or PROVIDER_TIMEOUTS[name], connect=CONNECT_TIMEOUT)

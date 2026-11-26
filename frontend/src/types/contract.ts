@@ -222,3 +222,33 @@ export type MarketApplication = {
   reviewed_at: string | null;
   demand: MarketDemand;
 };
+
+export type AskIntent = 'select' | 'store' | 'prep' | 'season' | 'price' | 'where';
+export type AskRequest = {
+  question?: string;
+  intent?: AskIntent;
+  item_id?: string;
+  market_id?: string;
+  lang?: 'ko';
+};
+export type Citation = {
+  title: string;
+  publisher: string | null;
+  url: string | null;
+  license: string | null;
+};
+export type PriceView = Price;
+export type AskResponse = {
+  kind: 'answer' | 'no_evidence' | 'need_item' | 'price' | 'where' | 'out_of_scope';
+  intent: AskIntent | null;
+  item_id: string | null;
+  item_name: string | null;
+  answer: string | null;
+  citations: Citation[];
+  candidates?: { item_id: string; name: string }[];
+  price?: PriceView;
+  stores?: { store_id: string; name: string }[];
+  model: string | null;
+  cached: boolean;
+  removed: number;
+};

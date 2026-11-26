@@ -116,3 +116,64 @@ export const recommend = (q: RecommendRequest): Promise<RecommendResponse> =>
       sources: ['팀 구성 예시 · 샘플'],
     })),
   }));
+
+export async function ask(
+  data: import('../../types/contract').AskRequest,
+): Promise<import('../../types/contract').AskResponse> {
+  const intent = data.intent ?? (data.question?.includes('가격') ? 'price' : 'store');
+  const item = items.find((i) => i.item_id === data.item_id || data.question?.includes(i.name));
+  const base: import('../../types/contract').AskResponse = {
+    kind: 'need_item',
+    intent,
+    item_id: item?.item_id ?? null,
+    item_name: item?.name ?? null,
+    answer: null,
+    citations: [],
+    model: null,
+    cached: false,
+    removed: 0,
+  };
+  if (!item)
+    return mock(() => ({
+      ...base,
+      candidates: items.slice(0, 5).map((i) => ({ item_id: i.item_id, name: i.name })),
+    }));
+  if (intent === 'price')
+    return {
+      ...base,
+      kind: 'price',
+      price: await price({
+        item_id: item.item_id,
+        market_id: data.market_id ?? '',
+        unit: item.default_unit,
+      }),
+    };
+  if (intent === 'where') {
+    if (!data.market_id)
+      throw { code: 'MARKET_REQUIRED', message: '시장을 선택해 주세요.', status: 422 };
+    return mock(() => ({
+      ...base,
+      kind: 'where',
+      stores: stores
+        .filter((s) => s.sells.includes(item.item_id))
+        .map((s) => ({ store_id: s.store_id, name: s.name })),
+    }));
+  }
+  if (item.item_id === 'item:green_onion' && intent === 'store')
+    return mock(() => ({
+      ...base,
+      kind: 'answer',
+      answer:
+        '대파는 비닐봉지나 신문지에 싸서 냉장 보관해요. 씻었다면 물기를 없앤 뒤 밀폐용기에 담아 냉장 보관해요.',
+      model: 'mock',
+      citations: [
+        {
+          title: '이달의 식재료 - 움파(대파) · 샘플',
+          publisher: '농촌진흥청 농사로',
+          url: null,
+          license: null,
+        },
+      ],
+    }));
+  return mock(() => ({ ...base, kind: 'no_evidence', answer: '이 품목의 자료가 아직 없어요.' }));
+}
