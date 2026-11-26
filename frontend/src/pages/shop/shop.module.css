@@ -471,8 +471,15 @@
   align-self: flex-start;
   max-width: 300px;
 }
+/* 구성은 카드 말풍선: 흰 면 + 가는 테두리(안의 점포 칩·품목 타일이 묻히지 않게) */
 .botWide .plan {
+  border: 1px solid var(--color-hairline);
   border-top-left-radius: 6px;
+  background: var(--color-canvas);
+}
+/* 끝까지 내릴 때 마지막 빠른 답이 아래 탭에 가리지 않게 */
+.talkEnd {
+  scroll-margin-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 16px);
 }
 .meMsg {
   align-self: flex-end;

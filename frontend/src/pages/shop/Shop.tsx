@@ -365,7 +365,7 @@ export default function Shop() {
         action.error &&
         botRow('error', lastIsMe, <ErrorBox message={action.error} />)}
       {replies}
-      <div ref={endRef} />
+      <div ref={endRef} className={s.talkEnd} />
     </div>
   );
 
