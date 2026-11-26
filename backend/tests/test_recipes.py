@@ -245,7 +245,9 @@ def test_primary_order_and_no_false_main_alias():
         'item:onion',
         'item:apple',
     ]
-    assert recipes.main_items('파프리카 요리', ['파프리카 1개', '다진 대파 5g'], dictionary) == []
+    assert recipes.main_items('파프리카 요리', ['파프리카 1개', '다진 대파 5g'], dictionary) == [
+        'item:paprika'
+    ]  # 047
     chosen = ir.select(
         [{'RCP_SEQ': '1', 'RCP_NM': '사과 요리', 'RCP_PARTS_DTLS': '사과 1개, 양파 1개'}],
         dictionary,

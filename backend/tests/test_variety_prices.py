@@ -300,3 +300,24 @@ def test_history_dates_exclude_mock():
     conn.execute.return_value = []
     price_repo.observation_dates(conn, 'item:pear', None, date(2026, 11, 1), date(2026, 11, 27))
     assert "p.source<>'mock'" in conn.execute.call_args.args[0]
+
+
+def test_baseline_uses_national_rows_without_market(monkeypatch):
+    """축산물처럼 시장 이름 없이 전국 평균 한 줄로만 조사된 행도 기준시세에 써요 (047 검수)."""
+    row = {
+        'exmn_ymd': date(2026, 11, 26),
+        'market_type': 'unknown',
+        'mrkt_cd': 'None',
+        'mrkt_nm': None,
+        'sgg_nm': '전국',
+        'price': 4011,
+        'unit': '구',
+        'unit_sz': '10',
+    }
+    monkeypatch.setattr(price_repo, 'fetch_rows', lambda c, q, params: [dict(row)])
+    result = price_repo.baseline(None, 'item:egg', on_date=date(2026, 11, 27), sgg_nm='동대문구')
+    assert result['scope'] == 'national' and result['all']['avg'] == 4011
+    monkeypatch.setattr(
+        price_repo, 'fetch_rows', lambda c, q, params: [dict(row, mrkt_cd='0110212')]
+    )
+    assert price_repo.baseline(None, 'item:egg', on_date=date(2026, 11, 27)) is None

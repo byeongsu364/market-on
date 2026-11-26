@@ -9,10 +9,10 @@ from fastapi.testclient import TestClient
 
 from app.db.repositories import knowledge_repo
 from app.deps import get_db
-from app.knowledge import season, ask_intent
+from app.knowledge import ask_intent, season
 from app.main import app
 from app.schemas.ask import AskRequest
-from app.services import ask_service, item_service
+from app.services import ask_service
 
 DATA = Path(__file__).resolve().parents[2] / 'data'
 
@@ -62,7 +62,7 @@ def test_data_and_facts(catalog):
         if r['p'] in ('inSeason', 'harvestPeriod', 'producedIn')
     ]
     # 기존 제철·수확·산지 관계 14개 + 귤 12월 제철 관계 1개
-    assert len(edges) == 15
+    assert len(edges) == 26  # 047 이달의 식재료 11품목 추가
     assert all(r.get('source') for r in edges)
     assert not list((DATA / 'rag_docs').glob('*/season.md'))
     assert len(list((DATA / 'rag_docs').glob('*/varieties.md'))) == 6
@@ -78,9 +78,12 @@ def test_data_and_facts(catalog):
         '전남 해안지방',
         '충남 아산',
     ]
-    assert season.season_facts(None, 'item:missing') == dict(
-        featured_months=[], harvest=[], regions=[], sources=[]
-    )
+    assert season.season_facts(None, 'item:missing') == {
+        'featured_months': [],
+        'harvest': [],
+        'regions': [],
+        'sources': [],
+    }
     assert season.season_facts(None, 'item:apple', 11)['featured_months'] == [11]
     assert season.season_facts(None, 'item:apple', 9)['featured_months'] == []
 
@@ -197,7 +200,16 @@ def test_mandarin_december_api(catalog, monkeypatch):
     try:
         with TestClient(app) as client:
             assert client.get('/items/in-season?month=12').json() == [
-                {'item_id': 'item:mandarin', 'name': '귤', 'label': '12월 식재료'}
+                {'item_id': 'item:mandarin', 'name': '귤', 'label': '12월 식재료'},
+                *[
+                    {'item_id': 'item:' + slug, 'name': name, 'label': '12월 식재료'}
+                    for slug, name in [
+                        ('red_bean', '팥'),
+                        ('sweet_potato', '고구마'),
+                        ('spinach', '시금치'),
+                        ('broccoli', '브로콜리'),
+                    ]
+                ],
             ]
     finally:
         app.dependency_overrides.pop(get_db)

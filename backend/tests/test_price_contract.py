@@ -204,10 +204,11 @@ def test_observation_unit_id(monkeypatch):
     query = Mock(return_value=[{'id': 'unit:piece'}])
     monkeypatch.setattr(price_repo, 'fetch_rows', query)
     assert price_repo.observation_unit_id(None, '개', '1') == 'unit:piece'
-    assert query.call_args.args[2] == ('unit:piece',)
+    assert query.call_args.args[2] == ('unit:piece', '개', 1.0, 'unit:piece')
     query.reset_mock()
-    assert price_repo.observation_unit_id(None, '개', '10') is None
-    query.assert_not_called()
+    query.return_value = [{'id': 'unit:piece10'}]
+    assert price_repo.observation_unit_id(None, '개', '10') == 'unit:piece10'
+    assert query.call_args.args[2] == ('', '개', 10.0, '')
     query.return_value = []
     assert price_repo.observation_unit_id(None, 'kg', '1') is None
 

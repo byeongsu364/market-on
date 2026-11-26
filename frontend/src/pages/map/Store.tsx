@@ -42,6 +42,7 @@ import s from './map.module.css';
 /** 점포 상세(시안 Store · WebStore). 점포 QR이 여는 화면이고 주요 버튼은 길 안내 */
 export default function Store() {
   const t = useT();
+  const [showAllItems, setShowAllItems] = useState(false);
   const desktop = useIsDesktop();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -260,7 +261,7 @@ export default function Store() {
           {t('mapSells')}
         </h2>
         <div className={s.chipWrap}>
-          {data.items.map((i) => (
+          {(showAllItems ? data.items : data.items.slice(0, 12)).map((i) => (
             <ChipLink
               key={i.item_id}
               to={ctx.href(`/items/${encodeURIComponent(i.item_id)}`, {
@@ -276,6 +277,11 @@ export default function Store() {
             </ChipLink>
           ))}
         </div>
+        {!showAllItems && data.items.length > 12 && (
+          <button type="button" onClick={() => setShowAllItems(true)}>
+            품목 더 보기 ({data.items.length})
+          </button>
+        )}
       </section>
       {(mapStore?.intro || data.store.intro) && <p>{mapStore?.intro || data.store.intro}</p>}
       <ul className={s.infoList}>

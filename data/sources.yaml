@@ -121,3 +121,84 @@ src:nics-month-food-mandarin:
   license: 공공데이터포털 이용허락범위 제한 없음
   kind: public_api
   retrieved_at: 2026-11-27
+# BEGIN GENERATED AT ITEMS (047)
+# fdmtSn 125
+src:nics-month-food-rice:
+  title: 농식품 이달의 식재료 - 쌀
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 156
+src:nics-month-food-red-bean:
+  title: 농식품 이달의 식재료 - 팥
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 39
+src:nics-month-food-mung-bean:
+  title: 농식품 이달의 식재료 - 녹두
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 143
+src:nics-month-food-sweet-potato:
+  title: 농식품 이달의 식재료 - 고구마
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 139
+src:nics-month-food-napa-cabbage:
+  title: 농식품 이달의 식재료 - 배추
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 59
+src:nics-month-food-spinach:
+  title: 농식품 이달의 식재료 - 시금치
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 131
+src:nics-month-food-squash:
+  title: 농식품 이달의 식재료 - 호박
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 138
+src:nics-month-food-radish:
+  title: 농식품 이달의 식재료 - 무
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 151
+src:nics-month-food-ginger:
+  title: 농식품 이달의 식재료 - 생강
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27
+# fdmtSn 150
+src:nics-month-food-broccoli:
+  title: 농식품 이달의 식재료 - 브로콜리
+  publisher: 농촌진흥청 국립식량과학원 (공공데이터포털)
+  url: https://www.data.go.kr/data/15168024/openapi.do
+  license: 공공데이터포털 이용허락범위 제한 없음
+  kind: public_api
+  retrieved_at: 2026-11-27

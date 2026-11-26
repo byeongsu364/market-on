@@ -149,7 +149,7 @@ def unit_multiplier(source, target):
         except (TypeError, ValueError):
             return 0
 
-    for key in ('factor_kg', 'count'):
+    for key in ('factor_kg', 'count', 'volume_l'):
         a, b = amount(source, key), amount(target, key)
         if a > 0 and b > 0:
             return b / a
@@ -272,8 +272,10 @@ def baseline_unit(conn, baseline, target):
         props = {}
         if raw_unit in ('kg', 'g'):
             props['factor_kg'] = survey_size * (0.001 if raw_unit == 'g' else 1)
-        elif raw_unit in ('개', '포기', '마리', '송이', '손'):
-            props['count'] = survey_size
+        elif raw_unit == 'L':
+            props['volume_l'] = survey_size
+        elif raw_unit in ('개', '포기', '마리', '송이', '손', '구', '장'):
+            props['count'] = survey_size * (2 if raw_unit == '손' else 1)
         factor = unit_multiplier({'id': 'survey', 'props': props}, target)
         if factor is not None:
             multiplier = factor

@@ -3,10 +3,13 @@
 from contextlib import nullcontext
 from copy import deepcopy
 from unittest.mock import Mock
-import yaml
+
 import pytest
-from scripts import load_market_stores as loader
+import yaml
+
 from app.db.repositories import store_repo
+from scripts import load_market_stores as loader
+from tests.test_items_markets_api import public  # noqa: F401 -- pytest fixture
 
 
 @pytest.fixture
@@ -16,16 +19,16 @@ def config():
 
 def fixture_rows():
     return [
-        dict(
-            bizesId=str(i),
-            bizesNm=f'고정상호{i}',
-            indsSclsNm=industry,
-            bldNm=building,
-            rdnmAdr=address,
-            flrNo='1',
-            lon=127.04,
-            lat=37.58,
-        )
+        {
+            'bizesId': str(i),
+            'bizesNm': f'고정상호{i}',
+            'indsSclsNm': industry,
+            'bldNm': building,
+            'rdnmAdr': address,
+            'flrNo': '1',
+            'lon': 127.04,
+            'lat': 37.58,
+        }
         # 실제 응답처럼 같은 건물이 "본관"·"신관"·빈칸으로 적혀 있음 → 도로명 주소로 고름
         for i, (industry, building, address) in enumerate(
             [
@@ -48,7 +51,7 @@ def test_prepare_filters_and_determinism(config):
     assert len(stores) == len(zones) == 2
     assert stores[1]['store_category_id'] == 'store_category:produce'
     assert 'item:green_onion' in guesses['store:gd-0']
-    assert guesses['store:gd-1'] == []
+    assert len(guesses['store:gd-1']) == 14  # 047 건어물 대표 업종 규칙
     assert report['stores'] == 2
     loader.load_market_stores(None, config, rows, dry_run=True)
 
@@ -96,7 +99,7 @@ def test_load_repeated_and_missing_preserves_merchant(config, monkeypatch):
 
 def test_pagination_and_failure(config, monkeypatch):
     pages = [
-        dict(header=dict(resultCode='00'), body=dict(items=[r], totalCount=2))
+        {'header': {'resultCode': '00'}, 'body': {'items': [r], 'totalCount': 2}}
         for r in fixture_rows()[:2]
     ]
     get = Mock(side_effect=[Mock(json=lambda p=p: p) for p in pages])
@@ -107,17 +110,14 @@ def test_pagination_and_failure(config, monkeypatch):
     monkeypatch.setattr(
         loader.http,
         'get_sync',
-        Mock(return_value=Mock(json=lambda: dict(header=dict(resultCode='99')))),
+        Mock(return_value=Mock(json=lambda: {'header': {'resultCode': '99'}})),
     )
     with pytest.raises(loader.AppError):
         loader.fetch_rows(config)
 
 
-from tests.test_items_markets_api import public
-
-
-def test_map_provenance(public, monkeypatch):
-    client, markets, stores = public
+def test_map_provenance(public, monkeypatch):  # noqa: F811 -- imported fixture
+    client, _markets, stores = public
     stores['store:demo-A05']['source'] = 'sbiz'
     original = store_repo.market_items
     monkeypatch.setattr(
@@ -142,7 +142,7 @@ def test_empty_snapshot_and_dry_run_no_writes(config, monkeypatch):
 
 
 def test_large_grid_no_overlap(config):
-    rows = [fixture_rows()[0] | dict(bizesId=str(i), bizesNm=f'상호{i:03}') for i in range(60)]
+    rows = [fixture_rows()[0] | {'bizesId': str(i), 'bizesNm': f'상호{i:03}'} for i in range(60)]
     rows += [fixture_rows()[1] | {'bizesId': 'dried'}]
     stores = loader.prepare(config, rows)[2]
     positions = [(s['map_x'], s['map_y']) for s in stores]

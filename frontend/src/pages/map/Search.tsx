@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Icon from '../../components/common/Icon';
 import { ButtonLink } from '../../components/common/Button';
-import { ChipLink } from '../../components/common/Chip';
+import { Chip, ChipLink } from '../../components/common/Chip';
 import { ItemTile, List } from '../../components/common/parts';
 import Resource from '../../components/common/Resource';
 import { useShoppingContext } from '../../hooks/useShoppingContext';
@@ -17,6 +17,8 @@ import { formatPrice } from '../../utils/formatPrice';
 import type { Item } from '../../types/contract';
 import { parseSearch } from './helpers';
 import s from './map.module.css';
+
+import { ITEM_CATEGORIES, ITEM_CATEGORY_LABELS } from '../../utils/itemImage';
 
 const RECENT = 'recent-items';
 const readRecent = (): string[] => {
@@ -50,6 +52,8 @@ export default function Search() {
   const ctx = useShoppingContext();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const [category, setCategory] = useState('all');
+  const [more, setMore] = useState(false);
   const [q, setQ] = useState(params.get('q') ?? '');
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -71,6 +75,9 @@ export default function Search() {
   const sold = marketItems.data
     ? all.filter((i) => marketItems.data!.some((m) => m.item_id === i.item_id))
     : all;
+  const filteredSold = sold.filter(
+    (i) => category === 'all' || ITEM_CATEGORIES[i.item_id] === category,
+  );
   const count = (id: string) => marketItems.data?.find((m) => m.item_id === id)?.store_count;
   const matches = name ? all.filter((i) => matchesName(i, name)) : [];
   const marketMatches =
@@ -211,7 +218,7 @@ export default function Search() {
                   {t('mapSearchAvailable')}
                 </h2>
                 <div className={s.chipWrap}>
-                  {sold.map((item) => {
+                  {sold.slice(0, 12).map((item) => {
                     const { to, state } = target(item);
                     return (
                       <ChipLink
@@ -269,7 +276,26 @@ export default function Search() {
                     </Link>
                   </p>
                 )}
-                <List>{sold.map(itemRow)}</List>
+                <div className={s.chipWrap} aria-label="품목 분류">
+                  {Object.entries({ all: '전체', ...ITEM_CATEGORY_LABELS }).map(([key, label]) => (
+                    <Chip
+                      key={key}
+                      pressed={category === key}
+                      onClick={() => {
+                        setCategory(key);
+                        setMore(false);
+                      }}
+                    >
+                      {label}
+                    </Chip>
+                  ))}
+                </div>
+                <List>{(more ? filteredSold : filteredSold.slice(0, 18)).map(itemRow)}</List>
+                {!more && filteredSold.length > 18 && (
+                  <button type="button" onClick={() => setMore(true)}>
+                    품목 더 보기 ({filteredSold.length})
+                  </button>
+                )}
               </section>
             </>
           )}

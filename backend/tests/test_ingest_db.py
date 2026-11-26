@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 from urllib.parse import urlparse
 
+import psycopg
 import pytest
 
 from app.core.config import settings
@@ -25,6 +26,14 @@ def db():
     url = os.environ['TEST_DATABASE_URL']
     if urlparse(url).path != '/marketon_test':
         pytest.fail('스키마 초기화는 marketon_test에서만 허용합니다.')
+    # 격리 실행 환경에서 Unix 소켓이 차단되면 30초 풀 재시도를 반복하지 않아요.
+    try:
+        with psycopg.connect(url, connect_timeout=1):
+            pass
+    except psycopg.OperationalError as exc:
+        if 'Operation not permitted' in str(exc):
+            pytest.skip('marketon_test DB 소켓 접근 차단: Operation not permitted')
+        raise
     pytest.importorskip('yaml', reason='PyYAML installation required')
     from scripts.migrate import migrate
 
@@ -58,7 +67,7 @@ def test_load_replace_search_cache_and_prune(db, tmp_path):
     # 식품안전나라 레시피(scripts.import_recipes 생성)는 받은 만큼 늘어나서 따로 셈
     recipes = len(list((data / 'rag_docs' / 'recipes').glob('foodsafety-*.md')))
     # 16 sources + 54 explicit(예시 품종 10 포함)/24 generated entities + 25 documents + 레시피
-    assert first['added'] == 119 + recipes * 2
+    assert first['added'] == 416 + recipes * 2  # 047: 26출처 + 292명시 + 40확인 + 58문서
     ids = db.execute('select id from chunks order by id').fetchall()
     second = load_all(db, data_dir=data, embedder=fake)
     assert second['added'] == second['changed'] == second['deleted'] == 0
@@ -152,13 +161,13 @@ def test_alignment(db, tmp_path):
         db.execute(
             "select count(*) from entities where type='criterion' and source_id is not null"
         ).fetchone()[0]
-        == 24  # 6품목 × 확인 포인트 4개 (2026-11-26 출처 있는 값으로 채움)
+        == 40  # 047 기존 24 + 원문 인용 16
     )
     assert (
         db.execute(
             "select count(*) from entity_relations where predicate='hasCriterion' and source_id is not null"
         ).fetchone()[0]
-        == 24
+        == 40
     )
     assert db.execute("select props from entity_relations where predicate='soldBy'").fetchone()[
         0

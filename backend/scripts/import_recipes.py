@@ -36,12 +36,18 @@ STEPS = 20  # MANUAL01 ~ MANUAL20
 def item_labels(ontology_dir: Path = DATA / 'ontology') -> list[tuple[str, str]]:
     """온톨로지 YAML에서 품목의 한국어 라벨을 (라벨, 품목 ID)로 모아요. DB 없이 동작."""
     labels = []
+    preferred = {}
     for path in sorted(ontology_dir.glob('*.yaml')):
         for entity in (yaml.safe_load(path.read_text(encoding='utf-8')) or {}).get('entities', []):
             if entity.get('type') != 'item':
                 continue
+            preferred[entity['name_ko']] = entity['id']
             for label in (entity.get('labels') or {}).get('ko', []):
                 labels.append((label, entity['id']))
+    # 같은 별칭은 정확한 품목 이름을 우선 (배추 ≠ 알배기배추).
+    labels = [
+        (label, eid) for label, eid in labels if label not in preferred or preferred[label] == eid
+    ]
     # 긴 라벨부터 (예: '대파'가 '파'보다 먼저)
     return sorted(set(labels), key=lambda x: (-len(x[0]), x[0], x[1]))
 

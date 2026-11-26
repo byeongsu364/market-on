@@ -17,7 +17,7 @@ import { useT } from '../../i18n';
 import type { RecognizeResponse } from '../../types/contract';
 import s from './scan.module.css';
 
-const unitShort = (u: string) => unitLabel(u).replace(/^1/, '');
+const unitShort = (u: string) => unitLabel(u).replace(/^1(?=\D)/, '');
 
 /** 찾지 못한 품목을 이름으로 고르기("목록에 없어요") */
 function PhotoSearch({ choose }: { choose: (id: string) => void }) {
@@ -33,7 +33,7 @@ function PhotoSearch({ choose }: { choose: (id: string) => void }) {
         onChange={(e) => setQ(e.target.value)}
       />
       <ChipRow wrap label={t('scanSearchResults')}>
-        {items.data?.map((i) => (
+        {items.data?.slice(0, 12).map((i) => (
           <Chip key={i.item_id} onClick={() => choose(i.item_id)}>
             {i.name}
           </Chip>

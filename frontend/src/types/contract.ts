@@ -13,6 +13,7 @@ export type Criterion = {
   source: string;
 };
 export type Item = {
+  criteria_style?: 'source_quote' | null;
   variety_id?: string | null;
   item_id: string;
   name: string;

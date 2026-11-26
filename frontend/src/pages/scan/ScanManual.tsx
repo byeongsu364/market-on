@@ -15,7 +15,7 @@ import { useT } from '../../i18n';
 import type { Item } from '../../types/contract';
 import s from './scan.module.css';
 
-const unitShort = (u: string) => unitLabel(u).replace(/^1/, '');
+const unitShort = (u: string) => unitLabel(u).replace(/^1(?=\D)/, '');
 
 /** 직접 입력(/scan?mode=manual). 사진 인식이 안 될 때도 여기로 옴. 가격은 선택 */
 export default function ScanManual() {
@@ -25,6 +25,7 @@ export default function ScanManual() {
   const location = useLocation();
   const storeId = useStoreId();
   const notice = (location.state as { notice?: string } | null)?.notice;
+  const [more, setMore] = useState(false);
   const [q, setQ] = useState('');
   const [item, setItem] = useState<Item | null>(null);
   const [price, setPrice] = useState('');
@@ -69,13 +70,14 @@ export default function ScanManual() {
           value={q}
           onChange={(e) => {
             setQ(e.target.value);
+            setMore(false);
             setItem(null);
           }}
         />
         <Resource state={results}>
           <fieldset className={s.options}>
             <legend className="sr-only">{t('scanPickItem')}</legend>
-            {results.data?.map((i) => (
+            {(more ? results.data : results.data?.slice(0, 18))?.map((i) => (
               <label className={s.option} key={i.item_id}>
                 <ItemTile itemId={i.item_id} />
                 <span className={s.optionBody}>
@@ -95,6 +97,11 @@ export default function ScanManual() {
             ))}
             {results.data?.length === 0 && <p className={s.note}>{t('searchEmpty')}</p>}
           </fieldset>
+          {!more && (results.data?.length ?? 0) > 18 && (
+            <button type="button" onClick={() => setMore(true)}>
+              품목 더 보기
+            </button>
+          )}
         </Resource>
         <div className={s.twoCols}>
           <Field

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/common/Icon';
 import { ItemTile, List } from '../../components/common/parts';
@@ -63,6 +63,7 @@ const seoulMonth = () =>
 
 /** 제철과 시세 탭(시안 MarketInfo): 예전 홈의 제철과 오늘 기준시세를 옮김 */
 export function InfoTab({ market }: { market: Market }) {
+  const [morePrices, setMorePrices] = useState(false);
   const t = useT();
   const month = seoulMonth();
   const seasonal = useResource(useCallback(() => getInSeason(month), [month]));
@@ -110,10 +111,15 @@ export function InfoTab({ market }: { market: Market }) {
         </div>
         <Resource state={items}>
           <List>
-            {priced.map(({ item }) => (
+            {(morePrices ? priced : priced.slice(0, 12)).map(({ item }) => (
               <PriceRows key={item.item_id} item={item} market={market} />
             ))}
           </List>
+          {!morePrices && priced.length > 12 && (
+            <button type="button" onClick={() => setMorePrices(true)}>
+              품목 더 보기 ({priced.length})
+            </button>
+          )}
         </Resource>
       </section>
     </div>

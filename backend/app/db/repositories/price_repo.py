@@ -117,15 +117,23 @@ def sale_units(conn, item_id):
 
 
 def observation_unit_id(conn, unit, size):
-    """Only single survey units can use an existing ontology unit ID."""
+    """Resolve full survey denominations, retaining legacy single-unit IDs."""
     try:
-        if float(size) != 1:
+        amount = float(size)
+        if amount <= 0:
             return None
     except (ValueError, TypeError):
         return None
-    suffix = {'개': 'piece', '단': 'bunch', '킬로그램': 'kg', '그램': 'g'}.get(unit, unit)
+    aliases = {'개': 'piece', '단': 'bunch', '킬로그램': 'kg', '그램': 'g'}
+    suffix = aliases.get(unit, unit)
+    legacy = f'unit:{suffix}' if amount == 1 else ''
     result = fetch_rows(
-        conn, "select id from entities where id=%s and type='unit'", (f'unit:{suffix}',)
+        conn,
+        """select id from entities where type='unit' and
+        (id=%s or (attrs->>'observation_unit'=%s
+        and (attrs->>'observation_size')::numeric=%s))
+        order by (id=%s) desc,id limit 1""",
+        (legacy, unit, amount, legacy),
     )
     return result[0]['id'] if result else None
 
@@ -164,7 +172,12 @@ def baseline(
         r
         for r in data
         if on_date - timedelta(days=lookback_days) <= r['exmn_ymd'] <= on_date
-        and r['market_type'] in ('traditional', 'large_retail')
+        and (
+            r['market_type'] in ('traditional', 'large_retail')
+            # 축산물·일부 수산물은 시장별 값 없이 전국 평균 한 줄로만 조사돼요 (시장 이름 없음)
+            # 수집기가 빈 시장 코드를 'None' 글자로 저장해요 (중복 방지 키라 그대로 둠)
+            or (r['market_type'] == 'unknown' and r.get('mrkt_cd') in (None, '', 'None'))
+        )
     ]
     if not data:
         return None
@@ -280,7 +293,7 @@ def observation_dates(conn, item_id, variety_id, start, end):
         where p.item_id=%s and (%s::text is null or p.variety_id=%s)
         and p.se_cd='01' and p.grd_cd=coalesce(e.kamis->>'grd_cd','04')
         and p.source<>'mock'
-        and p.market_type in ('traditional','large_retail')
+        and (p.market_type in ('traditional','large_retail') or (p.market_type='unknown' and coalesce(p.mrkt_cd,'None') in ('None','')))
         and p.exmn_ymd between %s and %s order by p.exmn_ymd""",
             (variety_id, item_id, variety_id, variety_id, start, end),
         )
