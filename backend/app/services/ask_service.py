@@ -32,7 +32,9 @@ TOPICS = {
 }
 
 
-def ask(conn, data, device_id, *, embedder=None, consume=True):
+def ask(
+    conn, data, device_id, *, embedder=None, consume=True, use_cache=True, raise_unavailable=False
+):
     if consume:
         consume_quota(conn, device_id)
     intent = data.intent or ask_intent.rule_intent(data.question) or ask_llm.classify(data.question)
@@ -87,7 +89,7 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
             result.citations = season.statement_citations(statements)
             return result
     key = answer_cache.cache_key(conn, ids[0], intent, data.lang, data.question)
-    cached = answer_cache.get_cached_answer(conn, key)
+    cached = answer_cache.get_cached_answer(conn, key) if use_cache else None
     if cached:
         return AskResponse(**(cached | {'cached': True, 'model': None}))
     result.kind = 'no_evidence'
@@ -151,6 +153,8 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
     try:
         routed = ask_llm.generate(question, evidence, accept)
     except (AppError, httpx.HTTPError, TimeoutError):
+        if raise_unavailable:
+            raise
         return result
     # Router may return the last rejected result or a rejected fallback.
     rejection = accept(routed.value)

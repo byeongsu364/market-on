@@ -17,3 +17,5 @@ data/snapshots/
 *.db
 
 backend/storage/
+
+data/build/

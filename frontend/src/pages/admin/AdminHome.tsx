@@ -1,3 +1,4 @@
+import PipelineReport from './PipelineReport';
 import { useResource } from '../../hooks/useResource';
 import { getListedMarkets, getActiveMarkets } from '../../api/admin';
 import { Navigate } from 'react-router-dom';
@@ -124,6 +125,7 @@ export default function AdminHome() {
         <Applications />
         <Pending />
         <MarketLists />
+        <PipelineReport />
       </div>
     </>
   );

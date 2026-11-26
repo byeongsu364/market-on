@@ -49,3 +49,5 @@ cd backend
 - 출처끼리 다른 곳: 양파 보관 온도(가정용 15~25℃ 서늘한 곳 vs 저장고 0℃) → 문서에는 가정용 기준만 넣었어요
 
 제철·품종·산지는 온톨로지(`data/ontology/items.yaml`, `seasons.yaml`)에서 검수
+
+자동 숫자 대조: [청크별 원문 대조표](build/review.md) (`python -m scripts.pipeline --offline --to review`로 생성).
