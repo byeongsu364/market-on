@@ -130,12 +130,18 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
         checked.update(answer=answer, removed=removed, used=sorted(set(used)))
         return None if answer else 'unsupported'
 
+    question = data.question or f'{item["name_ko"]} {TOPICS[intent]} 방법을 알려 주세요.'
+    # 040: 근거가 길거나 많으면 제미나이→GPT가 필요한 사실만 뽑고, 젬마가 최종 답을 써요
+    # 답 확인(accept)은 언제나 원래 근거(cleaned)로 해요
+    steps = ['search']
+    evidence = cleaned
+    if ask_llm.needs_extract(cleaned):
+        evidence = ask_llm.extract(question, cleaned)
+        steps.append('extract')
+    steps += ['write', 'check']
+    result.steps = steps
     try:
-        routed = ask_llm.generate(
-            data.question or f'{item["name_ko"]} {TOPICS[intent]} 방법을 알려 주세요.',
-            cleaned,
-            accept,
-        )
+        routed = ask_llm.generate(question, evidence, accept)
     except (AppError, httpx.HTTPError, TimeoutError):
         return result
     # Router may return the last rejected result or a rejected fallback.

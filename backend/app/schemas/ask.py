@@ -54,6 +54,8 @@ class AskResponse(BaseModel):
     model: str | None = None
     cached: bool = False
     removed: int = 0
+    # 040: 실제로 거친 단계 (search·extract·write·check). 화면의 단계 표시용
+    steps: list[str] = Field(default_factory=list)
 
     @model_serializer(mode='wrap')
     def serialize(self, handler):

@@ -232,7 +232,7 @@ def test_actual_router_retries_broken_json(monkeypatch):
     from app.core.config import settings
     from app.llm import recommend, router
 
-    monkeypatch.setattr(settings, 'LLM_ROUTES', {'recommend': ['gemma', 'openai']})
+    monkeypatch.setattr(settings, 'LLM_ROUTES', {'reason': ['gemma', 'openai']})
     monkeypatch.setattr(router, '_configured', lambda *a: True)
     monkeypatch.setattr(router.llm_call_repo, 'record', Mock())
     providers = [

@@ -19,15 +19,32 @@ from app.schemas.chat import ChatMessage, ChatResponse
 from app.services.agent import agent_service as svc
 
 
-def test_default_order_is_gemma_gemini_gpt():
+def test_default_roles_follow_040():
     routes = Settings(_env_file=None).LLM_ROUTES
-    assert set(routes) == {'recognize', 'ask', 'recommend', 'chat'}
-    assert all(order == ['gemma', 'gemini', 'openai'] for order in routes.values())
+    assert routes == {
+        'route': ['gemma', 'gemini', 'openai'],
+        'plan': ['gemini', 'openai'],
+        'extract': ['gemini', 'openai'],
+        'write': ['gemma', 'gemini', 'openai'],
+        'reason': ['gemini', 'openai', 'gemma'],
+    }
+    # 사진 품목 인식은 구글 비전만: 모델 순서에 recognize가 없어요
+    assert 'recognize' not in routes
+
+
+def test_old_env_route_names_do_not_break_roles():
+    """.env에 예전 이름(recognize·ask·recommend·chat)만 있어도 역할은 기본 순서로 채워져요."""
+    old = {'recognize': ['gemma'], 'ask': ['gemma', 'openai'], 'chat': ['openai']}
+    routes = Settings(_env_file=None, LLM_ROUTES=old).LLM_ROUTES
+    assert set(routes) == {'route', 'plan', 'extract', 'write', 'reason'}
+    assert Settings(_env_file=None, LLM_ROUTES={'write': ['openai']}).LLM_ROUTES['write'] == [
+        'openai'
+    ]
 
 
 @pytest.fixture
 def routing(monkeypatch):
-    monkeypatch.setattr(settings, 'LLM_ROUTES', {'ask': ['gemma', 'gemini', 'openai']})
+    monkeypatch.setattr(settings, 'LLM_ROUTES', {'write': ['gemma', 'gemini', 'openai']})
     monkeypatch.setattr(settings, 'OLLAMA_BASE_URL', 'http://offline.invalid')
     monkeypatch.setattr(settings, 'GEMINI_API_KEY', 'g')
     monkeypatch.setattr(settings, 'OPENAI_API_KEY', 'o')
@@ -55,12 +72,12 @@ def as_client(key, fn):
 
 
 def test_gemini_before_gpt(routing):
-    result = router.run('ask', gemma_fails)
+    result = router.run('write', gemma_fails)
     assert (result.value, result.model) == ('gemini', 'gemini:' + settings.GEMINI_CHAT_MODEL)
 
 
 def test_client_hourly_limit_then_other_client_ok(routing):
-    run = lambda: router.run('ask', gemma_fails).value
+    run = lambda: router.run('write', gemma_fails).value
     assert as_client('device:a', run) == 'gemini'
     assert as_client('device:a', run) == 'gemini'
     with pytest.raises(AppError) as error:  # 젬마도 실패, 외부는 한도 → 답 없음
@@ -73,16 +90,16 @@ def test_client_hourly_limit_then_other_client_ok(routing):
 
 def test_daily_limit_counts_each_provider(routing):
     for n in range(3):
-        assert as_client(f'device:{n}', lambda: router.run('ask', gemma_fails).value) == 'gemini'
+        assert as_client(f'device:{n}', lambda: router.run('write', gemma_fails).value) == 'gemini'
     # 제미나이 하루 한도(3) 소진 → GPT로
-    assert as_client('device:x', lambda: router.run('ask', gemma_fails).value) == 'openai'
+    assert as_client('device:x', lambda: router.run('write', gemma_fails).value) == 'openai'
 
 
 def test_limit_keeps_gemma_answer(routing):
     """젬마가 자신 없을 때 외부가 막혀 있으면 젬마 답을 그대로 돌려줘요."""
     settings.EXTERNAL_LLM_DAILY_LIMIT = 0
     result = router.run(
-        'ask', lambda p: p, accept=lambda v: 'low_confidence' if v == 'gemma' else None
+        'write', lambda p: p, accept=lambda v: 'low_confidence' if v == 'gemma' else None
     )
     assert (result.value, result.reason) == ('gemma', 'low_confidence')
     assert [c.kwargs['reason'] for c in routing.call_args_list[1:]] == ['daily_limit'] * 2
@@ -91,7 +108,7 @@ def test_limit_keeps_gemma_answer(routing):
 def test_gemma_is_not_counted(routing):
     settings.EXTERNAL_LLM_DAILY_LIMIT = 0
     for _ in range(5):
-        assert as_client('device:a', lambda: router.run('ask', lambda p: p).value) == 'gemma'
+        assert as_client('device:a', lambda: router.run('write', lambda p: p).value) == 'gemma'
 
 
 @pytest.mark.parametrize(
