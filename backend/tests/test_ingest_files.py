@@ -44,8 +44,14 @@ def test_sample_formats_and_kamis():
             assert entity.get('kamis') is None
     directory = DATA / 'rag_docs'
     docs = [read_document(path, directory) for path in directory.rglob('*.md')]
+    # 식품안전나라 레시피는 scripts.import_recipes가 만든 파일 (받은 만큼 늘어남)
+    imported = [doc for doc in docs if doc.doc_key.startswith('recipes/foodsafety-')]
+    assert all(
+        doc.doc_type == 'recipe' and doc.source_key == 'src:foodsafety-cookrcp01' and doc.entities
+        for doc in imported
+    )
     # 품목 5개 × (고르는 법·보관·손질·제철) + 연습용 긴 레시피 1개
-    assert len(docs) == 21
+    assert len(docs) - len(imported) == 21
     for kind in ('criterion', 'storage', 'prep', 'season'):
         assert sum(doc.doc_type == kind for doc in docs) == 5
     for doc in docs:
@@ -53,7 +59,7 @@ def test_sample_formats_and_kamis():
         assert not doc.doc_key.startswith('/')
         # 판정 문구 금지 (검수 표시 줄은 팀이 검수 후 지움 — 있어도 없어도 됨)
         assert not any(word in doc.body for word in ('구매 추천', 'A등급', '신선해요'))
-    long = next(doc for doc in docs if doc.doc_type == 'recipe')
+    long = next(doc for doc in docs if doc.doc_key == 'practice/long_recipe.md')
     assert len(long.body) >= 1500 and long.body.count('## ') >= 3
     assert len(chunk_document(long)) > 3
 
