@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import JSONResponse
+from app.core import captcha
 from app.core.config import settings
 from app.core.errors import AppError
 from app.deps import get_db, current_user, require_csrf
@@ -23,6 +24,12 @@ def authenticated(response, result):
         path='/',
     )
     return {'user': user}
+
+
+@router.get('/captcha')
+def new_captcha(response: Response):
+    response.headers['Cache-Control'] = 'no-store'
+    return captcha.issue()
 
 
 @router.post('/signup', status_code=201)

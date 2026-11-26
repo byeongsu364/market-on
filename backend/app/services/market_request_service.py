@@ -40,6 +40,7 @@ def request(conn, mid, device):
 
 
 def join(conn, data):
+    auth_service.require_captcha(data)
     with conn.transaction():
         listed(market(conn, data.market_id, True))
         if repo.pending(conn, data.market_id):
