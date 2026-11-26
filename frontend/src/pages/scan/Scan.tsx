@@ -1,7 +1,8 @@
-import { useState, type ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { recognize } from '../../api/scan';
 import { useCamera } from '../../hooks/useCamera';
+import { useLiveCamera } from '../../hooks/useLiveCamera';
 import { useAction } from '../../hooks/useResource';
 import { useRequireMarket } from '../../hooks/useFlows';
 import { useMarketMap } from '../../hooks/useMarketMap';
@@ -31,6 +32,15 @@ function Camera() {
   const storeName = useStoreName(ctx.marketId, storeId);
   const [recognized, setRecognized] = useState<File | null>(null);
   const [drag, setDrag] = useState(false);
+  // 화면 안 카메라: 휴대폰은 들어오자마자 켜고, PC는 "카메라로 찍기"를 눌렀을 때만 켬. 사진을 고르면 끔
+  const video = useRef<HTMLVideoElement>(null);
+  const [webcam, setWebcam] = useState(false);
+  const live = useLiveCamera(video, !camera.file && (!desktop || webcam));
+  const canWebcam = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+  const shoot = async () => {
+    const file = await live.capture();
+    if (file) pick(file);
+  };
   const action = useAction(async (file: File) => {
     try {
       const result = await recognize(file);
@@ -89,10 +99,47 @@ function Camera() {
           >
             {camera.preview ? (
               <img src={camera.preview} alt={t('scanPhotoAlt')} />
+            ) : webcam ? (
+              <>
+                <video
+                  ref={video}
+                  className={s.video}
+                  autoPlay
+                  playsInline
+                  muted
+                  aria-label={t('scanCameraView')}
+                />
+                {live.status === 'live' ? (
+                  <button
+                    type="button"
+                    className={`${s.shutter} ${s.webShutter}`}
+                    aria-label={t('scanShutter')}
+                    onClick={() => void shoot()}
+                  >
+                    <span />
+                  </button>
+                ) : (
+                  <p className={s.webCameraNote} role="status">
+                    {live.status === 'denied' || live.status === 'unavailable'
+                      ? t('scanCameraDenied')
+                      : t('scanCameraStarting')}
+                  </p>
+                )}
+              </>
             ) : (
               <div className={s.webEmpty}>
                 <Icon name="camera" size={40} />
                 <span>{t('scanHint')}</span>
+                {canWebcam && (
+                  <button
+                    type="button"
+                    className={buttonClass({ variant: 'surface', size: 'md' })}
+                    onClick={() => setWebcam(true)}
+                  >
+                    <Icon name="camera" size={20} />
+                    {t('scanCameraOn')}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -144,7 +191,19 @@ function Camera() {
         {t('scanTitle')}
       </h1>
       <div className={s.photo}>
-        {camera.preview && <img src={camera.preview} alt={t('scanPhotoAlt')} />}
+        {camera.preview ? (
+          <img src={camera.preview} alt={t('scanPhotoAlt')} />
+        ) : (
+          <video
+            ref={video}
+            className={s.video}
+            data-live={live.status === 'live'}
+            autoPlay
+            playsInline
+            muted
+            aria-label={t('scanCameraView')}
+          />
+        )}
       </div>
       <span className={s.shade} aria-hidden="true" />
       {result ? (
@@ -188,7 +247,12 @@ function Camera() {
             aria-hidden="true"
           />
           <div className={s.pillRow} style={{ bottom: 200 }}>
-            <span className={`${s.pill} ${s.hint}`}>{status ?? t('scanHint')}</span>
+            <span className={`${s.pill} ${s.hint}`}>
+              {status ??
+                (live.status === 'denied' || live.status === 'unavailable'
+                  ? t('scanCameraDenied')
+                  : t('scanHint'))}
+            </span>
           </div>
           <div className={s.shutterBar}>
             <div className={s.shutterRow}>
@@ -197,17 +261,31 @@ function Camera() {
                 {t('scanAlbum')}
                 <input className={s.fileInput} type="file" accept="image/*" onChange={onFile} />
               </label>
-              <label className={s.shutter}>
-                <span />
-                <input
-                  className={s.fileInput}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
+              {live.status === 'live' ? (
+                // 화면 안 카메라 영상에서 바로 찍음
+                <button
+                  type="button"
+                  className={s.shutter}
                   aria-label={t('scanShutter')}
-                  onChange={onFile}
-                />
-              </label>
+                  disabled={action.loading}
+                  onClick={() => void shoot()}
+                >
+                  <span />
+                </button>
+              ) : (
+                // 카메라를 못 켜면(권한 거부·지원 안 함) 기본 카메라 앱으로
+                <label className={s.shutter}>
+                  <span />
+                  <input
+                    className={s.fileInput}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    aria-label={t('scanShutter')}
+                    onChange={onFile}
+                  />
+                </label>
+              )}
               <Link className={s.side} to={manualHref}>
                 <Icon name="pencil" size={26} />
                 {t('scanManual')}
