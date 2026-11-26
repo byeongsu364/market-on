@@ -1,0 +1,1179 @@
+_meta:
+  machine_translated: true
+  reviewed: false
+entities:
+  cat:vegetable:
+    text: 蔬菜
+    reviewed: false
+  cat:fruit:
+    text: 水果
+    reviewed: false
+  item:green_onion:
+    text: 大葱
+    reviewed: false
+  crit:green_onion-leaf:
+    text: 叶子尖端看起来有弹性，没有夹杂干叶
+    reviewed: false
+  crit:green_onion-stem:
+    text: 茎的白色部分很多且干净
+    reviewed: false
+  crit:green_onion-root:
+    text: 轻轻碰一下白色的根部，它不会软塌，而是有弹性的
+    reviewed: false
+  crit:green_onion-bunch:
+    text: 捆绑物中的长度和粗细相似
+    reviewed: false
+  item:onion:
+    text: 洋葱
+    reviewed: false
+  crit:onion-firm:
+    text: 用手按一下，它不软而坚硬
+    reviewed: false
+  crit:onion-skin:
+    text: 外壳颜色鲜艳，干燥良好
+    reviewed: false
+  crit:onion-sprout:
+    text: 没有发芽
+    reviewed: false
+  crit:onion-weight:
+    text: 听起来有分量感，不像它的尺寸那么大
+    reviewed: false
+  item:apple:
+    text: 苹果
+    reviewed: false
+  crit:apple-color:
+    text: 外壳颜色均匀明亮
+    reviewed: false
+  crit:apple-stem:
+    text: 花梗呈蓝色并看起来湿润
+    reviewed: false
+  crit:apple-surface:
+    text: 没有划痕、病虫害痕迹
+    reviewed: false
+  crit:apple-tap:
+    text: 轻轻敲击时，感觉有弹性且饱满
+    reviewed: false
+  item:pear:
+    text: 梨
+    reviewed: false
+  crit:pear-color:
+    text: 外表是清澈透明的黄色
+    reviewed: false
+  crit:pear-skin:
+    text: 外皮不皱而是光滑的
+    reviewed: false
+  crit:pear-bottom:
+    text: 没有在插头另一端突出，也没有黑色的细纹
+    reviewed: false
+  crit:pear-calyx:
+    text: 花萼部分没有变蓝，而是变成黄色了
+    reviewed: false
+  item:sweet_persimmon:
+    text: 柿子
+    reviewed: false
+  crit:sweet_persimmon-calyx:
+    text: 与手柄和果实紧密贴合
+    reviewed: false
+  crit:sweet_persimmon-spots:
+    text: 整体上没有污渍
+    reviewed: false
+  crit:sweet_persimmon-firm:
+    text: 摸上去果肉很硬
+    reviewed: false
+  crit:sweet_persimmon-color:
+    text: 껍질的90%以上都染成了黄色
+    reviewed: false
+  item:mandarin:
+    text: 橘子
+    reviewed: false
+  crit:mandarin-skin:
+    text: 果皮薄，果皮与果肉之间无空隙紧贴
+    reviewed: false
+  crit:mandarin-shape:
+    text: 尾部不突出，左右圆而扁平
+    reviewed: false
+  crit:mandarin-stem:
+    text: 颜色深橙色，果蒂呈绿色紧密附着。
+    reviewed: false
+  crit:mandarin-gloss:
+    text: เปลือก不怎么有光泽
+    reviewed: false
+  unit:bunch:
+    text: 短
+    reviewed: false
+  unit:kg:
+    text: 公斤
+    reviewed: false
+  unit:piece:
+    text: 狗
+    reviewed: false
+  variety:apple-fuji:
+    text: 富士
+    reviewed: false
+  variety:apple-hongro:
+    text: 红罗
+    reviewed: false
+  variety:apple-shinano-gold:
+    text: 信浓金
+    reviewed: false
+  variety:pear-shingo:
+    text: 举报
+    reviewed: false
+  variety:sweet_persimmon-fuyu:
+    text: 富裕
+    reviewed: false
+  variety:green_onion-daepa:
+    text: 大葱
+    reviewed: false
+  variety:onion-onion:
+    text: 洋葱
+    reviewed: false
+  variety:mandarin-open:
+    text: 野地
+    reviewed: false
+  variety:mandarin-greenhouse:
+    text: 设施
+    reviewed: false
+  variety:pear-noksu:
+    text: 绿水
+    reviewed: false
+  variety:pear-hanareum:
+    text: 韩아름
+    reviewed: false
+  variety:pear-manpung:
+    text: Manpungbae
+    reviewed: false
+  variety:sweet_persimmon-gampung:
+    text: 减风
+    reviewed: false
+  variety:sweet_persimmon-romang:
+    text: 浪漫
+    reviewed: false
+  variety:sweet_persimmon-jowan:
+    text: 赵完
+    reviewed: false
+  variety:onion-jangilhwang:
+    text: 章日皇
+    reviewed: false
+  variety:onion-highland:
+    text: 高山夏季洋葱
+    reviewed: false
+  variety:green_onion-cold:
+    text: 韩智亨
+    reviewed: false
+  variety:green_onion-warm:
+    text: 南之形
+    reviewed: false
+  cat:grain:
+    text: 谷物
+    reviewed: false
+  cat:special:
+    text: 经济作物
+    reviewed: false
+  cat:livestock:
+    text: 畜牧产品
+    reviewed: false
+  cat:seafood:
+    text: 海鲜
+    reviewed: false
+  item:rice:
+    text: 米
+    reviewed: false
+  crit:rice-p1:
+    text: ''
+    reviewed: false
+  variety:rice-01:
+    text: ''
+    reviewed: false
+  variety:rice-10:
+    text: ''
+    reviewed: false
+  item:glutinous_rice:
+    text: 糯米
+    reviewed: false
+  variety:glutinous_rice-01:
+    text: 普通类
+    reviewed: false
+  item:soybean:
+    text: 豆
+    reviewed: false
+  variety:soybean-01:
+    text: 白豆 (国产)
+    reviewed: false
+  item:red_bean:
+    text: 红豆
+    reviewed: false
+  crit:red_bean-p1:
+    text: 红色浓郁，有光泽，蛋形饱满，蛋壳薄为佳，避免浮在水面上或蛋形不规则的。
+    reviewed: false
+  variety:red_bean-00:
+    text: 红红豆(国产)
+    reviewed: false
+  item:mung_bean:
+    text: 绿豆
+    reviewed: false
+  crit:mung_bean-p1:
+    text: 绿色发暗，混有棕色颗粒，颗粒饱满均匀的更好。尤其是未完全成熟的颗粒像小米一样小，浸水或烹饪后会变硬，所以最好购买大小均匀的。
+    reviewed: false
+  variety:mung_bean-00:
+    text: 国产
+    reviewed: false
+  item:sweet_potato:
+    text: 红薯
+    reviewed: false
+  crit:sweet_potato-p1:
+    text: 形状均匀、表面光滑坚硬、无瑕疵为佳
+    reviewed: false
+  variety:sweet_potato-00:
+    text: 夜
+    reviewed: false
+  item:potato:
+    text: 土豆
+    reviewed: false
+  variety:potato-01:
+    text: 水美(露地)
+    reviewed: false
+  item:brown_rice:
+    text: 糙米
+    reviewed: false
+  variety:brown_rice-01:
+    text: ''
+    reviewed: false
+  item:barley:
+    text: 大麦米
+    reviewed: false
+  variety:barley-04:
+    text: 荞麦
+    reviewed: false
+  item:mixed_grains:
+    text: 混食曲
+    reviewed: false
+  variety:mixed_grains-01:
+    text: 国产
+    reviewed: false
+  item:napa_cabbage:
+    text: 大白菜
+    reviewed: false
+  crit:napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:napa_cabbage-03:
+    text: 秋天
+    reviewed: false
+  item:cabbage:
+    text: 卷心菜
+    reviewed: false
+  variety:cabbage-00:
+    text: 卷心菜
+    reviewed: false
+  item:spinach:
+    text: 菠菜
+    reviewed: false
+  crit:spinach-p1:
+    text: ''
+    reviewed: false
+  variety:spinach-00:
+    text: 菠菜
+    reviewed: false
+  item:lettuce:
+    text: 生菜
+    reviewed: false
+  variety:lettuce-01:
+    text: 赤
+    reviewed: false
+  variety:lettuce-02:
+    text: 青
+    reviewed: false
+  item:young_napa_cabbage:
+    text: 卷心白菜
+    reviewed: false
+  variety:young_napa_cabbage-00:
+    text: 青口白菜
+    reviewed: false
+  item:watermelon:
+    text: 西瓜
+    reviewed: false
+  variety:watermelon-00:
+    text: 西瓜
+    reviewed: false
+  item:cucumber:
+    text: 黄瓜
+    reviewed: false
+  variety:cucumber-01:
+    text: 棘刺系统
+    reviewed: false
+  variety:cucumber-02:
+    text: 达达系统
+    reviewed: false
+  variety:cucumber-03:
+    text: ''
+    reviewed: false
+  item:squash:
+    text: 南瓜
+    reviewed: false
+  crit:squash-p1:
+    text: ''
+    reviewed: false
+  crit:squash-p2:
+    text: 南瓜：最好是颜色均匀深、结实且相对于尺寸更重
+    reviewed: false
+  crit:squash-p3:
+    text: 老南瓜：体积非常大，果体有光泽，呈淡黄色。皮坚硬的比较好。
+    reviewed: false
+  variety:squash-01:
+    text: 西葫芦
+    reviewed: false
+  variety:squash-02:
+    text: 西葫芦
+    reviewed: false
+  item:tomato:
+    text: 西红柿
+    reviewed: false
+  variety:tomato-00:
+    text: 西红柿
+    reviewed: false
+  item:strawberry:
+    text: 草莓
+    reviewed: false
+  variety:strawberry-00:
+    text: 薛香
+    reviewed: false
+  item:radish:
+    text: 无
+    reviewed: false
+  crit:radish-p1:
+    text: 表白、光滑、坚硬、沉重之物（根部丰满，叶部呈蓝色的萝卜美味）。
+    reviewed: false
+  crit:radish-p2:
+    text: 形状笔直，不裂开或爆裂，无多根细根。
+    reviewed: false
+  variety:radish-03:
+    text: 秋天
+    reviewed: false
+  item:carrot:
+    text: 胡萝卜
+    reviewed: false
+  variety:carrot-01:
+    text: 无水清洗（国产）
+    reviewed: false
+  item:young_radish:
+    text: 芝麻菜
+    reviewed: false
+  variety:young_radish-00:
+    text: 小萝卜
+    reviewed: false
+  item:dried_chili:
+    text: 干辣椒
+    reviewed: false
+  variety:dried_chili-00:
+    text: Hwageon
+    reviewed: false
+  item:green_chili:
+    text: 青辣椒
+    reviewed: false
+  variety:green_chili-00:
+    text: 青辣椒(绿光等)
+    reviewed: false
+  variety:green_chili-02:
+    text: ''
+    reviewed: false
+  variety:green_chili-03:
+    text: 青阳辣椒
+    reviewed: false
+  variety:green_chili-04:
+    text: 黄瓜辣辣椒
+    reviewed: false
+  item:red_chili:
+    text: 红辣椒
+    reviewed: false
+  variety:red_chili-00:
+    text: 红辣椒
+    reviewed: false
+  item:peeled_garlic:
+    text: 蒜蓉
+    reviewed: false
+  variety:peeled_garlic-01:
+    text: 蒜蓉 (国产)
+    reviewed: false
+  item:ginger:
+    text: 姜
+    reviewed: false
+  crit:ginger-p1:
+    text: 肉质紧实、大块，呈黄土色，最好是多个小块附着在一个块上。
+    reviewed: false
+  crit:ginger-p2:
+    text: 鸡蛋大、宽、壳少皱、易剥。
+    reviewed: false
+  crit:ginger-p3:
+    text: 具有独特辣味和强烈的香气，颜色略深，形状不规则的。
+    reviewed: false
+  variety:ginger-00:
+    text: 国产
+    reviewed: false
+  item:eggplant:
+    text: 茄子
+    reviewed: false
+  variety:eggplant-00:
+    text: ''
+    reviewed: false
+  item:water_dropwort:
+    text: 水芹
+    reviewed: false
+  variety:water_dropwort-00:
+    text: 水芹
+    reviewed: false
+  item:perilla_leaves:
+    text: ''
+    reviewed: false
+  variety:perilla_leaves-00:
+    text: ''
+    reviewed: false
+  item:chives:
+    text: 韭菜
+    reviewed: false
+  variety:chives-00:
+    text: 韭菜
+    reviewed: false
+  item:bell_pepper:
+    text: 甜椒
+    reviewed: false
+  variety:bell_pepper-00:
+    text: 青
+    reviewed: false
+  item:paprika:
+    text: 红椒
+    reviewed: false
+  variety:paprika-00:
+    text: 甜椒
+    reviewed: false
+  item:melon:
+    text: Melon
+    reviewed: false
+  variety:melon-00:
+    text: melon
+    reviewed: false
+  item:chili_powder:
+    text: 红辣椒粉
+    reviewed: false
+  variety:chili_powder-00:
+    text: 国产
+    reviewed: false
+  variety:chili_powder-01:
+    text: 中国
+    reviewed: false
+  item:mustard_greens:
+    text: 神
+    reviewed: false
+  variety:mustard_greens-00:
+    text: 神
+    reviewed: false
+  item:cherry_tomato:
+    text: 樱桃番茄
+    reviewed: false
+  variety:cherry_tomato-02:
+    text: 枣子型樱桃番茄
+    reviewed: false
+  item:baby_napa_cabbage:
+    text: 小白菜
+    reviewed: false
+  crit:baby_napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:baby_napa_cabbage-00:
+    text: 小白菜
+    reviewed: false
+  item:broccoli:
+    text: 西兰花
+    reviewed: false
+  crit:broccoli-p1:
+    text: ''
+    reviewed: false
+  variety:broccoli-00:
+    text: 西兰花(国产)
+    reviewed: false
+  item:sesame:
+    text: 芝麻
+    reviewed: false
+  variety:sesame-01:
+    text: 白色 (国产)
+    reviewed: false
+  variety:sesame-02:
+    text: 中国
+    reviewed: false
+  item:peanut:
+    text: 花生
+    reviewed: false
+  variety:peanut-01:
+    text: 国产
+    reviewed: false
+  variety:peanut-02:
+    text: 进口
+    reviewed: false
+  item:oyster_mushroom:
+    text: 平菇
+    reviewed: false
+  variety:oyster_mushroom-00:
+    text: 平菇
+    reviewed: false
+  variety:oyster_mushroom-01:
+    text: ''
+    reviewed: false
+  item:enoki_mushroom:
+    text: 平菇
+    reviewed: false
+  variety:enoki_mushroom-00:
+    text: 平菇
+    reviewed: false
+  item:king_oyster_mushroom:
+    text: 香菇
+    reviewed: false
+  variety:king_oyster_mushroom-00:
+    text: ''
+    reviewed: false
+  item:walnut:
+    text: 核桃
+    reviewed: false
+  variety:walnut-00:
+    text: 进口
+    reviewed: false
+  item:almond:
+    text: 杏仁
+    reviewed: false
+  variety:almond-00:
+    text: 进口
+    reviewed: false
+  item:banana:
+    text: 香蕉
+    reviewed: false
+  variety:banana-02:
+    text: 进口
+    reviewed: false
+  item:lemon:
+    text: 柠檬
+    reviewed: false
+  variety:lemon-00:
+    text: 进口
+    reviewed: false
+  item:pineapple:
+    text: 菠萝
+    reviewed: false
+  variety:pineapple-02:
+    text: 进口
+    reviewed: false
+  item:mango:
+    text: 芒果
+    reviewed: false
+  variety:mango-00:
+    text: 进口
+    reviewed: false
+  item:orange:
+    text: 橙子
+    reviewed: false
+  variety:orange-06:
+    text: Neible 澳大利亚
+    reviewed: false
+  item:grape:
+    text: 葡萄
+    reviewed: false
+  variety:grape-12:
+    text: 夏威夷葡萄
+    reviewed: false
+  item:avocado:
+    text: 牛油果
+    reviewed: false
+  variety:avocado-00:
+    text: 进口
+    reviewed: false
+  item:blueberry:
+    text: 蓝莓
+    reviewed: false
+  variety:blueberry-02:
+    text: 进口（冷冻）
+    reviewed: false
+  item:kiwi:
+    text: 奇异果
+    reviewed: false
+  variety:kiwi-01:
+    text: 黄金
+    reviewed: false
+  item:beef:
+    text: 牛
+    reviewed: false
+  variety:beef-21:
+    text: 安心
+    reviewed: false
+  variety:beef-22:
+    text: 里脊肉
+    reviewed: false
+  variety:beef-36:
+    text: 雪道
+    reviewed: false
+  variety:beef-40:
+    text: 阳皮
+    reviewed: false
+  variety:beef-50:
+    text: ''
+    reviewed: false
+  item:pork:
+    text: 猪
+    reviewed: false
+  variety:pork-25:
+    text: 前腿
+    reviewed: false
+  variety:pork-27:
+    text: 三层五肉
+    reviewed: false
+  variety:pork-28:
+    text: 排骨
+    reviewed: false
+  variety:pork-68:
+    text: 牛心肉
+    reviewed: false
+  item:imported_beef:
+    text: 进口牛肉
+    reviewed: false
+  variety:imported_beef-31:
+    text: ''
+    reviewed: false
+  variety:imported_beef-37:
+    text: 排骨肉
+    reviewed: false
+  item:imported_pork:
+    text: 进口猪肉
+    reviewed: false
+  variety:imported_pork-27:
+    text: 五花肉
+    reviewed: false
+  item:chicken:
+    text: 鸡
+    reviewed: false
+  variety:chicken-05:
+    text: 六级12号
+    reviewed: false
+  variety:chicken-99:
+    text: 鸡肉(公斤)
+    reviewed: false
+  variety:chicken-04:
+    text: 肉鸡11号
+    reviewed: false
+  variety:chicken-03:
+    text: 六级10号
+    reviewed: false
+  variety:chicken-02:
+    text: 陆鸡9号
+    reviewed: false
+  variety:chicken-01:
+    text: 本土鸡17号
+    reviewed: false
+  item:egg:
+    text: 鸡蛋
+    reviewed: false
+  variety:egg-21:
+    text: XL10组
+    reviewed: false
+  variety:egg-23:
+    text: XL30号
+    reviewed: false
+  item:milk:
+    text: 牛奶
+    reviewed: false
+  variety:milk-01:
+    text: 白牛奶
+    reviewed: false
+  item:mackerel:
+    text: 鲭鱼
+    reviewed: false
+  variety:mackerel-03:
+    text: 国产（盐渍）
+    reviewed: false
+  variety:mackerel-05:
+    text: ''
+    reviewed: false
+  variety:mackerel-08:
+    text: 进口的（腌制的）
+    reviewed: false
+  item:dried_anchovy:
+    text: 干鲄鱼
+    reviewed: false
+  variety:dried_anchovy-00:
+    text: 干鲣鱼
+    reviewed: false
+  item:dried_squid:
+    text: 干鱿鱼
+    reviewed: false
+  variety:dried_squid-00:
+    text: 干鱿鱼
+    reviewed: false
+  item:laver:
+    text: 金
+    reviewed: false
+  variety:laver-00:
+    text: 海苔
+    reviewed: false
+  variety:laver-01:
+    text: 烤海苔
+    reviewed: false
+  item:dried_seaweed:
+    text: 干海带
+    reviewed: false
+  variety:dried_seaweed-00:
+    text: 干海带
+    reviewed: false
+  item:oyster:
+    text: 卷
+    reviewed: false
+  variety:oyster-00:
+    text: ''
+    reviewed: false
+  item:imported_croaker:
+    text: 提前进口
+    reviewed: false
+  variety:imported_croaker-04:
+    text: 增值税收入(冷冻)
+    reviewed: false
+  item:salted_shrimp:
+    text: 虾酱
+    reviewed: false
+  variety:salted_shrimp-00:
+    text: 虾酱
+    reviewed: false
+  item:anchovy_sauce:
+    text: 멸치鱼露
+    reviewed: false
+  variety:anchovy_sauce-00:
+    text: 沙丁鱼鱼露
+    reviewed: false
+  item:sea_salt:
+    text: 천일盐
+    reviewed: false
+  variety:sea_salt-00:
+    text: 海盐
+    reviewed: false
+  item:abalone:
+    text: 鲍鱼
+    reviewed: false
+  variety:abalone-00:
+    text: 冷藏
+    reviewed: false
+  item:shrimp:
+    text: 虾
+    reviewed: false
+  variety:shrimp-01:
+    text: 白腿 (进口)
+    reviewed: false
+  item:saury:
+    text: 鲭鱼
+    reviewed: false
+  variety:saury-01:
+    text: 冷凍（进口）
+    reviewed: false
+  item:squid:
+    text: 鱿鱼
+    reviewed: false
+  variety:squid-04:
+    text: 近海（冷冻）
+    reviewed: false
+  variety:squid-05:
+    text: 远洋（冷冻）
+    reviewed: false
+  item:hairtail:
+    text: 鲭鱼
+    reviewed: false
+  variety:hairtail-03:
+    text: 国产(冷藏)
+    reviewed: false
+  variety:hairtail-04:
+    text: 国产（冷冻）
+    reviewed: false
+  item:pollock:
+    text: 北极鳕鱼
+    reviewed: false
+  variety:pollock-04:
+    text: 冷冻（远洋进口整合）
+    reviewed: false
+  variety:pollock-05:
+    text: 冷冻加工
+    reviewed: false
+  item:croaker:
+    text: 早期
+    reviewed: false
+  variety:croaker-05:
+    text: ''
+    reviewed: false
+  variety:croaker-06:
+    text: 冷凝器(制冷)
+    reviewed: false
+  variety:croaker-07:
+    text: 干鳕鱼
+    reviewed: false
+  item:dried_kelp:
+    text: 乾岛
+    reviewed: false
+  variety:dried_kelp-01:
+    text: 完岛产
+    reviewed: false
+  item:scallop:
+    text: 扇贝
+    reviewed: false
+  variety:scallop-01:
+    text: 海胆蛤蜊(红蛤蜊)
+    reviewed: false
+  item:mussel:
+    text: 贻贝
+    reviewed: false
+  variety:mussel-01:
+    text: 小蛤蜊(冷藏)
+    reviewed: false
+  variety:mussel-02:
+    text: 未开的蛤蜊（冷藏）
+    reviewed: false
+  item:blue_crab:
+    text: ''
+    reviewed: false
+  variety:blue_crab-00:
+    text: 冷凍
+    reviewed: false
+  item:spanish_mackerel:
+    text: 鲭鱼
+    reviewed: false
+  variety:spanish_mackerel-01:
+    text: 冷藏
+    reviewed: false
+  item:mackerel_fillet:
+    text: 鲭鱼柳
+    reviewed: false
+  variety:mackerel_fillet-00:
+    text: 进口
+    reviewed: false
+  variety:mackerel_fillet-01:
+    text: 国产
+    reviewed: false
+  item:clam:
+    text: 蛤蜊
+    reviewed: false
+  variety:clam-00:
+    text: 冷藏
+    reviewed: false
+  item:octopus:
+    text: 鱿鱼
+    reviewed: false
+  variety:octopus-00:
+    text: 进口(冷冻)
+    reviewed: false
+  item:cockle:
+    text: 小蛤蜊
+    reviewed: false
+  variety:cockle-00:
+    text: 国产（新小蛤）
+    reviewed: false
+  unit:egg10:
+    text: 10区
+    reviewed: false
+  unit:egg30:
+    text: 30区
+    reviewed: false
+  unit:fish:
+    text: 玛丽
+    reviewed: false
+  unit:fish10:
+    text: 10只
+    reviewed: false
+  unit:fish5:
+    text: 5只
+    reviewed: false
+  unit:g100:
+    text: ''
+    reviewed: false
+  unit:g150:
+    text: ''
+    reviewed: false
+  unit:g50:
+    text: ''
+    reviewed: false
+  unit:g500:
+    text: ''
+    reviewed: false
+  unit:g600:
+    text: ''
+    reviewed: false
+  unit:head:
+    text: 放弃
+    reviewed: false
+  unit:kg10:
+    text: ''
+    reviewed: false
+  unit:kg2:
+    text: ''
+    reviewed: false
+  unit:kg20:
+    text: ''
+    reviewed: false
+  unit:kg5:
+    text: ''
+    reviewed: false
+  unit:liter:
+    text: ''
+    reviewed: false
+  unit:pair:
+    text: 手
+    reviewed: false
+  unit:piece10:
+    text: 10个
+    reviewed: false
+  unit:piece3:
+    text: 3个
+    reviewed: false
+  unit:sheet10:
+    text: 第10章
+    reviewed: false
+  recipe:foodsafety-32:
+    text: 嫩豆腐苹果酱黄瓜拌菜
+    reviewed: false
+  recipe:foodsafety-33:
+    text: 苹果虾海带汤
+    reviewed: false
+  recipe:foodsafety-150:
+    text: 柑橘泡菜
+    reviewed: false
+  recipe:foodsafety-261:
+    text: 塔可猫酱鸡肉炖菜
+    reviewed: false
+  recipe:foodsafety-268:
+    text: 番茄猪肉解酒汤
+    reviewed: false
+  recipe:foodsafety-306:
+    text: 五色炒面
+    reviewed: false
+  recipe:foodsafety-360:
+    text: 比特洋葱泡菜
+    reviewed: false
+  recipe:foodsafety-388:
+    text: 排骨烤肉
+    reviewed: false
+  recipe:foodsafety-422:
+    text: 苹果泡菜
+    reviewed: false
+  recipe:foodsafety-479:
+    text: 饭肉饼
+    reviewed: false
+  recipe:foodsafety-483:
+    text: 水果泡菜
+    reviewed: false
+  recipe:foodsafety-597:
+    text: 派车和主乐
+    reviewed: false
+  recipe:foodsafety-718:
+    text: 苹果酱炸鸡
+    reviewed: false
+  recipe:foodsafety-853:
+    text: 肋眼牛排
+    reviewed: false
+  recipe:foodsafety-923:
+    text: 菠菜 梨 咪音
+    reviewed: false
+  recipe:foodsafety-1129:
+    text: 葡萄酒泡菜
+    reviewed: false
+  recipe:foodsafety-2953:
+    text: 济州岛冰饼，柑橘酱油酱
+    reviewed: false
+  recipe:foodsafety-3089:
+    text: 고사리파전&团柿传
+    reviewed: false
+  recipe:foodsafety-3172:
+    text: 丹柿子泡菜
+    reviewed: false
+  recipe:foodsafety-3175:
+    text: 柑橘豆子沙拉
+    reviewed: false
+  recipe:foodsafety-3285:
+    text: 菠菜鹰嘴豆泥
+    reviewed: false
+  region:seoul:
+    text: 首尔
+    reviewed: false
+  region:busan-myeongji:
+    text: 釜山 北区 明智
+    reviewed: false
+  region:jeonnam-coast:
+    text: 全罗南海岸地区
+    reviewed: false
+  region:chungnam-asan:
+    text: 忠南牙山市
+    reviewed: false
+  store_category:fruit:
+    text: 水果
+    reviewed: false
+  store_category:vegetable:
+    text: 蔬菜
+    reviewed: false
+  store_category:seafood:
+    text: 水产
+    reviewed: false
+  store_category:meat:
+    text: 肉类
+    reviewed: false
+  store_category:side_dish:
+    text: 配菜
+    reviewed: false
+  store_category:snack:
+    text: 떡·粉食
+    reviewed: false
+  store_category:produce:
+    text: 蔬菜水果
+    reviewed: false
+  store_category:dried:
+    text: 干货和腌鱼/젓갈
+    reviewed: false
+phrases:
+  가을~겨울:
+    text: 秋天~冬天
+    reviewed: false
+  일반적으로 늦가을이나 초봄에 씨를 뿌려 수확:
+    text: 通常在深秋或早春播种收获
+    reviewed: false
+  4~6월:
+    text: 4月至6月
+    reviewed: false
+  조생종 4월~5월 초:
+    text: 早熟品种 4月~5月初
+    reviewed: false
+  9월 상·중순:
+    text: 9月初中旬
+    reviewed: false
+  고랭지 여름양파:
+    text: 高海拔夏季洋葱
+    reviewed: false
+  0℃ · 상대습도 90~95%:
+    text: 0℃ · 相对湿度 90~95%
+    reviewed: false
+  0~2℃:
+    text: ''
+    reviewed: false
+  0℃:
+    text: ''
+    reviewed: false
+  부유 품종은:
+    text: 浮水品种是
+    reviewed: false
+  1~3개월:
+    text: 1~3个月
+    reviewed: false
+  10월 하순 이후:
+    text: 10月下旬之后
+    reviewed: false
+  만생종:
+    text: 万生宗
+    reviewed: false
+  중생종 추석용 품종:
+    text: 中生种秋夕用品种
+    reviewed: false
+  10월 하순~11월 상순:
+    text: 10月下旬~11月上旬
+    reviewed: false
+  남부 주산지는 대개 11월 상순:
+    text: 南部主汛期通常为11月上旬
+    reviewed: false
+  채소:
+    text: 蔬菜
+    reviewed: false
+  과일:
+    text: 水果
+    reviewed: false
+  곡물:
+    text: 谷物
+    reviewed: false
+  특용작물:
+    text: 特种作物
+    reviewed: false
+  축산물:
+    text: 畜牧产品
+    reviewed: false
+  수산물:
+    text: 海产品
+    reviewed: false
+  반찬:
+    text: 小菜
+    reviewed: false
+  기타:
+    text: 其他
+    reviewed: false
+  국&찌개:
+    text: 国&찌개
+    reviewed: false
+  끓이기:
+    text: 煮
+    reviewed: false
+  일품:
+    text: 极品
+    reviewed: false
+  볶기:
+    text: 煸炒
+    reviewed: false
+  후식:
+    text: 甜点
+    reviewed: false
+  굽기:
+    text: 烤
+    reviewed: false
+  밥:
+    text: 饭
+    reviewed: false
+  튀기기:
+    text: 油炸
+    reviewed: false
+  청과:
+    text: 水果
+    reviewed: false
+  수산:
+    text: 水产
+    reviewed: false
+  정육:
+    text: 肉店
+    reviewed: false
+  떡·분식:
+    text: 年糕·小吃
+    reviewed: false
+  채소·과일:
+    text: 蔬菜水果
+    reviewed: false
+  건어물·젓갈:
+    text: 干货和腌鱼
+    reviewed: false
+  눈 오는 날 만드는:
+    text: 制造雪天的
+    reviewed: false
+  더운 날 만드는:
+    text: 制造炎热天气
+    reviewed: false
+  비 오는 날 만드는:
+    text: 在下雨的天气里营造
+    reviewed: false
+  요리:
+    text: 烹饪
+    reviewed: false
+  추운 날 끓이는:
+    text: 在寒冷的日子里煮的
+    reviewed: false
+templates:
+  season_featured:
+    text: 韩国农村振兴厅（本月食材）将{name}列为{months}月的食材。
+    reviewed: false
+  season_harvest:
+    text: '{name}的收获期为{period}{note}。'
+    reviewed: false
+  season_regions:
+    text: '{name}主要种植于{regions}。'
+    reviewed: false
+  storage:
+    text: 资料说明：{name}适宜在{temperature}储存。
+    reviewed: false
+  storage_period:
+    text: 资料说明：{name}可在{temperature}储存{period}。
+    reviewed: false
+  recipe_reason:
+    text: 用{name}制作的菜肴：{dish}
+    reviewed: false
+  recipe_season_reason:
+    text: '{month}月时令食材{name}制作的菜肴：{dish}'
+    reviewed: false

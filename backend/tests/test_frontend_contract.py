@@ -63,15 +63,15 @@ def test_auth_admin_contract(memory):  # noqa: F811 -- imported fixture
     client = memory['client']
     response = signup(memory)
     user = response.json()['user']
-    assert set(user) == USER
+    assert set(user) == USER | {'lang'}
     assert set(user['store']) == {'store_id', 'name', 'market_id'}
-    assert set(client.get('/auth/me').json()['user']) == USER
+    assert set(client.get('/auth/me').json()['user']) == USER | {'lang'}
     operator(memory)
     pending = client.get('/admin/merchants').json()[0]
-    assert set(pending) == USER | {'created_at'}
+    assert set(pending) == USER | {'created_at', 'lang'}
     for action in ('approve', 'reject', 'disable'):
         response = client.post(f'/admin/merchants/{user["id"]}/{action}', headers=HEADER)
-        assert set(response.json()['user']) == USER
+        assert set(response.json()['user']) == USER | {'lang'}
 
 
 def test_store_sale_poster_contract(merchant):  # noqa: F811 -- imported fixture

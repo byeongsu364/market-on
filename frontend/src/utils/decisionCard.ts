@@ -1,9 +1,12 @@
-import type { Item, Market, Price } from '../types/contract';
+import { t as translate, type Key } from '../i18n';
+import type { Item, Language, Market, Price } from '../types/contract';
 import { seoulDay } from './sale';
 import { unitLabel } from './convertUnit';
-import { BAND_LABELS, priceBand } from './priceBand';
+import { priceBand } from './priceBand';
 
 export type CardInput = {
+  /** 카드 글자의 언어(045). 품목 이름·출처는 서버가 준 그대로 */
+  lang?: Language;
   item: Item;
   market: Pick<Market, 'market_id' | 'name'>;
   checked: string[];
@@ -18,6 +21,11 @@ export type CardInput = {
 };
 export function buildCardData(input: CardInput) {
   const { item, market, price, store } = input;
+  const lang = input.lang ?? 'ko';
+  const t = (key: Key) => translate(key, lang);
+  const pctText = (key: Key, value: number) => t(key).replace('{pct}', String(Math.abs(value)));
+  // 가격 자리 이름은 요청대로 많이 낮음·낮음·조금 높음·높음(판정 대신 위치만, 2026-11-27)
+  const bandLabels = [t('cardBand1'), t('cardBand2'), t('cardBand3'), t('cardBand4')];
   const selected = item.criteria.filter((c) => input.checked.includes(c.key));
   const date = seoulDay(input.now);
   const seen = Number(input.value);
@@ -27,28 +35,42 @@ export function buildCardData(input: CardInput) {
     pct == null
       ? ''
       : pct === 0
-        ? '기준시세와 차이가 없어요 · 0%'
-        : `${pct < 0 ? '▼ −' : '▲ +'}${Math.abs(pct)}% · 기준시세보다 ${Math.abs(pct)}% ${pct < 0 ? '낮아요' : '높아요'}`;
+        ? t('cardEqual')
+        : `${pct < 0 ? '▼ −' : '▲ +'}${Math.abs(pct)}% · ${pctText(pct < 0 ? 'cardLower' : 'cardHigher', pct)}`;
   const points = (selected.length ? selected : item.criteria).map(
     (c) => `${selected.length ? '✓ ' : ''}${c.text}`,
   );
   const count = selected.length
-    ? `${item.criteria.length}개 중 ${selected.length}개 확인`
-    : `확인 포인트 ${item.criteria.length}개`;
+    ? t('cardChecked')
+        .replace('{total}', String(item.criteria.length))
+        .replace('{done}', String(selected.length))
+    : t('cardPoints').replace('{total}', String(item.criteria.length));
   const prices = [
     ...(hasPrice
       ? [
           // "5,000원 / 3개 (1개 1,667원)" — "3 × 1개"처럼 읽히지 않게
           input.quantity > 1
-            ? `현장 가격 ${seen.toLocaleString('ko-KR')}원 / ${input.quantity}${unitLabel(input.unit).replace(/^1/, '')} (${unitLabel(input.unit)} ${Math.round(seen / input.quantity).toLocaleString('ko-KR')}원)`
-            : `현장 가격 ${seen.toLocaleString('ko-KR')}원 / ${unitLabel(input.unit)}`,
+            ? `${t('cardPriceLine')
+                .replace('{price}', seen.toLocaleString('ko-KR'))
+                .replace(
+                  '{unit}',
+                  `${input.quantity}${unitLabel(input.unit).replace(/^1/, '')}`,
+                )} (${unitLabel(input.unit)} ${Math.round(seen / input.quantity).toLocaleString('ko-KR')}원)`
+            : t('cardPriceLine')
+                .replace('{price}', seen.toLocaleString('ko-KR'))
+                .replace('{unit}', unitLabel(input.unit)),
         ]
       : []),
     ...(price
       ? [
-          `기준시세 ${price.mock ? '예시 ' : ''}${price.reference_price.toLocaleString('ko-KR')}원 / ${unitLabel(price.unit)}`,
+          t('cardReferenceLine')
+            .replace(
+              '{price}',
+              `${price.mock ? `${t('sample')} ` : ''}${price.reference_price.toLocaleString('ko-KR')}`,
+            )
+            .replace('{unit}', unitLabel(price.unit)),
         ]
-      : ['기준시세 정보 없음']),
+      : [t('cardNoPrice')]),
     ...(comparison ? [comparison] : []),
   ];
   const sources = [
@@ -63,16 +85,24 @@ export function buildCardData(input: CardInput) {
   // 가격 구간: 결과 화면과 같은 규칙(utils/priceBand). 가격을 넣지 않았으면 눈금을 모두 끄고 문구를 비움
   const verdict = hasPrice && price ? priceBand(price, price.variety_id) : null;
   const band = verdict?.band ?? null;
-  const bandLine = verdict ? verdict.message : '';
+  // 판정 문구 없이 차이(%)만(요청 2026-11-27)
+  const diff = verdict?.diff;
+  const bandLine = !verdict
+    ? ''
+    : !verdict.band || diff == null
+      ? t('cardCompareNote')
+      : diff === 0
+        ? t('cardChipEqual')
+        : pctText(diff < 0 ? 'cardLower' : 'cardHigher', diff);
   // 신선도에는 결론을 붙이지 않고 손님이 한 확인만 적음(기획서 "팀 원칙과 맞추기")
-  const footer = '신선도는 직접 확인했어요';
+  const footer = t('cardFooter');
   const title = [item.name, price?.variety_name !== item.name ? price?.variety_name : null]
     .filter(Boolean)
     .join(' · ');
   // 2026-11-27 시안(판단 카드): 위 가격 두 줄 + 비교 칩, "비교 근거 4가지", 내가 확인한 것(체크한 것만)
   const seenLine = hasPrice
     ? {
-        label: '현장 가격',
+        label: t('cardSeenLabel'),
         value: `${seen.toLocaleString('ko-KR')}원`,
         unit:
           input.quantity > 1
@@ -83,7 +113,7 @@ export function buildCardData(input: CardInput) {
   const refLine = price
     ? {
         // 046: 예시 품종 시세(실제 조사값 아님)면 그렇게 적음
-        label: price.mock ? '기준시세(예시)' : '기준시세',
+        label: t(price.mock ? 'cardRefSampleLabel' : 'cardRefLabel'),
         value: `${price.reference_price.toLocaleString('ko-KR')}원`,
         unit: unitLabel(price.unit),
       }
@@ -92,32 +122,49 @@ export function buildCardData(input: CardInput) {
     pct == null
       ? ''
       : pct === 0
-        ? '기준시세와 같아요'
-        : `${pct < 0 ? '▼' : '▲'} ${Math.abs(pct)}% · 기준시세보다 ${pct < 0 ? '낮아요' : '높아요'}`;
+        ? t('cardChipEqual')
+        : `${pct < 0 ? '▼' : '▲'} ${Math.abs(pct)}% · ${t(pct < 0 ? 'cardChipLower' : 'cardChipHigher')}`;
   const basis = [
     {
-      label: '가격',
+      key: 'price',
+      label: t('cardBasisPrice'),
       value:
         pct == null
-          ? hasPrice
-            ? '기준시세 없음'
-            : '가격 없이 확인'
+          ? t(hasPrice ? 'cardNoReference' : 'cardNoPriceChecked')
           : pct === 0
-            ? '시세와 같음'
-            : `시세보다 ${Math.abs(pct)}% ${pct < 0 ? '낮음' : '높음'}`,
+            ? t('cardSameAsRef')
+            : pctText(pct < 0 ? 'cardPctLower' : 'cardPctHigher', pct),
     },
-    { label: '품종', value: price?.variety_name ?? '품종 미확인' },
-    // 제철은 카드를 그릴 때 이달의 식재료 응답으로 채움(DecisionCardSheet)
-    { label: '제철', value: '' },
     {
-      label: '상태',
+      key: 'variety',
+      label: t('cardBasisVariety'),
+      value: price?.variety_name ?? t('cardNoVariety'),
+    },
+    // 제철은 카드를 그릴 때 이달의 식재료 응답으로 채움(DecisionCardSheet)
+    { key: 'season', label: t('cardBasisSeason'), value: '' },
+    {
+      key: 'state',
+      label: t('cardBasisState'),
       value: selected.length
-        ? `${item.criteria.length}개 중 ${selected.length}개 확인`
-        : '확인 안 함',
+        ? t('cardChecked')
+            .replace('{total}', String(item.criteria.length))
+            .replace('{done}', String(selected.length))
+        : t('cardNotChecked'),
     },
   ];
   const checkedPoints = selected.map((c) => `✓ ${c.text}`);
-  const disclaimer = 'Market-On은 판정하지 않아요 · 확인은 직접 했어요';
+  const disclaimer = t('cardDisclaimer');
+  // 그림 안의 고정 글(언어별)
+  const labels = {
+    photoTag: t('cardPhotoTag'),
+    noPrice: t('cardNoPrice'),
+    basisTitle: t('cardBasisTitle'),
+    seasonUnknown: t('cardSeasonUnknown'),
+    seasonNo: t('cardSeasonNo'),
+    seasonNow: t('cardSeasonNow'),
+    myChecks: t('cardMyChecks'),
+    noChecks: t('cardNoChecks'),
+  };
   return {
     itemId: item.item_id,
     itemName: item.name,
@@ -127,6 +174,8 @@ export function buildCardData(input: CardInput) {
     basis,
     checkedPoints,
     disclaimer,
+    labels,
+    lang,
     /** 이달의 식재료 문구(예: "11월 식재료"). null이면 이번 달 제철이 아님, undefined면 모름 */
     season: undefined as string | null | undefined,
     date,
@@ -139,7 +188,7 @@ export function buildCardData(input: CardInput) {
     sources,
     footer,
     band,
-    bandLabels: [...BAND_LABELS],
+    bandLabels,
     bandLine,
     bandNote: verdict?.fallbackNote ?? null,
     store: store?.name ?? market.name,
@@ -154,11 +203,11 @@ export function buildCardData(input: CardInput) {
       market.name,
       date,
       title,
-      '내가 확인한 것',
+      t('cardMyChecks'),
       count,
       ...points,
       ...prices,
-      band ? `가격 자리 ${BAND_LABELS[band - 1]}` : '',
+      band ? `${lang === 'ko' ? '가격 자리 ' : ''}${bandLabels[band - 1]}` : '',
       bandLine,
       store?.name,
       ...sources,
@@ -195,7 +244,8 @@ export function wrapText(
   return result;
 }
 
-const FONT = '"Pretendard Variable", Pretendard, system-ui, sans-serif';
+const FONT =
+  '"Pretendard Variable", Pretendard, system-ui, "PingFang SC", "Hiragino Sans", "Yu Gothic", "Microsoft YaHei", sans-serif';
 
 /** 판단 카드 PNG(1080×1760). 어두운 면(surface-dark) 위에 시안 Card의 배치를 그대로 옮김 */
 export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promise<Blob> {
@@ -316,7 +366,7 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
     } finally {
       URL.revokeObjectURL(url);
     }
-    const tag = '찍은 사진';
+    const tag = data.labels.photoTag;
     const tw = measure(tag, 28, 600) + 36;
     round(P + 20, photoY + photoS - 72, tw, 52, 26, colors.tag);
     text(tag, P + 20 + tw / 2, photoY + photoS - 36, 28, tw, {
@@ -343,7 +393,7 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
   if (data.seenLine) priceRow(data.seenLine);
   if (data.refLine) priceRow(data.refLine);
   else {
-    text('기준시세 정보 없음', rx, ry, 32, rw, { color: colors.soft });
+    text(data.labels.noPrice, rx, ry, 32, rw, { color: colors.soft });
     ry += 70;
   }
   if (data.chip) {
@@ -354,33 +404,33 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
 
   // 비교 근거 4가지(2×2)
   let y = photoY + photoS + 96;
-  text('비교 근거 4가지', P, y, 40, W - P * 2, { weight: 700 });
+  text(data.labels.basisTitle, P, y, 40, W - P * 2, { weight: 700 });
   y += 36;
   const gap = 24;
   const tileW = (W - P * 2 - gap) / 2;
   const tileH = 136;
   const season =
     data.season === undefined
-      ? '제철 정보 없음'
+      ? data.labels.seasonUnknown
       : data.season === null
-        ? '이번 달 제철 아님'
-        : `지금 제철 (${data.season})`;
+        ? data.labels.seasonNo
+        : data.labels.seasonNow.replace('{season}', data.season);
   data.basis.forEach((b, i) => {
     const x = P + (i % 2) * (tileW + gap);
     const ty = y + Math.floor(i / 2) * (tileH + gap);
     outline(x, ty, tileW, tileH, 24);
     text(b.label, x + 32, ty + 52, 28, tileW - 64, { weight: 600, color: colors.muted });
-    text(b.label === '제철' ? season : b.value, x + 32, ty + 102, 34, tileW - 64, {
+    text(b.key === 'season' ? season : b.value, x + 32, ty + 102, 34, tileW - 64, {
       weight: 700,
     });
   });
   y += tileH * 2 + gap + 90;
 
   // 내가 확인한 것(체크한 것만 ✓)
-  const head = '내가 확인한 것';
+  const head = data.labels.myChecks;
   text(head, P, y, 40, 500, { weight: 700 });
   text(data.count, P + measure(head, 40, 700) + 20, y, 30, 500, { color: colors.soft });
-  const lines = data.checkedPoints.length ? data.checkedPoints : ['체크한 확인 포인트가 없어요'];
+  const lines = data.checkedPoints.length ? data.checkedPoints : [data.labels.noChecks];
   lines.slice(0, 4).forEach((point) => {
     y += 58;
     text(point, P, y, 34, W - P * 2, {

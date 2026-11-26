@@ -270,21 +270,24 @@ export default function Store() {
         <h2 id="store-items" className={s.h2Row}>
           {t('mapSells')}
         </h2>
+        {/* 품목 옆에는 오늘 기준시세만 짧게, 출처·업종 기준 안내는 한 줄로(요청 2026-11-27) */}
+        <p className="caption">
+          {t('mapSellsNote')}
+          {data.guessed_item_ids.length > 0 && ` · ${t('mapGuessed')}`}
+        </p>
         <div className={s.chipWrap}>
           {(showAllItems ? data.items : data.items.slice(0, 12)).map((i) => (
-            <ChipLink
+            <SellsChip
               key={i.item_id}
+              itemId={i.item_id}
+              name={i.name}
+              marketId={marketId}
+              unit={catalog.data?.find((x) => x.item_id === i.item_id)?.default_unit ?? ''}
               to={ctx.href(`/items/${encodeURIComponent(i.item_id)}`, {
                 market: marketId,
                 store: storeId,
               })}
-              icon={<ItemTile itemId={i.item_id} size={20} />}
-            >
-              {i.name}
-              {data.guessed_item_ids.includes(i.item_id) && (
-                <span className={s.chipNote}>{t('mapGuessed')}</span>
-              )}
-            </ChipLink>
+            />
           ))}
         </div>
         {!showAllItems && data.items.length > 12 && (
@@ -413,5 +416,34 @@ export default function Store() {
       </div>
       {sheet}
     </div>
+  );
+}
+
+/** 파는 품목 칩: 이름 옆에 이 시장의 오늘 기준시세(단위는 옅게). 시세가 없으면 이름만 */
+function SellsChip({
+  itemId,
+  name,
+  marketId,
+  unit,
+  to,
+}: {
+  itemId: string;
+  name: string;
+  marketId: string;
+  unit: string;
+  to: string;
+}) {
+  const price = usePrice({ item_id: itemId, market_id: marketId, unit });
+  const p = price.data;
+  return (
+    <ChipLink to={to} icon={<ItemTile itemId={itemId} size={20} />}>
+      {name}
+      {p && (
+        <span className={s.chipPrice}>
+          {formatPrice(p.reference_price)}
+          <span className={s.chipNote}> / {unitLabel(p.unit)}</span>
+        </span>
+      )}
+    </ChipLink>
   );
 }

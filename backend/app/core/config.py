@@ -14,6 +14,7 @@ DEFAULT_LLM_ROUTES: dict[str, list[str]] = {
     'extract': ['gemini', 'openai'],
     'write': ['gemma', 'gemini', 'openai'],
     'reason': ['gemini', 'openai', 'gemma'],
+    'translate': ['gemma'],
 }
 
 
@@ -67,7 +68,9 @@ class Settings(BaseSettings):
     def fill_routes(cls, value: dict[str, list[str]]) -> dict[str, list[str]]:
         # .env에 예전 이름(recognize·ask·recommend·chat)만 있어도 서버가 멈추지 않게
         # 모르는 이름은 버리고, 빠진 역할은 기본 순서로 채움
-        return DEFAULT_LLM_ROUTES | {k: v for k, v in value.items() if k in DEFAULT_LLM_ROUTES}
+        return (
+            DEFAULT_LLM_ROUTES | {k: v for k, v in value.items() if k in DEFAULT_LLM_ROUTES}
+        ) | {'translate': ['gemma']}
 
     # 외부 AI(제미나이·GPT) 사용 규칙: 모델별 하루 전체 횟수, 손님(기기·IP)별 1시간 횟수, 답변 길이
     EXTERNAL_LLM_DAILY_LIMIT: int = 500

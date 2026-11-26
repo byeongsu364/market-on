@@ -222,6 +222,9 @@ def test_http(env, monkeypatch):
     assert response.status_code == 200
     assert set(response.json()) == {'items', 'total', 'budget', 'left', 'note', 'model'}
     assert set(response.json()['items'][0]) == {
+        'lang',
+        'translated',
+        'original',
         'item_id',
         'name',
         'quantity',

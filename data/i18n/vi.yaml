@@ -1,0 +1,1183 @@
+_meta:
+  machine_translated: true
+  reviewed: false
+entities:
+  cat:vegetable:
+    text: Rau củ
+    reviewed: false
+  cat:fruit:
+    text: Trái cây
+    reviewed: false
+  item:green_onion:
+    text: Hành lá
+    reviewed: false
+  crit:green_onion-leaf:
+    text: Cuống lá có vẻ đàn hồi đến tận đầu và không có lá khô lẫn vào
+    reviewed: false
+  crit:green_onion-stem:
+    text: Phần trắng của thân có nhiều và sạch sẽ
+    reviewed: false
+  crit:green_onion-root:
+    text: Khi chạm nhẹ vào phần gốc trắng, nó không mềm mà có độ đàn hồi.
+    reviewed: false
+  crit:green_onion-bunch:
+    text: Độ dài và độ dày của các gói tương tự nhau
+    reviewed: false
+  item:onion:
+    text: hành tây
+    reviewed: false
+  crit:onion-firm:
+    text: Nếu bạn ấn bằng tay, nó không mềm mà cứng.
+    reviewed: false
+  crit:onion-skin:
+    text: ''
+    reviewed: false
+  crit:onion-sprout:
+    text: Không có mầm mọc
+    reviewed: false
+  crit:onion-weight:
+    text: Nghe thì có cảm giác nặng so với kích thước.
+    reviewed: false
+  item:apple:
+    text: quả táo
+    reviewed: false
+  crit:apple-color:
+    text: Màu vỏ đồng đều và sáng
+    reviewed: false
+  crit:apple-stem:
+    text: Cuống có màu xanh và trông ẩm ướt.
+    reviewed: false
+  crit:apple-surface:
+    text: Không có vết xước hay vết bệnh/sâu bọ
+    reviewed: false
+  crit:apple-tap:
+    text: Khi chạm nhẹ, tôi cảm thấy sự đàn hồi và đầy đặn.
+    reviewed: false
+  item:pear:
+    text: quả
+    reviewed: false
+  crit:pear-color:
+    text: Màu vàng, trong và trong suốt.
+    reviewed: false
+  crit:pear-skin:
+    text: Vỏ không bị nhăn nhúm mà mịn màng.
+    reviewed: false
+  crit:pear-bottom:
+    text: Mặt đối diện của cái nắp không bị lồi ra và không có vết nứt đen.
+    reviewed: false
+  crit:pear-calyx:
+    text: Phần đài hoa không xanh mà chuyển sang màu vàng.
+    reviewed: false
+  item:sweet_persimmon:
+    text: Đu đủ
+    reviewed: false
+  crit:sweet_persimmon-calyx:
+    text: Nó dính liền giữa tay cầm và trái cây.
+    reviewed: false
+  crit:sweet_persimmon-spots:
+    text: Nhìn chung không có vết ố
+    reviewed: false
+  crit:sweet_persimmon-firm:
+    text: Chạm vào thì thịt quả cứng
+    reviewed: false
+  crit:sweet_persimmon-color:
+    text: Hơn 90% vỏ bị ngả vàng
+    reviewed: false
+  item:mandarin:
+    text: Quýt
+    reviewed: false
+  crit:mandarin-skin:
+    text: Vỏ mỏng và dính liền giữa vỏ và thịt quả mà không có khoảng trống
+    reviewed: false
+  crit:mandarin-shape:
+    text: Phần thân không nhô ra mà tròn và phẳng ở hai bên.
+    reviewed: false
+  crit:mandarin-stem:
+    text: Màu cam đậm và được gắn chặt với phần cuống màu xanh lá cây.
+    reviewed: false
+  crit:mandarin-gloss:
+    text: Vỏ không bóng quá
+    reviewed: false
+  unit:bunch:
+    text: Đơn
+    reviewed: false
+  unit:kg:
+    text: ''
+    reviewed: false
+  unit:piece:
+    text: cá
+    reviewed: false
+  variety:apple-fuji:
+    text: Fujii
+    reviewed: false
+  variety:apple-hongro:
+    text: Hồng Lộ
+    reviewed: false
+  variety:apple-shinano-gold:
+    text: Shinano Gold
+    reviewed: false
+  variety:pear-shingo:
+    text: Báo cáo
+    reviewed: false
+  variety:sweet_persimmon-fuyu:
+    text: Giàu có
+    reviewed: false
+  variety:green_onion-daepa:
+    text: Hành lá
+    reviewed: false
+  variety:onion-onion:
+    text: Hành tây
+    reviewed: false
+  variety:mandarin-open:
+    text: Ngoại lộ
+    reviewed: false
+  variety:mandarin-greenhouse:
+    text: Cơ sở vật chất
+    reviewed: false
+  variety:pear-noksu:
+    text: Nước xanh
+    reviewed: false
+  variety:pear-hanareum:
+    text: Hanareum
+    reviewed: false
+  variety:pear-manpung:
+    text: Manpungbae
+    reviewed: false
+  variety:sweet_persimmon-gampung:
+    text: Cảm phong
+    reviewed: false
+  variety:sweet_persimmon-romang:
+    text: Mơ mộng
+    reviewed: false
+  variety:sweet_persimmon-jowan:
+    text: Jo Wan
+    reviewed: false
+  variety:onion-jangilhwang:
+    text: Trương Nhật Hoàng
+    reviewed: false
+  variety:onion-highland:
+    text: Hành tây mùa hè vùng cao
+    reviewed: false
+  variety:green_onion-cold:
+    text: Han Ji-hyeong
+    reviewed: false
+  variety:green_onion-warm:
+    text: Nanjihyeong
+    reviewed: false
+  cat:grain:
+    text: Ngũ cốc
+    reviewed: false
+  cat:special:
+    text: Nông sản đặc biệt
+    reviewed: false
+  cat:livestock:
+    text: Thịt gia súc
+    reviewed: false
+  cat:seafood:
+    text: Hải sản
+    reviewed: false
+  item:rice:
+    text: Gạo
+    reviewed: false
+  crit:rice-p1:
+    text: ''
+    reviewed: false
+  variety:rice-01:
+    text: ''
+    reviewed: false
+  variety:rice-10:
+    text: ''
+    reviewed: false
+  item:glutinous_rice:
+    text: gạo nếp
+    reviewed: false
+  variety:glutinous_rice-01:
+    text: Trung học phổ thông chung
+    reviewed: false
+  item:soybean:
+    text: Đậu
+    reviewed: false
+  variety:soybean-01:
+    text: Đậu trắng (sản xuất trong nước)
+    reviewed: false
+  item:red_bean:
+    text: Đậu đỏ
+    reviewed: false
+  crit:red_bean-p1:
+    text: Nên chọn loại có màu đỏ đậm, bóng, hạt to và vỏ mỏng, tránh những loại nổi
+      trên nước hoặc hạt không đều.
+    reviewed: false
+  variety:red_bean-00:
+    text: Đậu đỏ (sản xuất trong nước)
+    reviewed: false
+  item:mung_bean:
+    text: Đậu xanh
+    reviewed: false
+  crit:mung_bean-p1:
+    text: ''
+    reviewed: false
+  variety:mung_bean-00:
+    text: Trong nước
+    reviewed: false
+  item:sweet_potato:
+    text: Khoai lang
+    reviewed: false
+  crit:sweet_potato-p1:
+    text: Nên có hình dạng đồng đều, bề mặt nhẵn và cứng, không bị trầy xước.
+    reviewed: false
+  variety:sweet_potato-00:
+    text: Đêm
+    reviewed: false
+  item:potato:
+    text: khoai tây
+    reviewed: false
+  variety:potato-01:
+    text: Sumi (Noji)
+    reviewed: false
+  item:brown_rice:
+    text: Gạo lứt
+    reviewed: false
+  variety:brown_rice-01:
+    text: Chalhyunmi
+    reviewed: false
+  item:barley:
+    text: Gạo lúa mạch
+    reviewed: false
+  variety:barley-04:
+    text: Yến mạch tím
+    reviewed: false
+  item:mixed_grains:
+    text: Bài hát hợp xướng
+    reviewed: false
+  variety:mixed_grains-01:
+    text: Nội địa
+    reviewed: false
+  item:napa_cabbage:
+    text: cải thảo
+    reviewed: false
+  crit:napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:napa_cabbage-03:
+    text: Mùa thu
+    reviewed: false
+  item:cabbage:
+    text: bắp cải
+    reviewed: false
+  variety:cabbage-00:
+    text: Bắp cải
+    reviewed: false
+  item:spinach:
+    text: Rau bina
+    reviewed: false
+  crit:spinach-p1:
+    text: ''
+    reviewed: false
+  variety:spinach-00:
+    text: rau bina
+    reviewed: false
+  item:lettuce:
+    text: xà lách
+    reviewed: false
+  variety:lettuce-01:
+    text: đỏ
+    reviewed: false
+  variety:lettuce-02:
+    text: Trời
+    reviewed: false
+  item:young_napa_cabbage:
+    text: Cải thảo muối chua
+    reviewed: false
+  variety:young_napa_cabbage-00:
+    text: Cải thảo ăn lá
+    reviewed: false
+  item:watermelon:
+    text: Dưa hấu
+    reviewed: false
+  variety:watermelon-00:
+    text: dưa hấu
+    reviewed: false
+  item:cucumber:
+    text: Dưa chuột
+    reviewed: false
+  variety:cucumber-01:
+    text: Hệ thống gai
+    reviewed: false
+  variety:cucumber-02:
+    text: Hệ thống Dada
+    reviewed: false
+  variety:cucumber-03:
+    text: Tuyển dụng
+    reviewed: false
+  item:squash:
+    text: bí ngô
+    reviewed: false
+  crit:squash-p1:
+    text: ''
+    reviewed: false
+  crit:squash-p2:
+    text: 'Bí đỏ: Nên chọn loại có màu đậm đồng đều, chắc và nặng so với kích thước.'
+    reviewed: false
+  crit:squash-p3:
+    text: 'Bí đỏ già: Có kích thước rất lớn, thân bóng và có màu vàng nhạt. Tốt nếu
+      vỏ cứng.'
+    reviewed: false
+  variety:squash-01:
+    text: Bí ngòi
+    reviewed: false
+  variety:squash-02:
+    text: Zucchini
+    reviewed: false
+  item:tomato:
+    text: cà chua
+    reviewed: false
+  variety:tomato-00:
+    text: cà chua
+    reviewed: false
+  item:strawberry:
+    text: dâu tây
+    reviewed: false
+  variety:strawberry-00:
+    text: Seolhyang
+    reviewed: false
+  item:radish:
+    text: vô
+    reviewed: false
+  crit:radish-p1:
+    text: Vỏ trắng và nhẵn, cứng và nặng (phần rễ tròn trịa và phần lá màu xanh, củ
+      ráy ngon).
+    reviewed: false
+  crit:radish-p2:
+    text: Hình dáng thẳng, không bị nứt hay vỡ, không có nhiều rễ nhỏ.
+    reviewed: false
+  variety:radish-03:
+    text: Mùa thu
+    reviewed: false
+  item:carrot:
+    text: Cà rốt
+    reviewed: false
+  variety:carrot-01:
+    text: Không cần rửa (sản xuất trong nước)
+    reviewed: false
+  item:young_radish:
+    text: Rau mồng tơi
+    reviewed: false
+  variety:young_radish-00:
+    text: Rau diếp
+    reviewed: false
+  item:dried_chili:
+    text: ớt khô
+    reviewed: false
+  variety:dried_chili-00:
+    text: Hwageon
+    reviewed: false
+  item:green_chili:
+    text: Ớt cay
+    reviewed: false
+  variety:green_chili-00:
+    text: Ớt xanh (như ớt xanh)
+    reviewed: false
+  variety:green_chili-02:
+    text: Ớt cay</text>
+    reviewed: false
+  variety:green_chili-03:
+    text: Ớt xanh Cheongyang
+    reviewed: false
+  variety:green_chili-04:
+    text: Ớt dưa chuột
+    reviewed: false
+  item:red_chili:
+    text: ớt đỏ
+    reviewed: false
+  variety:red_chili-00:
+    text: Ớt đỏ
+    reviewed: false
+  item:peeled_garlic:
+    text: Tỏi xay
+    reviewed: false
+  variety:peeled_garlic-01:
+    text: Tỏi băm (trong nước)
+    reviewed: false
+  item:ginger:
+    text: Gừng
+    reviewed: false
+  crit:ginger-p1:
+    text: Nên có một khối với nhiều miếng nhỏ gắn vào nhau, có chất lượng thịt chắc,
+      lớn và có màu vàng đất.
+    reviewed: false
+  crit:ginger-p2:
+    text: Trứng to, rộng, ít nếp nhăn trên vỏ và dễ bóc.
+    reviewed: false
+  crit:ginger-p3:
+    text: Có vị cay và hương thơm riêng biệt, màu hơi đậm và hình dạng sần sùi.
+    reviewed: false
+  variety:ginger-00:
+    text: Trong nước
+    reviewed: false
+  item:eggplant:
+    text: cây
+    reviewed: false
+  variety:eggplant-00:
+    text: cây
+    reviewed: false
+  item:water_dropwort:
+    text: Minari
+    reviewed: false
+  variety:water_dropwort-00:
+    text: Minari
+    reviewed: false
+  item:perilla_leaves:
+    text: Lá tía tô
+    reviewed: false
+  variety:perilla_leaves-00:
+    text: lá tía tô
+    reviewed: false
+  item:chives:
+    text: hẹ
+    reviewed: false
+  variety:chives-00:
+    text: hẹ
+    reviewed: false
+  item:bell_pepper:
+    text: Ớt chuông
+    reviewed: false
+  variety:bell_pepper-00:
+    text: Trời
+    reviewed: false
+  item:paprika:
+    text: Ớt chuông
+    reviewed: false
+  variety:paprika-00:
+    text: ớt chuông
+    reviewed: false
+  item:melon:
+    text: Melon
+    reviewed: false
+  variety:melon-00:
+    text: Melon
+    reviewed: false
+  item:chili_powder:
+    text: Bột ớt
+    reviewed: false
+  variety:chili_powder-00:
+    text: Trong nước
+    reviewed: false
+  variety:chili_powder-01:
+    text: Trung Quốc
+    reviewed: false
+  item:mustard_greens:
+    text: Thần thánh
+    reviewed: false
+  variety:mustard_greens-00:
+    text: Thần thánh
+    reviewed: false
+  item:cherry_tomato:
+    text: Cà chua bi
+    reviewed: false
+  variety:cherry_tomato-02:
+    text: Cà chua bi hạt táo
+    reviewed: false
+  item:baby_napa_cabbage:
+    text: Rau cải non
+    reviewed: false
+  crit:baby_napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:baby_napa_cabbage-00:
+    text: Cải bắp non
+    reviewed: false
+  item:broccoli:
+    text: bông cải xanh
+    reviewed: false
+  crit:broccoli-p1:
+    text: ''
+    reviewed: false
+  variety:broccoli-00:
+    text: Bông cải xanh (trong nước)
+    reviewed: false
+  item:sesame:
+    text: Vừng
+    reviewed: false
+  variety:sesame-01:
+    text: Trắng (trong nước)
+    reviewed: false
+  variety:sesame-02:
+    text: Trung Quốc
+    reviewed: false
+  item:peanut:
+    text: Đậu phộng
+    reviewed: false
+  variety:peanut-01:
+    text: Trong nước
+    reviewed: false
+  variety:peanut-02:
+    text: Nhập khẩu
+    reviewed: false
+  item:oyster_mushroom:
+    text: nấm sò
+    reviewed: false
+  variety:oyster_mushroom-00:
+    text: Nấm sò
+    reviewed: false
+  variety:oyster_mushroom-01:
+    text: Nấm Anethum
+    reviewed: false
+  item:enoki_mushroom:
+    text: Nấm sò
+    reviewed: false
+  variety:enoki_mushroom-00:
+    text: Nấm đông cô
+    reviewed: false
+  item:king_oyster_mushroom:
+    text: Nấm hoàng kim
+    reviewed: false
+  variety:king_oyster_mushroom-00:
+    text: Nấm sò
+    reviewed: false
+  item:walnut:
+    text: Hạt óc chó
+    reviewed: false
+  variety:walnut-00:
+    text: Nhập khẩu
+    reviewed: false
+  item:almond:
+    text: Hạnh nhân
+    reviewed: false
+  variety:almond-00:
+    text: Nhập khẩu
+    reviewed: false
+  item:banana:
+    text: chuối
+    reviewed: false
+  variety:banana-02:
+    text: Nhập khẩu
+    reviewed: false
+  item:lemon:
+    text: chanh vàng
+    reviewed: false
+  variety:lemon-00:
+    text: Nhập khẩu
+    reviewed: false
+  item:pineapple:
+    text: dứa
+    reviewed: false
+  variety:pineapple-02:
+    text: Nhập khẩu
+    reviewed: false
+  item:mango:
+    text: Xoài
+    reviewed: false
+  variety:mango-00:
+    text: Nhập khẩu
+    reviewed: false
+  item:orange:
+    text: cam
+    reviewed: false
+  variety:orange-06:
+    text: Neible Australia
+    reviewed: false
+  item:grape:
+    text: Nho
+    reviewed: false
+  variety:grape-12:
+    text: Nho quýt
+    reviewed: false
+  item:avocado:
+    text: bơ
+    reviewed: false
+  variety:avocado-00:
+    text: Nhập khẩu
+    reviewed: false
+  item:blueberry:
+    text: Việt quất
+    reviewed: false
+  variety:blueberry-02:
+    text: Nhập khẩu (đông lạnh)
+    reviewed: false
+  item:kiwi:
+    text: Kiwi
+    reviewed: false
+  variety:kiwi-01:
+    text: Vàng
+    reviewed: false
+  item:beef:
+    text: con bò
+    reviewed: false
+  variety:beef-21:
+    text: Yên tâm
+    reviewed: false
+  variety:beef-22:
+    text: thăn bò
+    reviewed: false
+  variety:beef-36:
+    text: Seoldo
+    reviewed: false
+  variety:beef-40:
+    text: Lòng đất
+    reviewed: false
+  variety:beef-50:
+    text: Sườn
+    reviewed: false
+  item:pork:
+    text: Lợn
+    reviewed: false
+  variety:pork-25:
+    text: chân trước
+    reviewed: false
+  variety:pork-27:
+    text: Samgyeopsal
+    reviewed: false
+  variety:pork-28:
+    text: Sườn nướng
+    reviewed: false
+  variety:pork-68:
+    text: Thăn nội
+    reviewed: false
+  item:imported_beef:
+    text: Thịt bò nhập khẩu
+    reviewed: false
+  variety:imported_beef-31:
+    text: sườn
+    reviewed: false
+  variety:imported_beef-37:
+    text: Thăn sườn
+    reviewed: false
+  item:imported_pork:
+    text: Thịt lợn nhập khẩu
+    reviewed: false
+  variety:imported_pork-27:
+    text: Samgyeopsal
+    reviewed: false
+  item:chicken:
+    text: gà
+    reviewed: false
+  variety:chicken-05:
+    text: Lục gia 12
+    reviewed: false
+  variety:chicken-99:
+    text: Thịt gà (kg)
+    reviewed: false
+  variety:chicken-04:
+    text: Lục kê 11
+    reviewed: false
+  variety:chicken-03:
+    text: Lục kế 10
+    reviewed: false
+  variety:chicken-02:
+    text: Lục kế số 9
+    reviewed: false
+  variety:chicken-01:
+    text: Gà bản địa số 17
+    reviewed: false
+  item:egg:
+    text: trứng
+    reviewed: false
+  variety:egg-21:
+    text: XL10 cửa
+    reviewed: false
+  variety:egg-23:
+    text: XL30 đơn vị
+    reviewed: false
+  item:milk:
+    text: sữa
+    reviewed: false
+  variety:milk-01:
+    text: ''
+    reviewed: false
+  item:mackerel:
+    text: Cá thu
+    reviewed: false
+  variety:mackerel-03:
+    text: (Muối muối) trong nước
+    reviewed: false
+  variety:mackerel-05:
+    text: ''
+    reviewed: false
+  variety:mackerel-08:
+    text: Nhập khẩu (muối)
+    reviewed: false
+  item:dried_anchovy:
+    text: Cá cơm khô
+    reviewed: false
+  variety:dried_anchovy-00:
+    text: Mực khô
+    reviewed: false
+  item:dried_squid:
+    text: Mực khô
+    reviewed: false
+  variety:dried_squid-00:
+    text: Mực khô
+    reviewed: false
+  item:laver:
+    text: Kim
+    reviewed: false
+  variety:laver-00:
+    text: Nori khô
+    reviewed: false
+  variety:laver-01:
+    text: 김 nướng
+    reviewed: false
+  item:dried_seaweed:
+    text: rong biển khô
+    reviewed: false
+  variety:dried_seaweed-00:
+    text: rong biển khô
+    reviewed: false
+  item:oyster:
+    text: củ cải
+    reviewed: false
+  variety:oyster-00:
+    text: Củ
+    reviewed: false
+  item:imported_croaker:
+    text: Xuất khẩu sớm
+    reviewed: false
+  variety:imported_croaker-04:
+    text: Thuế phụ phí (đông lạnh)
+    reviewed: false
+  item:salted_shrimp:
+    text: mắm tép
+    reviewed: false
+  variety:salted_shrimp-00:
+    text: Mắm tôm
+    reviewed: false
+  item:anchovy_sauce:
+    text: nước mắm cá cơm
+    reviewed: false
+  variety:anchovy_sauce-00:
+    text: nước mắm cá cơm
+    reviewed: false
+  item:sea_salt:
+    text: Muối biển thiên nhật
+    reviewed: false
+  variety:sea_salt-00:
+    text: Muối biển
+    reviewed: false
+  item:abalone:
+    text: Hàu thân vân
+    reviewed: false
+  variety:abalone-00:
+    text: Làm lạnh
+    reviewed: false
+  item:shrimp:
+    text: tôm
+    reviewed: false
+  variety:shrimp-01:
+    text: Hà trắng (nhập khẩu)
+    reviewed: false
+  item:saury:
+    text: Cá mòi
+    reviewed: false
+  variety:saury-01:
+    text: Đông lạnh (nhập khẩu)
+    reviewed: false
+  item:squid:
+    text: mực ống nước
+    reviewed: false
+  variety:squid-04:
+    text: Nga nguyên biển (đông lạnh)
+    reviewed: false
+  variety:squid-05:
+    text: Đại dương (đông lạnh)
+    reviewed: false
+  item:hairtail:
+    text: Cá hố
+    reviewed: false
+  variety:hairtail-03:
+    text: Trong nước (lạnh)
+    reviewed: false
+  variety:hairtail-04:
+    text: Trong nước (đông lạnh)
+    reviewed: false
+  item:pollock:
+    text: Bơn tuyết
+    reviewed: false
+  variety:pollock-04:
+    text: Đông lạnh (Nhập khẩu ngoài biển tích hợp)
+    reviewed: false
+  variety:pollock-05:
+    text: Chế biến đông lạnh
+    reviewed: false
+  item:croaker:
+    text: Sớm
+    reviewed: false
+  variety:croaker-05:
+    text: ''
+    reviewed: false
+  variety:croaker-06:
+    text: Máy lạnh (làm lạnh)
+    reviewed: false
+  variety:croaker-07:
+    text: Cá khô cồn biển
+    reviewed: false
+  item:dried_kelp:
+    text: Kandaishima
+    reviewed: false
+  variety:dried_kelp-01:
+    text: 산 hoàn độ
+    reviewed: false
+  item:scallop:
+    text: Sò điệp
+    reviewed: false
+  variety:scallop-01:
+    text: Hàu vỏ sò (Hàu đỏ)
+    reviewed: false
+  item:mussel:
+    text: Hàu
+    reviewed: false
+  variety:mussel-01:
+    text: Hàu vỏ (làm lạnh)
+    reviewed: false
+  variety:mussel-02:
+    text: Ngao hến (lạnh)
+    reviewed: false
+  item:blue_crab:
+    text: Cua cua
+    reviewed: false
+  variety:blue_crab-00:
+    text: Đông lạnh
+    reviewed: false
+  item:spanish_mackerel:
+    text: Cá thu
+    reviewed: false
+  variety:spanish_mackerel-01:
+    text: Làm lạnh
+    reviewed: false
+  item:mackerel_fillet:
+    text: Phi lê cá thu
+    reviewed: false
+  variety:mackerel_fillet-00:
+    text: Nhập khẩu
+    reviewed: false
+  variety:mackerel_fillet-01:
+    text: Nội địa
+    reviewed: false
+  item:clam:
+    text: Ngao sò điệp
+    reviewed: false
+  variety:clam-00:
+    text: Làm mát
+    reviewed: false
+  item:octopus:
+    text: mực
+    reviewed: false
+  variety:octopus-00:
+    text: Nhập khẩu (đông lạnh)
+    reviewed: false
+  item:cockle:
+    text: Hàu
+    reviewed: false
+  variety:cockle-00:
+    text: Nội địa (ốc nhồi)
+    reviewed: false
+  unit:egg10:
+    text: 10 buồng
+    reviewed: false
+  unit:egg30:
+    text: 30 quận
+    reviewed: false
+  unit:fish:
+    text: Marie
+    reviewed: false
+  unit:fish10:
+    text: 10 con
+    reviewed: false
+  unit:fish5:
+    text: 5 con
+    reviewed: false
+  unit:g100:
+    text: ''
+    reviewed: false
+  unit:g150:
+    text: ''
+    reviewed: false
+  unit:g50:
+    text: ''
+    reviewed: false
+  unit:g500:
+    text: ''
+    reviewed: false
+  unit:g600:
+    text: ''
+    reviewed: false
+  unit:head:
+    text: Bỏ cuộc
+    reviewed: false
+  unit:kg10:
+    text: ''
+    reviewed: false
+  unit:kg2:
+    text: ''
+    reviewed: false
+  unit:kg20:
+    text: ''
+    reviewed: false
+  unit:kg5:
+    text: ''
+    reviewed: false
+  unit:liter:
+    text: ''
+    reviewed: false
+  unit:pair:
+    text: Tay
+    reviewed: false
+  unit:piece10:
+    text: 10 cái
+    reviewed: false
+  unit:piece3:
+    text: 3 cái
+    reviewed: false
+  unit:sheet10:
+    text: Chương 10
+    reviewed: false
+  recipe:foodsafety-32:
+    text: Đậu phụ non, táo, sốt, dưa chuột trộn
+    reviewed: false
+  recipe:foodsafety-33:
+    text: Táo tôm canh rong biển
+    reviewed: false
+  recipe:foodsafety-150:
+    text: Kimchi quýt
+    reviewed: false
+  recipe:foodsafety-261:
+    text: Thịt gà kho Taco Sauce
+    reviewed: false
+  recipe:foodsafety-268:
+    text: Canh giải rượu cà chua thịt heo
+    reviewed: false
+  recipe:foodsafety-306:
+    text: Mì xào ngũ sắc
+    reviewed: false
+  recipe:foodsafety-360:
+    text: Kimchi hành tây bit
+    reviewed: false
+  recipe:foodsafety-388:
+    text: Gà nướng Bae Suk
+    reviewed: false
+  recipe:foodsafety-422:
+    text: Ô dưa táo
+    reviewed: false
+  recipe:foodsafety-479:
+    text: Bánh viên thịt
+    reviewed: false
+  recipe:foodsafety-483:
+    text: Kim chi trái cây
+    reviewed: false
+  recipe:foodsafety-597:
+    text: Điều phối xe và chè rán
+    reviewed: false
+  recipe:foodsafety-718:
+    text: Sốt táo xào thịt
+    reviewed: false
+  recipe:foodsafety-853:
+    text: thăn bò nướng
+    reviewed: false
+  recipe:foodsafety-923:
+    text: Rau bina, lê, mieum
+    reviewed: false
+  recipe:foodsafety-1129:
+    text: Trứng hấp rượu vang
+    reviewed: false
+  recipe:foodsafety-2953:
+    text: Bánh tráng đá Jeju, sốt nước tương quýt
+    reviewed: false
+  recipe:foodsafety-3089:
+    text: Cây dương xỉ và quả hồng
+    reviewed: false
+  recipe:foodsafety-3172:
+    text: Dưa chuột ngâm hồng
+    reviewed: false
+  recipe:foodsafety-3175:
+    text: Salad đậu cam
+    reviewed: false
+  recipe:foodsafety-3285:
+    text: Hummus rau bina
+    reviewed: false
+  region:seoul:
+    text: Seoul
+    reviewed: false
+  region:busan-myeongji:
+    text: Myeongji, Buk-gu, Busan
+    reviewed: false
+  region:jeonnam-coast:
+    text: Bờ biển tỉnh Jeonnam
+    reviewed: false
+  region:chungnam-asan:
+    text: Asan, Chungnam
+    reviewed: false
+  store_category:fruit:
+    text: Trái cây
+    reviewed: false
+  store_category:vegetable:
+    text: Rau củ
+    reviewed: false
+  store_category:seafood:
+    text: Thủy sản
+    reviewed: false
+  store_category:meat:
+    text: Thịt thăn
+    reviewed: false
+  store_category:side_dish:
+    text: Món ăn kèm
+    reviewed: false
+  store_category:snack:
+    text: Bánh gạo và đồ ăn vặt
+    reviewed: false
+  store_category:produce:
+    text: Rau củ quả
+    reviewed: false
+  store_category:dried:
+    text: Hải sản khô và mắm muối
+    reviewed: false
+phrases:
+  가을~겨울:
+    text: Mùa thu~mùa đông
+    reviewed: false
+  일반적으로 늦가을이나 초봄에 씨를 뿌려 수확:
+    text: Thường gieo hạt vào cuối thu hoặc đầu xuân và thu hoạch
+    reviewed: false
+  4~6월:
+    text: Tháng 4-6
+    reviewed: false
+  조생종 4월~5월 초:
+    text: Giống sớm tháng 4~tháng 5 đầu
+    reviewed: false
+  9월 상·중순:
+    text: Giữa tháng và cuối tháng 9
+    reviewed: false
+  고랭지 여름양파:
+    text: Hành tây mùa hè trên vùng cao
+    reviewed: false
+  0℃ · 상대습도 90~95%:
+    text: 0℃ · Độ ẩm tương đối 90~95%
+    reviewed: false
+  0~2℃:
+    text: ''
+    reviewed: false
+  0℃:
+    text: ''
+    reviewed: false
+  부유 품종은:
+    text: Giống nổi là
+    reviewed: false
+  1~3개월:
+    text: 1~3 tháng
+    reviewed: false
+  10월 하순 이후:
+    text: Sau nửa cuối tháng 10
+    reviewed: false
+  만생종:
+    text: Siêu giống loài
+    reviewed: false
+  중생종 추석용 품종:
+    text: Giống Trung sinh Trung thu
+    reviewed: false
+  10월 하순~11월 상순:
+    text: Cuối tháng 10 ~ đầu tháng 11
+    reviewed: false
+  남부 주산지는 대개 11월 상순:
+    text: Các khu vực sản xuất phía nam thường vào đầu tháng 11.
+    reviewed: false
+  채소:
+    text: Rau củ
+    reviewed: false
+  과일:
+    text: Trái cây
+    reviewed: false
+  곡물:
+    text: Ngũ cốc
+    reviewed: false
+  특용작물:
+    text: Cây trồng đặc biệt
+    reviewed: false
+  축산물:
+    text: Thịt gia súc
+    reviewed: false
+  수산물:
+    text: Hải sản
+    reviewed: false
+  반찬:
+    text: Món ăn kèm
+    reviewed: false
+  기타:
+    text: Khác
+    reviewed: false
+  국&찌개:
+    text: Canh Quốc & Canh
+    reviewed: false
+  끓이기:
+    text: Đun sôi
+    reviewed: false
+  일품:
+    text: Tuyệt hảo
+    reviewed: false
+  볶기:
+    text: Chiên
+    reviewed: false
+  후식:
+    text: Món tráng miệng
+    reviewed: false
+  굽기:
+    text: Nướng
+    reviewed: false
+  밥:
+    text: Cơm
+    reviewed: false
+  튀기기:
+    text: Chiên
+    reviewed: false
+  청과:
+    text: Rau củ
+    reviewed: false
+  수산:
+    text: Thủy sản
+    reviewed: false
+  정육:
+    text: thịt bò
+    reviewed: false
+  떡·분식:
+    text: Bánh gạo · Đồ ăn nhẹ
+    reviewed: false
+  채소·과일:
+    text: Rau củ và trái cây
+    reviewed: false
+  건어물·젓갈:
+    text: Hải sản khô và mắm muối
+    reviewed: false
+  눈 오는 날 만드는:
+    text: Tạo ngày tuyết rơi
+    reviewed: false
+  더운 날 만드는:
+    text: Tạo ngày nóng
+    reviewed: false
+  비 오는 날 만드는:
+    text: Tạo ra ngày mưa
+    reviewed: false
+  요리:
+    text: Nấu ăn
+    reviewed: false
+  추운 날 끓이는:
+    text: Nấu vào ngày lạnh
+    reviewed: false
+templates:
+  season_featured:
+    text: Cục Phát triển Nông thôn Hàn Quốc (Thực phẩm của tháng) giới thiệu {name} cho các tháng {months}.
+    reviewed: false
+  season_harvest:
+    text: '{name} được thu hoạch {period}{note}.'
+    reviewed: false
+  season_regions:
+    text: '{name} được trồng nhiều tại {regions}.'
+    reviewed: false
+  storage:
+    text: Hướng dẫn bảo quản {name} ở {temperature}.
+    reviewed: false
+  storage_period:
+    text: Hướng dẫn bảo quản {name} ở {temperature} trong {period}.
+    reviewed: false
+  recipe_reason:
+    text: 'Món ăn từ {name}: {dish}'
+    reviewed: false
+  recipe_season_reason:
+    text: 'Món ăn từ {name} vào mùa tháng {month}: {dish}'
+    reviewed: false

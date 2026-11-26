@@ -1,0 +1,1179 @@
+_meta:
+  machine_translated: true
+  reviewed: false
+entities:
+  cat:vegetable:
+    text: 野菜
+    reviewed: false
+  cat:fruit:
+    text: 果物
+    reviewed: false
+  item:green_onion:
+    text: 長ネギ
+    reviewed: false
+  crit:green_onion-leaf:
+    text: 葉の先まで弾力があり、枯れ葉が混ざっていません
+    reviewed: false
+  crit:green_onion-stem:
+    text: 茎の白い部分が多くて綺麗です
+    reviewed: false
+  crit:green_onion-root:
+    text: 白い根元の方を軽く触れると、柔らかくならずに弾力があります
+    reviewed: false
+  crit:green_onion-bunch:
+    text: グループ内の長さと太さが似ています
+    reviewed: false
+  item:onion:
+    text: 玉ねぎ
+    reviewed: false
+  crit:onion-firm:
+    text: 手で押してみると、柔らかくなくしっかりしています
+    reviewed: false
+  crit:onion-skin:
+    text: 殻の色が鮮やかで、よく乾燥しています
+    reviewed: false
+  crit:onion-sprout:
+    text: 芽が出ていません
+    reviewed: false
+  crit:onion-weight:
+    text: 聞いてみると、サイズに対して重みがあります
+    reviewed: false
+  item:apple:
+    text: りんご
+    reviewed: false
+  crit:apple-color:
+    text: 皮の色が均一で明るいです
+    reviewed: false
+  crit:apple-stem:
+    text: 穂先が青みを帯びていて、水分があるように見えます。
+    reviewed: false
+  crit:apple-surface:
+    text: 傷や病気、虫食いの跡はありません
+    reviewed: false
+  crit:apple-tap:
+    text: 軽く叩くと弾力がありふっくらとした感触があります
+    reviewed: false
+  item:pear:
+    text: バケ
+    reviewed: false
+  crit:pear-color:
+    text: 外側は澄んだ透明な黄色です
+    reviewed: false
+  crit:pear-skin:
+    text: 皮がしわしわしていなくて滑らかです
+    reviewed: false
+  crit:pear-bottom:
+    text: キャップの反対側に突き出ていたり、黒いひび割れはありません。
+    reviewed: false
+  crit:pear-calyx:
+    text: 子葉柄の部分が青くならず黄色く変色しています
+    reviewed: false
+  item:sweet_persimmon:
+    text: 柿
+    reviewed: false
+  crit:sweet_persimmon-calyx:
+    text: 取っ手と果物の間に隙間なくくっついています
+    reviewed: false
+  crit:sweet_persimmon-spots:
+    text: 全体的にシミがありません
+    reviewed: false
+  crit:sweet_persimmon-firm:
+    text: 触ってみると果肉が固いです
+    reviewed: false
+  crit:sweet_persimmon-color:
+    text: 皮の90%以上が黄色く染まっています
+    reviewed: false
+  item:mandarin:
+    text: みかん
+    reviewed: false
+  crit:mandarin-skin:
+    text: 皮が薄く、皮と果肉の間に隙間なくくっついています
+    reviewed: false
+  crit:mandarin-shape:
+    text: つまみが飛び出さず、左右に丸く平らです
+    reviewed: false
+  crit:mandarin-stem:
+    text: 色が濃いオレンジ色で、先端は緑色でしっかりついています
+    reviewed: false
+  crit:mandarin-gloss:
+    text: 皮が過度に光っていないです
+    reviewed: false
+  unit:bunch:
+    text: 単
+    reviewed: false
+  unit:kg:
+    text: ''
+    reviewed: false
+  unit:piece:
+    text: 犬
+    reviewed: false
+  variety:apple-fuji:
+    text: 富士
+    reviewed: false
+  variety:apple-hongro:
+    text: 紅露
+    reviewed: false
+  variety:apple-shinano-gold:
+    text: シナノゴールド
+    reviewed: false
+  variety:pear-shingo:
+    text: 通報
+    reviewed: false
+  variety:sweet_persimmon-fuyu:
+    text: 浮遊
+    reviewed: false
+  variety:green_onion-daepa:
+    text: 青ネギ
+    reviewed: false
+  variety:onion-onion:
+    text: 玉ねぎ
+    reviewed: false
+  variety:mandarin-open:
+    text: 野地
+    reviewed: false
+  variety:mandarin-greenhouse:
+    text: 施設
+    reviewed: false
+  variety:pear-noksu:
+    text: 緑水
+    reviewed: false
+  variety:pear-hanareum:
+    text: ハナアラム
+    reviewed: false
+  variety:pear-manpung:
+    text: マンフンベイ
+    reviewed: false
+  variety:sweet_persimmon-gampung:
+    text: 風向き
+    reviewed: false
+  variety:sweet_persimmon-romang:
+    text: ロマン
+    reviewed: false
+  variety:sweet_persimmon-jowan:
+    text: チョ・ウォン
+    reviewed: false
+  variety:onion-jangilhwang:
+    text: チャン・イルファン
+    reviewed: false
+  variety:onion-highland:
+    text: 高冷地の夏タマネギ
+    reviewed: false
+  variety:green_onion-cold:
+    text: ハン・ジヒョン
+    reviewed: false
+  variety:green_onion-warm:
+    text: ナンジ型
+    reviewed: false
+  cat:grain:
+    text: 穀物
+    reviewed: false
+  cat:special:
+    text: 特用作物
+    reviewed: false
+  cat:livestock:
+    text: 畜産物
+    reviewed: false
+  cat:seafood:
+    text: 水産物
+    reviewed: false
+  item:rice:
+    text: 米
+    reviewed: false
+  crit:rice-p1:
+    text: ''
+    reviewed: false
+  variety:rice-01:
+    text: ''
+    reviewed: false
+  variety:rice-10:
+    text: ''
+    reviewed: false
+  item:glutinous_rice:
+    text: もち米
+    reviewed: false
+  variety:glutinous_rice-01:
+    text: 一般系
+    reviewed: false
+  item:soybean:
+    text: 豆
+    reviewed: false
+  variety:soybean-01:
+    text: 白豆（国産）
+    reviewed: false
+  item:red_bean:
+    text: 小豆
+    reviewed: false
+  crit:red_bean-p1:
+    text: 赤みが濃く、艶があり、卵が太く殻が薄いものが良い。水に浮いたり卵の大きさが不均一なものは避けるのが良い。
+    reviewed: false
+  variety:red_bean-00:
+    text: 赤い小豆（国産）
+    reviewed: false
+  item:mung_bean:
+    text: 緑豆
+    reviewed: false
+  crit:mung_bean-p1:
+    text: 緑色の光沢が濃く、茶色の粒が混ざっており、粒がしっかりしていて均一なものが良い。特に未熟な粒はひまわりの種のように小さく、水に浸したり調理しても硬くなるため、なるべく粒のサイズが均一なものを購入すべきである。
+    reviewed: false
+  variety:mung_bean-00:
+    text: 国産
+    reviewed: false
+  item:sweet_potato:
+    text: サツマイモ
+    reviewed: false
+  crit:sweet_potato-p1:
+    text: 形が均一で表面が滑らかで硬く傷がないことが望ましい
+    reviewed: false
+  variety:sweet_potato-00:
+    text: 夜
+    reviewed: false
+  item:potato:
+    text: ジャガイモ
+    reviewed: false
+  variety:potato-01:
+    text: スミ（野地）
+    reviewed: false
+  item:brown_rice:
+    text: 玄米
+    reviewed: false
+  variety:brown_rice-01:
+    text: 察賢美
+    reviewed: false
+  item:barley:
+    text: 大麦
+    reviewed: false
+  variety:barley-04:
+    text: ''
+    reviewed: false
+  item:mixed_grains:
+    text: 混食曲
+    reviewed: false
+  variety:mixed_grains-01:
+    text: 国産
+    reviewed: false
+  item:napa_cabbage:
+    text: 白菜
+    reviewed: false
+  crit:napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:napa_cabbage-03:
+    text: 秋
+    reviewed: false
+  item:cabbage:
+    text: キャベツ
+    reviewed: false
+  variety:cabbage-00:
+    text: キャベツ
+    reviewed: false
+  item:spinach:
+    text: ほうれん草
+    reviewed: false
+  crit:spinach-p1:
+    text: ''
+    reviewed: false
+  variety:spinach-00:
+    text: ほうれんそう
+    reviewed: false
+  item:lettuce:
+    text: レタス
+    reviewed: false
+  variety:lettuce-01:
+    text: 赤
+    reviewed: false
+  variety:lettuce-02:
+    text: 青
+    reviewed: false
+  item:young_napa_cabbage:
+    text: 小松菜
+    reviewed: false
+  variety:young_napa_cabbage-00:
+    text: 白菜
+    reviewed: false
+  item:watermelon:
+    text: スイカ
+    reviewed: false
+  variety:watermelon-00:
+    text: スイカ
+    reviewed: false
+  item:cucumber:
+    text: キュウリ
+    reviewed: false
+  variety:cucumber-01:
+    text: 棘系
+    reviewed: false
+  variety:cucumber-02:
+    text: ダダ機構
+    reviewed: false
+  variety:cucumber-03:
+    text: 仲介청
+    reviewed: false
+  item:squash:
+    text: かぼちゃ
+    reviewed: false
+  crit:squash-p1:
+    text: ''
+    reviewed: false
+  crit:squash-p2:
+    text: 'カボチャ: 色が均一に濃く、しっかりしていて、サイズに対して重いものが良い'
+    reviewed: false
+  crit:squash-p3:
+    text: '古きカボチャ: 大きさが非常に大きく、本体に艶があり、淡黄色を帯びたもの。皮が硬いものが良い。'
+    reviewed: false
+  variety:squash-01:
+    text: ズッキーニ
+    reviewed: false
+  variety:squash-02:
+    text: ズッキーニ
+    reviewed: false
+  item:tomato:
+    text: トマト
+    reviewed: false
+  variety:tomato-00:
+    text: トマト
+    reviewed: false
+  item:strawberry:
+    text: いちご
+    reviewed: false
+  variety:strawberry-00:
+    text: 雪香
+    reviewed: false
+  item:radish:
+    text: ム
+    reviewed: false
+  crit:radish-p1:
+    text: 表面が白く滑らかで硬く重いもの（根元が丸々として葉の部分が青いムカゲが美味しい）。
+    reviewed: false
+  crit:radish-p2:
+    text: 形がまっすぐで、割れたり破れたりせず、根が少ないもの。
+    reviewed: false
+  variety:radish-03:
+    text: 秋
+    reviewed: false
+  item:carrot:
+    text: にんじん
+    reviewed: false
+  variety:carrot-01:
+    text: 無洗浄（国産）
+    reviewed: false
+  item:young_radish:
+    text: ムラサキ
+    reviewed: false
+  variety:young_radish-00:
+    text: レタス
+    reviewed: false
+  item:dried_chili:
+    text: 乾燥唐辛子
+    reviewed: false
+  variety:dried_chili-00:
+    text: ''
+    reviewed: false
+  item:green_chili:
+    text: ''
+    reviewed: false
+  variety:green_chili-00:
+    text: 青唐辛子（緑光など）
+    reviewed: false
+  variety:green_chili-02:
+    text: ''
+    reviewed: false
+  variety:green_chili-03:
+    text: 青唐辛子
+    reviewed: false
+  variety:green_chili-04:
+    text: きゅうり味唐辛子
+    reviewed: false
+  item:red_chili:
+    text: 赤唐辛子
+    reviewed: false
+  variety:red_chili-00:
+    text: 赤唐辛子
+    reviewed: false
+  item:peeled_garlic:
+    text: 刻みニンニク
+    reviewed: false
+  variety:peeled_garlic-01:
+    text: にんにく（国産）
+    reviewed: false
+  item:ginger:
+    text: 生姜
+    reviewed: false
+  crit:ginger-p1:
+    text: 肉質がしっかりしていて大きく、黄土色をしており、一つの塊に複数のピースがついているのが良い。
+    reviewed: false
+  crit:ginger-p2:
+    text: 卵が太く広く、皮の皺が少なく、剥きやすいもの。
+    reviewed: false
+  crit:ginger-p3:
+    text: 固有の辛さと香りが強く、色がやや濃く、形がゴツゴツしているもの。
+    reviewed: false
+  variety:ginger-00:
+    text: 国産
+    reviewed: false
+  item:eggplant:
+    text: ''
+    reviewed: false
+  variety:eggplant-00:
+    text: ナス
+    reviewed: false
+  item:water_dropwort:
+    text: ミナリ
+    reviewed: false
+  variety:water_dropwort-00:
+    text: ミナリ
+    reviewed: false
+  item:perilla_leaves:
+    text: ''
+    reviewed: false
+  variety:perilla_leaves-00:
+    text: ''
+    reviewed: false
+  item:chives:
+    text: ニラ
+    reviewed: false
+  variety:chives-00:
+    text: チャイブ
+    reviewed: false
+  item:bell_pepper:
+    text: ピーマン
+    reviewed: false
+  variety:bell_pepper-00:
+    text: 青
+    reviewed: false
+  item:paprika:
+    text: パプリカ
+    reviewed: false
+  variety:paprika-00:
+    text: パプリカ
+    reviewed: false
+  item:melon:
+    text: メロン
+    reviewed: false
+  variety:melon-00:
+    text: メロン
+    reviewed: false
+  item:chili_powder:
+    text: 唐辛子パウダー
+    reviewed: false
+  variety:chili_powder-00:
+    text: 国産
+    reviewed: false
+  variety:chili_powder-01:
+    text: 中国
+    reviewed: false
+  item:mustard_greens:
+    text: 神
+    reviewed: false
+  variety:mustard_greens-00:
+    text: 神
+    reviewed: false
+  item:cherry_tomato:
+    text: ミニトマト
+    reviewed: false
+  variety:cherry_tomato-02:
+    text: ナツメグボールトマト
+    reviewed: false
+  item:baby_napa_cabbage:
+    text: アルベギキャベツ
+    reviewed: false
+  crit:baby_napa_cabbage-p1:
+    text: ''
+    reviewed: false
+  variety:baby_napa_cabbage-00:
+    text: アルベギキャベツ
+    reviewed: false
+  item:broccoli:
+    text: ブロッコリー
+    reviewed: false
+  crit:broccoli-p1:
+    text: ''
+    reviewed: false
+  variety:broccoli-00:
+    text: ブロッコリー（国産）
+    reviewed: false
+  item:sesame:
+    text: ごま
+    reviewed: false
+  variety:sesame-01:
+    text: 白色 (国産)
+    reviewed: false
+  variety:sesame-02:
+    text: 中国
+    reviewed: false
+  item:peanut:
+    text: ピーナッツ
+    reviewed: false
+  variety:peanut-01:
+    text: 国産
+    reviewed: false
+  variety:peanut-02:
+    text: 輸入
+    reviewed: false
+  item:oyster_mushroom:
+    text: エノキダケ
+    reviewed: false
+  variety:oyster_mushroom-00:
+    text: エノキダケ
+    reviewed: false
+  variety:oyster_mushroom-01:
+    text: アヌタリキノコ
+    reviewed: false
+  item:enoki_mushroom:
+    text: ''
+    reviewed: false
+  variety:enoki_mushroom-00:
+    text: えのき茸
+    reviewed: false
+  item:king_oyster_mushroom:
+    text: 椎茸
+    reviewed: false
+  variety:king_oyster_mushroom-00:
+    text: しいたけ
+    reviewed: false
+  item:walnut:
+    text: くるみ
+    reviewed: false
+  variety:walnut-00:
+    text: 輸入
+    reviewed: false
+  item:almond:
+    text: アーモンド
+    reviewed: false
+  variety:almond-00:
+    text: 輸入
+    reviewed: false
+  item:banana:
+    text: バナナ
+    reviewed: false
+  variety:banana-02:
+    text: 輸入品
+    reviewed: false
+  item:lemon:
+    text: レモン
+    reviewed: false
+  variety:lemon-00:
+    text: 輸入
+    reviewed: false
+  item:pineapple:
+    text: パイナップル
+    reviewed: false
+  variety:pineapple-02:
+    text: 輸入
+    reviewed: false
+  item:mango:
+    text: マンゴー
+    reviewed: false
+  variety:mango-00:
+    text: 輸入
+    reviewed: false
+  item:orange:
+    text: オレンジ
+    reviewed: false
+  variety:orange-06:
+    text: ネイル オーストラリア
+    reviewed: false
+  item:grape:
+    text: ブドウ
+    reviewed: false
+  variety:grape-12:
+    text: シャインマスカット
+    reviewed: false
+  item:avocado:
+    text: アボカド
+    reviewed: false
+  variety:avocado-00:
+    text: 輸入
+    reviewed: false
+  item:blueberry:
+    text: ブルーベリー
+    reviewed: false
+  variety:blueberry-02:
+    text: 輸入(冷凍)
+    reviewed: false
+  item:kiwi:
+    text: キウイ
+    reviewed: false
+  variety:kiwi-01:
+    text: ゴールド
+    reviewed: false
+  item:beef:
+    text: 牛
+    reviewed: false
+  variety:beef-21:
+    text: 安心
+    reviewed: false
+  variety:beef-22:
+    text: サーロイン
+    reviewed: false
+  variety:beef-36:
+    text: 雪島
+    reviewed: false
+  variety:beef-40:
+    text: 良地
+    reviewed: false
+  variety:beef-50:
+    text: ''
+    reviewed: false
+  item:pork:
+    text: ブタ
+    reviewed: false
+  variety:pork-25:
+    text: 前脚
+    reviewed: false
+  variety:pork-27:
+    text: サムギョプサル
+    reviewed: false
+  variety:pork-28:
+    text: ''
+    reviewed: false
+  variety:pork-68:
+    text: モモ肉
+    reviewed: false
+  item:imported_beef:
+    text: 輸入牛肉
+    reviewed: false
+  variety:imported_beef-31:
+    text: ''
+    reviewed: false
+  variety:imported_beef-37:
+    text: リブステーキ
+    reviewed: false
+  item:imported_pork:
+    text: 輸入豚肉
+    reviewed: false
+  variety:imported_pork-27:
+    text: サムギョプサル
+    reviewed: false
+  item:chicken:
+    text: 鶏
+    reviewed: false
+  variety:chicken-05:
+    text: 六鶏12号
+    reviewed: false
+  variety:chicken-99:
+    text: 鶏肉(kg)
+    reviewed: false
+  variety:chicken-04:
+    text: 肉鶏11号
+    reviewed: false
+  variety:chicken-03:
+    text: 肉鶏10号
+    reviewed: false
+  variety:chicken-02:
+    text: 肉鷄9号
+    reviewed: false
+  variety:chicken-01:
+    text: 土着鶏17号
+    reviewed: false
+  item:egg:
+    text: 卵
+    reviewed: false
+  variety:egg-21:
+    text: XL10具
+    reviewed: false
+  variety:egg-23:
+    text: XL30区
+    reviewed: false
+  item:milk:
+    text: 牛乳
+    reviewed: false
+  variety:milk-01:
+    text: 牛乳
+    reviewed: false
+  item:mackerel:
+    text: サバ
+    reviewed: false
+  variety:mackerel-03:
+    text: 国産（塩漬け）
+    reviewed: false
+  variety:mackerel-05:
+    text: ''
+    reviewed: false
+  variety:mackerel-08:
+    text: 輸入品（塩漬け）
+    reviewed: false
+  item:dried_anchovy:
+    text: 干しイワシ
+    reviewed: false
+  variety:dried_anchovy-00:
+    text: 干しイワシ
+    reviewed: false
+  item:dried_squid:
+    text: 干しイカ
+    reviewed: false
+  variety:dried_squid-00:
+    text: 干しイカ
+    reviewed: false
+  item:laver:
+    text: キム
+    reviewed: false
+  variety:laver-00:
+    text: 焼き海苔
+    reviewed: false
+  variety:laver-01:
+    text: 焼き海苔
+    reviewed: false
+  item:dried_seaweed:
+    text: 乾燥わかめ
+    reviewed: false
+  variety:dried_seaweed-00:
+    text: 乾燥わかめ
+    reviewed: false
+  item:oyster:
+    text: ''
+    reviewed: false
+  variety:oyster-00:
+    text: ''
+    reviewed: false
+  item:imported_croaker:
+    text: 輸入早期
+    reviewed: false
+  variety:imported_croaker-04:
+    text: 付加価値税収入（冷凍）
+    reviewed: false
+  item:salted_shrimp:
+    text: エビの塩辛
+    reviewed: false
+  variety:salted_shrimp-00:
+    text: エビの漬け物
+    reviewed: false
+  item:anchovy_sauce:
+    text: イワシの魚醤
+    reviewed: false
+  variety:anchovy_sauce-00:
+    text: イワシの魚醤
+    reviewed: false
+  item:sea_salt:
+    text: ''
+    reviewed: false
+  variety:sea_salt-00:
+    text: 海塩
+    reviewed: false
+  item:abalone:
+    text: アワビ
+    reviewed: false
+  variety:abalone-00:
+    text: 冷蔵
+    reviewed: false
+  item:shrimp:
+    text: エビ
+    reviewed: false
+  variety:shrimp-01:
+    text: 白い脚（輸入）
+    reviewed: false
+  item:saury:
+    text: ''
+    reviewed: false
+  variety:saury-01:
+    text: 冷凍（輸入品）
+    reviewed: false
+  item:squid:
+    text: モリエイユイカ
+    reviewed: false
+  variety:squid-04:
+    text: 沿岸域（冷凍）
+    reviewed: false
+  variety:squid-05:
+    text: 遠洋（冷凍）
+    reviewed: false
+  item:hairtail:
+    text: ブリ
+    reviewed: false
+  variety:hairtail-03:
+    text: 国産（冷蔵）
+    reviewed: false
+  variety:hairtail-04:
+    text: 国産（冷凍）
+    reviewed: false
+  item:pollock:
+    text: タラ
+    reviewed: false
+  variety:pollock-04:
+    text: 冷凍（遠洋輸入統合）
+    reviewed: false
+  variety:pollock-05:
+    text: 冷凍加工
+    reviewed: false
+  item:croaker:
+    text: 早期
+    reviewed: false
+  variety:croaker-05:
+    text: ''
+    reviewed: false
+  variety:croaker-06:
+    text: リフリジェレーター（冷蔵）
+    reviewed: false
+  variety:croaker-07:
+    text: きび
+    reviewed: false
+  item:dried_kelp:
+    text: 간다시마
+    reviewed: false
+  variety:dried_kelp-01:
+    text: 完島産
+    reviewed: false
+  item:scallop:
+    text: ガリービ
+    reviewed: false
+  variety:scallop-01:
+    text: 海胆ガリビ（紅ガリビ）
+    reviewed: false
+  item:mussel:
+    text: ムール貝
+    reviewed: false
+  variety:mussel-01:
+    text: 殻付きムール貝（冷蔵）
+    reviewed: false
+  variety:mussel-02:
+    text: 生の殻付きムール貝（冷蔵）
+    reviewed: false
+  item:blue_crab:
+    text: ''
+    reviewed: false
+  variety:blue_crab-00:
+    text: 冷凍
+    reviewed: false
+  item:spanish_mackerel:
+    text: サバ
+    reviewed: false
+  variety:spanish_mackerel-01:
+    text: 冷蔵
+    reviewed: false
+  item:mackerel_fillet:
+    text: サバの切り身
+    reviewed: false
+  variety:mackerel_fillet-00:
+    text: 輸入
+    reviewed: false
+  variety:mackerel_fillet-01:
+    text: 国産
+    reviewed: false
+  item:clam:
+    text: ムール貝
+    reviewed: false
+  variety:clam-00:
+    text: 冷蔵
+    reviewed: false
+  item:octopus:
+    text: タコ
+    reviewed: false
+  variety:octopus-00:
+    text: 輸入（冷凍）
+    reviewed: false
+  item:cockle:
+    text: ハマグリ
+    reviewed: false
+  variety:cockle-00:
+    text: 国産（새꼬막）
+    reviewed: false
+  unit:egg10:
+    text: 10区
+    reviewed: false
+  unit:egg30:
+    text: 30区
+    reviewed: false
+  unit:fish:
+    text: マリー
+    reviewed: false
+  unit:fish10:
+    text: 10匹
+    reviewed: false
+  unit:fish5:
+    text: 5匹
+    reviewed: false
+  unit:g100:
+    text: ''
+    reviewed: false
+  unit:g150:
+    text: ''
+    reviewed: false
+  unit:g50:
+    text: ''
+    reviewed: false
+  unit:g500:
+    text: ''
+    reviewed: false
+  unit:g600:
+    text: ''
+    reviewed: false
+  unit:head:
+    text: 諦める
+    reviewed: false
+  unit:kg10:
+    text: ''
+    reviewed: false
+  unit:kg2:
+    text: ''
+    reviewed: false
+  unit:kg20:
+    text: ''
+    reviewed: false
+  unit:kg5:
+    text: ''
+    reviewed: false
+  unit:liter:
+    text: ''
+    reviewed: false
+  unit:pair:
+    text: 手
+    reviewed: false
+  unit:piece10:
+    text: 10個
+    reviewed: false
+  unit:piece3:
+    text: 3個
+    reviewed: false
+  unit:sheet10:
+    text: 第10章
+    reviewed: false
+  recipe:foodsafety-32:
+    text: 絹ごし豆腐とリンゴのソースとキュウリ和え
+    reviewed: false
+  recipe:foodsafety-33:
+    text: りんご エビ 北のきつねうどん
+    reviewed: false
+  recipe:foodsafety-150:
+    text: 柑橘キムチ
+    reviewed: false
+  recipe:foodsafety-261:
+    text: タコモソース鶏の煮込み
+    reviewed: false
+  recipe:foodsafety-268:
+    text: トマト豚肉解毒スープ
+    reviewed: false
+  recipe:foodsafety-306:
+    text: 五色炒め麺
+    reviewed: false
+  recipe:foodsafety-360:
+    text: ビートタマネギキムチ
+    reviewed: false
+  recipe:foodsafety-388:
+    text: 豚の丸焼き
+    reviewed: false
+  recipe:foodsafety-422:
+    text: りんごの漬物
+    reviewed: false
+  recipe:foodsafety-479:
+    text: ライスコロッケ
+    reviewed: false
+  recipe:foodsafety-483:
+    text: フルーツキムチ
+    reviewed: false
+  recipe:foodsafety-597:
+    text: 配車と主菓
+    reviewed: false
+  recipe:foodsafety-718:
+    text: りんごソースポークチャップ
+    reviewed: false
+  recipe:foodsafety-853:
+    text: サーロインステーキ
+    reviewed: false
+  recipe:foodsafety-923:
+    text: ほうれん草 ペ イウム
+    reviewed: false
+  recipe:foodsafety-1129:
+    text: ワインの漬物
+    reviewed: false
+  recipe:foodsafety-2953:
+    text: 済州島の氷떡、みかん醤油ソース
+    reviewed: false
+  recipe:foodsafety-3089:
+    text: シダレツボとダンカンツボ
+    reviewed: false
+  recipe:foodsafety-3172:
+    text: 柿ピクルス
+    reviewed: false
+  recipe:foodsafety-3175:
+    text: オレンジ콩サラダ
+    reviewed: false
+  recipe:foodsafety-3285:
+    text: ほうれん草フムス
+    reviewed: false
+  region:seoul:
+    text: ソウル
+    reviewed: false
+  region:busan-myeongji:
+    text: 釜山 北区 明知
+    reviewed: false
+  region:jeonnam-coast:
+    text: 全羅南道の海岸地方
+    reviewed: false
+  region:chungnam-asan:
+    text: 忠南 アサン
+    reviewed: false
+  store_category:fruit:
+    text: 果物
+    reviewed: false
+  store_category:vegetable:
+    text: 野菜
+    reviewed: false
+  store_category:seafood:
+    text: 水産
+    reviewed: false
+  store_category:meat:
+    text: 食肉
+    reviewed: false
+  store_category:side_dish:
+    text: おかず
+    reviewed: false
+  store_category:snack:
+    text: トック・粉食
+    reviewed: false
+  store_category:produce:
+    text: 野菜・果物
+    reviewed: false
+  store_category:dried:
+    text: 乾物・漬物
+    reviewed: false
+phrases:
+  가을~겨울:
+    text: 秋～冬
+    reviewed: false
+  일반적으로 늦가을이나 초봄에 씨를 뿌려 수확:
+    text: 一般的に晩秋か早春に種をまいて収穫する
+    reviewed: false
+  4~6월:
+    text: 4〜6月
+    reviewed: false
+  조생종 4월~5월 초:
+    text: 早生種 4月～5月上旬
+    reviewed: false
+  9월 상·중순:
+    text: 9月上旬〜中旬
+    reviewed: false
+  고랭지 여름양파:
+    text: 高原夏玉ねぎ
+    reviewed: false
+  0℃ · 상대습도 90~95%:
+    text: 0℃ · 相対湿度 90〜95%
+    reviewed: false
+  0~2℃:
+    text: 0～2℃
+    reviewed: false
+  0℃:
+    text: ''
+    reviewed: false
+  부유 품종은:
+    text: 浮遊品種は
+    reviewed: false
+  1~3개월:
+    text: 1～3か月
+    reviewed: false
+  10월 하순 이후:
+    text: 10月下旬以降
+    reviewed: false
+  만생종:
+    text: 万生の種
+    reviewed: false
+  중생종 추석용 품종:
+    text: 中生種 秋夕用 品種
+    reviewed: false
+  10월 하순~11월 상순:
+    text: 10月下旬～11月上旬
+    reviewed: false
+  남부 주산지는 대개 11월 상순:
+    text: 南部山地は概ね11月上旬
+    reviewed: false
+  채소:
+    text: 野菜
+    reviewed: false
+  과일:
+    text: 果物
+    reviewed: false
+  곡물:
+    text: 穀物
+    reviewed: false
+  특용작물:
+    text: 特用作物
+    reviewed: false
+  축산물:
+    text: 畜産物
+    reviewed: false
+  수산물:
+    text: 水産物
+    reviewed: false
+  반찬:
+    text: おかず
+    reviewed: false
+  기타:
+    text: その他
+    reviewed: false
+  국&찌개:
+    text: 国&찌개
+    reviewed: false
+  끓이기:
+    text: 茹でる
+    reviewed: false
+  일품:
+    text: 逸品
+    reviewed: false
+  볶기:
+    text: 炒める
+    reviewed: false
+  후식:
+    text: デザート
+    reviewed: false
+  굽기:
+    text: 焼き
+    reviewed: false
+  밥:
+    text: ごはん
+    reviewed: false
+  튀기기:
+    text: 揚げる
+    reviewed: false
+  청과:
+    text: 果物
+    reviewed: false
+  수산:
+    text: 水産
+    reviewed: false
+  정육:
+    text: 精肉
+    reviewed: false
+  떡·분식:
+    text: トック・粉食
+    reviewed: false
+  채소·과일:
+    text: 野菜・果物
+    reviewed: false
+  건어물·젓갈:
+    text: 乾物・漬物
+    reviewed: false
+  눈 오는 날 만드는:
+    text: 雪の日の作る
+    reviewed: false
+  더운 날 만드는:
+    text: 暑い日を作る
+    reviewed: false
+  비 오는 날 만드는:
+    text: 雨の日の作り方
+    reviewed: false
+  요리:
+    text: 料理
+    reviewed: false
+  추운 날 끓이는:
+    text: 寒い日に煮込む
+    reviewed: false
+templates:
+  season_featured:
+    text: 韓国農村振興庁の「今月の食材」は{name}を{months}月の食材として紹介しています。
+    reviewed: false
+  season_harvest:
+    text: '{name}の収穫期は{period}{note}です。'
+    reviewed: false
+  season_regions:
+    text: '{name}は{regions}で多く栽培されています。'
+    reviewed: false
+  storage:
+    text: 資料では{name}を{temperature}で保存すると案内しています。
+    reviewed: false
+  storage_period:
+    text: 資料では{name}を{temperature}で{period}保存できると案内しています。
+    reviewed: false
+  recipe_reason:
+    text: '{name}で作る料理：{dish}'
+    reviewed: false
+  recipe_season_reason:
+    text: '{month}月が旬の{name}で作る料理：{dish}'
+    reviewed: false

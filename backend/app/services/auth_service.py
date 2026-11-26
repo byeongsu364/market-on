@@ -1,13 +1,14 @@
 """Registration, login throttling and persistent opaque sessions."""
 
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+
 from psycopg.errors import UniqueViolation
+
+from app.core import captcha, security
 from app.core.config import settings
 from app.core.errors import AppError
-from app.core import captcha, security
-from app.db.repositories import user_repo, session_repo, store_repo
-
+from app.db.repositories import session_repo, store_repo, user_repo
 
 LOCK_AFTER = 5
 CAPTCHA_AFTER = 2  # 같은 아이디로 2번 틀리면 다음 로그인부터 캡차 필요
@@ -20,7 +21,7 @@ _unknown_lock = threading.Lock()
 
 
 def now():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _remember_unknown(login_id, failures, locked_until):
@@ -36,6 +37,7 @@ def public_user(conn, user):
     market = store_repo.get_market(conn, user['market_id']) if user.get('market_id') else None
     return {key: user[key] for key in ('id', 'login_id', 'role', 'status')} | {
         'created_at': user.get('created_at'),
+        'lang': user.get('lang', 'ko'),
         'store': {
             'store_id': store['id'],
             'name': store['name_ko'],

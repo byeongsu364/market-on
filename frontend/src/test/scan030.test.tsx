@@ -208,3 +208,24 @@ it('장보기 동선 화면은 순서를 매기고 산 곳을 체크하면 남�
   // 약도에 순서 번호와 "핀 위치는 예시"
   expect(screen.getByText(/미리보기 지도/)).toBeInTheDocument();
 });
+
+it('기준시세가 없는 품종을 골라도 품종 칩이 남아 다른 품종으로 돌아갈 수 있다(귤 시설 404)', async () => {
+  const priceApi = await import('../api/price');
+  const real = priceApi.getPrice;
+  const spy = vi.spyOn(priceApi, 'getPrice').mockImplementation(async (q) => {
+    if (q.variety_id === 'variety:apple-hongro')
+      throw Object.assign(new Error('없음'), { status: 404 });
+    return real(q);
+  });
+  try {
+    show('/items/item:apple?market=market:demo&variety=variety:apple-hongro', { method: 'manual' });
+    expect(await screen.findByText('기준시세가 아직 없어요')).toBeInTheDocument();
+    const fuji = await screen.findByRole('button', { name: '후지' });
+    fireEvent.click(fuji);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: '후지' })).toHaveAttribute('aria-pressed', 'true'),
+    );
+  } finally {
+    spy.mockRestore();
+  }
+});

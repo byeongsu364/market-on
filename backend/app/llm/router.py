@@ -1,18 +1,20 @@
 """Ordered model routing with bounded attempts and metadata-only auditing."""
 
 import logging
+from collections.abc import Callable
 from concurrent.futures import Future
 from dataclasses import dataclass
 from threading import Thread
 from time import monotonic
-from typing import Callable, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from app.core.config import settings
 from app.core.errors import AppError
 from app.db.repositories import llm_call_repo
+
+from . import quota
 from .base import LLMProvider
 from .factory import _provider
-from . import quota
 from .limits import EXTERNAL_PROVIDERS, PROVIDER_TIMEOUTS
 
 T = TypeVar('T')
@@ -44,7 +46,7 @@ def _bounded(call, provider, timeout):
     def invoke():
         try:
             future.set_result(call(provider))
-        except BaseException as exc:
+        except BaseException as exc:  # noqa: BLE001 - propagate worker failures through Future
             future.set_exception(exc)
 
     Thread(target=invoke, daemon=True).start()
@@ -69,9 +71,15 @@ def run(
     accept: Callable[[T], str | None] = lambda _: None,
     *,
     task: str | None = None,
+    audit: bool = True,
 ) -> Routed[T]:
     """role(route·plan·extract·write·reason)의 모델 순서대로 부름. task는 기록용 요청 이름(ask·chat…)."""
-    names = [name for name in settings.LLM_ROUTES.get(role, []) if _configured(name)]
+    record = llm_call_repo.record if audit else lambda **kwargs: None
+    names = [
+        name
+        for name in (['gemma'] if role == 'translate' else settings.LLM_ROUTES.get(role, []))
+        if _configured(name)
+    ]
     task = task or role
     last_error = AppError('LLM_NOT_CONFIGURED', '사용 가능한 모델이 없습니다.', 503)
     reason = None
@@ -81,7 +89,7 @@ def run(
             limited = quota.take(name)
             if limited:
                 # 외부 AI 사용 규칙에 걸리면 부르지 않고 다음 모델로 (젬마 답이 있으면 그걸 돌려줌)
-                llm_call_repo.record(
+                record(
                     task=task,
                     role=role,
                     provider=name,
@@ -101,7 +109,7 @@ def run(
             value = _bounded(call, provider, PROVIDER_TIMEOUTS.get(name, 45.0))
             rejected = accept(value)
             ok = True
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - model failures advance the configured route
             last_error = exc
             reason = 'error'
             # 질문·답 내용은 남기지 않고 오류 종류만 (예: GEMINI_UNAVAILABLE, ReadTimeout)
@@ -109,7 +117,7 @@ def run(
                 '%s 역할 %s 실패: %s', role, name, getattr(exc, 'code', None) or type(exc).__name__
             )
         finally:
-            llm_call_repo.record(
+            record(
                 task=task,
                 role=role,
                 provider=name,

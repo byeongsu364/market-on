@@ -6,9 +6,10 @@ import re
 from app.core import chat_sign
 from app.core.errors import AppError
 from app.db.repositories import ask_repo, store_repo
-from app.knowledge import fact_check
+from app.knowledge import fact_check, i18n
 from app.knowledge.ingest import tag_entities
 from app.llm import chat as chat_llm
+from app.llm.translate import translate
 from app.schemas.chat import ChatResponse
 from app.services import ask_service, item_service
 
@@ -185,5 +186,12 @@ def chat(conn, data, device_id):
             'ASK_UNAVAILABLE', '지금은 답변을 찾을 수 없어요. 잠시 뒤 다시 물어봐 주세요.', 503
         )
     routed.value.model = routed.model
+    routed.value.lang = data.lang
+    routed.value.original = routed.value.reply
+    routed.value.reply, routed.value.translated = translate(routed.value.reply, data.lang, conn)
+    routed.value.items = [
+        type(item)(**i18n.localize(conn, item.model_dump(), data.lang))
+        for item in routed.value.items
+    ]
     routed.value.reply_sig = chat_sign.sign(routed.value.reply)
     return routed.value

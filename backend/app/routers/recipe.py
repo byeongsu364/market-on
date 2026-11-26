@@ -1,9 +1,12 @@
+# FastAPI dependency defaults are intentional.
+# ruff: noqa: B008
 """Source-backed recipe shopping endpoints."""
 
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query
 
+from app.core.language import preferred_language
 from app.deps import get_db
 from app.services import recipe_service
 
@@ -13,6 +16,7 @@ Weather = Literal['cold', 'hot', 'rain', 'snow', 'clear']
 
 @router.get('')
 def recipes(
+    lang=Depends(preferred_language),
     item_id: str | None = None,
     market_id: str | None = None,
     month: int | None = Query(None, ge=1, le=12),
@@ -22,12 +26,22 @@ def recipes(
     conn: Annotated[Any, Depends(get_db)] = None,
 ):
     return recipe_service.find_recipes(
-        conn, item_id=item_id, market_id=market_id, month=month, weather=weather, q=q, limit=limit
+        conn,
+        item_id=item_id,
+        market_id=market_id,
+        month=month,
+        weather=weather,
+        q=q,
+        limit=limit,
+        lang=lang,
     )
 
 
 @router.get('/{recipe_id}')
 def recipe(
-    recipe_id: str, market_id: str | None = None, conn: Annotated[Any, Depends(get_db)] = None
+    recipe_id: str,
+    lang=Depends(preferred_language),
+    market_id: str | None = None,
+    conn: Annotated[Any, Depends(get_db)] = None,
 ):
-    return recipe_service.get_recipe(conn, recipe_id, market_id=market_id)
+    return recipe_service.get_recipe(conn, recipe_id, market_id=market_id, lang=lang)

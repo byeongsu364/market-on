@@ -113,7 +113,18 @@ export const useSessionState = () => {
     // Startup selection runs once; manual choices take priority afterward.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [language, setLanguage] = useState<Language>(() => read('language', 'ko'));
+  const [language, setLanguage] = useState<Language>(() => {
+    const value = read<Language>('language', 'ko');
+    return ['ko', 'en', 'zh', 'ja', 'vi'].includes(value) ? value : 'ko';
+  });
+  useEffect(() => {
+    const restore = (event: Event) => {
+      const value = (event as CustomEvent<Language>).detail;
+      if (['ko', 'en', 'zh', 'ja', 'vi'].includes(value)) setLanguage(value);
+    };
+    window.addEventListener('language:account', restore);
+    return () => window.removeEventListener('language:account', restore);
+  }, []);
   const [theme, setTheme] = useState<Theme>(() => {
     try {
       const v = localStorage.getItem('theme');

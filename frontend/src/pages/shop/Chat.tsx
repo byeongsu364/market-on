@@ -1,3 +1,4 @@
+import TranslationNotice from '../../components/domain/TranslationNotice';
 import { Link } from 'react-router-dom';
 import { useRequireMarket } from '../../hooks/useFlows';
 import { useShoppingContext } from '../../hooks/useShoppingContext';
@@ -63,6 +64,7 @@ function Conversation({ marketId, itemId }: { marketId: string; itemId?: string 
                 </div>
               )}
               <p>{e.content}</p>
+              {e.response && <TranslationNotice {...e.response} />}
               {e.response && (
                 <>
                   {e.response.items.length > 1 && (

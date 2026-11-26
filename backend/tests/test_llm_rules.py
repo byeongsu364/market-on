@@ -27,6 +27,7 @@ def test_default_roles_follow_040():
         'extract': ['gemini', 'openai'],
         'write': ['gemma', 'gemini', 'openai'],
         'reason': ['gemini', 'openai', 'gemma'],
+        'translate': ['gemma'],
     }
     # 사진 품목 인식은 구글 비전만: 모델 순서에 recognize가 없어요
     assert 'recognize' not in routes
@@ -36,7 +37,7 @@ def test_old_env_route_names_do_not_break_roles():
     """.env에 예전 이름(recognize·ask·recommend·chat)만 있어도 역할은 기본 순서로 채워져요."""
     old = {'recognize': ['gemma'], 'ask': ['gemma', 'openai'], 'chat': ['openai']}
     routes = Settings(_env_file=None, LLM_ROUTES=old).LLM_ROUTES
-    assert set(routes) == {'route', 'plan', 'extract', 'write', 'reason'}
+    assert set(routes) == {'route', 'plan', 'extract', 'write', 'reason', 'translate'}
     assert Settings(_env_file=None, LLM_ROUTES={'write': ['openai']}).LLM_ROUTES['write'] == [
         'openai'
     ]

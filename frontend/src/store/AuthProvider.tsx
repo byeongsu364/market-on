@@ -4,6 +4,10 @@ import { AuthContext } from './auth';
 import type { User, AuthRequest } from '../types/contract';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    if (user?.lang)
+      window.dispatchEvent(new CustomEvent('language:account', { detail: user.lang }));
+  }, [user]);
   const [loading, setLoading] = useState(true);
   const me = async () => {
     try {

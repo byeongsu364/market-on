@@ -166,3 +166,73 @@ questions:
   intent: recipe
   question: 귤로 뭐 해 먹지?
   expect: recipes
+
+- id: en-green_onion-select
+  item_id: item:green_onion
+  intent: select
+  question: How should I check the white roots when buying green onions?
+  doc_key: green_onion/criterion.md
+  lang: en
+
+- id: en-green_onion-store
+  item_id: item:green_onion
+  intent: store
+  question: How should I store washed green onions?
+  doc_key: green_onion/storage.md
+  lang: en
+
+- id: en-green_onion-prep
+  item_id: item:green_onion
+  intent: prep
+  question: Can I prepare green onions all at once?
+  doc_key: green_onion/prep.md
+  lang: en
+
+- id: en-green_onion-story
+  item_id: item:green_onion
+  intent: story
+  question: How do cold-region and warm-region green onions differ?
+  doc_key: green_onion/varieties.md
+  lang: en
+
+- id: zh-onion-select
+  item_id: item:onion
+  intent: select
+  question: 买洋葱时也要检查是否发芽吗？
+  doc_key: onion/criterion.md
+  lang: zh
+
+- id: zh-onion-store
+  item_id: item:onion
+  intent: store
+  question: 去皮的洋葱应该放在哪里保存？
+  doc_key: onion/storage.md
+  lang: zh
+
+- id: ja-apple-select
+  item_id: item:apple
+  intent: select
+  question: リンゴを買うとき、へたの何を確認しますか？
+  doc_key: apple/criterion.md
+  lang: ja
+
+- id: ja-apple-store
+  item_id: item:apple
+  intent: store
+  question: リンゴと他の野菜を一緒に置いてもいいですか？
+  doc_key: apple/storage.md
+  lang: ja
+
+- id: vi-pear-select
+  item_id: item:pear
+  intent: select
+  question: Khi mua lê, cần kiểm tra vỏ như thế nào?
+  doc_key: pear/criterion.md
+  lang: vi
+
+- id: vi-pear-store
+  item_id: item:pear
+  intent: store
+  question: Có thể bảo quản lê cùng với táo không?
+  doc_key: pear/storage.md
+  lang: vi

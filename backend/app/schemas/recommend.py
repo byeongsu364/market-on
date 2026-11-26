@@ -8,6 +8,7 @@ from .ask import CandidateStore, Citation
 
 
 class RecommendRequest(BaseModel):
+    lang: Literal['ko', 'en', 'zh', 'ja', 'vi'] = 'ko'
     purpose: Literal['집밥', '선물', '모임']
     relation: Literal['가족', '친구', '나'] | None = None
     event: str | None = Field(default=None, max_length=200)
@@ -17,6 +18,9 @@ class RecommendRequest(BaseModel):
 
 
 class RecommendItem(BaseModel):
+    lang: Literal['ko', 'en', 'zh', 'ja', 'vi'] = 'ko'
+    translated: bool = False
+    original: str | None = None
     item_id: str
     name: str
     quantity: int

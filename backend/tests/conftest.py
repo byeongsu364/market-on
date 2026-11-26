@@ -1,6 +1,7 @@
 """공통 테스트 설정."""
 
 import pytest
+
 from app.core import captcha
 from app.core.config import settings
 
@@ -20,6 +21,7 @@ def no_external_ai_by_default(monkeypatch):
     from app.llm import quota
 
     monkeypatch.setattr(settings, 'GEMINI_API_KEY', None)
+    monkeypatch.setattr(settings, 'OLLAMA_BASE_URL', None)
     monkeypatch.setattr(settings, 'OPENAI_API_KEY', None)
     quota.reset()
     yield
@@ -35,3 +37,15 @@ def no_real_push(monkeypatch):
     sender = Mock(return_value=201)
     monkeypatch.setattr(web_push, 'send', sender)
     yield sender
+
+
+@pytest.fixture(autouse=True)
+def isolated_database_settings(monkeypatch):
+    """Even best-effort LLM audits can only address the isolated test database."""
+    import os
+    from urllib.parse import urlparse
+
+    url = os.getenv('TEST_DATABASE_URL')
+    if url and urlparse(url).path != '/marketon_test':
+        pytest.fail('Only marketon_test may be used by tests')
+    monkeypatch.setattr(settings, 'DATABASE_URL', url)

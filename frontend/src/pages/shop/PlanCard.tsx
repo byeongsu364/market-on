@@ -4,6 +4,7 @@ import { useT } from '../../i18n';
 import { ChipLink, ChipRow } from '../../components/common/Chip';
 import { ItemTile } from '../../components/common/parts';
 import ModelLabel from '../../components/domain/ModelLabel';
+import TranslationNotice from '../../components/domain/TranslationNotice';
 import { formatPrice } from '../../utils/formatPrice';
 import type { RecommendResponse } from '../../types/contract';
 import s from './shop.module.css';
@@ -36,6 +37,7 @@ export default function PlanCard({ plan, id }: { plan: RecommendResponse; id: st
                 {i.name}
               </h3>
               <span className={s.sub}>{i.reason}</span>
+              <TranslationNotice {...i} />
               <span className={s.note}>
                 {i.sources.map((src, n) => (
                   <span key={n}>

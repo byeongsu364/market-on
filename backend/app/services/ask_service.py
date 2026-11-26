@@ -11,6 +11,7 @@ from app.knowledge import (
     ask_intent,
     citation,
     fact_check,
+    i18n,
     ontology,
     retriever,
     season,
@@ -18,6 +19,7 @@ from app.knowledge import (
 )
 from app.llm import ask as ask_llm
 from app.llm.factory import get_embedder
+from app.llm.translate import translate
 from app.schemas.ask import AskResponse
 
 from . import item_service, market_service, price_service, recipe_service
@@ -32,7 +34,84 @@ TOPICS = {
 }
 
 
-def ask(
+def _foreign_question(question):
+    letters = [char for char in question if char.isalpha()]
+    korean = sum('가' <= char <= '힣' for char in letters)
+    return bool(letters) and korean * 2 < len(letters)
+
+
+def ask(conn, data, device_id, **kwargs):
+    if kwargs.pop('consume', True):
+        consume_quota(conn, device_id)
+    lang = data.lang
+    korean = data.model_copy()
+    # Explicit item/intent chips use deterministic templates without a model call.
+    # Free foreign-language questions need Gemma before Korean intent/retrieval.
+    if (
+        lang != 'ko'
+        and data.question
+        and _foreign_question(data.question)
+        and not (
+            data.item_id
+            and (
+                data.intent in ('season', 'price', 'where', 'recipe')
+                or (
+                    data.intent == 'store'
+                    and (not data.question or storage.is_fact_question(data.question))
+                )
+            )
+        )
+    ):
+        question, ok = translate(data.question, 'ko', conn, source=lang, check=False)
+        if not ok:
+            return AskResponse(
+                kind='no_evidence',
+                answer='지금은 질문을 번역할 수 없어요. 한국어로 다시 물어봐 주세요.',
+                lang=lang,
+                original='지금은 질문을 번역할 수 없어요. 한국어로 다시 물어봐 주세요.',
+            )
+        korean.question = question
+    result = _ask_korean(conn, korean, device_id, consume=False, **kwargs)
+    result.lang = lang
+    if result.answer:
+        result.original = result.answer
+        if lang != 'ko':
+            if 'write' in result.steps and result.kind == 'answer':
+                result.answer, result.translated = translate(result.answer, lang, conn)
+            elif result.kind == 'answer' and result.intent in ('season', 'store'):
+                item = knowledge_repo.get_item(conn, result.item_id)
+                if result.intent == 'season':
+                    variety = ontology.match_variety(conn, result.item_id, korean.question or '')
+                    statements = season.season_statements(
+                        conn, result.item_id, item['name_ko'], variety_id=variety, lang=lang
+                    )
+                else:
+                    statements = storage.storage_statements(
+                        conn, result.item_id, item['name_ko'], lang=lang
+                    )
+                rendered = ' '.join(text for text, _ in statements)
+                # 문장 틀·라벨 번역이 빠져 한국어가 섞이면(예: 수확 시기 문구) 템플릿 대신
+                # 한국어 답 전체를 젬마로 번역하고, 그것도 실패하면 한국어 원문 + translated False
+                if (
+                    rendered
+                    and not _has_hangul(rendered)
+                    and fact_check.translation_check(result.original, rendered, lang)
+                ):
+                    result.answer = rendered
+                    result.translated = rendered != result.original
+                else:
+                    result.answer, result.translated = translate(result.original, lang, conn)
+                    if not result.translated:
+                        result.answer = result.original
+    payload = i18n.localize(conn, result.model_dump(), lang)
+    return AskResponse(**payload)
+
+
+def _has_hangul(text):
+    return any('가' <= ch <= '힣' for ch in text or '')
+
+
+def _ask_korean(
     conn, data, device_id, *, embedder=None, consume=True, use_cache=True, raise_unavailable=False
 ):
     if consume:
@@ -52,7 +131,11 @@ def ask(
     if intent == 'recipe' and not ids:
         result.kind = 'recipes'
         result.recipes = recipe_service.find_recipes(
-            conn, market_id=data.market_id, q=data.question, embedder=embedder
+            conn,
+            market_id=data.market_id,
+            q=data.question if data.lang == 'ko' else None,
+            embedder=embedder,
+            lang=data.lang,
         )
         result.citations = list(
             {r['source']['title']: r['source'] for r in result.recipes}.values()
@@ -72,7 +155,12 @@ def ask(
     if intent == 'recipe':
         result.kind = 'recipes'
         result.recipes = recipe_service.find_recipes(
-            conn, item_id=ids[0], market_id=data.market_id, q=data.question, embedder=embedder
+            conn,
+            item_id=ids[0],
+            market_id=data.market_id,
+            q=data.question if data.lang == 'ko' else None,
+            embedder=embedder,
+            lang=data.lang,
         )
         result.citations = list(
             {r['source']['title']: r['source'] for r in result.recipes}.values()
@@ -99,13 +187,22 @@ def ask(
         )
         result.citations = season.statement_citations(statements)
         return result
-    if intent == 'store' and storage.is_fact_question(data.question):
+    if intent == 'store' and (
+        storage.is_fact_question(data.question) or (data.lang != 'ko' and not data.question)
+    ):
         statements = storage.storage_statements(conn, ids[0], item['name_ko'])
         if statements:
             result.kind = 'answer'
             result.answer = ' '.join(text for text, _ in statements)
             result.citations = season.statement_citations(statements)
             return result
+    if data.lang != 'ko' and data.question and _foreign_question(data.question):
+        question, ok = translate(data.question, 'ko', conn, source=data.lang, check=False)
+        if not ok:
+            result.kind = 'no_evidence'
+            result.answer = '지금은 질문을 번역할 수 없어요. 한국어로 다시 물어봐 주세요.'
+            return result
+        data = data.model_copy(update={'question': question})
     key = answer_cache.cache_key(conn, ids[0], intent, data.lang, data.question)
     cached = answer_cache.get_cached_answer(conn, key) if use_cache else None
     if cached:
@@ -119,7 +216,7 @@ def ask(
             data.question or f'{item["name_ko"]} {TOPICS[intent]}',
             entity_ids=ids,
             intent=intent,
-            lang=data.lang,
+            lang='ko',
             k=4,
             min_similarity=0.45,
         )

@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 from app.core.errors import AppError
 from app.db.repositories import recipe_repo, store_repo
+from app.knowledge import i18n
 from app.knowledge.recipes import body_parts, parse_ingredients, rules
 from app.llm.factory import get_embedder
 
@@ -58,12 +59,36 @@ def _ro(name):
     return '로' if final in (0, 8) else '으로'
 
 
-def reason(name, dish, months, month, weather, tags):
+def reason(name, dish, months, month, weather, tags, *, lang='ko', conn=None, item_id=None):
     dish = '요리' if not dish or dish == '기타' else dish
+    translated_dish = i18n.text(dish, lang, dish, section='phrases')
     rule = rules('weather_rules')['rules'].get(weather, {})
     if weather in tags and rule.get('reason'):
-        return f'{rule["reason"]} {dish}'
-    return f'{str(month) + "월 제철 " if month in months else ""}{name}{_ro(name)} 만드는 {dish}'
+        original = f'{rule["reason"]} {dish}'
+        prefix = i18n.text(rule['reason'], lang, '', section='phrases')
+        if lang == 'ko' or not prefix:
+            return original
+        localized = f'{prefix} {translated_dish}'
+        # 한 조각이라도 번역이 없어 한국어가 섞이면 섞인 문장 대신 한국어 원문 전체
+        return original if _has_hangul(localized) else localized
+    original = (
+        f'{str(month) + "월 제철 " if month in months else ""}{name}{_ro(name)} 만드는 {dish}'
+    )
+    if lang == 'ko':
+        return original
+    localized = i18n.template(
+        'recipe_season_reason' if month in months else 'recipe_reason',
+        lang,
+        original,
+        name=i18n.label(conn, item_id, lang, name),
+        dish=translated_dish,
+        month=month,
+    )
+    return original if _has_hangul(localized) else localized
+
+
+def _has_hangul(text):
+    return any('가' <= ch <= '힣' for ch in text or '')
 
 
 def _card(row, stores, assortment, month, weather):
@@ -133,6 +158,7 @@ def find_recipes(
     limit=3,
     embedder=None,
     recipe_id=None,
+    lang='ko',
 ):
     month = month or datetime.now(ZoneInfo('Asia/Seoul')).month
     if market_id and not store_repo.get_market(conn, market_id):
@@ -173,6 +199,23 @@ def find_recipes(
         if recipe_id is None:
             card.pop('steps')
             card.pop('ingredient_lines')
+    if lang != 'ko':
+        for card in cards:
+            row = by_id[card['recipe_id']]
+            card['reason'] = reason(
+                row.get('main_item_name') or card['name'],
+                card['dish_type'],
+                row['props'].get('season_months', []),
+                month,
+                weather,
+                row['props'].get('weather_tags', []),
+                lang=lang,
+                conn=conn,
+                item_id=card['main_item_id'],
+            )
+            for key in ('dish_type', 'cook_method'):
+                card[key] = i18n.text(card[key], lang, card[key], section='phrases')
+        cards = i18n.localize(conn, cards, lang)
     return cards[:limit]
 
 

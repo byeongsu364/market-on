@@ -158,8 +158,8 @@ def test_stale_cache_preserves_current_other_and_quota(monkeypatch):
 
 def test_questions_have_actual_documents_and_coverage():
     questions = yaml.safe_load((DATA / 'eval/questions.yaml').read_text())['questions']
-    assert len(questions) == 35
-    assert len({q['id'] for q in questions}) == 35
+    assert len(questions) == 45
+    assert len({q['id'] for q in questions}) == 45
     # 범위 밖 5개: 지어내지 않은 안전한 응답 종류 목록, 모두 no_evidence를 포함
     outside = [q for q in questions[:30] if q.get('expect')]
     assert len(outside) == 5 and all('no_evidence' in q['expect'] for q in outside)

@@ -15,6 +15,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
+    lang: Literal['ko', 'en', 'zh', 'ja', 'vi'] = 'ko'
     messages: list[ChatMessage] = Field(min_length=1, max_length=10)
     market_id: str
     item_id: str | None = None
@@ -32,6 +33,9 @@ class ToolLabel(BaseModel):
 
 
 class ChatResponse(BaseModel):
+    lang: Literal['ko', 'en', 'zh', 'ja', 'vi'] = 'ko'
+    translated: bool = False
+    original: str | None = None
     reply: str
     citations: list[Citation] = Field(default_factory=list)
     tools: list[ToolLabel] = Field(default_factory=list)
