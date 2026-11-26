@@ -107,15 +107,39 @@ export const map = (market_id: string, item_id?: string, unit?: string): Promise
       ),
   }));
 export const recommend = (q: RecommendRequest): Promise<RecommendResponse> =>
-  mock(() => ({
-    items: items.slice(0, 3).map((i) => ({
-      item_id: i.item_id,
-      name: i.name,
-      reason: `${q.purpose} · ${q.headcount}명 · 예산 ${q.budget.toLocaleString()}원에 맞춘 구성 예시 · 샘플`,
-      stores: stores.filter((s) => s.sells.includes(i.item_id)).map((s) => s.store_id),
-      sources: ['팀 구성 예시 · 샘플'],
-    })),
-  }));
+  mock(() => {
+    const chosen = items
+      .filter((i) => q.purpose !== '선물' || ['item:apple', 'item:pear'].includes(i.item_id))
+      .slice(0, 3);
+    const quantity = 1;
+    const unit_price = 1000;
+    const total = chosen.length * unit_price;
+    return {
+      items: chosen.map((i) => ({
+        item_id: i.item_id,
+        name: i.name,
+        quantity,
+        unit: i.default_unit,
+        unit_label:
+          i.default_unit === 'unit:bunch' ? '단' : i.default_unit === 'unit:kg' ? 'kg' : '개',
+        unit_price,
+        subtotal: unit_price,
+        reason: `${q.purpose}에 맞춰 넣은 구성 예시예요.`,
+        stores: stores
+          .filter((s) => s.sells.includes(i.item_id))
+          .slice(0, 3)
+          .map((s) => ({ store_id: s.store_id, name: s.name })),
+        sources: [
+          { title: '팀 구성 예시 · 샘플', publisher: null, url: null, license: null, draft: true },
+        ],
+      })),
+      total,
+      budget: q.budget,
+      left: q.budget - total,
+      note: '기준시세로 계산한 예상 금액이에요. 실제 가격은 가게마다 달라요',
+      model: null,
+    };
+  });
 
 export async function ask(
   data: import('../../types/contract').AskRequest,

@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.logging import setup_logging
 from app.routers import (
+    recommend,
     ask,
     scan,
     price,
@@ -29,6 +30,7 @@ from app.routers import (
 
 setup_logging()
 routers = [
+    recommend.router,
     ask.router,
     scan.router,
     price.router,

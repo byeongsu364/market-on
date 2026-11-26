@@ -369,3 +369,13 @@ def test_string_evidence_numbers_are_accepted(env):
     env.outputs[:] = [{'answer': '대파는 0~2℃에서 보관해요.', 'used': ['1']}]
     result = ask(env)
     assert result.kind == 'answer' and result.answer == '대파는 0~2℃에서 보관해요.'
+
+
+@pytest.mark.parametrize(
+    'sentence',
+    ['확인할 점은 1번에 나와 있어요.', '근거 2에 따르면 냉장해요.', '[1] 냉장 보관해요.'],
+)
+def test_evidence_number_leak_is_removed(sentence):
+    from app.knowledge.fact_check import check
+
+    assert check(sentence + ' 냉장 보관해요.', '냉장 보관해요.', 'item:green_onion', [])[1] == 1

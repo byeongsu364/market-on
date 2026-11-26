@@ -91,20 +91,32 @@ export type MarketMap = {
   stores: Store[];
 };
 export type RecommendRequest = {
-  purpose: string;
-  relation?: string;
+  purpose: '집밥' | '선물' | '모임';
+  relation?: '가족' | '친구' | '나';
   event?: string;
   budget: number;
   headcount: number;
+  market_id: string;
+};
+export type RecommendItem = {
+  item_id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  unit_label: string;
+  unit_price: number | null;
+  subtotal: number | null;
+  reason: string;
+  stores: { store_id: string; name: string }[];
+  sources: Citation[];
 };
 export type RecommendResponse = {
-  items: {
-    item_id: string;
-    name: string;
-    reason: string;
-    stores: string[];
-    sources: string[];
-  }[];
+  items: RecommendItem[];
+  total: number;
+  budget: number;
+  left: number;
+  note: string;
+  model: string | null;
 };
 export type ApiError = {
   code: string;

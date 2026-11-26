@@ -2,6 +2,7 @@ import type { AskResponse } from '../../types/contract';
 import { useT } from '../../i18n';
 import { unitLabel } from '../../utils/convertUnit';
 import Card from '../common/Card';
+import ModelLabel from './ModelLabel';
 
 export default function AskAnswer({
   question,
@@ -11,13 +12,6 @@ export default function AskAnswer({
   response: AskResponse;
 }) {
   const t = useT();
-  const model = response.cached
-    ? t('askCached')
-    : response.model?.startsWith('gemma4:')
-      ? 'Gemma'
-      : response.model?.startsWith('openai:')
-        ? 'GPT'
-        : response.model;
   return (
     <Card>
       <h3>{question}</h3>
@@ -41,7 +35,10 @@ export default function AskAnswer({
             ))}
           </ul>
           <small>{t('askEvidence')}</small>
-          {model && <small>{model}</small>}
+          <ModelLabel
+            model={response.model}
+            cachedLabel={response.cached ? t('askCached') : undefined}
+          />
         </>
       )}
       {response.kind === 'no_evidence' && (

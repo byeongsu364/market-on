@@ -125,10 +125,11 @@ export function useMarketChoice() {
   };
 }
 export function useRecommendFlow() {
-  const [purpose, setPurpose] = useState('집밥');
-  const [relation, setRelation] = useState('가족');
+  const [purpose, setPurpose] = useState<'집밥' | '선물' | '모임'>('집밥');
+  const [relation, setRelation] = useState<'가족' | '친구' | '나'>('가족');
   const [budget, setBudget] = useState(20000);
   const [headcount, setHeadcount] = useState(2);
+  const { market } = useSession();
   const action = useAction(recommend);
   return {
     purpose,
@@ -140,7 +141,8 @@ export function useRecommendFlow() {
     headcount,
     setHeadcount,
     action,
-    submit: () => action.run({ purpose, relation, budget, headcount }),
+    submit: () =>
+      market && action.run({ purpose, relation, budget, headcount, market_id: market.market_id }),
   };
 }
 export function useRequireMarket() {

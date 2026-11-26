@@ -18,8 +18,7 @@ TOPICS = {'select': '확인 포인트', 'store': '보관', 'prep': '손질', 'se
 
 
 def ask(conn, data, device_id, *, embedder=None):
-    if not ask_repo.consume_quota(conn, hash_device(device_id)):
-        raise AppError('TOO_MANY_QUESTIONS', '한 시간에 60회까지 질문할 수 있어요.', 429)
+    consume_quota(conn, device_id)
     intent = data.intent or ask_intent.rule_intent(data.question) or ask_llm.classify(data.question)
     if intent not in ask_intent.INTENTS:
         return AskResponse(kind='out_of_scope')
@@ -123,3 +122,8 @@ def ask(conn, data, device_id, *, embedder=None):
     result.citations = citation.attach_citations(conn, [chunks[i - 1] for i in checked['used']])
     answer_cache.save(conn, key, result.model_dump(mode='json'), routed.model)
     return result
+
+
+def consume_quota(conn, device_id):
+    if not ask_repo.consume_quota(conn, hash_device(device_id)):
+        raise AppError('TOO_MANY_QUESTIONS', '한 시간에 60회까지 질문할 수 있어요.', 429)
