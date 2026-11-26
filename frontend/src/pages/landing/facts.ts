@@ -20,7 +20,8 @@ export const FACTS = {
   /** 소상공인 상가정보 경동시장 식품 점포 */
   stores: 106,
   appleStores: 52,
-  tests: 949,
+  /** 자동 테스트: 백엔드 735 + 프런트 236 */
+  tests: 971,
 } as const;
 
 /** 경동시장 식품 점포 106곳의 업종 나눔 */

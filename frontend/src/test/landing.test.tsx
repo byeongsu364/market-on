@@ -180,12 +180,12 @@ describe('기능', () => {
     for (const id of ids) expect(document.getElementById(id!.slice(1))).not.toBeNull();
   });
 
-  it('지금 숫자(52곳 · 949개 · 95개 · 106곳)와 기술 설명', async () => {
+  it('지금 숫자(52곳 · 971개 · 95개 · 106곳)와 기술 설명', async () => {
     show('/intro/features');
     await screen.findByRole('heading', { level: 1 });
     const text = pageText();
     expect(text).toContain('실제 상호 52곳');
-    expect(screen.getAllByText('949개').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('971개').length).toBeGreaterThan(0);
     expect(screen.getAllByText('106곳').length).toBeGreaterThan(0);
     expect(text).toContain('품목 95개, 품종 144개, 확인 포인트 40개');
     expect(text).toContain('근거 문서 79개, 출처 26곳');
@@ -334,7 +334,7 @@ describe('팀 소개', () => {
     );
     expect(screen.getByText('신효영')).toBeInTheDocument();
     const text = pageText();
-    expect(text).toContain('자동 테스트 949개 통과');
+    expect(text).toContain('자동 테스트 971개 통과');
     expect(text).not.toContain('참가 서약');
     expect(text).not.toMatch(/\[[^\]]*\]/);
   });
@@ -384,4 +384,15 @@ describe('FeatureVideo', () => {
     render(<FeatureVideo src="/landing/video/x.mp4" poster="/landing/card.webp" label="설명" />);
     expect(screen.getByRole('button', { name: '영상 재생' })).toBeInTheDocument();
   });
+});
+
+it('기능 페이지 숫자는 영상 속 화면(노지 귤 250원 · 기준시세 279원 · 10%, 대파 2,128원)과 같다', async () => {
+  show('/intro/features');
+  await screen.findByRole('heading', { level: 1 });
+  const text = document.body.textContent ?? '';
+  expect(text).toContain('기준시세보다 10% 낮아요');
+  expect(text).toContain('노지 귤 1개 전통시장 279원');
+  expect(text).toContain('대파 1단 경동시장 2,128원');
+  expect(text).not.toContain('9% 낮아요');
+  expect(text).not.toContain('부사 3개 5,000원');
 });

@@ -40,12 +40,12 @@ const FLOW = [
 const ANSHIMON_STEPS = [
   {
     title: '가격 눈금',
-    text: '현장 가격을 기준시세와 같은 단위로 맞춰 "기준시세보다 9% 낮아요"처럼 알려 드려요.',
+    text: '현장 가격을 기준시세와 같은 단위로 맞춰, 노지 귤 1개 250원이면 기준시세 279원과 비교해 "기준시세보다 10% 낮아요"처럼 알려 드려요.',
   },
   { title: '비교 근거 4가지', text: '가격, 품종, 제철, 상태를 공식 문서를 근거로 설명해요.' },
   {
     title: '내가 확인한 것',
-    text: '판정하지 않고, 손님이 체크한 확인 포인트만 "4개 중 2개"로 세요.',
+    text: '판정하지 않고, 손님이 체크한 확인 포인트만 세요. 귤은 확인 포인트 4개 중 체크한 만큼 "4개 중 2개 확인"처럼 적어요.',
   },
   { title: '저장 · 공유', text: '카드 한 장으로 저장하고 친구에게 보내요.' },
 ];
@@ -322,8 +322,9 @@ function Features() {
               가기 전에, 오늘 시세부터.
             </h2>
             <p className={b.leadSm}>
-              전통시장과 대형마트 가격을 나란히 보여 드리고, 지금 제철인 품목을 먼저 올려요. 손님이
-              스스로 시장을 찾아오게 하는 첫 화면이에요.
+              전통시장과 대형마트 가격을 나란히 보여 드리고(노지 귤 1개 전통시장 279원 · 대형마트
+              388원), 지금 제철인 품목을 먼저 올려요. 손님이 스스로 시장을 찾아오게 하는 첫
+              화면이에요.
             </p>
             <div className={b.chipRow}>
               <span className={b.tag}>aT 농산물 가격정보</span>
@@ -577,8 +578,8 @@ function Features() {
                   <td>
                     <span className={f.cellTitle}>aT 소매가격 조사처</span>
                     <span className={f.cellText}>
-                      이 시장 가격이 공공데이터로 나와요. 대파 1kg 경동시장 2,500원, 전통시장 평균
-                      2,576원, 대형유통 평균 2,451원
+                      이 시장 가격이 공공데이터로 나와요. 대파 1단 경동시장 2,128원, 대형유통 평균
+                      2,319원
                     </span>
                     <span className={f.cellSource}>aT 기간별 소매가격</span>
                   </td>
@@ -669,9 +670,11 @@ function Features() {
           </div>
           <div className={f.proof}>
             <div>
-              <span className={b.stat}>3 / 3</span>
-              <span className={f.proofLabel}>품목 · 품종 일치</span>
-              <span className={f.proofText}>가격표 사진 "부사 3개 5,000원"</span>
+              <span className={b.stat}>0.6초</span>
+              <span className={f.proofLabel}>사진 한 장으로 품목 · 품종 · 가격</span>
+              <span className={f.proofText}>
+                "노지 귤 1개 250원" 가격표 → 귤(확신도 1.00) · 노지 · 250원
+              </span>
             </div>
             <div>
               <span className={`${b.stat} ${f.signalText}`}>
