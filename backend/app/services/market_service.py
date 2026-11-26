@@ -17,11 +17,11 @@ ZONE_ORDER = ('청과', '채소', '수산', '정육', '반찬', '떡·분식')
 
 
 def pin_source(row):
-    """지도 핀으로 내보낼 좌표의 출처: 상인 확인(merchant) > 카카오맵 장소 검색(kakao) > 없음."""
+    """지도 핀으로 내보낼 좌표의 출처: 상인 확인(merchant) > 네이버 지도 장소(naver) > 카카오맵(kakao) > 없음."""
     if row.get('location_verified'):
         return 'merchant'
-    if row.get('location_source') == 'kakao' and row.get('lat') is not None:
-        return 'kakao'
+    if row.get('location_source') in ('naver', 'kakao') and row.get('lat') is not None:
+        return row['location_source']
     return None
 
 

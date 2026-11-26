@@ -94,7 +94,7 @@ def load_kakao_places(
         if not dry_run:
             conn.execute(
                 "update stores set lat=%s,lng=%s,location_source='kakao',kakao_place_id=%s "
-                'where id=%s and not location_verified',
+                "where id=%s and not location_verified and location_source is distinct from 'naver'",
                 (float(doc['y']), float(doc['x']), doc.get('id'), store['id']),
             )
     print(f'카카오 장소 검색: 찾음={found} 못찾음={missing} 건너뜀(상인 확인·비활성)={skipped}')

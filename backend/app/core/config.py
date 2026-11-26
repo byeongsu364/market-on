@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     NAVER_MAP_CLIENT_SECRET: str | None = None
     # 카카오 로컬(키워드로 장소 검색): 점포 위치 찾기(scripts.load_kakao_places)에만 씀. 서버 전용
     KAKAO_REST_API_KEY: str | None = None
+    # 네이버 개발자센터 검색(지역) API: 점포 위치를 네이버 지도의 가게 자리로 찾기(scripts.load_naver_places). 서버 전용
+    NAVER_SEARCH_CLIENT_ID: str | None = None
+    NAVER_SEARCH_CLIENT_SECRET: str | None = None
     MEDIA_DIR: Path = Path(__file__).resolve().parents[2] / 'storage'
     LLM_PROVIDER: str = 'gemma'
     OPENAI_API_KEY: str | None = None

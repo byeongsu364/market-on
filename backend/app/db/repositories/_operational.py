@@ -32,6 +32,11 @@ def save(conn, table, values, *, upsert=False):
                 if table == 'stores'
                 and values.get('source') == 'sbiz'
                 and f in ('lat', 'lng', 'location_verified')
+                # 중복으로 숨긴 점포(duplicate_of)는 상가정보를 다시 적재해도 숨긴 채로 둠
+                else sql.SQL(
+                    'active=CASE WHEN stores.duplicate_of IS NOT NULL THEN false ELSE excluded.active END'
+                )
+                if table == 'stores' and f == 'active'
                 else sql.SQL('{}=excluded.{}').format(sql.Identifier(f), sql.Identifier(f))
             )
             for f in fields

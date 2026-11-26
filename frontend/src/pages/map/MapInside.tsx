@@ -250,13 +250,16 @@ function MarketView({ market }: { market: Market }) {
   const pins: MapPin[] = crowded
     ? pinList.map((p) => (p.state === 'default' ? { ...p, state: 'small' } : p))
     : pinList;
-  const kakaoPins = views.filter((v) => v.store.location_source === 'kakao').length;
+  const count = (src: string) => views.filter((v) => v.store.location_source === src).length;
   const unplaced = views.filter((v) => v.store.lat == null || v.store.lng == null).length;
+  const placeSources = [count('naver') && '네이버 지도', count('kakao') && '카카오맵']
+    .filter(Boolean)
+    .join('·');
   const sampleNote =
     example.size > 0
       ? true
-      : kakaoPins > 0
-        ? `카카오맵 기준 위치${unplaced ? ` · ${unplaced}곳은 위치 확인 전이라 목록에만` : ''}`
+      : placeSources
+        ? `${placeSources} 기준 위치${unplaced ? ` · ${unplaced}곳은 위치 확인 전이라 목록에만` : ''}`
         : hasCoords && map.data?.layout === 'schematic';
 
   const top = (

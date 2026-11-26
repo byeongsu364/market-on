@@ -1,0 +1,295 @@
+# 경동시장 점포 핀 위치 — 카카오맵 장소와 수동 대조 (2026-11-27)
+# 기준: 상가정보 상호 = 카카오 장소 이름, 그리고 상가정보 도로명 주소 = 카카오 장소 주소(같은 건물)일 때만 씀.
+# 이름만 비슷하거나 다른 건물의 같은 이름 가게는 넣지 않음. 여기 없는 점포는 지도에 핀 없이 목록에만 나옴.
+# 출처: 카카오 로컬 API '키워드로 장소 검색'(시장 중심 반경 700m), 상가정보(소상공인시장진흥공단) 2026-09.
+# 같은 상호·주소 규칙: 카카오 같은 이름 장소가 점포 수만큼 → 따로(핀 하나씩). 업종 같고 카카오 장소 1곳 이하 → 한 점포로
+#   합침(duplicates, 숨김). 업종이 다르면 따로 두고 카카오와 맞는 쪽에만 핀. 최종 확인은 상인 가입 때.
+# 적재: python -m scripts.load_store_locations --file /srv/data/markets/gyeongdong_locations.yaml
+market_id: market:gyeongdong
+checked_on: 2026-11-27
+locations:
+  - store_id: 'store:gd-MA010120220801165797'
+    name: '자연상회'
+    lat: 37.5790039
+    lng: 127.0387265
+    source: kakao
+    kakao_place_id: '20708745'
+    kakao_name: '자연상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA010120220803627833'
+    name: '현대재료'
+    lat: 37.5793840
+    lng: 127.0393200
+    source: kakao
+    kakao_place_id: '16586184'
+    kakao_name: '현대재료'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA010120220805014736'
+    name: '서울상회'
+    lat: 37.5791031
+    lng: 127.0386360
+    source: kakao
+    kakao_place_id: '26969008'
+    kakao_name: '서울상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA010120220813559696'
+    name: '태진상회'
+    lat: 37.5796878
+    lng: 127.0386680
+    source: kakao
+    kakao_place_id: '862463889'
+    kakao_name: '태진상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202308A0094067'
+    name: '공주물산'
+    lat: 37.5796498
+    lng: 127.0392624
+    source: kakao
+    kakao_place_id: '1587299854'
+    kakao_name: '공주물산'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0259725'
+    name: '이문상회'
+    lat: 37.5792174
+    lng: 127.0389780
+    source: kakao
+    kakao_place_id: '16675769'
+    kakao_name: '이문상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0259800'
+    name: '종합민물고기'
+    lat: 37.5796256
+    lng: 127.0386646
+    source: kakao
+    kakao_place_id: '10790574'
+    kakao_name: '종합민물고기'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0259934'
+    name: '영도상회'
+    lat: 37.5795237
+    lng: 127.0391932
+    source: kakao
+    kakao_place_id: '1287835812'
+    kakao_name: '영도상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+    note: '같은 상호 건어물 점포는 제외(카카오 장소가 과일·채소 가게)'
+  - store_id: 'store:gd-MA0101202410A0259969'
+    name: '충남회센타'
+    lat: 37.5796047
+    lng: 127.0394457
+    source: kakao
+    kakao_place_id: '1185620230'
+    kakao_name: '충남회센터'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+    note: '표기 차이(센타/센터)'
+  - store_id: 'store:gd-MA0101202410A0260029'
+    name: '강원축산'
+    lat: 37.5795274
+    lng: 127.0386589
+    source: kakao
+    kakao_place_id: '16473154'
+    kakao_name: '강원축산'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0260428'
+    name: '충남상회'
+    lat: 37.5794110
+    lng: 127.0392668
+    source: kakao
+    kakao_place_id: '364437922'
+    kakao_name: '충남상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0260767'
+    name: '오복상회'
+    lat: 37.5796220
+    lng: 127.0387608
+    source: kakao
+    kakao_place_id: '236328995'
+    kakao_name: '오복상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+    note: '같은 가게가 상가정보에 2건(아래 duplicates) → 이 점포 하나로 보임'
+  - store_id: 'store:gd-MA0101202410A0260932'
+    name: '대흥상회'
+    lat: 37.5797671
+    lng: 127.0386375
+    source: kakao
+    kakao_place_id: '797430694'
+    kakao_name: '대흥상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+    note: '같은 상호 반찬 점포(A0691100)는 업종이 달라 따로 두고 핀 없이 목록에만 — 상인 확인 필요'
+  - store_id: 'store:gd-MA0101202410A0261050'
+    name: '성보상회'
+    lat: 37.5789157
+    lng: 127.0385759
+    source: kakao
+    kakao_place_id: '9177421'
+    kakao_name: '성보상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0261286'
+    name: '보현땅콩'
+    lat: 37.5797362
+    lng: 127.0394413
+    source: kakao
+    kakao_place_id: '16377900'
+    kakao_name: '보현땅콩'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0261336'
+    name: '성덕상회'
+    lat: 37.5789543
+    lng: 127.0389178
+    source: kakao
+    kakao_place_id: '1860974867'
+    kakao_name: '성덕상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+    note: '같은 상호 점포 2건·카카오 장소 2곳 → 하나씩 나눔(어느 쪽인지는 현장 확인 필요)'
+  - store_id: 'store:gd-MA0101202410A0261406'
+    name: '신안수산'
+    lat: 37.5796849
+    lng: 127.0394061
+    source: kakao
+    kakao_place_id: '16678397'
+    kakao_name: '신안수산'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0261801'
+    name: '성덕상회'
+    lat: 37.5791490
+    lng: 127.0387345
+    source: kakao
+    kakao_place_id: '1031957659'
+    kakao_name: '성덕상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+    note: '같은 상호 점포 2건·카카오 장소 2곳 → 하나씩 나눔(어느 쪽인지는 현장 확인 필요)'
+  - store_id: 'store:gd-MA0101202410A0261929'
+    name: '대복상회'
+    lat: 37.5792139
+    lng: 127.0387380
+    source: kakao
+    kakao_place_id: '8871078'
+    kakao_name: '대복상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0262134'
+    name: '경동건어물'
+    lat: 37.5797436
+    lng: 127.0388594
+    source: kakao
+    kakao_place_id: '23491453'
+    kakao_name: '경동건어물'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0262872'
+    name: '영양상회'
+    lat: 37.5792598
+    lng: 127.0388512
+    source: kakao
+    kakao_place_id: '9259974'
+    kakao_name: '영양상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0263210'
+    name: '이천농장'
+    lat: 37.5789472
+    lng: 127.0386778
+    source: kakao
+    kakao_place_id: '27285175'
+    kakao_name: '이천농장'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0390190'
+    name: '금덕약초'
+    lat: 37.5792127
+    lng: 127.0395304
+    source: kakao
+    kakao_place_id: '524927099'
+    kakao_name: '금덕약초'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0448176'
+    name: '대일상회'
+    lat: 37.5792634
+    lng: 127.0387640
+    source: kakao
+    kakao_place_id: '2050348265'
+    kakao_name: '대일상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0505203'
+    name: '대성상회'
+    lat: 37.5792264
+    lng: 127.0388500
+    source: kakao
+    kakao_place_id: '1751500490'
+    kakao_name: '대성상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0535576'
+    name: '가평상회'
+    lat: 37.5789588
+    lng: 127.0388476
+    source: kakao
+    kakao_place_id: '416825307'
+    kakao_name: '가평상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0582278'
+    name: '제기축산물공판장'
+    lat: 37.5792337
+    lng: 127.0386429
+    source: kakao
+    kakao_place_id: '19057666'
+    kakao_name: '제기축산물공판장'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0628264'
+    name: '현대상회'
+    lat: 37.5795030
+    lng: 127.0388830
+    source: kakao
+    kakao_place_id: '330737865'
+    kakao_name: '현대상회'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202410A0839639'
+    name: '창명물산'
+    lat: 37.5792913
+    lng: 127.0387539
+    source: kakao
+    kakao_place_id: '16734087'
+    kakao_name: '창명물산'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+  - store_id: 'store:gd-MA0101202411A0149657'
+    name: '이천농장2'
+    lat: 37.5790380
+    lng: 127.0391432
+    source: kakao
+    kakao_place_id: '1314451725'
+    kakao_name: '이천농장2'
+    kakao_address: '서울 동대문구 고산자로36길 3'
+    sbiz_address: '서울특별시 동대문구 고산자로36길 3'
+duplicates:
+  - store_id: 'store:gd-MA0101202410A0871845'
+    duplicate_of: 'store:gd-MA0101202410A0260767'
+    name: '오복상회'
+    reason: '상호·도로명 주소·업종(채소/과일, 1층) 같음, 카카오맵 장소 1곳'
+  - store_id: 'store:gd-MA0101202410A0264706'
+    duplicate_of: 'store:gd-MA0101202410A0219543'
+    name: '영월상회'
+    reason: '상호·도로명 주소·업종(채소/과일, 1층) 같음, 카카오맵 장소 없음'

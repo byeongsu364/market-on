@@ -361,7 +361,7 @@ export type StoreExtra = {
   naver_name?: string;
   verified?: boolean;
   /** 핀 좌표 출처(2026-11-27): merchant=상인 확인, kakao=카카오맵 장소 검색, null=좌표 없음 */
-  location_source?: 'merchant' | 'kakao' | null;
+  location_source?: 'merchant' | 'naver' | 'kakao' | null;
   open_now?: boolean | null;
   intro?: string | null;
   distance_m?: number | null;
