@@ -1,4 +1,3 @@
-import QRCode from 'qrcode';
 import type { Item, Market, Price } from '../types/contract';
 import { seoulDay } from './sale';
 import { unitLabel } from './convertUnit';
@@ -66,7 +65,65 @@ export function buildCardData(input: CardInput) {
   // 신선도에는 결론을 붙이지 않고 손님이 한 확인만 적음(기획서 "팀 원칙과 맞추기")
   const footer = '신선도는 직접 확인했어요';
   const title = [item.name, price?.variety_name].filter(Boolean).join(' · ');
+  // 2026-11-27 시안(판단 카드): 위 가격 두 줄 + 비교 칩, "비교 근거 4가지", 내가 확인한 것(체크한 것만)
+  const seenLine = hasPrice
+    ? {
+        label: '현장 가격',
+        value: `${seen.toLocaleString('ko-KR')}원`,
+        unit:
+          input.quantity > 1
+            ? `${input.quantity}${unitLabel(input.unit).replace(/^1/, '')}`
+            : unitLabel(input.unit),
+      }
+    : null;
+  const refLine = price
+    ? {
+        label: '기준시세',
+        value: `${price.reference_price.toLocaleString('ko-KR')}원`,
+        unit: unitLabel(price.unit),
+      }
+    : null;
+  const chip =
+    pct == null
+      ? ''
+      : pct === 0
+        ? '기준시세와 같아요'
+        : `${pct < 0 ? '▼' : '▲'} ${Math.abs(pct)}% · 기준시세보다 ${pct < 0 ? '낮아요' : '높아요'}`;
+  const basis = [
+    {
+      label: '가격',
+      value:
+        pct == null
+          ? hasPrice
+            ? '기준시세 없음'
+            : '가격 없이 확인'
+          : pct === 0
+            ? '시세와 같음'
+            : `시세보다 ${Math.abs(pct)}% ${pct < 0 ? '낮음' : '높음'}`,
+    },
+    { label: '품종', value: price?.variety_name ?? '품종 미확인' },
+    // 제철은 카드를 그릴 때 이달의 식재료 응답으로 채움(DecisionCardSheet)
+    { label: '제철', value: '' },
+    {
+      label: '상태',
+      value: selected.length
+        ? `${item.criteria.length}개 중 ${selected.length}개 확인`
+        : '확인 안 함',
+    },
+  ];
+  const checkedPoints = selected.map((c) => `✓ ${c.text}`);
+  const disclaimer = 'Market-On은 판정하지 않아요 · 확인은 직접 했어요';
   return {
+    itemId: item.item_id,
+    itemName: item.name,
+    seenLine,
+    refLine,
+    chip,
+    basis,
+    checkedPoints,
+    disclaimer,
+    /** 이달의 식재료 문구(예: "11월 식재료"). null이면 이번 달 제철이 아님, undefined면 모름 */
+    season: undefined as string | null | undefined,
     date,
     title,
     market: market.name,
@@ -149,20 +206,23 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
   const style = getComputedStyle(palette);
   const token = (name: string) => style.getPropertyValue(`--color-${name}`).trim();
   const colors = {
-    bg: token('surface-dark'),
-    text: token('on-dark'),
-    soft: token('on-dark-soft'),
-    on: token('signal-dark'),
-    diff: token('signal-text-dark'),
-    off: token('gauge-off-dark'),
+    bg: token('canvas-soft'),
+    card: token('surface-card'),
+    line: token('hairline-strong'),
+    text: token('ink'),
+    soft: token('body'),
+    muted: token('muted'),
+    chipBg: token('signal-soft'),
+    chip: token('signal-text'),
     photo: token('photo-placeholder'),
-    qrBg: token('surface-card'),
-    qr: token('ink'),
+    tag: token('surface-dark'),
+    onTag: token('on-dark'),
   };
   palette.remove();
+  // 2026-11-27 판단 카드 시안 배치: 머리(로고·시장·날짜) → 사진 + 품목·가격·비교 칩 → 비교 근거 4가지 → 내가 확인한 것 → 출처
   const W = 1080;
-  const H = 1760;
-  const P = 60;
+  const P = 64;
+  const H = 1480;
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -180,24 +240,46 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
     ctx.fillStyle = color;
     ctx.textAlign = align;
     ctx.font = `${weight} ${size}px ${FONT}`;
-    const rows = wrapText(value, (s) => ctx.measureText(s).width, width, lines);
-    rows.forEach((s, i) => ctx.fillText(s, x, y + i * size * 1.35));
+    const rows = wrapText(value, (v) => ctx.measureText(v).width, width, lines);
+    rows.forEach((v, i) => ctx.fillText(v, x, y + i * size * 1.35));
     ctx.textAlign = 'left';
     return rows.length * size * 1.35;
   };
-  const round = (x: number, y: number, w: number, h: number, r: number[]) => {
+  const measure = (value: string, size: number, weight = 400) => {
+    ctx.font = `${weight} ${size}px ${FONT}`;
+    return ctx.measureText(value).width;
+  };
+  const round = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number | number[],
+    fill: string,
+  ) => {
+    ctx.fillStyle = fill;
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, r);
     ctx.fill();
   };
-  // 머리: 로고 글자, 시장과 날짜
-  text('Market-On', P, 92, 52, 400, { weight: 700 });
-  text(`${data.market}, ${data.date}`, W - P, 88, 32, 560, { color: colors.soft, align: 'right' });
-  // 사진(없으면 빈 면)
-  const photoY = 140;
-  const photoH = 380;
-  ctx.fillStyle = colors.photo;
-  round(P, photoY, W - P * 2, photoH, [40]);
+  const outline = (x: number, y: number, w: number, h: number, r: number) => {
+    round(x, y, w, h, r, colors.card);
+    ctx.strokeStyle = colors.line;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(x + 1.5, y + 1.5, w - 3, h - 3, r);
+    ctx.stroke();
+  };
+
+  // 머리: 로고 글자 · 시장 · 날짜
+  text('Market-On', P, 104, 44, 360, { weight: 700 });
+  text(data.market, W / 2 + 40, 100, 32, 320, { color: colors.soft, align: 'center' });
+  text(data.date, W - P, 100, 32, 300, { color: colors.soft, align: 'right' });
+
+  // 사진(정사각, 없으면 빈 면) + "찍은 사진" 꼬리표
+  const photoY = 150;
+  const photoS = 400;
+  round(P, photoY, photoS, photoS, 32, colors.photo);
   if (data.photo) {
     const url = URL.createObjectURL(data.photo);
     try {
@@ -207,13 +289,12 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
         img.onerror = () => reject(new Error('Photo unavailable'));
         img.src = url;
       });
-      const boxW = W - P * 2;
-      const scale = Math.max(boxW / img.naturalWidth, photoH / img.naturalHeight);
-      const sw = boxW / scale;
-      const sh = photoH / scale;
+      const scale = Math.max(photoS / img.naturalWidth, photoS / img.naturalHeight);
+      const sw = photoS / scale;
+      const sh = photoS / scale;
       ctx.save();
       ctx.beginPath();
-      ctx.roundRect(P, photoY, boxW, photoH, [40]);
+      ctx.roundRect(P, photoY, photoS, photoS, 32);
       ctx.clip();
       ctx.drawImage(
         img,
@@ -223,82 +304,89 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
         sh,
         P,
         photoY,
-        boxW,
-        photoH,
+        photoS,
+        photoS,
       );
       ctx.restore();
     } finally {
       URL.revokeObjectURL(url);
     }
-  }
-  // 품목, 가격 줄
-  let y = photoY + photoH + 70;
-  text(data.title, P, y, 38, W - P * 2, { weight: 500, color: colors.soft });
-  y += 20;
-  data.prices.forEach((line, i) => {
-    y += i === 0 ? 64 : 48;
-    text(line, P, y, i === 0 ? 48 : 32, W - P * 2, {
-      weight: i === 0 ? 700 : 400,
-      color:
-        i === 0
-          ? colors.text
-          : line.startsWith('▼') || line.startsWith('▲')
-            ? colors.diff
-            : colors.soft,
-    });
-  });
-  // 가격 눈금: 4px 막대 아래 네 칸, 켜진 칸만 주황(signal-dark)
-  y += 50;
-  const gap = 12;
-  const cellW = (W - P * 2 - gap * 3) / 4;
-  ctx.fillStyle = colors.text;
-  round(P, y, W - P * 2, 12, [6]);
-  data.bandLabels.forEach((label, i) => {
-    const on = data.band === i + 1;
-    ctx.fillStyle = on ? colors.on : colors.off;
-    const x = P + i * (cellW + gap);
-    round(x, y + 12, cellW, 78, [0, 0, 39, 39]);
-    text(label, x + cellW / 2, y + 140, 32, cellW, {
-      weight: on ? 600 : 400,
-      color: on ? colors.text : colors.soft,
+    const tag = '찍은 사진';
+    const tw = measure(tag, 28, 600) + 36;
+    round(P + 20, photoY + photoS - 72, tw, 52, 26, colors.tag);
+    text(tag, P + 20 + tw / 2, photoY + photoS - 36, 28, tw, {
+      weight: 600,
+      color: colors.onTag,
       align: 'center',
     });
-  });
-  y += 210;
-  text(data.bandLine || '비교는 참고만 하세요', P, y, 56, W - P * 2, { weight: 600 });
-  if (data.bandNote) {
-    y += 52;
-    text(data.bandNote, P, y, 30, W - P * 2, { color: colors.soft });
   }
+
+  // 오른쪽: 품목 · 품종, 현장 가격, 기준시세, 비교 칩
+  const rx = P + photoS + 44;
+  const rw = W - P - rx;
+  text(data.title, rx, photoY + 60, 52, rw, { weight: 700, lines: 2 });
+  let ry = photoY + 150;
+  const priceRow = (row: { label: string; value: string; unit: string }) => {
+    const lw = measure(row.label + ' ', 32);
+    text(row.label, rx, ry, 32, rw, { color: colors.soft });
+    const vw = measure(row.value, 44, 700);
+    text(row.value, rx + lw, ry, 44, rw - lw, { weight: 700 });
+    text(` / ${row.unit}`, rx + lw + vw, ry, 32, rw - lw - vw, { color: colors.soft });
+    ry += 70;
+  };
+  if (data.seenLine) priceRow(data.seenLine);
+  if (data.refLine) priceRow(data.refLine);
+  else {
+    text('기준시세 정보 없음', rx, ry, 32, rw, { color: colors.soft });
+    ry += 70;
+  }
+  if (data.chip) {
+    const cw = Math.min(rw, measure(data.chip, 32, 600) + 48);
+    round(rx, ry - 20, cw, 72, 20, colors.chipBg);
+    text(data.chip, rx + 24, ry + 26, 32, cw - 48, { weight: 600, color: colors.chip });
+  }
+
+  // 비교 근거 4가지(2×2)
+  let y = photoY + photoS + 96;
+  text('비교 근거 4가지', P, y, 40, W - P * 2, { weight: 700 });
+  y += 36;
+  const gap = 24;
+  const tileW = (W - P * 2 - gap) / 2;
+  const tileH = 136;
+  const season =
+    data.season === undefined
+      ? '제철 정보 없음'
+      : data.season === null
+        ? '이번 달 제철 아님'
+        : `지금 제철 (${data.season})`;
+  data.basis.forEach((b, i) => {
+    const x = P + (i % 2) * (tileW + gap);
+    const ty = y + Math.floor(i / 2) * (tileH + gap);
+    outline(x, ty, tileW, tileH, 24);
+    text(b.label, x + 32, ty + 52, 28, tileW - 64, { weight: 600, color: colors.muted });
+    text(b.label === '제철' ? season : b.value, x + 32, ty + 102, 34, tileW - 64, {
+      weight: 700,
+    });
+  });
+  y += tileH * 2 + gap + 90;
+
   // 내가 확인한 것(체크한 것만 ✓)
-  y += 50;
-  ctx.fillStyle = colors.off;
-  ctx.fillRect(P, y, W - P * 2, 3);
-  y += 20;
-  data.points.slice(0, 4).forEach((point) => {
-    y += 52;
-    text(point, P, y, 34, 700, { lines: 1 });
+  const head = '내가 확인한 것';
+  text(head, P, y, 40, 500, { weight: 700 });
+  text(data.count, P + measure(head, 40, 700) + 20, y, 30, 500, { color: colors.soft });
+  const lines = data.checkedPoints.length ? data.checkedPoints : ['체크한 확인 포인트가 없어요'];
+  lines.slice(0, 4).forEach((point) => {
+    y += 58;
+    text(point, P, y, 34, W - P * 2, {
+      color: data.checkedPoints.length ? colors.text : colors.soft,
+    });
   });
-  y += 56;
-  text(`${data.count}. ${data.footer}.`, P, y, 30, 700, { lines: 2, color: colors.soft });
-  // 아래: 점포, 출처, QR
-  const qrSize = 200;
-  const qrY = H - P - qrSize;
-  text(data.store, P, qrY + 40, 38, W - P * 3 - qrSize, { lines: 1, weight: 600 });
-  text(data.sources.join(' · '), P, qrY + 96, 24, W - P * 3 - qrSize, {
-    lines: 4,
-    color: colors.soft,
-  });
-  const qr = QRCode.create(data.url, { errorCorrectionLevel: 'M' }).modules;
-  const cell = qrSize / (qr.size + 8);
-  const qrX = W - P - qrSize;
-  ctx.fillStyle = colors.qrBg;
-  round(qrX, qrY, qrSize, qrSize, [16]);
-  ctx.fillStyle = colors.qr;
-  for (let row = 0; row < qr.size; row++)
-    for (let col = 0; col < qr.size; col++)
-      if (qr.get(row, col))
-        ctx.fillRect(qrX + (col + 4) * cell, qrY + (row + 4) * cell, cell + 0.2, cell + 0.2);
+
+  // 출처와 판정하지 않는다는 말
+  y += 84;
+  y += text(data.sources[0] ?? '', P, y, 26, W - P * 2, { lines: 2, color: colors.soft });
+  text(data.disclaimer, P, y + 6, 26, W - P * 2, { color: colors.soft });
+
   return new Promise((resolve, reject) =>
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('PNG unavailable'))),

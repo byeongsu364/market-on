@@ -70,3 +70,23 @@ it('폭 측정으로 줄바꿈하고 최대 줄에서 말줄임한다', () => {
   expect(wrapText('가\n나', (s) => s.length, 3, 2)).toEqual(['가', '나']);
   expect(wrapText('가', (s) => s.length, 3, 0)).toEqual([]);
 });
+it('시안 배치용 값: 현장 가격·기준시세·비교 칩·비교 근거 4가지·체크한 것만', () => {
+  const data = buildCardData(input);
+  expect(data.seenLine).toEqual({ label: '현장 가격', value: '8,800원', unit: '1kg' });
+  expect(data.refLine).toEqual({ label: '기준시세', value: '10,000원', unit: '1kg' });
+  expect(data.chip).toBe('▼ 12% · 기준시세보다 낮아요');
+  expect(data.basis.map((b) => [b.label, b.value])).toEqual([
+    ['가격', '시세보다 12% 낮음'],
+    ['품종', '후지'],
+    ['제철', ''],
+    ['상태', '2개 중 1개 확인'],
+  ]);
+  expect(data.checkedPoints).toEqual(['✓ 표면을 확인해요']);
+  expect(data.disclaimer).toContain('판정하지 않아요');
+  const none = buildCardData({ ...input, checked: [], value: '' });
+  expect(none.seenLine).toBeNull();
+  expect(none.chip).toBe('');
+  expect(none.basis[0].value).toBe('가격 없이 확인');
+  expect(none.basis[3].value).toBe('확인 안 함');
+  expect(none.checkedPoints).toEqual([]);
+});

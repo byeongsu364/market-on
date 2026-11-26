@@ -7,6 +7,8 @@ import { useSession } from '../../store/session';
 import { getMarkets } from '../../api/markets';
 import s from './layout.module.css';
 import { chromeFor } from './chrome';
+import { showLanding } from './desktopGate';
+import Landing from '../../pages/landing/Landing';
 
 /** 주소의 market이 세션과 다르면 세션 시장을 주소에 맞춤(주소가 이김) */
 function useUrlMarket() {
@@ -40,6 +42,7 @@ export default function PageLayout() {
   useEffect(() => {
     window.scrollTo?.(0, 0);
   }, [pathname]);
+  if (showLanding(pathname, desktop)) return <Landing />;
   return (
     <div
       className="app-shell"
