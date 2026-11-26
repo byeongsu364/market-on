@@ -47,6 +47,7 @@ export default function MerchantHome() {
       <div className={desktop ? s.webStats : s.stats}>
         <Stat value={`오늘 ${f.stats.data.today.views}번 조회`} label={t('storeViews')} />
         <Stat value={`${f.stats.data.today.directions}회`} label="오늘 길 안내" />
+        <Stat value={`${f.stats.data.favorites}명`} label="단골로 저장한 손님" />
       </div>
       <Section title="최근 7일 조회·길 안내">
         <div className={s.chart} role="img" aria-label="날짜별 조회 수와 길 안내 횟수">

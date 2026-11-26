@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
 import Icon from '../common/Icon';
 import { useAuth } from '../../hooks/useAuth';
 import { useSession } from '../../store/session';
@@ -65,6 +66,7 @@ export default function WebHeader() {
         />
       </form>
       <div className={s.webEnd}>
+        <NotificationBell />
         <Link to="/me/settings" className={s.webLink}>
           <Icon name="globe" size={18} />
           {LANGUAGE_NAMES[language]}

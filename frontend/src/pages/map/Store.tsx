@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import AppHeader from '../../components/layout/AppHeader';
 import MapView from '../../components/map/MapView';
 import type { MapPin } from '../../components/map/MapView';
@@ -42,6 +43,9 @@ import s from './map.module.css';
 export default function Store() {
   const t = useT();
   const desktop = useIsDesktop();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { storeId = '' } = useParams();
   const ctx = useShoppingContext();
   const session = useSession();
@@ -83,11 +87,21 @@ export default function Store() {
   )?.name;
 
   const favorites = useResource(
-    useCallback(() => (favoritesAvailable ? getFavorites() : Promise.resolve([])), []),
+    useCallback(() => (user?.role === 'customer' ? getFavorites() : Promise.resolve([])), [user]),
   );
-  const [saved, setSaved] = useState<boolean | null>(null);
-  const isSaved = saved ?? !!favorites.data?.some((f) => f.store_id === storeId);
+  const [saved, setSaved] = useState<{ storeId: string; userId: string; value: boolean } | null>(
+    null,
+  );
+  const isSaved =
+    saved?.storeId === storeId && saved.userId === user?.id
+      ? saved.value
+      : !!favorites.data?.some((f) => f.store_id === storeId);
   const toggleSaved = useAction(async () => {
+    if (!user) {
+      navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+    if (user.role !== 'customer') throw new Error('손님 계정으로 단골을 저장할 수 있어요');
     if (!state.data) return;
     if (isSaved) await removeFavorite(storeId);
     else
@@ -96,7 +110,7 @@ export default function Store() {
         name: state.data.store.name,
         market_id: state.data.store.market_id,
       });
-    setSaved(!isSaved);
+    setSaved({ storeId, userId: user.id, value: !isSaved });
   });
 
   const pins: MapPin[] = useMemo(
@@ -165,7 +179,7 @@ export default function Store() {
       disabled={toggleSaved.loading}
       onClick={() => void toggleSaved.run()}
     >
-      <Icon name="bookmark" strokeWidth={isSaved ? 2.4 : 1.7} />
+      <Icon name="star" strokeWidth={isSaved ? 2.4 : 1.7} />
     </button>
   ) : null;
 
@@ -306,12 +320,14 @@ export default function Store() {
         </section>
       )}
       <StoreReviews key={storeId} storeId={storeId} />
+      {!user && <p>로그인하면 단골을 저장할 수 있어요</p>}
+      {toggleSaved.error && <p role="alert">{toggleSaved.error}</p>}
       {favoritesAvailable && desktop && (
         <Button
           variant="text"
           aria-pressed={isSaved}
           onClick={() => void toggleSaved.run()}
-          icon={<Icon name="bookmark" size={20} />}
+          icon={<Icon name="star" size={20} />}
         >
           {isSaved ? t('mapUnsave') : t('mapSave')}
         </Button>

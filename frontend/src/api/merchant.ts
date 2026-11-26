@@ -47,7 +47,8 @@ const notAvailable = () =>
 export const getExtras = (): Promise<MerchantExtras | null> =>
   isMock
     ? mock030.extras()
-    : getStore().then((s) => ({
+    : Promise.all([getStore(), getStats()]).then(([s, stats]) => ({
+        favorites: stats.favorites,
         location: s.location ?? null,
         location_confirmed: s.location_confirmed ?? false,
       }));

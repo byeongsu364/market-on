@@ -1,12 +1,14 @@
+# FastAPI dependencies and pytest fixture imports are intentional.
+# ruff: noqa: B008
 """Public market reads."""
 
-from fastapi import APIRouter, Depends, Header, Query
 from uuid import UUID
-from app.deps import require_csrf
-from app.services import market_request_service as requests
 
-from app.deps import get_db
-from app.schemas.market import Market, MarketMap, MarketItem
+from fastapi import APIRouter, Depends, Header, Query
+
+from app.deps import get_db, optional_user, require_csrf
+from app.schemas.market import Market, MarketItem, MarketMap
+from app.services import market_request_service as requests
 from app.services import market_service
 
 router = APIRouter(prefix='/markets', tags=['markets'])
@@ -45,9 +47,17 @@ def market_map(
     unit: str | None = None,
     lat: float | None = Query(default=None, ge=-90, le=90),
     lng: float | None = Query(default=None, ge=-180, le=180),
+    user=Depends(optional_user),
     conn=Depends(get_db),
 ):
-    return market_service.market_map(conn, market_id, item_id, unit, lat, lng)
+    from app.services.notification_service import favorites
+
+    result = market_service.market_map(conn, market_id, item_id, unit, lat, lng)
+    if user and user['role'] == 'customer':
+        saved = {f['store_id'] for f in favorites(conn, user['id'])}
+        for store in result.stores:
+            store.favorite = store.store_id in saved
+    return result
 
 
 @router.get('/{market_id}/items', response_model=list[MarketItem])

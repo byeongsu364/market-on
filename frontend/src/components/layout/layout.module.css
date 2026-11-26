@@ -209,3 +209,27 @@
     padding: 24px 0 0;
   }
 }
+
+.notificationBell {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-ink);
+}
+.notificationCount {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 11px;
+  line-height: 15px;
+  text-align: center;
+}

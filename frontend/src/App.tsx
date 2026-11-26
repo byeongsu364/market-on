@@ -14,6 +14,7 @@ import Search from './pages/map/Search';
 import Variety from './pages/scan/Variety';
 import ShopRoute from './pages/shop/ShopRoute';
 import My from './pages/me/My';
+import Notifications from './pages/me/Notifications';
 import Saved from './pages/me/Saved';
 import Settings from './pages/me/Settings';
 import Login from './pages/account/Login';
@@ -75,6 +76,7 @@ function AppRoutes() {
         <Route path="shop/route" element={<ShopRoute />} />
         <Route path="chat" element={<Chat />} />
         <Route path="me" element={<My />} />
+        <Route path="me/notifications" element={<Notifications />} />
         <Route path="me/saved" element={<Saved />} />
         <Route path="me/settings" element={<Settings />} />
         <Route path="login" element={<Login />} />

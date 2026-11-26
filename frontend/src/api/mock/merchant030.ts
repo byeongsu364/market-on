@@ -47,7 +47,7 @@ export async function extras(): Promise<MerchantExtras> {
   const ex = example(store_id);
   const saved = locations.get(store_id);
   return {
-    favorites: ex?.favorites ?? 0,
+    favorites: (await (await import('./merchant')).stats()).favorites,
     sold_out_item_ids: [...(soldOut.get(store_id) ?? [])],
     location: saved ?? (ex?.lat && ex.lng ? { lat: ex.lat, lng: ex.lng } : null),
     location_confirmed: !!saved,

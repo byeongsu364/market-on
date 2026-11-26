@@ -57,7 +57,7 @@ it('상인 홈은 조회·길 안내 숫자와 날짜별 그래프를 표시하�
   vi.spyOn(merchantApi, 'getStats').mockResolvedValue({
     today: { views: 38, directions: 5 },
     days: [{ day: '2026-11-27', views: 38, directions: 5 }],
-    favorites: null,
+    favorites: 0,
   });
   render(
     <MemoryRouter initialEntries={['/merchant']}>
@@ -81,7 +81,7 @@ it('mock 통계는 점포·세일 조회를 합산하고 길 안내를 10분 중
   expect(stats.today).toEqual({ views: 2, directions: 1 });
   expect(stats.days).toHaveLength(7);
   expect(stats.days.at(-1)?.day).toBe(seoulDay());
-  expect(stats.favorites).toBeNull();
+  expect(stats.favorites).toBe(0);
 });
 
 it('mock 운영자 목록과 시장 관리자 통계는 역할과 응답 계약을 따른다', async () => {

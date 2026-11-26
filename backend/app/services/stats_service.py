@@ -5,7 +5,10 @@ from threading import Lock
 from time import monotonic
 
 from app.core.errors import AppError
-from app.db.repositories import stats_repo as repo, store_repo
+from app.db.repositories import stats_repo as repo
+from app.db.repositories import store_repo
+from app.db.repositories._operational import rows
+
 from .auth_service import now
 from .price_report_service import hash_device
 from .sale_service import SEOUL
@@ -36,23 +39,27 @@ def merchant(conn, user, days):
     series = []
     for offset in range(days):
         day = start + timedelta(days=offset)
-        series.append(values.get(day, dict(day=day, views=0, directions=0)))
-    return dict(
-        today={k: series[-1][k] for k in ('views', 'directions')}, days=series, favorites=None
-    )
+        series.append(values.get(day, {'day': day, 'views': 0, 'directions': 0}))
+    return {
+        'today': {k: series[-1][k] for k in ('views', 'directions')},
+        'days': series,
+        'favorites': rows(
+            conn, 'select count(*) as n from favorites where store_id=%s', (user['store_id'],)
+        )[0]['n'],
+    }
 
 
 def market(conn, user):
     today = now().astimezone(SEOUL).date()
     start = today - timedelta(days=6)
-    return repo.market(conn, user['market_id'], start, today) | dict(
-        recent=repo.recent(
+    return repo.market(conn, user['market_id'], start, today) | {
+        'recent': repo.recent(
             conn,
             user['market_id'],
             datetime.combine(start, time(), SEOUL),
             datetime.combine(today + timedelta(days=1), time(), SEOUL),
         )
-    )
+    }
 
 
 def markets(conn, status):

@@ -3,20 +3,21 @@
 from contextlib import nullcontext
 from datetime import timedelta
 from uuid import uuid4
+
 import pytest
-from fastapi.testclient import TestClient
-from app.main import app
-from app.deps import get_db
 from app.core import security
-from app.services import auth_service
 from app.db.repositories import (
-    user_repo,
-    session_repo,
-    store_repo,
     merchant_repo,
     sale_repo,
+    session_repo,
+    store_repo,
+    user_repo,
     view_repo,
 )
+from app.deps import get_db
+from app.main import app
+from app.services import auth_service
+from fastapi.testclient import TestClient
 
 HEADER = {'X-Requested-With': 'market-on'}
 PASSWORD = 'merchant-password'
@@ -24,6 +25,9 @@ PASSWORD = 'merchant-password'
 
 @pytest.fixture
 def memory(monkeypatch):
+    from app.services import notification_service
+
+    monkeypatch.setattr(notification_service, 'dispatch_sale', lambda sale_id: None)
     variety_links = {}
     monkeypatch.setattr(merchant_repo, 'varieties', lambda c, sid: variety_links.get(sid, {}))
     monkeypatch.setattr(
@@ -34,7 +38,7 @@ def memory(monkeypatch):
     conn = Mock(transaction=nullcontext)
     users, sessions, sales, views = {}, {}, {}, {}
     stores = {
-        key: dict(id=key, name_ko=key, market_id='market:test', active=True, hours=None)
+        key: {'id': key, 'name_ko': key, 'market_id': 'market:test', 'active': True, 'hours': None}
         for key in ('store:a', 'store:b')
     }
     items = {key: ['item:onion'] for key in stores}
@@ -44,17 +48,17 @@ def memory(monkeypatch):
 
         if any(u['login_id'] == login_id for u in users.values()):
             raise UniqueViolation()
-        user = dict(
-            id=uuid4(),
-            login_id=login_id,
-            password_hash=password_hash,
-            role=role,
-            status='approved' if role == 'operator' else 'pending',
-            store_id=store_id,
-            failed_logins=0,
-            locked_until=None,
-            created_at=auth_service.now(),
-        )
+        user = {
+            'id': uuid4(),
+            'login_id': login_id,
+            'password_hash': password_hash,
+            'role': role,
+            'status': 'approved' if role == 'operator' else 'pending',
+            'store_id': store_id,
+            'failed_logins': 0,
+            'locked_until': None,
+            'created_at': auth_service.now(),
+        }
         users[user['id']] = user
         return user
 
@@ -94,7 +98,7 @@ def memory(monkeypatch):
         session_repo,
         'create',
         lambda c, digest, uid, expires: sessions.update(
-            {digest: dict(user_id=uid, expires_at=expires)}
+            {digest: {'user_id': uid, 'expires_at': expires}}
         ),
     )
     monkeypatch.setattr(
@@ -120,12 +124,12 @@ def memory(monkeypatch):
     monkeypatch.setattr(session_repo, 'purge_expired', drop_sessions)
     monkeypatch.setattr(auth_service, '_unknown_logins', {})
     monkeypatch.setattr(store_repo, 'get_store', lambda c, sid: stores.get(sid))
-    monkeypatch.setattr(store_repo, 'get_market', lambda c, mid: dict(name_ko='시장'))
+    monkeypatch.setattr(store_repo, 'get_market', lambda c, mid: {'name_ko': '시장'})
     monkeypatch.setattr(
         store_repo, 'set_store_items', lambda c, sid, ids, source: items.update({sid: ids})
     )
     monkeypatch.setattr(
-        merchant_repo, 'items', lambda c, sid: [dict(item_id=i, name_ko=i) for i in items[sid]]
+        merchant_repo, 'items', lambda c, sid: [{'item_id': i, 'name_ko': i} for i in items[sid]]
     )
     monkeypatch.setattr(
         merchant_repo, 'valid_items', lambda c, ids: set(ids) & {'item:onion', 'item:apple'}
@@ -144,9 +148,12 @@ def memory(monkeypatch):
     monkeypatch.setattr(view_repo, 'today', lambda c, sid, day: views.get((sid, None, day), 0))
 
     def sale_create(c, sid, values):
-        sale = values | dict(
-            id=len(sales) + 1, store_id=sid, status='active', created_at=auth_service.now()
-        )
+        sale = values | {
+            'id': len(sales) + 1,
+            'store_id': sid,
+            'status': 'active',
+            'created_at': auth_service.now(),
+        }
         sales[sale['id']] = sale
         return sale
 
@@ -184,8 +191,8 @@ def memory(monkeypatch):
             s for s in sales.values() if s['store_id'] == sid and s['status'] == status
         ],
     )
-    from app.services import item_service
     from app.schemas.item import Item
+    from app.services import item_service
 
     monkeypatch.setattr(
         item_service,
@@ -212,34 +219,36 @@ def memory(monkeypatch):
     )
     app.dependency_overrides[get_db] = lambda: conn
     with TestClient(app) as client:
-        yield dict(
-            client=client,
-            conn=conn,
-            users=users,
-            sessions=sessions,
-            sales=sales,
-            views=views,
-            stores=stores,
-            items=items,
-        )
+        yield {
+            'client': client,
+            'conn': conn,
+            'users': users,
+            'sessions': sessions,
+            'sales': sales,
+            'views': views,
+            'stores': stores,
+            'items': items,
+        }
     app.dependency_overrides.pop(get_db, None)
 
 
 def signup(memory, lid='merchant_a', sid='store:a'):
     return memory['client'].post(
-        '/auth/signup', headers=HEADER, json=dict(login_id=lid, password=PASSWORD, store_id=sid)
+        '/auth/signup',
+        headers=HEADER,
+        json={'login_id': lid, 'password': PASSWORD, 'store_id': sid},
     )
 
 
 def operator(memory):
     user = auth_service.create_operator(memory['conn'], 'admin', PASSWORD)
     client = memory['client']
-    client.post('/auth/login', headers=HEADER, json=dict(login_id='admin', password=PASSWORD))
+    client.post('/auth/login', headers=HEADER, json={'login_id': 'admin', 'password': PASSWORD})
     return user
 
 
 def approved(memory):
-    response = signup(memory)
+    signup(memory)
     user = next(u for u in memory['users'].values() if u['login_id'] == 'merchant_a')
     user['status'] = 'approved'
     return user
@@ -296,7 +305,9 @@ def test_cookie_digest_expiry_logout_and_no_secrets(memory):
         seconds=1
     )
     assert client.get('/auth/me').status_code == 401
-    client.post('/auth/login', headers=HEADER, json=dict(login_id='MERCHANT_A', password=PASSWORD))
+    client.post(
+        '/auth/login', headers=HEADER, json={'login_id': 'MERCHANT_A', 'password': PASSWORD}
+    )
     assert client.post('/auth/logout', headers=HEADER).status_code == 204
     assert client.get('/auth/me').status_code == 401
 
@@ -307,7 +318,7 @@ def test_login_lock_reset_and_indistinguishable_failure(memory, monkeypatch):
 
     def login(lid, password):
         return client.post(
-            '/auth/login', headers=HEADER, json=dict(login_id=lid, password=password)
+            '/auth/login', headers=HEADER, json={'login_id': lid, 'password': password}
         )
 
     unknown = login('unknown_id', 'incorrect').json()
@@ -349,7 +360,7 @@ def test_validation_never_echoes_password(memory):
         client.post(
             '/auth/signup',
             headers=HEADER,
-            json=dict(login_id='valid_id', password='short', store_id='store:a'),
+            json={'login_id': 'valid_id', 'password': 'short', 'store_id': 'store:a'},
         ).json()['error']['code']
         == 'INVALID_PASSWORD'
     )
@@ -371,7 +382,7 @@ def test_unknown_id_locks_like_real_account(memory):
     def codes(lid):
         return [
             client.post(
-                '/auth/login', headers=HEADER, json=dict(login_id=lid, password='incorrect')
+                '/auth/login', headers=HEADER, json={'login_id': lid, 'password': 'incorrect'}
             ).json()['error']['code']
             for _ in range(6)
         ]
@@ -386,7 +397,7 @@ def test_password_length_limits(memory, monkeypatch):
     r = client.post(
         '/auth/signup',
         headers=HEADER,
-        json=dict(login_id='long_pw', password=too_long, store_id='store:a'),
+        json={'login_id': 'long_pw', 'password': too_long, 'store_id': 'store:a'},
     )
     assert r.json()['error']['code'] == 'INVALID_PASSWORD' and too_long not in r.text
     signup(memory)
@@ -399,7 +410,7 @@ def test_password_length_limits(memory, monkeypatch):
 
     monkeypatch.setattr(security, '_hasher', Spy())
     r = client.post(
-        '/auth/login', headers=HEADER, json=dict(login_id='merchant_a', password='a' * 10_000)
+        '/auth/login', headers=HEADER, json={'login_id': 'merchant_a', 'password': 'a' * 10_000}
     )
     assert r.status_code == 401 and calls == []  # 해시 계산 없이 바로 거절
 
@@ -415,8 +426,8 @@ def test_reject_revokes_sessions(memory):
 
 
 def test_cors_wildcard_rejected():
-    from pydantic import ValidationError
     from app.core.config import Settings
+    from pydantic import ValidationError
 
     with pytest.raises(ValidationError):
         Settings(CORS_ORIGINS=['*'])

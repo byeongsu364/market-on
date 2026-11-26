@@ -31,6 +31,8 @@ beforeEach(() => {
     .mockReset()
     .mockImplementation(async (path) => {
       if (path === '/merchant/store') return store;
+      if (path === '/merchant/stats?days=7')
+        return { favorites: 0, today: { views: 0, directions: 0 }, days: [] };
       if (path.startsWith('/items/search')) return [{ item_id: 'item:apple', name: '사과' }];
       throw new Error(`Unexpected request: ${path}`);
     });
@@ -60,7 +62,11 @@ it('live 결제 수단과 소개를 표시하고 PATCH로 저장한다', async (
   );
 });
 it('live 위치는 PUT으로 저장하고 품절·단골 값을 만들지 않는다', async () => {
-  expect(await getExtras()).toEqual({ location: store.location, location_confirmed: true });
+  expect(await getExtras()).toEqual({
+    favorites: 0,
+    location: store.location,
+    location_confirmed: true,
+  });
   vi.mocked(request).mockResolvedValue(store);
   expect(await saveLocation(store.location)).toEqual({
     location: store.location,

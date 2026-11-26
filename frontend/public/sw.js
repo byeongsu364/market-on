@@ -37,3 +37,21 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(isPage ? '/' : request).then((hit) => hit || Response.error())),
   );
 });
+
+function safeNotificationUrl(value) {
+  try { const url = new URL(value || '/me/notifications', self.location.origin); return url.origin === self.location.origin ? url.href : new URL('/me/notifications', self.location.origin).href; } catch { return new URL('/me/notifications', self.location.origin).href; }
+}
+self.addEventListener('push', event => {
+  let payload = {};
+  try { payload = event.data?.json() || {}; } catch { /* malformed payload */ }
+  event.waitUntil(self.registration.showNotification(payload.title || 'Market-On', {body:payload.body || '',icon:'/brand/icon.svg',data:{url:safeNotificationUrl(payload.url)}}));
+});
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = safeNotificationUrl(event.notification.data?.url);
+  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async clients => {
+    const existing = clients.find(client => client.url === url);
+    if (existing) return existing.focus();
+    return self.clients.openWindow(url);
+  }));
+});

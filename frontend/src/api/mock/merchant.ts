@@ -69,13 +69,28 @@ export async function stats(days = 7): Promise<import('../../types/contract').Me
   return {
     today: { views: today.views, directions: today.directions },
     days: series,
-    favorites: null,
+    favorites: (await import('./favorites')).countForStore(id),
   };
 }
 const details = new Map<string, Pick<MerchantStore, 'payments' | 'intro' | 'varieties'>>();
+export function favoriteForStore(id: string): boolean | undefined {
+  if (current?.role !== 'customer') return undefined;
+  try {
+    return (
+      JSON.parse(localStorage.getItem(`mock-favorites:${current.id}`) ?? '[]') as {
+        store_id: string;
+      }[]
+    ).some((f) => f.store_id === id);
+  } catch {
+    return false;
+  }
+}
 export const storeDetails = (id: string) => {
   const d = details.get(id);
-  return d ? { ...d, varieties: Object.values(d.varieties ?? {}).flat() } : {};
+  return {
+    ...(d ? { ...d, varieties: Object.values(d.varieties ?? {}).flat() } : {}),
+    favorite: favoriteForStore(id),
+  };
 };
 export const sales: ClosingSale[] = [
   {
@@ -267,6 +282,11 @@ export async function createSale(q: SaleRequest) {
     view_count: 0,
   };
   sales.push(sale);
+  (await import('./favorites')).notifySale(
+    sale,
+    info(s.store_id).name,
+    items.find((i) => i.item_id === sale.item_id)?.name ?? sale.item_id,
+  );
   return sale;
 }
 function own(id: number) {
@@ -312,7 +332,7 @@ export async function decide(id: string, status: User['status']) {
 export async function publicStore(id: string) {
   const key = `${seoulDay()}:${id}`;
   views.set(key, (views.get(key) ?? 0) + 1);
-  const store = info(id);
+  const store = { ...info(id), favorite: favoriteForStore(id) };
   return {
     store,
     source: 'manual' as const,

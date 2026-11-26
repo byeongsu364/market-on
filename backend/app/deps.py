@@ -1,3 +1,5 @@
+# FastAPI dependencies and pytest fixture imports are intentional.
+# ruff: noqa: B008
 """FastAPI dependencies: DB/LLM providers and service-backed authorization."""
 
 from __future__ import annotations
@@ -6,6 +8,7 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from fastapi import Depends, Request
+
 from app.core.errors import AppError
 from app.services import auth_service
 
@@ -68,5 +71,11 @@ def optional_user(request: Request, conn=Depends(get_db)):
 
 def require_customer(user=Depends(current_user)):
     if user['role'] != 'customer' or user['status'] != 'approved':
-        raise AppError('FORBIDDEN', '리뷰는 손님 계정으로 쓸 수 있어요', 403)
+        raise AppError('FORBIDDEN', '손님 계정으로 이용할 수 있어요', 403)
     return user
+
+
+def require_merchant_write(request: Request, conn=Depends(get_db, scope='function')):
+    """Share the write transaction and release it before background delivery."""
+    user = auth_service.current(conn, request.cookies.get('mo_session'))
+    return require_merchant(user)

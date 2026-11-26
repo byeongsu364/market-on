@@ -3,6 +3,7 @@ import type { StoreCategory } from '../../types/contract';
 
 // 선 아이콘: 24px 격자, 1.7px 선, 둥근 끝(디자인 시스템 "아이콘"). 경로는 화면 시안에서 그대로 가져옴.
 const paths = {
+  star: <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z" />,
   chevronRight: <path d="M9.5 6l6 6-6 6" />,
   back: <path d="M14.5 5.5L8 12l6.5 6.5" />,
   camera: (

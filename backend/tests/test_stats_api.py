@@ -1,12 +1,16 @@
+# FastAPI dependencies and pytest fixture imports are intentional.
+# ruff: noqa: F401, F811
 """Offline date, authorization and anonymous recording contracts."""
 
-from datetime import datetime, date, timezone
+from datetime import UTC, date, datetime, timezone
 from unittest.mock import Mock
+
 import pytest
-from tests.test_auth_api import memory, approved, operator, HEADER
-from tests.test_market_admin_api import manager, login_manager
 from app.db.repositories import stats_repo
 from app.services import stats_service
+
+from tests.test_auth_api import HEADER, approved, memory, operator
+from tests.test_market_admin_api import login_manager, manager
 
 
 @pytest.fixture(autouse=True)
@@ -52,25 +56,26 @@ def test_direction_failure_does_not_suppress_retry(memory, monkeypatch):
 
 def test_merchant_days_and_seoul_boundary(memory, monkeypatch):
     approved(memory)
+    monkeypatch.setattr(stats_service, 'rows', lambda *args: [{'n': 0}])
     client = memory['client']
-    instant = [datetime(2026, 11, 26, 14, 59, 59, tzinfo=timezone.utc)]
+    instant = [datetime(2026, 11, 26, 14, 59, 59, tzinfo=UTC)]
     monkeypatch.setattr(stats_service, 'now', lambda: instant[0])
-    daily = Mock(return_value=[dict(day=date(2026, 11, 26), views=9, directions=2)])
+    daily = Mock(return_value=[{'day': date(2026, 11, 26), 'views': 9, 'directions': 2}])
     monkeypatch.setattr(stats_repo, 'daily', daily)
     response = client.get('/merchant/stats?days=3').json()
-    assert response == dict(
-        today=dict(views=9, directions=2),
-        favorites=None,
-        days=[
-            dict(day='2026-11-24', views=0, directions=0),
-            dict(day='2026-11-25', views=0, directions=0),
-            dict(day='2026-11-26', views=9, directions=2),
+    assert response == {
+        'today': {'views': 9, 'directions': 2},
+        'favorites': 0,
+        'days': [
+            {'day': '2026-11-24', 'views': 0, 'directions': 0},
+            {'day': '2026-11-25', 'views': 0, 'directions': 0},
+            {'day': '2026-11-26', 'views': 9, 'directions': 2},
         ],
-    )
+    }
     assert daily.call_args.args[1:] == ('store:a', date(2026, 11, 24), date(2026, 11, 26))
-    instant[0] = datetime(2026, 11, 26, 15, tzinfo=timezone.utc)
+    instant[0] = datetime(2026, 11, 26, 15, tzinfo=UTC)
     assert client.get('/merchant/stats?days=1').json()['days'] == [
-        dict(day='2026-11-27', views=0, directions=0)
+        {'day': '2026-11-27', 'views': 0, 'directions': 0}
     ]
     for days in (0, 29):
         assert client.get(f'/merchant/stats?days={days}').status_code == 422
@@ -99,19 +104,21 @@ def test_stats_role_permissions(memory, monkeypatch):
 
 def test_market_scope_and_seoul_week(manager, monkeypatch):
     login_manager(manager)
-    monkeypatch.setattr(
-        stats_service, 'now', lambda: datetime(2026, 11, 26, 15, tzinfo=timezone.utc)
-    )
+    monkeypatch.setattr(stats_service, 'now', lambda: datetime(2026, 11, 26, 15, tzinfo=UTC))
     summary = Mock(
-        return_value=dict(stores=2, merchants_approved=1, merchants_pending=1, views_week=8)
+        return_value={'stores': 2, 'merchants_approved': 1, 'merchants_pending': 1, 'views_week': 8}
     )
     recent = Mock(return_value=[])
     monkeypatch.setattr(stats_repo, 'market', summary)
     monkeypatch.setattr(stats_repo, 'recent', recent)
     result = manager['client'].get('/market-admin/stats').json()
-    assert result == dict(
-        stores=2, merchants_approved=1, merchants_pending=1, views_week=8, recent=[]
-    )
+    assert result == {
+        'stores': 2,
+        'merchants_approved': 1,
+        'merchants_pending': 1,
+        'views_week': 8,
+        'recent': [],
+    }
     assert summary.call_args.args[1:] == ('market:test', date(2026, 11, 21), date(2026, 11, 27))
     assert recent.call_args.args[1] == 'market:test'
     assert recent.call_args.args[2].isoformat() == '2026-11-21T00:00:00+09:00'
