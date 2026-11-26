@@ -1,5 +1,13 @@
 import { it, expect, vi, afterEach } from 'vitest';
-import { fireEvent, render, screen, waitFor, renderHook, within } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  renderHook,
+  within,
+} from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import { markets } from '../api/mock/data';
@@ -26,6 +34,8 @@ const active: Market = {
   distance_m: 800,
 };
 afterEach(() => {
+  // 화면을 먼저 내림: 남은 효과가 복원된 matchMedia mock을 부르지 않게
+  cleanup();
   vi.restoreAllMocks();
   markets.splice(0, markets.length, ...structuredClone(initialMarkets));
   mock.resetMarketRequests();
@@ -37,7 +47,7 @@ function show(path: string) {
     </MemoryRouter>,
   );
 }
-it('가장 가까운 listed는 자동 선택하지 않고 홈에 요청 카드와 지원 시장을 표시한다', async () => {
+it('가장 가까운 listed는 자동 선택하지 않고 지도 홈에 요청 화면과 지원 시장을 표시한다', async () => {
   localStorage.removeItem('market');
   vi.spyOn(marketApi, 'getMarkets').mockResolvedValue([listed, active]);
   Object.defineProperty(navigator, 'geolocation', {
@@ -51,13 +61,14 @@ it('가장 가까운 listed는 자동 선택하지 않고 홈에 요청 카드�
     .spyOn(api, 'requestMarket')
     .mockResolvedValue({ requested: true, requests_7d: null });
   show('/');
-  await screen.findByText('이 시장은 아직 Market-On에 없어요');
+  await screen.findByRole('heading', { name: '등록 시장은 아직 준비 중이에요' });
   fireEvent.click(screen.getByRole('button', { name: '이 시장도 쓰고 싶어요' }));
-  await screen.findByText(/요청했어요 · 이번 주 5명 미만/);
+  await screen.findByText('요청했어요. 이번 주 5명 미만이 요청했어요.');
   expect(request).toHaveBeenCalledWith(listed.market_id);
-  expect(screen.getByRole('button', { name: '가까운 지원 시장 · 지원 시장' })).toBeVisible();
-  fireEvent.click(screen.getByRole('button', { name: '가까운 지원 시장 · 지원 시장' }));
-  await screen.findByText(/지금 있는 시장 · 지원 시장/);
+  const other = screen.getByRole('link', { name: /지원 시장은 지금 쓸 수 있어요/ });
+  expect(other).toBeVisible();
+  fireEvent.click(other);
+  expect(await screen.findByRole('heading', { name: '지원 시장', level: 1 })).toBeInTheDocument();
 });
 it('가까운 active만 자동 선택한다', async () => {
   localStorage.removeItem('market');
@@ -89,12 +100,13 @@ it('입점 검색·수요·신청 완료 뒤 pending 관리자가 로그인한�
   fireEvent.change(await screen.findByLabelText('시장 이름'), { target: { value: '등록' } });
   fireEvent.click(screen.getByRole('button', { name: '검색' }));
   fireEvent.click(await screen.findByRole('button', { name: '등록 시장' }));
-  await screen.findByText('이번 주 이 시장 근처에서 Market-On을 연 사람 5명 미만');
+  await screen.findByText('최근 7일 동안 손님 5명 미만이 이 시장을 요청했어요');
   fireEvent.change(screen.getByLabelText('시장 공식 연락처'), { target: { value: '02-123-4567' } });
   fireEvent.change(screen.getByLabelText('아이디'), { target: { value: 'join_manager' } });
   fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'password123' } });
   fireEvent.click(screen.getByRole('button', { name: '입점 신청' }));
-  await screen.findByText(/운영팀이 확인하면 시장 관리자 화면이 열려요/);
+  await screen.findByRole('heading', { name: '신청을 보냈어요' });
+  expect(screen.getByText(/운영팀이 확인하면 시장 관리자 화면이 열려요/)).toBeInTheDocument();
   const result = await auth.login({ login_id: 'join_manager', password: 'password123' });
   expect(result.user?.status).toBe('pending');
   expect(result.user?.role).toBe('market_admin');
@@ -114,9 +126,9 @@ it.each(['approve', 'reject'] as const)(
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     const decide = vi.spyOn(api, 'decide');
     show('/admin');
-    const heading = await screen.findByRole('heading', { name: listed.name });
-    const button = within(heading.closest('article')!).getByRole('button', {
-      name: decision === 'approve' ? '승인' : '거절',
+    const row = await screen.findByRole('row', { name: new RegExp(listed.name) });
+    const button = within(row).getByRole('button', {
+      name: decision === 'approve' ? /승인/ : /거절/,
     });
     fireEvent.click(button);
     expect(decide).not.toHaveBeenCalled();

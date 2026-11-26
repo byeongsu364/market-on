@@ -1,48 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { getMarkets } from '../api/markets';
 import { useResource } from './useResource';
-import type { Market } from '../types/contract';
-export type MapMode = 'inside' | 'outside';
-export function mapMode(
-  item: string | undefined,
-  selected: Market | null,
-  markets: Market[],
-): MapMode {
-  if (item) return 'inside';
-  const nearest = markets
-    .filter((m) => m.status === 'active' && m.distance_m !== null)
-    .sort((a, b) => a.distance_m! - b.distance_m!)[0];
-  return nearest && nearest.distance_m! <= 1000 && nearest.market_id === selected?.market_id
-    ? 'inside'
-    : 'outside';
-}
-export function useNearbyMarkets() {
-  const [position, setPosition] = useState<{ lat: number; lng: number } | null | undefined>(
-    undefined,
-  );
-  useEffect(() => {
-    let active = true;
-    const denied = () => {
-      if (active) setPosition(null);
-    };
-    if (!navigator.geolocation) denied();
-    else
-      navigator.geolocation.getCurrentPosition(
-        ({ coords }) => {
-          if (active) setPosition({ lat: coords.latitude, lng: coords.longitude });
-        },
-        denied,
-        { timeout: 5000 },
-      );
-    return () => {
-      active = false;
-    };
-  }, []);
+import { usePosition } from './usePosition';
+
+/** 주변 시장. ask=false(첫 방문 안내 전)면 위치 없이 목록만 받음 */
+export function useNearbyMarkets(ask = true) {
+  const { position, locate } = usePosition(ask);
+  const query = ask ? position : null;
   const markets = useResource(
     useCallback(async () => {
-      if (position === undefined) return null;
-      return getMarkets(position?.lat, position?.lng);
-    }, [position]),
+      if (query === undefined) return null;
+      return getMarkets(query?.lat, query?.lng);
+    }, [query]),
   );
-  return { position, markets };
+  return { position: ask ? position : undefined, markets, locate };
 }

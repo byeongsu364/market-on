@@ -1,4 +1,3 @@
-import { resetReviews } from './reviews';
 import type {
   AuthRequest,
   User,
@@ -88,22 +87,8 @@ export async function logout() {
   session(null);
 }
 export async function signup(q: AuthRequest) {
+  if (q.role === 'customer') return signupCustomer(q);
   validateSignup(q.login_id, q.password);
-  if (q.role === 'customer') {
-    if (q.store_id !== undefined) throw new Error('손님은 점포를 지정할 수 없어요.');
-    const u: PendingMerchant = {
-      id: q.login_id,
-      login_id: q.login_id,
-      role: 'customer',
-      status: 'approved',
-      store: null,
-      market: null,
-      created_at: new Date().toISOString(),
-    };
-    users.push(u);
-    passwords.set(u.login_id, q.password);
-    return session(u);
-  }
   if (users.some((u) => u.store?.store_id === q.store_id && u.status === 'approved'))
     throw new Error('이미 승인된 상인이 있는 점포예요.');
   const s = stores.find((s) => s.store_id === q.store_id);
@@ -115,6 +100,23 @@ export async function signup(q: AuthRequest) {
     role: 'merchant',
     status: 'pending',
     store: { store_id: s.store_id, name: s.name, market_id: markets[0].market_id },
+    created_at: new Date().toISOString(),
+  };
+  users.push(u);
+  passwords.set(u.login_id, q.password);
+  return session(u);
+}
+/** 손님 가입: live와 동일한 역할과 점포 제약을 적용해요. */
+export async function signupCustomer(q: AuthRequest) {
+  if (q.store_id) throw { status: 422, message: '손님은 점포를 지정할 수 없어요.' };
+  validateSignup(q.login_id, q.password);
+  const u: PendingMerchant = {
+    id: q.login_id,
+    login_id: q.login_id,
+    market: null,
+    role: 'customer',
+    status: 'approved',
+    store: null,
     created_at: new Date().toISOString(),
   };
   users.push(u);
@@ -262,8 +264,14 @@ export async function view(id: number) {
   if (s) s.view_count++;
 }
 
+/** 030 mock(merchant030.ts)이 같은 계정 목록과 지금 로그인을 읽음 */
+export const mockUsers = () => users;
+export const currentMockUser = () => current;
+const resetHooks: (() => void)[] = [];
+export const onMockReset = (fn: () => void) => resetHooks.push(fn);
+
 export function resetMock() {
-  resetReviews();
+  resetHooks.forEach((fn) => fn());
   current = null;
   confirmations.clear();
   users.splice(0, users.length, ...structuredClone(initialUsers));

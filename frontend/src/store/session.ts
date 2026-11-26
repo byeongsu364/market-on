@@ -3,6 +3,7 @@ import { getMarkets } from '../api/markets';
 import { seoulDay } from '../utils/sale';
 import type { Language, Market } from '../types/contract';
 type Theme = 'system' | 'light' | 'dark';
+export type TextSize = 'normal' | 'large' | 'xlarge';
 const read = <T>(key: string, fallback: T): T => {
   try {
     return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback;
@@ -121,6 +122,15 @@ export const useSessionState = () => {
       return 'system';
     }
   });
+  // 글자 크기(030 Settings): <html data-text-size>로 가격·확인 포인트부터 키움
+  const [textSize, setTextSize] = useState<TextSize>(() => {
+    const v = read<string>('text-size', 'normal');
+    return v === 'large' || v === 'xlarge' ? v : 'normal';
+  });
+  useEffect(() => {
+    write('text-size', textSize);
+    document.documentElement.dataset.textSize = textSize;
+  }, [textSize]);
   useEffect(() => {
     write('market', market);
   }, [market]);
@@ -132,17 +142,17 @@ export const useSessionState = () => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const apply = () => {
       document.documentElement.dataset.theme =
-        theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
+        theme === 'system' ? (media?.matches ? 'dark' : 'light') : theme;
     };
     apply();
-    media.addEventListener('change', apply);
+    media?.addEventListener?.('change', apply);
     try {
       if (theme === 'system') localStorage.removeItem('theme');
       else localStorage.setItem('theme', theme);
     } catch {
       /* Storage may be unavailable. */
     }
-    return () => media.removeEventListener('change', apply);
+    return () => media?.removeEventListener?.('change', apply);
   }, [theme]);
   return {
     market,
@@ -157,6 +167,8 @@ export const useSessionState = () => {
     setLanguage,
     theme,
     setTheme,
+    textSize,
+    setTextSize,
   };
 };
 export const SessionContext = createContext<ReturnType<typeof useSessionState> | null>(null);

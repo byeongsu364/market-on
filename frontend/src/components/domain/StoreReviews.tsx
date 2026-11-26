@@ -1,9 +1,14 @@
+import { useT } from '../../i18n';
+import Button from '../common/Button';
+import ErrorBox from '../common/ErrorBox';
+import s from './reviews.module.css';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import * as api from '../../api/reviews';
 import type { StoreReviews as Reviews } from '../../types/contract';
 export default function StoreReviews({ storeId }: { storeId: string }) {
+  const t = useT();
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -58,7 +63,9 @@ export default function StoreReviews({ storeId }: { storeId: string }) {
   }
   async function write() {
     if (!user) {
-      navigate(`/merchant/login?next=${encodeURIComponent(location.pathname + location.search)}`);
+      navigate(
+        `/login?next=${encodeURIComponent(location.pathname + location.search + location.hash)}`,
+      );
       return;
     }
     setError('');
@@ -84,8 +91,8 @@ export default function StoreReviews({ storeId }: { storeId: string }) {
     }
   }
   return (
-    <section aria-label="점포 리뷰">
-      <h2>손님 리뷰</h2>
+    <section className={s.reviews} aria-label="점포 리뷰">
+      <h2>{t('reviewTitle')}</h2>
       {data && (
         <>
           <p>
@@ -95,24 +102,24 @@ export default function StoreReviews({ storeId }: { storeId: string }) {
             <article key={r.id}>
               <p>
                 ★ {r.rating} · {r.author}
-                {r.mine ? ' · 내 리뷰' : ''}
+                {r.mine ? ` · ${t('reviewMine')}` : ''}
               </p>
               <p>{r.body}</p>
             </article>
           ))}
           {data.count > data.items.length && (
-            <button disabled={busy} onClick={() => void more()}>
-              리뷰 더 보기
-            </button>
+            <Button disabled={busy} onClick={() => void more()}>
+              {t('reviewMore')}
+            </Button>
           )}
         </>
       )}
       {user && user.role !== 'customer' ? (
-        <p>리뷰는 손님 계정으로 쓸 수 있어요</p>
+        <p>{t('reviewCustomerOnly')}</p>
       ) : (
-        <button disabled={busy} onClick={() => void write()}>
-          {mine ? '리뷰 고치기' : '리뷰 쓰기'}
-        </button>
+        <Button disabled={busy} onClick={() => void write()}>
+          {mine ? t('reviewEdit') : t('reviewWrite')}
+        </Button>
       )}
       {editing && user?.role === 'customer' && (
         <form
@@ -121,9 +128,9 @@ export default function StoreReviews({ storeId }: { storeId: string }) {
             void mutate();
           }}
         >
-          <div role="group" aria-label="별점">
+          <div role="group" aria-label={t('reviewRating')}>
             {[1, 2, 3, 4, 5].map((n) => (
-              <button
+              <Button
                 key={n}
                 type="button"
                 aria-label={`${n}점`}
@@ -131,11 +138,11 @@ export default function StoreReviews({ storeId }: { storeId: string }) {
                 onClick={() => setRating(n)}
               >
                 {n <= rating ? '★' : '☆'}
-              </button>
+              </Button>
             ))}
           </div>
           <label>
-            리뷰 글
+            {t('reviewBody')}
             <textarea
               required
               maxLength={200}
@@ -144,18 +151,20 @@ export default function StoreReviews({ storeId }: { storeId: string }) {
             />
           </label>
           <p>{200 - [...body].length}자 남음</p>
-          <button disabled={busy}>저장</button>
+          <Button type="submit" variant="primary" disabled={busy}>
+            {t('reviewSave')}
+          </Button>
           {hasOwn && (
-            <button type="button" disabled={busy} onClick={() => void mutate(true)}>
-              내 리뷰 지우기
-            </button>
+            <Button type="button" disabled={busy} onClick={() => void mutate(true)}>
+              {t('reviewDelete')}
+            </Button>
           )}
-          <button type="button" onClick={() => setEditing(false)}>
-            취소
-          </button>
+          <Button type="button" onClick={() => setEditing(false)}>
+            {t('reviewCancel')}
+          </Button>
         </form>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorBox message={error} />}
     </section>
   );
 }

@@ -24,6 +24,9 @@ it('손님 가입 후 점포로 돌아와 리뷰 작성·수정·차단·삭제'
   fireEvent.change(screen.getByLabelText('비밀번호 확인'), {
     target: { value: credentials.password },
   });
+  fireEvent.click(
+    screen.getByRole('checkbox', { name: '이용약관과 개인정보 처리방침에 동의해요' }),
+  );
   fireEvent.click(screen.getByRole('button', { name: '가입하기' }));
   await screen.findByText('손님 리뷰');
   fireEvent.click(await screen.findByRole('button', { name: '리뷰 쓰기' }));
@@ -90,4 +93,44 @@ it('최근 3개에서 더 보기를 누르면 다음 리뷰를 표시한다', as
   await screen.findByText('후기 0');
   expect(screen.getAllByText(/^후기 /)).toHaveLength(4);
   expect(screen.queryByRole('button', { name: '리뷰 더 보기' })).not.toBeInTheDocument();
+});
+
+it('리뷰 횟수 제한 오류를 화면에 표시한다', async () => {
+  await auth.signup(credentials);
+  for (let i = 0; i < 10; i++) await reviews.save('store:A-05', { rating: 4, body: '좋아요' });
+  show('/s/store:A-05');
+  fireEvent.click(await screen.findByRole('button', { name: '리뷰 고치기' }));
+  fireEvent.click(await screen.findByRole('button', { name: '저장' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    '리뷰는 하루 10회까지 작성·수정할 수 있어요.',
+  );
+});
+
+it('지도에서 점포를 고른 시트에도 리뷰가 보이고 로그인 복귀 주소를 유지한다', async () => {
+  show('/?market=market:demo&item=item:apple&store=store:A-05');
+  await screen.findByText('손님 리뷰');
+  fireEvent.click(screen.getByRole('button', { name: '리뷰 쓰기' }));
+  await screen.findByRole('heading', { name: '로그인' });
+  expect(screen.getByRole('link', { name: '회원가입' })).toHaveAttribute(
+    'href',
+    expect.stringContaining('next=%2F%3Fmarket%3Dmarket%3Ademo'),
+  );
+});
+
+it('시장 평균만 있는 점포는 더 낮은 가격을 확인한 점포로 소개하지 않는다', async () => {
+  render(
+    <MemoryRouter
+      initialEntries={[
+        {
+          pathname: '/items/item:apple',
+          search: '?market=market:demo&unit=unit:piece',
+          state: { price: 9999, quantity: 1 },
+        },
+      ]}
+    >
+      <App />
+    </MemoryRouter>,
+  );
+  await screen.findAllByText(/시장 평균 · aT/);
+  expect(screen.queryByText('더 낮은 가격을 확인한 점포')).not.toBeInTheDocument();
 });

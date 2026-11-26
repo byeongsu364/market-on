@@ -1,13 +1,22 @@
 import * as api from '../../api/marketRequests';
 import { useResource, useAction } from '../../hooks/useResource';
 import Resource from '../common/Resource';
+import Button from '../common/Button';
+import ErrorBox from '../common/ErrorBox';
 import { people } from '../../utils/people';
+import { useT } from '../../i18n';
+import { DataTable, Section } from '../../pages/merchant/parts';
+import { monthDay } from '../../pages/merchant/format';
+import s from '../../pages/merchant/merchant.module.css';
+
+// WebAdmin의 입점 신청 표. 승인·거절 전에 확인을 받음.
 export default function Applications() {
+  const t = useT();
   const list = useResource(api.applications);
   const action = useAction(async (id: number, decision: 'approve' | 'reject') => {
     if (
       !window.confirm(
-        decision === 'approve' ? '이 시장의 입점을 승인할까요?' : '이 시장의 입점을 거절할까요?',
+        t(decision === 'approve' ? 'adminApproveAppConfirm' : 'adminRejectAppConfirm'),
       )
     )
       return;
@@ -15,36 +24,51 @@ export default function Applications() {
     list.retry();
   });
   return (
-    <section>
-      <h2>입점 신청</h2>
+    <Section title={t('adminApplications')} gap={6}>
       <Resource state={list}>
-        {list.data?.length === 0 && <p>확인할 신청이 없어요</p>}
-        {list.data?.map((value) => (
-          <article className="card" key={value.id}>
-            <h3>{value.demand.name}</h3>
-            <p>
-              {value.manager_org} · {value.contact}
-            </p>
-            <time>{new Date(value.created_at).toLocaleString('ko-KR')}</time>
-            <p>
-              이번 주 근처에서 연 사람 {people(value.demand.nearby_7d)} · 요청한 사람{' '}
-              {people(value.demand.requests_7d)}
-            </p>
-            <div className="chips">
-              {(['approve', 'reject'] as const).map((decision) => (
-                <button
-                  key={decision}
-                  disabled={action.loading}
-                  onClick={() => void action.run(value.id, decision)}
-                >
-                  {decision === 'approve' ? '승인' : '거절'}
-                </button>
-              ))}
-            </div>
-          </article>
-        ))}
+        <DataTable
+          minWidth={760}
+          empty={t('adminNoApplications')}
+          head={[
+            t('adminColMarket'),
+            t('adminColOrg'),
+            t('adminColContact'),
+            t('adminColRequests'),
+            t('adminColNearby'),
+            t('adminColDate'),
+            '',
+          ]}
+          rows={(list.data ?? []).map((value) => ({
+            key: String(value.id),
+            cells: [
+              value.demand.name,
+              value.manager_org,
+              value.contact,
+              people(value.demand.requests_7d),
+              people(value.demand.nearby_7d),
+              <time key="d" dateTime={value.created_at}>
+                {monthDay(value.created_at)}
+              </time>,
+              <span key="a" className={s.actions}>
+                {(['approve', 'reject'] as const).map((decision) => (
+                  <Button
+                    key={decision}
+                    size="sm"
+                    variant={decision === 'approve' ? 'primary' : 'surface'}
+                    disabled={action.loading}
+                    aria-label={`${value.demand.name} ${t(decision)}`}
+                    onClick={() => void action.run(value.id, decision)}
+                  >
+                    {t(decision)}
+                  </Button>
+                ))}
+              </span>,
+            ],
+          }))}
+        />
       </Resource>
-      {action.error && <p role="alert">{action.error}</p>}
-    </section>
+      <p className={s.help}>{t('adminApplicationsHelp')}</p>
+      {action.error && <ErrorBox message={action.error} />}
+    </Section>
   );
 }

@@ -1,3 +1,6 @@
+import { t } from '../../i18n';
+import { fill } from '../../utils/josa';
+import s from './priceDisplay.module.css';
 import type { StorePrice } from '../../types/contract';
 import { unitLabel } from '../../utils/convertUnit';
 import { priceTime } from '../../utils/priceTime';
@@ -12,15 +15,18 @@ export default function StorePriceDisplay({
   const marketAvg = price.source === 'market_avg';
   const surveyDate = price.observed_on?.split('-');
   return (
-    <div className={price.stale && !marketAvg ? 'store-price stale' : 'store-price'}>
+    <div
+      className={`${s.price} store-price${price.stale && !marketAvg ? ` ${s.stale} stale` : ''}`}
+    >
       <p>
         {price.price.toLocaleString()}원 / {unitLabel(price.unit)}
       </p>
       <small>
         {marketAvg ? (
           <>
-            시장 평균
-            {surveyDate && ` · aT ${Number(surveyDate[1])}월 ${Number(surveyDate[2])}일 조사`}
+            {t('reviewMarketAverage')}
+            {surveyDate &&
+              fill(t('reviewSurvey'), { month: Number(surveyDate[1]), day: Number(surveyDate[2]) })}
           </>
         ) : (
           <>

@@ -8,5 +8,8 @@ export const getMarkets = (lat?: number, lng?: number, radius_km = 10) =>
 
 export const getMarketItems = (id: string) =>
   isMock ? mock.marketItems(id) : request<MarketItem[]>(`/markets/${encodeURIComponent(id)}/items`);
+// mock이어도 VITE_PUBLIC_CONFIG=live 이면 지도 키만 실제 서버에 물어봄(mock 핀을 네이버 지도 위에서 보기)
 export const getPublicConfig = () =>
-  isMock ? mock.publicConfig() : request<PublicConfig>('/config/public');
+  isMock && import.meta.env.VITE_PUBLIC_CONFIG !== 'live'
+    ? mock.publicConfig()
+    : request<PublicConfig>('/config/public');

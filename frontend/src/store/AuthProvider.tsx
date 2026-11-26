@@ -29,12 +29,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (q: AuthRequest) => {
     setUser((await api.signup(q)).user);
   };
+  const signupCustomer = async (q: AuthRequest) => {
+    setUser((await api.signupCustomer(q)).user);
+  };
   const logout = async () => {
     await api.logout();
     setUser(null);
   };
   return (
-    <AuthContext.Provider value={{ user, loading, me, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, me, login, signup, signupCustomer, logout }}>
       {children}
     </AuthContext.Provider>
   );

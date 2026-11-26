@@ -1,3 +1,5 @@
+import { Chip } from './Chip';
+import s from './ui.module.css';
 export default function ChipGroup<T extends string | number>({
   label,
   options,
@@ -5,6 +7,7 @@ export default function ChipGroup<T extends string | number>({
   onChange,
   display,
   disabled = false,
+  hideLegend = false,
 }: {
   disabled?: boolean;
   label: string;
@@ -12,22 +15,16 @@ export default function ChipGroup<T extends string | number>({
   value: T | '';
   onChange: (v: T) => void;
   display?: (v: T) => string;
+  hideLegend?: boolean;
 }) {
   return (
     <fieldset>
-      <legend>{label}</legend>
-      <div className="chips">
+      <legend className={hideLegend ? 'sr-only' : s.legend}>{label}</legend>
+      <div className={s.chipWrap}>
         {options.map((v) => (
-          <button
-            disabled={disabled}
-            type="button"
-            className="chip"
-            aria-pressed={value === v}
-            key={v}
-            onClick={() => onChange(v)}
-          >
+          <Chip disabled={disabled} pressed={value === v} key={v} onClick={() => onChange(v)}>
             {display ? display(v) : v}
-          </button>
+          </Chip>
         ))}
       </div>
     </fieldset>

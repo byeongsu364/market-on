@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Recommend from '../pages/Recommend';
+import Recommend from '../pages/shop/Shop';
 import { SessionContext, useSessionState } from '../store/session';
 import { recommend } from '../api/recommend';
 import type { RecommendResponse } from '../types/contract';
@@ -54,13 +54,18 @@ it('현재 시장 요청과 카드·수량·합계·근거·모델을 표시한�
     market_id: 'market:demo',
   });
   expect(screen.getByText('3개')).toBeInTheDocument();
-  expect(screen.getByText(/예상 합계 3,000원/)).toHaveTextContent('예산 20,000원 (17,000원 남음)');
+  expect(screen.getByText('3,000원')).toBeInTheDocument();
+  expect(screen.getByText('예산 20,000원 안이에요')).toBeInTheDocument();
   expect(screen.getByText(response.note)).toBeInTheDocument();
   expect(screen.getByText('GPT')).toBeInTheDocument();
   expect(screen.getByText(/검수 전/)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: '점포 A-01' })).toHaveAttribute(
     'href',
-    '/map?item=item%3Aapple&store=s',
+    '/?market=market%3Ademo&item=item%3Aapple&store=s',
+  );
+  expect(screen.getByRole('link', { name: '한 번에 지도에서 보기' })).toHaveAttribute(
+    'href',
+    '/shop/route?market=market%3Ademo&item=item%3Aapple',
   );
 });
 it('로딩과 빈 구성 note를 표시한다', async () => {

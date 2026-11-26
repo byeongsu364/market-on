@@ -1,5 +1,8 @@
 import type {
   MarketMap,
+  MultiItemMap,
+  PriceHistory,
+  VarietyExtra,
   Price,
   PriceRequest,
   RecognizeResponse,
@@ -10,6 +13,7 @@ import { record } from './marketRequests';
 import { items, markets, stores, source } from './data';
 import { activeForStore, storePrice } from './merchant';
 import { zones } from '../../constants/zones';
+import { demoMarketExtra, demoBoundary, demoFacilities, storeExtra } from './geo';
 import { convertUnit } from '../../utils/convertUnit';
 import { diffPct } from '../../utils/diffPct';
 export async function mock<T>(work: () => T): Promise<T> {
@@ -23,6 +27,7 @@ export const nearby = (lat?: number, lng?: number, radius_km = 5) =>
     [...markets]
       .map((m) => ({
         ...m,
+        ...(m.market_id === 'market:demo' ? demoMarketExtra : {}),
         distance_m:
           lat == null || lng == null
             ? null
@@ -66,6 +71,22 @@ export const search = (q: string) =>
       [...i.synonyms, ...i.vision_labels].some((n) => n.toLowerCase().includes(q.toLowerCase())),
     ),
   );
+// 품종 설명은 data/rag_docs/apple/varieties.md 문장만, 수확 시기는 data/ontology/items.yaml harvestPeriod 값만 씀.
+// 문장이나 값이 없는 품종(시나노골드)은 비워 둠(지시서 030 2장).
+const varietyExtra: Record<string, VarietyExtra> = {
+  'variety:apple-fuji': {
+    description:
+      '후지는 전국에서 재배할 수 있는 품종이고, 완전히 익으면 과육 속에 꿀이 생기고 저장성이 좋아요.',
+    description_source: '농촌진흥청 농사로 · 이달의 식재료 사과',
+    harvest: { label: '10월 하순 이후', from: '10' },
+  },
+  'variety:apple-hongro': {
+    description: '홍로는 국내에서 처음 육성한 품종이에요.',
+    description_source: '농촌진흥청 농사로 · 이달의 식재료 사과',
+    harvest: { label: '9월 상·중순', from: '09', to: '09' },
+  },
+  'variety:apple-shinano-gold': { description: null, description_source: null, harvest: null },
+};
 export const price = (q: PriceRequest): Promise<Price> =>
   mock(() => {
     const base = q.item_id === 'item:green_onion' ? 2576 : q.item_id === 'item:onion' ? 2100 : 3200;
@@ -92,6 +113,7 @@ export const price = (q: PriceRequest): Promise<Price> =>
             },
           ].map((v) => ({
             ...v,
+            ...varietyExtra[v.variety_id],
             unit: q.unit,
             observed_on: v.reference_price === null ? null : '2026-11-20',
             count: v.reference_price === null ? 0 : 15,
@@ -156,9 +178,14 @@ export const map = async (
     layout: 'schematic',
     source_note: '시연용 예시 배치',
     zones,
+    // 예시 값: 경계와 편의시설(geo.ts)
+    ...(market_id === 'market:demo' ? { boundary: demoBoundary, facilities: demoFacilities } : {}),
     stores: stores
-      .map((s) => ({
+      .map((s, i) => ({
         ...s,
+        ...(market_id === 'market:demo'
+          ? storeExtra(s, i, zones.find((z) => z.id === s.zone_id)?.name ?? '')
+          : {}),
         highlight: !!item_id && s.sells.includes(item_id),
         active_sale: activeForStore(s.store_id, item_id),
         price:
@@ -376,6 +403,43 @@ export async function chat(
 }
 
 export const publicConfig = () => mock(() => ({ naver_map_client_id: null }));
+
+/** 예시 값: 최근 4주 기준시세. 지금 기준시세에서 주마다 조금씩 움직인 값(실제 조사값 아님) */
+export const priceHistory = (
+  item_id: string,
+  variety_id: string | undefined,
+  unit: string,
+  weeks = 4,
+): Promise<PriceHistory> =>
+  price({ item_id, variety_id, unit, market_id: 'market:demo' }).then((p) => {
+    const selected = p.varieties.find((v) => v.variety_id === p.variety_id);
+    const base = selected ? selected.reference_price : p.reference_price;
+    const steps = [1.06, 1.03, 0.98, 1];
+    return {
+      item_id,
+      variety_id: p.variety_id,
+      unit,
+      source: '예시 값 · 샘플',
+      points: Array.from({ length: weeks }, (_, i) => {
+        const day = new Date(Date.UTC(2026, 10, 2 + i * 7));
+        return {
+          week_start: day.toISOString().slice(0, 10),
+          price: base == null ? null : Math.round((base * steps[i % 4]) / 10) * 10,
+        };
+      }),
+    };
+  });
+
+/** 여러 품목 지도: 고른 품목 중 하나라도 파는 점포를 강조 */
+export const multiMap = (market_id: string, item_ids: string[]): Promise<MultiItemMap> =>
+  map(market_id).then((m) => ({
+    ...m,
+    item_ids,
+    stores: m.stores.map((s) => ({
+      ...s,
+      highlight: item_ids.some((id) => s.sells.includes(id)),
+    })),
+  }));
 export const marketItems = (marketId: string) =>
   mock(() => {
     if (!markets.some((m) => m.market_id === marketId)) throw new Error('시장을 찾을 수 없어요.');

@@ -1,4 +1,4 @@
-import { me } from './merchant';
+import { onMockReset, me } from './merchant';
 import { stores } from './data';
 import { seoulDay } from '../../utils/sale';
 import type { StoreReview, StoreReviews, ReviewWrite } from '../../types/contract';
@@ -93,3 +93,5 @@ export function resetReviews() {
   counts.clear();
   sequence = 0;
 }
+
+onMockReset(resetReviews);

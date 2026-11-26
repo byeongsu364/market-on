@@ -34,7 +34,7 @@ it('손님 가격을 그대로 확인 요청한다', async () => {
       <MerchantPrices />
     </SessionProvider>,
   );
-  fireEvent.click(await screen.findByRole('button', { name: '확인' }));
+  fireEvent.click(await screen.findByRole('button', { name: /맞아요/ }));
   expect(post).toHaveBeenCalledWith({ item_id: 'i', unit: price.unit, price: 1800 });
   vi.restoreAllMocks();
 });
@@ -76,4 +76,41 @@ it('시장 평균은 조사일을 표시하고 오래된 점포 가격 스타일
     'stale',
   );
   expect(screen.queryByText(/손님|상인 확인/)).not.toBeInTheDocument();
+});
+
+it('시장 평균은 지도와 판매 점포의 가격 눈금에 사용하지 않는다', async () => {
+  const { storeBand, priceWho } = await import('../pages/map/helpers');
+  const { SellingStores } = await import('../pages/scan/resultParts');
+  const { MemoryRouter } = await import('react-router-dom');
+  const { map, price: reference } = await import('../api/mock');
+  const { t } = await import('../i18n');
+  const stores = (await map('market:demo', 'item:apple')).stores.filter(
+    (s) => s.price?.source === 'market_avg',
+  );
+  expect(stores.length).toBeGreaterThan(0);
+  const current = await reference({
+    market_id: 'market:demo',
+    item_id: 'item:apple',
+    unit: 'unit:piece',
+  });
+  expect(storeBand(stores[0], current)).toBeNull();
+  expect(priceWho(stores[0].price!, t)).toMatch(/^시장 평균 · aT \d+월 \d+일 조사$/);
+  const { container } = render(
+    <MemoryRouter>
+      <SessionProvider>
+        <SellingStores
+          stores={stores.slice(0, 1)}
+          title="판매 점포"
+          total={1}
+          reference={9999}
+          unit="unit:piece"
+          map={null}
+          mapHref="/"
+          itemId="item:apple"
+        />
+      </SessionProvider>
+    </MemoryRouter>,
+  );
+  expect(container.textContent).toContain('시장 평균');
+  expect(container.querySelector('[data-on="true"]')).toBeNull();
 });

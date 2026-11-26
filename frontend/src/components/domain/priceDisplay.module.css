@@ -1,0 +1,14 @@
+.price {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.price p {
+  font-weight: 700;
+}
+.price small {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+.stale {
+  opacity: 0.6;
+}

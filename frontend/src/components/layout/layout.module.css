@@ -1,0 +1,211 @@
+/* 하단 탭(모바일): 지도, 찍기(검정 면 버튼), 장보기 */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  height: calc(var(--tabbar-h) + var(--safe-bottom) - 18px);
+  min-height: var(--tabbar-h);
+  padding: 0 12px max(18px, var(--safe-bottom));
+  background: var(--color-surface-card);
+  border-top: 1px solid var(--color-hairline);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.tab {
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 88px;
+  height: 52px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+.tab[aria-current='page'] {
+  color: var(--color-ink);
+}
+.scan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 22px 0 18px;
+  border-radius: 16px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* PC 머리말 */
+.webHeader {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 28px;
+  padding: 10px 32px;
+  border-bottom: 1px solid var(--color-hairline);
+  background: var(--color-canvas);
+}
+.logoLink {
+  display: flex;
+  align-items: center;
+  height: 44px;
+}
+.logo {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+.logoDark {
+  display: none;
+}
+:global([data-theme='dark']) .logoLight {
+  display: none;
+}
+:global([data-theme='dark']) .logoDark {
+  display: block;
+}
+.webNav {
+  display: flex;
+  gap: 22px;
+}
+.webNav a {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-body);
+}
+.webNav a[aria-current='page'] {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.webSearch {
+  flex: 1 1 260px;
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-strong);
+  color: var(--color-muted);
+}
+.webSearch:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.webSearch input {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  height: 44px;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 15px;
+  color: var(--color-ink);
+}
+.webSearch input::placeholder {
+  color: var(--color-muted);
+}
+.webEnd {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.webLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  font-size: 14px;
+  color: var(--color-body);
+}
+.webLogin {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.webScan {
+  display: flex;
+  align-items: center;
+  height: 44px;
+}
+.webScan span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* 모바일 화면 머리말(뒤로 + 제목) */
+.appHeader {
+  padding: calc(var(--safe-top) + 44px) var(--space-5) 0;
+}
+.appHeaderRow {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  gap: 4px;
+}
+.back {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -12px;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+}
+.appTitle {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.skip {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: 100;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.skip:focus {
+  top: 8px;
+}
+@media (min-width: 1024px) {
+  .appHeader {
+    padding: 24px 0 0;
+  }
+}

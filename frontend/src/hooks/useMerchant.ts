@@ -16,7 +16,14 @@ export function useMerchantHome() {
     store.retry();
     return true;
   });
-  return { store, active, ended, action };
+  // 030: 단골 수·오늘 품절·가게 위치(mock만, live는 null)
+  const extras = useResource(api.getExtras);
+  const soldOut = useAction(async (item: string, out: boolean) => {
+    await api.setSoldOut(item, out);
+    extras.retry();
+    return true;
+  });
+  return { store, active, ended, action, extras, soldOut };
 }
 export function useSaleNew() {
   const store = useResource(api.getStore);
@@ -24,7 +31,9 @@ export function useSaleNew() {
   const [item, setItem] = useState('');
   const [price, setPrice] = useState('');
   const [regular, setRegular] = useState('');
+  const [unit, setUnit] = useState('');
   const [duration, setDuration] = useState(1);
+  const extras = useResource(api.getExtras);
   const endsAt = saleEnd(duration, store.data?.hours.close);
   const action = useAction(api.createSale);
   const submit = () =>
@@ -32,6 +41,7 @@ export function useSaleNew() {
       item_id: item,
       sale_price: Number(price),
       ...(regular ? { regular_price: Number(regular) } : {}),
+      ...(unit ? { unit_id: unit } : {}),
       ends_at: endsAt,
     });
   return {
@@ -43,6 +53,9 @@ export function useSaleNew() {
     setPrice,
     regular,
     setRegular,
+    unit,
+    setUnit,
+    extras,
     duration,
     setDuration,
     endsAt,

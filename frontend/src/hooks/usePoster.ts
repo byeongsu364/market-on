@@ -4,18 +4,19 @@ import QRCode from 'qrcode';
 import { getPoster } from '../api/merchant';
 import { getMarketPoster } from '../api/marketAdmin';
 import { useResource } from './useResource';
-export function usePoster(market = false) {
-  const info = useResource<Omit<PosterInfo, 'store_name'> & { store_name?: string }>(
-    market ? getMarketPoster : getPoster,
-  );
+/** 주소 하나를 QR SVG 문자열로 */
+export function useQrSvg(url: string | null | undefined) {
   const [svg, setSvg] = useState('');
   const [error, setError] = useState('');
   useEffect(() => {
     let active = true;
-    if (info.data)
-      QRCode.toString(info.data.url, { type: 'svg', margin: 4 })
+    if (url)
+      QRCode.toString(url, { type: 'svg', margin: 4 })
         .then((s) => {
-          if (active) setSvg(s);
+          if (active) {
+            setSvg(s);
+            setError('');
+          }
         })
         .catch(() => {
           if (active) setError('qrError');
@@ -23,6 +24,13 @@ export function usePoster(market = false) {
     return () => {
       active = false;
     };
-  }, [info.data]);
+  }, [url]);
+  return { svg, error };
+}
+export function usePoster(market = false) {
+  const info = useResource<Omit<PosterInfo, 'store_name'> & { store_name?: string }>(
+    market ? getMarketPoster : getPoster,
+  );
+  const { svg, error } = useQrSvg(info.data?.url);
   return { info, svg, error };
 }
