@@ -4,10 +4,25 @@ import { zoneColors } from '../../constants/zones';
 export default function MiniMap({
   map,
   onStore,
+  itemName,
 }: {
   map: MarketMap;
-  onStore: (store: Store, trigger: Element) => void;
+  onStore?: (store: Store, trigger: Element) => void;
+  itemName?: string;
 }) {
+  const focused = itemName
+    ? [...map.zones]
+        .sort(
+          (a, b) =>
+            map.stores.filter((s) => s.highlight && s.zone_id === b.id).length -
+            map.stores.filter((s) => s.highlight && s.zone_id === a.id).length,
+        )
+        .find((z) => map.stores.some((s) => s.highlight && s.zone_id === z.id))
+    : undefined;
+  const focusedStores = map.stores.filter((s) => s.zone_id === focused?.id);
+  const viewBox = focused
+    ? `${Math.max(0, focused.x - 8)} ${Math.max(0, focused.y - 8)} 188 ${Math.max(188, ...focusedStores.map((s) => s.map_y - focused.y + 72))}`
+    : `0 0 376 ${Math.max(548, ...map.stores.map((s) => s.map_y + 64))}`;
   return (
     <>
       {map.layout === 'schematic' && (
@@ -16,7 +31,8 @@ export default function MiniMap({
       <p className="caption">{map.source_note}</p>
       <svg
         className="market-map"
-        viewBox={`0 0 376 ${Math.max(548, ...map.stores.map((s) => s.map_y + 64))}`}
+        viewBox={viewBox}
+        data-focused-zone={focused?.id}
         role="group"
         aria-label="시장 점포 평면도"
         style={Object.fromEntries(zoneColors.map((c, i) => [`--zone-${i}`, c])) as CSSProperties}
@@ -35,6 +51,12 @@ export default function MiniMap({
               fill={`var(--zone-${i % zoneColors.length})`}
               fillOpacity="0.2"
             />
+            {/* 파는 점포가 있는 구역에만 개수 표시 ("사과 0곳"은 숨김) */}
+            {itemName && map.stores.some((s) => s.highlight && s.zone_id === z.id) && (
+              <text x={z.x + 12} y={z.y + 10}>
+                {itemName} {map.stores.filter((s) => s.highlight && s.zone_id === z.id).length}곳
+              </text>
+            )}
             <text x={z.x + 12} y={z.y + 26}>
               {z.name}
             </text>
@@ -43,15 +65,15 @@ export default function MiniMap({
         {map.stores.map((s) => (
           <g
             key={s.store_id}
-            role="button"
-            tabIndex={0}
+            role={onStore ? 'button' : undefined}
+            tabIndex={onStore ? 0 : undefined}
             aria-label={`${s.name}${s.highlight ? ' · 판매 점포' : ''}`}
             data-highlight={s.highlight}
-            onClick={(e) => onStore(s, e.currentTarget)}
+            onClick={(e) => onStore?.(s, e.currentTarget)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                onStore(s, e.currentTarget);
+                onStore?.(s, e.currentTarget);
               }
             }}
           >

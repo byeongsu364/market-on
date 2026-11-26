@@ -73,3 +73,28 @@ def test_public_sql_contract(db):
         finally:
             app.dependency_overrides.pop(get_db, None)
         raise Rollback()
+
+
+def test_market_item_counts_active_only(db):
+    data = Path(__file__).resolve().parents[2] / 'data'
+    with db.transaction():
+        load_sources(db, data / 'sources.yaml')
+        load_ontology(db, data / 'ontology')
+        seed_demo_market(db)
+        before = store_repo.market_item_counts(db, 'market:demo')
+        assert before == sorted(before, key=lambda row: (row['name'], row['item_id']))
+        onion = next(row for row in before if row['item_id'] == 'item:green_onion')
+        assert onion['store_count'] == 3
+        store_repo.upsert_store(
+            db,
+            id='store:demo-A05',
+            market_id='market:demo',
+            name_ko='점포 A-05',
+            source='manual',
+            active=False,
+        )
+        after = store_repo.market_item_counts(db, 'market:demo')
+        assert (
+            next(row for row in after if row['item_id'] == 'item:green_onion')['store_count'] == 2
+        )
+        raise Rollback()

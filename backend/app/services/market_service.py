@@ -18,7 +18,7 @@ def distance(lat, lng, market):
     return 2 * asin(sqrt(min(1, max(0, h))))
 
 
-def nearby(conn, lat=None, lng=None, device_id=None):
+def nearby(conn, lat=None, lng=None, device_id=None, radius_km=5):
     markets = [
         Market(
             market_id=m['id'],
@@ -33,6 +33,7 @@ def nearby(conn, lat=None, lng=None, device_id=None):
     for market in markets:
         if lat is not None and lng is not None:
             market.distance_m = round(distance(lat, lng, market) * 6_371_000)
+    markets = [m for m in markets if m.distance_m is None or m.distance_m <= radius_km * 1000]
     if device_id:
         from .price_report_service import hash_device
         from app.db.repositories import market_request_repo
@@ -154,3 +155,9 @@ def selling_stores(conn, market_id, item_id):
         for s in store_repo.list_stores(conn, market_id)
         if s['active'] and s['id'] in ids
     ]
+
+
+def market_items(conn, market_id):
+    if store_repo.get_market(conn, market_id) is None:
+        raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
+    return store_repo.market_item_counts(conn, market_id)

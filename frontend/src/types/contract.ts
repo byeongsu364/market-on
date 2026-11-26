@@ -302,3 +302,6 @@ export type ChatResponse = {
   model: string | null;
   removed: number;
 };
+
+export type MarketItem = { item_id: string; name: string; store_count: number };
+export type PublicConfig = { naver_map_client_id: string | null };

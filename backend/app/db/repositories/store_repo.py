@@ -131,3 +131,15 @@ def deactivate_missing_sbiz(conn, market_id, ids):
         "update stores set active=false where market_id=%s and source='sbiz' and not(id=any(%s))",
         (market_id, ids),
     )
+
+
+def market_item_counts(conn, market_id):
+    return rows(
+        conn,
+        """select i.item_id, e.name_ko as name, count(distinct s.id) as store_count
+        from store_items i join stores s on s.id=i.store_id
+        join entities e on e.id=i.item_id
+        where s.market_id=%s and s.active
+        group by i.item_id,e.name_ko order by e.name_ko,i.item_id""",
+        (market_id,),
+    )

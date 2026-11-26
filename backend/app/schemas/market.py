@@ -60,3 +60,13 @@ class MarketMap(BaseModel):
     market_id: str
     zones: list[Zone]
     stores: list[Store]
+
+
+class MarketItem(BaseModel):
+    item_id: str
+    name: str
+    store_count: int
+
+
+class PublicConfig(BaseModel):
+    naver_map_client_id: str | None
