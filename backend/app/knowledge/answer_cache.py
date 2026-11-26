@@ -20,7 +20,11 @@ def cache_key(conn, item, intent, lang, question):
 
 
 def get_cached_answer(conn, key):
-    return ask_repo.get_cache(conn, key)
+    cached = ask_repo.get_cache(conn, key)
+    # Regenerate older payloads that cannot identify unreviewed evidence.
+    if cached and any('draft' not in source for source in cached.get('citations', [])):
+        return None
+    return cached
 
 
 def save(conn, key, answer, model):

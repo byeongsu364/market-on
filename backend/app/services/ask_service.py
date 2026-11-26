@@ -91,7 +91,9 @@ def ask(conn, data, device_id, *, embedder=None):
             or 'answer' not in value
         ):
             return 'invalid_json'
-        used = value['used']
+        # Gemma는 근거 번호를 "1"처럼 문자열로 줄 때가 있어 숫자로 맞춤
+        used = [int(i) if isinstance(i, str) and i.strip().isdigit() else i for i in value['used']]
+        value['used'] = used
         if not used or any(type(i) is not int or not 1 <= i <= len(chunks) for i in used):
             return 'unsupported'
         answer, removed = fact_check.check(

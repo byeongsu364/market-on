@@ -63,7 +63,15 @@ def env(monkeypatch):
     monkeypatch.setattr(
         svc.ask_repo,
         'sources',
-        lambda *a: [{'title': '출처', 'publisher': '기관', 'url': None, 'license': None}],
+        lambda *a: [
+            {
+                'title': '출처',
+                'publisher': '기관',
+                'url': None,
+                'license': None,
+                'body': '> 초안 · 검수 전\n근거',
+            }
+        ],
     )
     monkeypatch.setattr(
         svc.knowledge_repo,
@@ -124,6 +132,7 @@ def test_cache_and_cleaning(env):
     assert '초안' not in str(env.calls) and '출처:' not in str(env.calls)
     second = ask(env)
     assert second.cached and second.model is None and len(env.calls) == 1
+    assert first.citations[0].draft and second.citations[0].draft
     env.version.append('changed body')
     assert not ask(env).cached and len(env.calls) == 2
     ask(env, question='어떻게 보관?')
@@ -226,6 +235,7 @@ def test_api_validation_and_contract(env, monkeypatch):
         'cached',
         'removed',
     }
+    assert set(response.json()['citations'][0]) == {'title', 'publisher', 'url', 'license', 'draft'}
     monkeypatch.setattr(svc.ask_repo, 'consume_quota', lambda *a: False)
     response = env.client.post('/ask', json={'intent': 'store'}, headers=HEADERS)
     assert response.status_code == 429 and response.json()['error']['code'] == 'TOO_MANY_QUESTIONS'
@@ -322,3 +332,40 @@ def test_model_unavailable_is_no_evidence(env, monkeypatch):
 )
 def test_additional_prohibited_judgments(sentence):
     assert fact_check.check(sentence, sentence, 'item:green_onion', DICTIONARY) == (None, 1)
+
+
+@pytest.mark.parametrize(
+    'body,draft',
+    [
+        ('> 초안 · 검수 전\n내용', True),
+        ('> 샘플\n내용', True),
+        ('검수 완료\n내용', False),
+        ('내용\n> 초안', False),
+    ],
+)
+def test_citation_document_marker(monkeypatch, body, draft):
+    from app.knowledge.citation import attach_citations
+
+    monkeypatch.setattr(
+        svc.ask_repo,
+        'sources',
+        lambda *a: [dict(title='출처', publisher=None, url=None, license=None, body=body)],
+    )
+    assert attach_citations(Mock(), [SimpleNamespace(chunk_id=1)])[0]['draft'] is draft
+
+
+def test_legacy_cache_without_draft_is_regenerated(env):
+    first = ask(env)
+    key = svc.answer_cache.cache_key(env.conn, 'item:green_onion', 'store', 'ko', None)
+    old = first.model_dump(mode='json')
+    del old['citations'][0]['draft']
+    svc.ask_repo.put_cache(env.conn, key, old, 'fake')
+    assert not ask(env).cached
+    assert ask(env).citations[0].draft
+
+
+def test_string_evidence_numbers_are_accepted(env):
+    # Gemma가 used를 ["1"]처럼 문자열로 줘도 GPT로 넘기지 않음
+    env.outputs[:] = [{'answer': '대파는 0~2℃에서 보관해요.', 'used': ['1']}]
+    result = ask(env)
+    assert result.kind == 'answer' and result.answer == '대파는 0~2℃에서 보관해요.'

@@ -232,6 +232,7 @@ export type AskRequest = {
   lang?: 'ko';
 };
 export type Citation = {
+  draft: boolean;
   title: string;
   publisher: string | null;
   url: string | null;

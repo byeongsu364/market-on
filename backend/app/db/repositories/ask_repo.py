@@ -56,7 +56,7 @@ def sources(conn, chunk_ids):
 
     return rows(
         conn,
-        """select distinct s.title,s.publisher,s.url,s.license from sources s
+        """select distinct s.title,s.publisher,s.url,s.license,d.body from sources s
         join documents d on d.source_id=s.id join chunks c on c.document_id=d.id
         where c.id=any(%s) order by s.title,s.publisher,s.url,s.license""",
         (chunk_ids,),

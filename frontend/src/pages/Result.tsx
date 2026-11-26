@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useResultFlow, useRequireMarket } from '../hooks/useFlows';
 import Resource from '../components/common/Resource';
+import AskPanel from '../components/domain/AskPanel';
 import Checklist from '../components/domain/Checklist';
 import PriceCompare from '../components/domain/PriceCompare';
 import StorePriceDisplay from '../components/domain/StorePriceDisplay';
@@ -23,7 +24,8 @@ export default function Result() {
             </small>
           )}
           <Checklist key={f.itemId} criteria={f.item.data.criteria} />
-          <section className="card">
+          <AskPanel key={`ask:${f.itemId}`} itemId={f.itemId} />
+          <section className="card" id="price-comparison">
             <h2>{t('priceComparison')}</h2>
             <label>
               {t('price')}
@@ -58,7 +60,7 @@ export default function Result() {
               {f.price.data && <PriceCompare price={f.price.data} />}
             </Resource>
           </section>
-          <section>
+          <section id="selling-stores">
             <h2>이 시장 판매 점포</h2>
             <Resource state={f.map}>
               {f.map.data?.stores

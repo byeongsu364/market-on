@@ -169,6 +169,7 @@ export async function ask(
       citations: [
         {
           title: '이달의 식재료 - 움파(대파) · 샘플',
+          draft: true,
           publisher: '농촌진흥청 농사로',
           url: null,
           license: null,
