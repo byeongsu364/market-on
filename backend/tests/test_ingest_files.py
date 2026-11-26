@@ -17,8 +17,8 @@ def test_sample_formats_and_kamis():
         for path in sorted((DATA / 'ontology').glob('*.yaml'))
         for e in yaml.safe_load(path.read_text())['entities']
     ]
-    # 기존 26개 + 월 12개 + 산지 3개
-    assert len(entities) == 41
+    # 기존 41개 + 귤 품목 1개 + 품종 2개
+    assert len(entities) == 44
     assert sum(e['type'] == 'category' for e in entities) == 2
     assert sum(e['type'] == 'store_category' for e in entities) == 8
     # 품목 KAMIS 코드는 aT 소매 품목코드표(신태빈 정리, 2026-11-20)에 실제로 있는 조합이어야 해요
@@ -31,8 +31,20 @@ def test_sample_formats_and_kamis():
     for entity in entities:
         if entity['type'] in ('item', 'variety'):
             kamis = entity['kamis']
+            if entity['id'] == 'variety:mandarin-greenhouse':
+                # 041 지정 코드: 저장된 aT 코드표에는 시설(02) 행이 없어요.
+                assert kamis == {
+                    'ctgry_cd': '400',
+                    'item_cd': '415',
+                    'vrty_cd': '02',
+                    'grd_cd': '15',
+                    'unit': '개',
+                    'unit_sz': '10',
+                }
+                continue
             assert (kamis['ctgry_cd'], kamis['item_cd'], kamis['vrty_cd']) in known, entity['id']
-            assert kamis['grd_cd'] == '04'
+            # 감귤은 상품(04) 대신 M과(15)로 조사돼요
+            assert kamis['grd_cd'] == ('15' if kamis['item_cd'] == '415' else '04')
             code_row = next(
                 r
                 for r in code_table
@@ -50,10 +62,10 @@ def test_sample_formats_and_kamis():
         doc.doc_type == 'recipe' and doc.source_key == 'src:foodsafety-cookrcp01' and doc.entities
         for doc in imported
     )
-    # 품목 5개 × (고르는 법·보관·손질·품종 특징) + 연습용 긴 레시피 1개
-    assert len(docs) - len(imported) == 21
+    # 품목 6개 × (고르는 법·보관·손질·품종 특징) + 연습용 긴 레시피 1개
+    assert len(docs) - len(imported) == 25
     for kind in ('criterion', 'storage', 'prep', 'story'):
-        assert sum(doc.doc_type == kind for doc in docs) == 5
+        assert sum(doc.doc_type == kind for doc in docs) == 6
     for doc in docs:
         assert doc.source_key in sources
         assert not doc.doc_key.startswith('/')
@@ -106,8 +118,17 @@ def test_criterion_expansion_without_db(monkeypatch):
     monkeypatch.setattr(repo, 'prune_generated_criteria', prune)
     conn = Mock(transaction=nullcontext)
     counts = load_ontology(conn)
-    assert counts['added'] == 61  # 명시 엔터티 41개 + 자동 확인 포인트 20개
+    assert counts['added'] == 68  # 명시 엔터티 44개 + 자동 확인 포인트 24개
     assert saved['variety:apple-hongro']['type'] == 'variety'
+    assert saved['item:mandarin']['name_ko'] == '귤'
+    assert ('hasGrade', 'variety:mandarin-open', None, None, {'default': True}) in relations[
+        'item:mandarin'
+    ]
+    assert ('inSeason', 'season:12', None, 42, None) in relations['item:mandarin']
+    for key in ('skin', 'shape', 'stem', 'gloss'):
+        criterion_id = f'crit:mandarin-{key}'
+        assert saved[criterion_id]['source'] == 'src:nics-month-food-mandarin'
+        assert ('hasCriterion', criterion_id, None, 42, None) in relations['item:mandarin']
     assert ('hasGrade', 'variety:apple-fuji', None, None, {'default': True}) in relations[
         'item:apple'
     ]
@@ -123,4 +144,32 @@ def test_criterion_expansion_without_db(monkeypatch):
     assert ('soldBy', 'unit:bunch', None, 42, {'factor_kg': 0.8, 'default': True}) in relations[
         'item:green_onion'
     ]
-    assert len(prune.call_args.args[1]) == 20  # 5품목 × 확인 포인트 4개
+    assert len(prune.call_args.args[1]) == 24  # 6품목 × 확인 포인트 4개
+
+
+def test_mandarin_catalog_and_documents():
+    entities = yaml.safe_load((DATA / 'ontology/items.yaml').read_text())['entities']
+    sources = yaml.safe_load((DATA / 'sources.yaml').read_text())
+    assert sum(e['type'] == 'item' for e in entities) == 6
+    assert len(sources) == 16
+    item = next(e for e in entities if e['id'] == 'item:mandarin')
+    assert item['labels'] == {'ko': ['귤', '감귤', '밀감'], 'en': ['mandarin', 'tangerine']}
+    assert not item.get('vision')
+    assert len(item['criteria']) == 4
+    assert all(c['source'] in sources for c in item['criteria'])
+    grades = [r for r in item['relations'] if r['p'] == 'hasGrade']
+    assert [r['o'] for r in grades if r.get('props', {}).get('default')] == [
+        'variety:mandarin-open'
+    ]
+    assert next(r for r in item['relations'] if r['p'] == 'inSeason')['o'] == 'season:12'
+    for grade in grades:
+        variety = next(e for e in entities if e['id'] == grade['o'])
+        assert variety['attrs'] == {} and not variety.get('relations')
+    root = DATA / 'rag_docs'
+    docs = [read_document(p, root) for p in (root / 'mandarin').glob('*.md')]
+    assert len(docs) == 4
+    assert {d.doc_type for d in docs} == {'criterion', 'storage', 'prep', 'story'}
+    assert all(
+        d.entities == ['item:mandarin'] and d.source_key == 'src:nics-month-food-mandarin'
+        for d in docs
+    )

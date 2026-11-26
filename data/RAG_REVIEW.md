@@ -3,7 +3,7 @@
 AI 답변(`/ask`)은 제철은 온톨로지 관계로, 그 밖의 근거 답변은 **`data/rag_docs/` 문서로** 답해요. 문서가 틀리면 답도 틀려요. 그래서 사람이 한 번씩 출처와 맞춰 봐야 해요.
 
 ## 지금 있는 문서 (2026-11-25, Claude 초안)
-품목 5개 × 4종류 = 20개. 각 품목 폴더(`green_onion`, `onion`, `apple`, `pear`, `sweet_persimmon`)에 있어요.
+품목 6개 × 4종류 = 24개. 각 품목 폴더(`green_onion`, `onion`, `apple`, `pear`, `sweet_persimmon`, `mandarin`)에 있어요.
 
 | 파일 | 내용 |
 |---|---|
@@ -11,6 +11,10 @@ AI 답변(`/ask`)은 제철은 온톨로지 관계로, 그 밖의 근거 답변�
 | `storage.md` | 집에서 보관하는 법 |
 | `prep.md` | 씻기·손질하는 법 |
 | `varieties.md` | 품종과 특징 |
+| `mandarin/criterion.md` | 귤 고를 때 확인할 점 |
+| `mandarin/storage.md` | 귤 집에서 보관하는 법 |
+| `mandarin/prep.md` | 귤 씻고 손질하는 법 |
+| `mandarin/varieties.md` | 귤 품종과 특징 |
 
 출처는 문서 맨 아래 `출처:` 줄과 `data/sources.yaml`에 있어요. 주 출처는 공공데이터포털 「농식품 이달의 식재료 목록정보」 API(농촌진흥청)와 농촌진흥청 보도자료예요.
 

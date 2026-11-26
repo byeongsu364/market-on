@@ -1,5 +1,9 @@
 import type { VarietyExtra } from '../../types/contract';
 const catalog: Record<string, [string, string, VarietyExtra][]> = {
+  'item:mandarin': [
+    ['variety:mandarin-open', '노지', { synonyms: ['노지감귤'] }],
+    ['variety:mandarin-greenhouse', '시설', { synonyms: ['하우스감귤'] }],
+  ],
   'item:apple': [
     [
       'variety:apple-fuji',

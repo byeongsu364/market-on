@@ -55,10 +55,8 @@ def test_load_replace_search_cache_and_prune(db, tmp_path):
     first = load_all(db, data_dir=data, embedder=fake)
     # 식품안전나라 레시피(scripts.import_recipes 생성)는 받은 만큼 늘어나서 따로 셈
     recipes = len(list((data / 'rag_docs' / 'recipes').glob('foodsafety-*.md')))
-    # 16 sources + 41 explicit/20 generated entities + 21 documents + 레시피
-    assert (
-        first['added'] == 97 + recipes
-    )  # 출처 1개 줄어듦(농사로 9개 → 공공데이터포털 API 6개 + 1유형 보도자료 2개)
+    # 16 sources + 44 explicit/24 generated entities + 25 documents + 레시피
+    assert first['added'] == 109 + recipes
     ids = db.execute('select id from chunks order by id').fetchall()
     second = load_all(db, data_dir=data, embedder=fake)
     assert second['added'] == second['changed'] == second['deleted'] == 0
@@ -150,13 +148,13 @@ def test_alignment(db, tmp_path):
         db.execute(
             "select count(*) from entities where type='criterion' and source_id is not null"
         ).fetchone()[0]
-        == 20  # 5품목 × 확인 포인트 4개 (2026-11-26 출처 있는 값으로 채움)
+        == 24  # 6품목 × 확인 포인트 4개 (2026-11-26 출처 있는 값으로 채움)
     )
     assert (
         db.execute(
             "select count(*) from entity_relations where predicate='hasCriterion' and source_id is not null"
         ).fetchone()[0]
-        == 20
+        == 24
     )
     assert db.execute("select props from entity_relations where predicate='soldBy'").fetchone()[
         0

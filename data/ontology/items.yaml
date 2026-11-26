@@ -102,6 +102,23 @@ entities:
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
       - {o: 'season:11', p: inSeason, source: 'src:nics-month-food-list'}
+  - id: item:mandarin
+    type: "item"
+    name_ko: "귤"
+    kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "01", grd_cd: "15", unit: 개, unit_sz: "10"}
+    attrs: {}
+    labels: {ko: [귤, 감귤, 밀감], en: [mandarin, tangerine]}
+    criteria:
+      - {key: skin, text: 껍질이 얇고 껍질과 과육 사이에 빈 공간 없이 붙어 있어요, source: 'src:nics-month-food-mandarin'}
+      - {key: shape, text: 꼭지 부분이 튀어나오지 않고 좌우로 둥글고 납작해요, source: 'src:nics-month-food-mandarin'}
+      - {key: stem, text: 색이 짙은 주황색이고 꼭지는 녹색으로 단단히 붙어 있어요, source: 'src:nics-month-food-mandarin'}
+      - {key: gloss, text: 껍질에 지나치게 윤이 나지 않아요, source: 'src:nics-month-food-mandarin'}
+    relations:
+      - {p: hasGrade, o: 'variety:mandarin-open', props: {default: true}}
+      - {p: hasGrade, o: 'variety:mandarin-greenhouse'}
+      - {p: isA, o: 'cat:fruit'}
+      - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
+      - {o: 'season:12', p: inSeason, source: 'src:nics-month-food-list'}
   - id: unit:bunch
     type: unit
     name_ko: 단
@@ -167,4 +184,16 @@ entities:
     name_ko: 양파
     labels: {}
     kamis: {ctgry_cd: "200", item_cd: "245", vrty_cd: "00", grd_cd: "04", unit: kg, unit_sz: "1"}
+    attrs: {}
+  - id: variety:mandarin-open
+    type: variety
+    name_ko: 노지
+    labels: {ko: [노지, 노지감귤]}
+    kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "01", grd_cd: "15", unit: 개, unit_sz: "10"}
+    attrs: {}
+  - id: variety:mandarin-greenhouse
+    type: variety
+    name_ko: 시설
+    labels: {ko: [시설, 하우스감귤]}
+    kamis: {ctgry_cd: "400", item_cd: "415", vrty_cd: "02", grd_cd: "15", unit: 개, unit_sz: "10"}
     attrs: {}

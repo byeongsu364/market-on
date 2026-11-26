@@ -30,7 +30,7 @@ def choices():
 def test_variety_ontology():
     entities = yaml.safe_load((DATA / 'ontology/items.yaml').read_text())['entities']
     varieties = [e for e in entities if e['type'] == 'variety']
-    assert len(varieties) == 7
+    assert len(varieties) == 9
     for item in (e for e in entities if e['type'] == 'item'):
         edges = [r for r in item['relations'] if r['p'] == 'hasGrade']
         defaults = [r for r in edges if r.get('props', {}).get('default')]
@@ -143,6 +143,7 @@ def test_collection_parent_and_every_variety(monkeypatch):
     )
     collector.update_prices(None)
     assert fetch.call_count == 3
+    assert {c.kwargs['grd_cd'] for c in fetch.call_args_list} == {'04'}
     assert {r['variety_id'] for r in saved} == {v['id'] for v in children}
     assert {r['item_id'] for r in saved} == {'item:apple'}
 
@@ -188,3 +189,22 @@ def test_price_tag_labels(monkeypatch, text, expected):
         ),
     )
     assert ontology.match_variety(None, 'item:apple', text) == expected
+
+
+def test_mandarin_collection_targets_without_network(monkeypatch):
+    entities = yaml.safe_load((DATA / 'ontology/items.yaml').read_text())['entities']
+    parent = next(e for e in entities if e['id'] == 'item:mandarin')
+    children = [
+        e | {'item_id': parent['id']} for e in entities if e['id'].startswith('variety:mandarin-')
+    ]
+    monkeypatch.setattr(collector.at_price, 'require_key', lambda: None)
+    monkeypatch.setattr(price_repo, 'kamis_entities', lambda *a: [parent])
+    monkeypatch.setattr(price_repo, 'varieties', lambda *a: children)
+    fetch = Mock(return_value=[])
+    monkeypatch.setattr(collector.at_price, 'fetch_period_retail', fetch)
+    monkeypatch.setattr(price_repo, 'upsert_observations', lambda *a: (0, 0))
+    collector.update_prices(None, item_id=parent['id'])
+    assert [call.args for call in fetch.call_args_list] == [
+        ('400', '415', '01'),
+        ('400', '415', '02'),
+    ]

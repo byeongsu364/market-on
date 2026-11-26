@@ -69,6 +69,10 @@ export const getItem = (id: string) =>
 export const search = (q: string) =>
   mock(() => {
     const variety = [
+      ['노지', 'variety:mandarin-open', 'item:mandarin'],
+      ['노지감귤', 'variety:mandarin-open', 'item:mandarin'],
+      ['시설', 'variety:mandarin-greenhouse', 'item:mandarin'],
+      ['하우스감귤', 'variety:mandarin-greenhouse', 'item:mandarin'],
       ['후지', 'variety:apple-fuji', 'item:apple'],
       ['부사', 'variety:apple-fuji', 'item:apple'],
       ['홍로', 'variety:apple-hongro', 'item:apple'],
@@ -86,14 +90,17 @@ export const search = (q: string) =>
   });
 export const price = (q: PriceRequest): Promise<Price> =>
   mock(() => {
+    // 귤을 포함한 시세는 실제 관측값이 아닌 팀 작성 예시 값이에요.
     const base = q.item_id === 'item:green_onion' ? 2576 : q.item_id === 'item:onion' ? 2100 : 3200;
     const varieties = mockVarieties(q.item_id).map((v, i) => ({
       ...v,
       reference_price: v.variety_id.endsWith('shinano-gold')
         ? null
-        : q.item_id === 'item:apple'
-          ? [3200, 3500][i]
-          : Math.round(convertUnit(base, 'kg', q.unit)),
+        : q.item_id === 'item:mandarin'
+          ? [800, 1200][i]
+          : q.item_id === 'item:apple'
+            ? [3200, 3500][i]
+            : Math.round(convertUnit(base, 'kg', q.unit)),
       default: i === 0,
       unit: q.unit,
       observed_on: v.variety_id.endsWith('shinano-gold') ? null : '2026-11-20',
@@ -279,6 +286,7 @@ export async function ask(
           ['홍로', '9월 상·중순', '중생종 추석용 품종', 'apple'],
         ],
       },
+      'item:mandarin': { months: [12], harvest: [] },
       'item:pear': { months: [10], harvest: [] },
       'item:sweet_persimmon': {
         months: [11],
@@ -395,6 +403,7 @@ export const priceHistory = (
 ): Promise<PriceHistory> =>
   price({ item_id, variety_id, unit, market_id: 'market:demo' }).then((p) => {
     const selected = p.varieties.find((v) => v.variety_id === p.variety_id);
+    // 귤을 포함한 시세는 실제 관측값이 아닌 팀 작성 예시 값이에요.
     const base = selected ? selected.reference_price : p.reference_price;
     const steps = [1.06, 1.03, 0.98, 1];
     return {
@@ -441,6 +450,7 @@ export async function getInSeason(
   ),
 ) {
   const featured = [
+    { item_id: 'item:mandarin', name: '귤', months: [12] },
     { item_id: 'item:apple', name: '사과', months: [11] },
     { item_id: 'item:pear', name: '배', months: [10] },
     { item_id: 'item:sweet_persimmon', name: '단감', months: [11] },

@@ -88,6 +88,7 @@ def update_prices(conn, *, days=7, end=None, item_id=None):
                 code.get('vrty_cd'),
                 start=end - timedelta(days=days - 1),
                 end=end,
+                grd_cd=str(code.get('grd_cd') or '04'),
             )
             prepared, skipped = observations(rows, entities, code)
             added, changed = price_repo.upsert_observations(conn, prepared)
