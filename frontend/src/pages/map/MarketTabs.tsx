@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Button from '../../components/common/Button';
 import Icon from '../../components/common/Icon';
 import { ItemTile, List } from '../../components/common/parts';
 import Resource from '../../components/common/Resource';
@@ -117,9 +118,9 @@ export function InfoTab({ market }: { market: Market }) {
             ))}
           </List>
           {!morePrices && priced.length > 12 && (
-            <button type="button" onClick={() => setMorePrices(true)}>
+            <Button variant="surface" size="md" wide onClick={() => setMorePrices(true)}>
               품목 더 보기 ({priced.length})
-            </button>
+            </Button>
           )}
         </Resource>
       </section>

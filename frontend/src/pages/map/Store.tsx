@@ -288,9 +288,9 @@ export default function Store() {
           ))}
         </div>
         {!showAllItems && data.items.length > 12 && (
-          <button type="button" onClick={() => setShowAllItems(true)}>
+          <Button variant="surface" size="md" wide onClick={() => setShowAllItems(true)}>
             품목 더 보기 ({data.items.length})
-          </button>
+          </Button>
         )}
       </section>
       {(mapStore?.intro || data.store.intro) && <p>{mapStore?.intro || data.store.intro}</p>}

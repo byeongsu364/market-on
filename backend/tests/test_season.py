@@ -21,7 +21,7 @@ DATA = Path(__file__).resolve().parents[2] / 'data'
 def catalog(monkeypatch):
     entities = {
         e['id']: e
-        for p in (DATA / 'ontology').glob('*.yaml')
+        for p in sorted((DATA / 'ontology').glob('*.yaml'))  # 파일 순서를 고정(파일 시스템마다 glob 순서가 달라 12월 목록 순서가 바뀜)
         for e in yaml.safe_load(p.read_text())['entities']
     }
     sources = yaml.safe_load((DATA / 'sources.yaml').read_text())
