@@ -18,3 +18,16 @@
 | 가게 위치 저장, 품절 스위치 | StorePin, Merchant | `PUT /merchant/store/location {lat,lng}`, 품목별 품절 `PUT /merchant/store/sold-out` | mock만 |
 | 경계·편의시설·공지 편집 | WebMarketAdmin | 이번에는 표시만, 편집은 mock | mock만 |
 | 조회 수, 단골 수, 거리 | 목록, Store, Merchant | 점포에 `views_today`, `favorites`, 손님 위치가 있을 때 `distance_m` | mock 예시 값만 |
+
+## 화면을 만들며 더 찾은 빈자리
+
+| 필요한 것 | 쓰는 화면 | 제안 형태 | 지금 프런트 |
+| --- | --- | --- | --- |
+| 시장 하나 조회 | `/?market=`, Store | `GET /markets/{id}` | 위치 없이 `/markets/nearby`를 불러 그 안에서 찾음 |
+| 시장 주소·점포 수·준비 중 시장 요청 수 | Main, WebMain, Markets | 시장 응답에 `address`, `store_count`, `requests` | 값이 없으면 그 줄을 숨김 |
+| 점포 가격의 품종 | 검색 결과의 작은 눈금 | 점포 가격(`StorePrice`)에 `variety_id` | 고른 품종 기준시세와 단위가 같을 때만 견줌 |
+| 알림 설정 | Saved | `/me/notifications {sales, season}` | mock만(이 기기 localStorage) |
+| 가격표 품종의 원문 글자 | ScanConfirm | 인식 응답 `price_tag`에 `variety_text`(예: "부사") | "가격표에서 {품종}으로 읽었어요"로 씀 |
+| 품종 동의어 | 직접 입력, 검색 | 품종에 `synonyms`(부사 ↔ 후지) | 품목 단위로만 검색 |
+| 레시피 목록과 재료-품목 연결 | Shop "레시피로 장보기" | `/recipes`, 재료별 `item_id` | 넣지 않음 |
+| 품목과 카테고리 연결 | SearchEmpty "수산 점포에서 찾아보세요" | 품목에 `store_category` | "{시장} 점포 지도에서 보기"로 대신 |
