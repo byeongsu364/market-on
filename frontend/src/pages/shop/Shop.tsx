@@ -65,7 +65,6 @@ export default function Shop() {
         {!desktop && <IconButton icon="user" label={t('shopMe')} round to="/me" />}
       </div>
       <p className={s.lead}>{t('shopLead')}</p>
-      <Recipes />
       <form
         className={s.form}
         onSubmit={(e) => {
@@ -217,16 +216,27 @@ export default function Shop() {
     </>
   );
 
-  if (!desktop) return <div className={s.page}>{panel}</div>;
+  // 장보기 구성 폼이 먼저, 레시피로 장보기는 그 아래(휴대폰) · 오른쪽 칸(PC, 구성 전)
+  if (!desktop)
+    return (
+      <div className={s.page}>
+        {panel}
+        <Recipes />
+      </div>
+    );
   return (
     <div className={s.web}>
       <div className={s.webPanel}>{panel}</div>
       <section className={s.webMap} aria-label={t('shopRouteMap')}>
         {plan && route.located ? (
           <RouteMap route={route} label={t('shopRouteMap')} />
-        ) : (
+        ) : plan ? (
           <div className={`${s.webMap} ${s.webMapEmpty}`}>
-            <p>{plan ? t('shopRouteNoLocation') : t('shopMapEmpty')}</p>
+            <p>{t('shopRouteNoLocation')}</p>
+          </div>
+        ) : (
+          <div className={s.webRecipes}>
+            <Recipes />
           </div>
         )}
       </section>

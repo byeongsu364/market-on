@@ -3,6 +3,30 @@ import { useResource } from '../../hooks/useResource';
 import Resource from '../../components/common/Resource';
 import { DataTable, Section } from '../merchant/parts';
 
+const stepLabels: Record<string, string> = {
+  collect: '수집',
+  clean: '정리',
+  normalize: '표준화',
+  chunk: '조각 나누기',
+  review: '검수',
+  load: '적재',
+  invalidate: '예전 답 지우기',
+};
+/** {"chunks":24,"note":"샘플"} → "chunks 24 · 샘플" (날것의 JSON 대신, 2026-11-27 다듬기) */
+function describe(value: unknown): string {
+  if (value == null) return '—';
+  if (typeof value !== 'object') return String(value);
+  return Object.entries(value as Record<string, unknown>)
+    .map(([k, v]) =>
+      k === 'note' || k === 'skipped'
+        ? String(v)
+        : `${k} ${typeof v === 'object' ? describe(v) : v}`,
+    )
+    .join(' · ');
+}
+/** 2026-11-27T12:00:00+09:00 → 2026-11-27 12:00 */
+const when = (iso: string) => iso.replace('T', ' ').replace(/:\d{2}([+-]\d{2}:\d{2}|Z)?$/, '');
+
 const labels: Record<string, string> = {
   retrieval: '검색 적중률',
   citations: '출처 표시율',
@@ -21,20 +45,24 @@ export default function PipelineReport() {
         {report?.load && (
           <>
             <p>
-              실행 시각: <time>{report.load.started_at}</time> · {report.load.seconds}초
+              실행 시각:{' '}
+              <time dateTime={report.load.started_at}>{when(report.load.started_at)}</time> ·{' '}
+              {report.load.seconds}초
             </p>
             <DataTable
+              minWidth={0}
               head={['단계', '처리 결과']}
               rows={Object.entries(report.load.results).map(([key, value]) => ({
                 key,
-                cells: [key, JSON.stringify(value)],
+                cells: [stepLabels[key] ?? key, describe(value)],
               }))}
             />
             <DataTable
+              minWidth={0}
               head={['자동 검사', '결과', '내용']}
               rows={report.load.checks.map((c) => ({
                 key: c.name,
-                cells: [c.name, c.ok ? '통과' : '실패', c.detail],
+                cells: [c.name, c.ok ? '✓ 통과' : '✕ 실패', c.detail],
               }))}
             />
           </>
@@ -42,9 +70,11 @@ export default function PipelineReport() {
         {report?.eval && (
           <>
             <p>
-              평가 시각: <time>{report.eval.started_at}</time>
+              평가 시각:{' '}
+              <time dateTime={report.eval.started_at}>{when(report.eval.started_at)}</time>
             </p>
             <DataTable
+              minWidth={0}
               head={['평가 지표', '결과']}
               rows={Object.entries(report.eval.metrics).map(([key, value]) => ({
                 key,

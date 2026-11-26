@@ -59,9 +59,9 @@ export const FEATURES: Feature[] = [
     menu: '사진 확인',
     kicker: '찍어서 확인하기',
     title: '상품과 가격표를 한 번에 찍어요',
-    lead: '찍기를 누르면 화면 안에서 바로 카메라가 켜져요. 품목과 가격표 글자를 읽어 오늘 기준시세와 견줘 드려요.',
+    lead: '찍기를 누르면 화면 안에서 바로 카메라가 켜져요. 품목과 가격표 글자를 읽어 오늘 기준시세와 비교해 드려요.',
     hero: '/landing/result.webp',
-    heroAlt: '사과 후지 1,500원을 기준시세 1,690원과 견준 결과 화면',
+    heroAlt: '사과 후지 1,500원을 기준시세 1,690원과 비교한 결과 화면',
     sections: [
       {
         title: '화면 안 카메라',
@@ -86,7 +86,7 @@ export const FEATURES: Feature[] = [
     slug: 'prices',
     menu: '시세',
     kicker: '시세 비교',
-    title: '오늘의 기준시세와 견줘요',
+    title: '오늘의 기준시세와 비교해요',
     lead: '한국농수산식품유통공사(aT)가 조사한 소매가격으로 전통시장과 대형마트 시세를 함께 보여 드려요.',
     hero: '/landing/prices.webp',
     heroAlt: '제철과 시세 탭: 귤·배·단감의 전통시장과 대형마트 시세',

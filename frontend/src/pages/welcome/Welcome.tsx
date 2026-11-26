@@ -5,6 +5,7 @@ import { LANGUAGE_NAMES } from '../me/languages';
 import Button from '../../components/common/Button';
 import type { Language } from '../../types/contract';
 import s from './welcome.module.css';
+import BrandLogo from '../../components/common/BrandLogo';
 
 /**
  * 처음 들어온 손님: ① 언어 고르기 → ② 단계별 안내 3장(2026-11-27).
@@ -50,7 +51,7 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
   if (step < 0)
     return (
       <section className={s.page} aria-labelledby="welcome-lang">
-        <img className={s.logo} src="/brand/logo-light.svg" alt="Market-On" />
+        <BrandLogo className={s.logo} />
         <h1 id="welcome-lang" className={s.pickTitle}>
           <span lang={picked}>{PICK_TITLES[picked]}</span>
         </h1>

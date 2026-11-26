@@ -13,6 +13,7 @@ import AuthHero from './AuthHero';
 import { useT } from '../../i18n';
 import { homeFor } from './homeFor';
 import s from './account.module.css';
+import BrandLogo from '../../components/common/BrandLogo';
 
 // Login · WebLogin. 로그인 후 이전 화면 또는 역할에 맞는 홈으로 이동해요.
 export default function Login() {
@@ -119,7 +120,7 @@ export default function Login() {
       <AppHeader back="/me" />
       <div className={s.main}>
         <div className={s.intro}>
-          <img className={s.mark} src="/brand/mark-tight.svg" alt="Market-On" />
+          <BrandLogo kind="mark" className={s.mark} />
           <div className={s.heading}>
             <h1 className={s.title}>{t('login')}</h1>
             <p className={s.lead}>{t('meLoginLead')}</p>

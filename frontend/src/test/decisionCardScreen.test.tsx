@@ -153,20 +153,14 @@ it('시트를 닫으면 미리보기 Object URL을 해제한다', async () => {
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:sample');
 });
-it('시트 머리에 안심On·저장, 아래 레시피 보기는 펼치면 답이나 자료 없음 안내를 보인다', async () => {
+it('시트 머리에 안심On·저장이 있고 레시피 보기는 없다', async () => {
   show();
   await screen.findByRole('heading', { name: '대파' });
   await openCard();
   const dialog = screen.getByRole('dialog');
   expect(within(dialog).getByRole('heading', { name: '판단 카드' })).toHaveTextContent('안심On');
   expect(within(dialog).getByRole('link', { name: '저장' })).toBeInTheDocument();
-  const recipe = within(dialog).getByRole('button', { name: /레시피 보기/ });
-  expect(recipe).toHaveAttribute('aria-expanded', 'false');
-  fireEvent.click(recipe);
-  expect(recipe).toHaveAttribute('aria-expanded', 'true');
-  const panel = await within(dialog).findByRole('region', { name: '레시피 보기' });
-  await waitFor(() => expect(within(panel).queryByRole('status')).not.toBeInTheDocument());
-  expect(panel.textContent?.length).toBeGreaterThan(5);
+  expect(within(dialog).queryByRole('button', { name: /레시피 보기/ })).toBeNull();
   // 제철은 이달의 식재료로 채워서 그림
-  expect(vi.mocked(drawCard).mock.calls.at(-1)?.[1]).toHaveProperty('season');
+  await waitFor(() => expect(vi.mocked(drawCard).mock.calls.at(-1)?.[1]).toHaveProperty('season'));
 });

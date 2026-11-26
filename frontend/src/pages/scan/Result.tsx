@@ -138,11 +138,8 @@ export default function Result() {
         ? verdict.fallbackNote
         : verdict?.diff == null || reference == null
           ? t('scanNoReferenceSub').replace('{name}', josa(varietyLabel, '은', '는'))
-          : verdict.diff === 0
-            ? t('scanSameAsReference').replace('{name}', varietyLabel)
-            : t(verdict.diff < 0 ? 'scanLowerThan' : 'scanHigherThan')
-                .replace('{name}', varietyLabel)
-                .replace('{pct}', String(Math.abs(verdict.diff)));
+          : // 제목이 이미 "기준시세보다 N% 낮아요"라서, 아래 줄은 무엇과 비교했는지만
+            `${varietyLabel} 기준시세 ${reference.toLocaleString('ko-KR')}원과 비교했어요`;
 
   const toggle = (key: string) =>
     setChecks({

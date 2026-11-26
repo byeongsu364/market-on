@@ -1,3 +1,4 @@
+import ReviewSummary from '../../components/domain/ReviewSummary';
 import { useCallback, type ReactNode, type RefObject } from 'react';
 import { Link, type To } from 'react-router-dom';
 import BottomSheet from '../../components/common/BottomSheet';
@@ -15,11 +16,11 @@ import { formatPrice } from '../../utils/formatPrice';
 import { saleTime, seoulDay } from '../../utils/sale';
 import { unitLabel } from '../../utils/convertUnit';
 import { formatDistance, walkMinutes } from '../../utils/directions';
-import StoreReviews from '../../components/domain/StoreReviews';
 import { priceWho, storeSub, type StoreView } from './helpers';
 import { CATEGORY_LABELS } from '../../utils/category';
 import type { ActiveSale, Market, PriceBand } from '../../types/contract';
 import s from './map.module.css';
+import BrandLogo from '../../components/common/BrandLogo';
 
 /** 지도 화면 틀: 모바일은 지도 위 검색창과 바텀시트, PC(1024px↑)는 왼쪽 패널과 오른쪽 지도 */
 export function MapLayout({
@@ -64,7 +65,9 @@ export function MapLayout({
           expanded={expanded}
           onExpandedChange={onExpandedChange}
         >
-          <div className={s.sheetBody}>{panel}</div>
+          <div className={s.sheetBody} data-sheet-scroll>
+            {panel}
+          </div>
         </BottomSheet>
       )}
     </div>
@@ -98,7 +101,7 @@ export function SearchPill({
       ) : (
         // 시안: 지도 위 검색창 왼쪽은 Market-On 로고(막대 네 개)
         <span className={s.pillIcon}>
-          <img src="/brand/mark-tight.svg" alt="Market-On" className={s.pillLogo} />
+          <BrandLogo kind="mark" className={s.pillLogo} />
         </span>
       )}
       <Link to={to} className={value ? s.pillValue : s.pillText}>
@@ -211,9 +214,12 @@ export function StoreResultRow({
               {formatPrice(sale ? sale.sale_price : store.price!.price)}
             </span>
             {!sale && store.price && (
+              // 두 줄로: "사과 1개" / "시장 평균 · aT 11월 25일 조사"(세 줄로 쌓여 비좁던 것)
               <span className={s.rowUnit}>
-                {itemName} {unitLabel(store.price.unit)}
-                {store.price.source === 'market_avg' && <span> · {priceWho(store.price, t)}</span>}
+                <span>
+                  {itemName} {unitLabel(store.price.unit)}
+                </span>
+                {store.price.source === 'market_avg' && <span>{priceWho(store.price, t)}</span>}
               </span>
             )}
           </span>
@@ -272,7 +278,7 @@ export function SelectedStoreCard({
           </div>
         )}
       </div>
-      <StoreReviews key={store.store_id} storeId={store.store_id} />
+      <ReviewSummary key={store.store_id} storeId={store.store_id} to={storeHref} />
       {itemName && !price && <p className={s.rowSub}>{t('mapNoStorePrice')}</p>}
       <div className={s.buttons}>
         <Button

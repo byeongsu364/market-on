@@ -380,3 +380,41 @@
     position: sticky;
   }
 }
+
+/* PC: 구성 전에는 오른쪽 칸에 레시피로 장보기(빈 회색 칸 대신, 2026-11-27) */
+.webRecipes {
+  height: 100%;
+  overflow-y: auto;
+  padding: 32px 40px;
+  background: var(--color-canvas);
+}
+
+/* 물어보기 첫 화면 안내 */
+.chatEmpty {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.chatEmptyIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-strong);
+  color: var(--color-ink);
+}
+.chatEmpty h2 {
+  font-size: 24px;
+  line-height: 1.3;
+  letter-spacing: -0.6px;
+  font-weight: 700;
+}
+.chatEmpty p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-body);
+}

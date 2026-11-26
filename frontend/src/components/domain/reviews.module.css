@@ -33,3 +33,21 @@
 .reviews [aria-pressed='true'] {
   background: var(--color-surface-strong);
 }
+/* 지도에서 고른 점포 카드의 한 줄 리뷰 요약 */
+.summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-size: 14px;
+  color: var(--color-body);
+}
+.summary strong {
+  color: var(--color-ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.summary:hover span:last-of-type {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

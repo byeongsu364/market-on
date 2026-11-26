@@ -5,13 +5,11 @@ import ErrorBox from '../common/ErrorBox';
 import Icon from '../common/Icon';
 import { drawCard, type CardData } from '../../utils/decisionCard';
 import { getInSeason } from '../../api/items';
-import { ask } from '../../api/ask';
-import type { AskResponse } from '../../types/contract';
 import { seoulDay } from '../../utils/sale';
 import s from './domain.module.css';
 
 /**
- * 판단 카드 시트(2026-11-27 시안): 머리에 이름·저장·공유·닫기, 가운데 카드 이미지, 아래에 레시피 보기.
+ * 판단 카드 시트(2026-11-27 시안): 머리에 이름·저장·공유·닫기, 가운데 카드 이미지(레시피 보기는 요청으로 뺌).
  * 카드는 이 기기에서 PNG로 그림(사진은 서버로 다시 보내지 않음). 제철은 이달의 식재료 응답으로 채움.
  */
 export default function DecisionCardSheet({
@@ -24,10 +22,6 @@ export default function DecisionCardSheet({
   const t = useT();
   const [image, setImage] = useState<{ url: string; file: File }>();
   const [error, setError] = useState<'' | 'decisionCardError' | 'decisionCardShareError'>('');
-  const [recipe, setRecipe] = useState<{ open: boolean; loading: boolean; answer?: AskResponse }>({
-    open: false,
-    loading: false,
-  });
   useEffect(() => {
     let active = true;
     let url: string | undefined;
@@ -63,25 +57,6 @@ export default function DecisionCardSheet({
         setError('decisionCardShareError');
     }
   };
-  const toggleRecipe = async () => {
-    if (recipe.open) return setRecipe((r) => ({ ...r, open: false }));
-    if (recipe.answer) return setRecipe((r) => ({ ...r, open: true }));
-    setRecipe({ open: true, loading: true });
-    try {
-      const answer = await ask({
-        question: `${data.itemName} 레시피 알려줘`,
-        item_id: data.itemId,
-      });
-      setRecipe({ open: true, loading: false, answer });
-    } catch {
-      setRecipe({ open: true, loading: false });
-    }
-  };
-  const recipeText =
-    recipe.answer?.kind === 'answer' && recipe.answer.answer
-      ? recipe.answer.answer
-      : t('decisionCardRecipeNone');
-
   return (
     <Sheet
       title={t('decisionCardTitle')}
@@ -116,30 +91,6 @@ export default function DecisionCardSheet({
       {error && <ErrorBox message={t(error)} />}
       {image && <img className={s.cardPreview} src={image.url} alt={data.alt} />}
       <p className="caption">{t('decisionCardPrivacy')}</p>
-      <button
-        type="button"
-        className={s.recipeButton}
-        aria-expanded={recipe.open}
-        onClick={() => void toggleRecipe()}
-      >
-        {t('decisionCardRecipe')}
-        <span aria-hidden="true">{recipe.open ? '▴' : '▾'}</span>
-      </button>
-      {recipe.open && (
-        <div className={s.recipePanel} role="region" aria-label={t('decisionCardRecipe')}>
-          {recipe.loading ? (
-            <p role="status">{t('decisionCardRecipeLoading')}</p>
-          ) : (
-            <p>{recipeText}</p>
-          )}
-          {recipe.answer?.kind === 'answer' &&
-            recipe.answer.citations?.slice(0, 2).map((c) => (
-              <p key={c.title} className="caption">
-                {c.title} · {c.publisher}
-              </p>
-            ))}
-        </div>
-      )}
     </Sheet>
   );
 }

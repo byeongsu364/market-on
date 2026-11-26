@@ -293,7 +293,7 @@ export function PriceGauge({
       aria-label={
         label ??
         (band
-          ? `기준시세와 견준 가격 자리: ${BAND_LABELS[band - 1]}`
+          ? `기준시세와 비교한 가격 자리: ${BAND_LABELS[band - 1]}`
           : '기준시세가 없어 비교하지 않아요')
       }
     >

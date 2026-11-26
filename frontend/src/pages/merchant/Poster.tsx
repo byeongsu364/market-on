@@ -64,7 +64,7 @@ export default function Poster({ market = false }: { market?: boolean }) {
         )}
         <Resource state={f.info}>
           {info && (
-            <section className={`poster ${s.posterCard}`}>
+            <section className={`poster ${s.posterCard}`} data-theme="light">
               <div className={s.awning} aria-hidden="true">
                 <span />
                 <span className={s.awningCells}>

@@ -247,3 +247,29 @@ small {
     display: none !important;
   }
 }
+
+/* 밝은·어두운 화면에 따라 하나만 보이는 그림(로고 등, components/common/BrandLogo) */
+.theme-dark-only {
+  display: none !important;
+}
+[data-theme='dark'] .theme-dark-only {
+  display: revert !important;
+}
+[data-theme='dark'] .theme-light-only {
+  display: none !important;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .theme-dark-only {
+    display: revert !important;
+  }
+  :root:not([data-theme='light']) .theme-light-only {
+    display: none !important;
+  }
+}
+/* 소개 사이트처럼 늘 밝게 둔 묶음 안에서는 밝은 그림 */
+[data-theme='light'] .theme-dark-only {
+  display: none !important;
+}
+[data-theme='light'] .theme-light-only {
+  display: revert !important;
+}

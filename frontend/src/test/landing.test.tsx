@@ -73,7 +73,7 @@ it('위 메뉴의 기능 페이지들이 열리고, 메뉴에서 지금 페이�
   asDesktop(true);
   show('/intro/prices');
   expect(
-    await screen.findByRole('heading', { level: 1, name: '오늘의 기준시세와 견줘요' }),
+    await screen.findByRole('heading', { level: 1, name: '오늘의 기준시세와 비교해요' }),
   ).toBeInTheDocument();
   const nav = screen.getByRole('navigation', { name: '기능 소개' });
   for (const name of [

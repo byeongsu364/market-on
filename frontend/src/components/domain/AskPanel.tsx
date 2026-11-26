@@ -10,7 +10,6 @@ import ErrorBox from '../common/ErrorBox';
 import Loading from '../common/Loading';
 import { useWaitSteps } from '../../hooks/useWaitSteps';
 import AskAnswer from './AskAnswer';
-import { Field, SectionHeader } from '../common/parts';
 import s from './domain.module.css';
 
 const topics: AskIntent[] = ['select', 'store', 'prep', 'season'];
@@ -24,7 +23,6 @@ type Entry = { id: number; question: string; intent?: AskIntent; response: AskRe
 export default function AskPanel({ itemId }: { itemId: string }) {
   const t = useT();
   const { market } = useSession();
-  const [question, setQuestion] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(false);
   const waitLabels = [t('waitSearch'), t('waitOrganize'), t('waitWrite')];
@@ -73,8 +71,8 @@ export default function AskPanel({ itemId }: { itemId: string }) {
     void submit({ intent }, t(labels[intent]!));
   }
   return (
-    <section className={s.ask} aria-labelledby="ask-title">
-      <SectionHeader id="ask-title" title={t('askTitle')} />
+    // 2026-11-27 요청: 제목과 자유 질문은 빼고 네 가지 버튼만(고르는 법·보관·손질·제철)
+    <section className={s.ask} aria-label={t('askTitle')}>
       <ChipGroup
         hideLegend
         label={t('askChips')}
@@ -84,30 +82,6 @@ export default function AskPanel({ itemId }: { itemId: string }) {
         display={(intent) => t(labels[intent]!)}
         disabled={loading}
       />
-      <form
-        className={s.askForm}
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (question.trim() && question.length <= 200)
-            void submit({ question: question.trim() }, question.trim());
-        }}
-      >
-        <Field
-          label={t('askQuestion')}
-          value={question}
-          placeholder={t('askPlaceholder')}
-          hint={`${t('askLimit')} · ${question.length}/200`}
-          disabled={loading}
-          onChange={(event) => setQuestion(event.target.value)}
-        />
-        <Button
-          type="submit"
-          size="md"
-          disabled={loading || !question.trim() || question.length > 200}
-        >
-          {t('askSubmit')}
-        </Button>
-      </form>
       {loading && (
         <Card>
           <div aria-live="polite">

@@ -92,6 +92,6 @@ it('PC 로그인은 머리말 없이 왼쪽 브랜드 면과 오른쪽 폼', asy
   show('/login');
   expect(await screen.findByRole('heading', { name: '로그인', level: 1 })).toBeInTheDocument();
   expect(screen.queryByRole('search')).toBeNull();
-  expect(screen.getByText('살 만한 가격인지, 시장에서 바로 확인해요')).toBeInTheDocument();
+  expect(screen.getByText('기준시세와 얼마나 다른지, 시장에서 바로 확인해요')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: '회원가입' })).toHaveAttribute('href', '/signup');
 });

@@ -16,7 +16,7 @@ export default function TabBar() {
         지도
       </Link>
       <Link to={ctx.href('/scan', { store: ctx.storeId })} className={s.scan}>
-        <Icon name="camera" size={22} />
+        <Icon name="camera" size={24} />
         찍기
       </Link>
       <Link to={ctx.href('/shop')} className={s.tab} aria-current={onShop ? 'page' : undefined}>

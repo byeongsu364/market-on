@@ -64,7 +64,9 @@ export function buildCardData(input: CardInput) {
   const bandLine = verdict ? verdict.message : '';
   // 신선도에는 결론을 붙이지 않고 손님이 한 확인만 적음(기획서 "팀 원칙과 맞추기")
   const footer = '신선도는 직접 확인했어요';
-  const title = [item.name, price?.variety_name].filter(Boolean).join(' · ');
+  const title = [item.name, price?.variety_name !== item.name ? price?.variety_name : null]
+    .filter(Boolean)
+    .join(' · ');
   // 2026-11-27 시안(판단 카드): 위 가격 두 줄 + 비교 칩, "비교 근거 4가지", 내가 확인한 것(체크한 것만)
   const seenLine = hasPrice
     ? {
@@ -324,8 +326,9 @@ export async function drawCard(canvas: HTMLCanvasElement, data: CardData): Promi
   // 오른쪽: 품목 · 품종, 현장 가격, 기준시세, 비교 칩
   const rx = P + photoS + 44;
   const rw = W - P - rx;
-  text(data.title, rx, photoY + 60, 52, rw, { weight: 700, lines: 2 });
-  let ry = photoY + 150;
+  // 이름이 두 줄이 되면 가격 줄을 그만큼 내림(겹치던 것, 2026-11-27)
+  const titleH = text(data.title, rx, photoY + 60, 52, rw, { weight: 700, lines: 2 });
+  let ry = photoY + 60 + titleH + 26;
   const priceRow = (row: { label: string; value: string; unit: string }) => {
     const lw = measure(row.label + ' ', 32);
     text(row.label, rx, ry, 32, rw, { color: colors.soft });

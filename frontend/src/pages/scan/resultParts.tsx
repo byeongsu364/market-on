@@ -420,7 +420,8 @@ export function SellingStores({
   total: number;
 }) {
   const t = useT();
-  const listKey = `${itemId}:${map?.market_id}`;
+  // 품목이 바뀔 때만 접음(시장 지도가 늦게 와서 market_id가 채워져도 펼친 목록은 그대로)
+  const listKey = itemId;
   const [expandedFor, setExpandedFor] = useState('');
   const visible = expandedFor === listKey ? stores : stores.slice(0, 5);
   return (

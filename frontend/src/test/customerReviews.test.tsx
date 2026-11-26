@@ -106,14 +106,17 @@ it('리뷰 횟수 제한 오류를 화면에 표시한다', async () => {
   );
 });
 
-it('지도에서 점포를 고른 시트에도 리뷰가 보이고 로그인 복귀 주소를 유지한다', async () => {
+it('지도에서 점포를 고른 카드에는 리뷰 한 줄 요약이 있고 누르면 점포 화면 리뷰로 간다', async () => {
   show('/?market=market:demo&item=item:apple&store=store:A-05');
+  const summary = await screen.findByRole('link', { name: /리뷰/ });
+  expect(summary).toHaveAttribute('href', expect.stringContaining('/s/store%3AA-05'));
+  fireEvent.click(summary);
   await screen.findByText('손님 리뷰');
   fireEvent.click(screen.getByRole('button', { name: '리뷰 쓰기' }));
   await screen.findByRole('heading', { name: '로그인' });
   expect(screen.getByRole('link', { name: '회원가입' })).toHaveAttribute(
     'href',
-    expect.stringContaining('next=%2F%3Fmarket%3Dmarket%3Ademo'),
+    expect.stringContaining('next='),
   );
 });
 

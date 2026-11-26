@@ -192,7 +192,8 @@ function MarketView({ market }: { market: Market }) {
     near && listed.some((v) => v.distance !== null)
       ? [...listed].sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
       : listed;
-  const shown = more ? sorted : sorted.slice(0, LIST_LIMIT);
+  // 시트를 끝까지 펴면 목록도 끝까지("더 보기" 없이), 접혀 있을 때만 앞 10곳
+  const shown = more || expanded ? sorted : sorted.slice(0, LIST_LIMIT);
   const hasCoords = views.some((v) => v.store.lat != null && v.store.lng != null);
   const categories = (Object.keys(CATEGORY_LABELS) as StoreCategory[])
     .map((c) => ({ c, n: views.filter((v) => v.category === c).length }))
@@ -364,7 +365,7 @@ function MarketView({ market }: { market: Market }) {
       onRoute={() => setRoute(selected)}
     />
   );
-  const moreButton = sorted.length > LIST_LIMIT && !more && (
+  const moreButton = sorted.length > LIST_LIMIT && !more && !expanded && (
     <Button variant="surface" size="md" wide onClick={() => setMore(true)}>
       {t('mapMore')}
     </Button>

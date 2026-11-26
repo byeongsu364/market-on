@@ -100,6 +100,14 @@
 /* 사용자가 직접 고르지 않았을 때 기기 설정을 따름 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
+    --tint-apple: #2a1d1e;
+    --tint-apple-hongro: #2a1d1e;
+    --tint-apple-shinano-gold: #29261a;
+    --tint-pear: #29251a;
+    --tint-persimmon: #2b2017;
+    --tint-green-onion: #1b261b;
+    --tint-onion: #2a2419;
+    --tint-mandarin: #2b2017;
     --color-canvas: #111113;
     --color-canvas-soft: #161618;
     --color-surface-card: #19191b;

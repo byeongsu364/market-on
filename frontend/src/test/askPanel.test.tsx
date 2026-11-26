@@ -33,7 +33,7 @@ beforeEach(() => {
   vi.mocked(ask).mockReset().mockResolvedValue(response);
   Element.prototype.scrollIntoView = vi.fn();
 });
-it('칩·자유 질문 계약, 중복 스크롤, 200자 제한과 최대 3개 답', async () => {
+it('네 가지 칩만 있고(제목·자유 질문 없음), 중복은 스크롤, 답은 최대 3개', async () => {
   render(
     <Wrapper>
       <AskPanel itemId="item:green_onion" />
@@ -49,25 +49,16 @@ it('칩·자유 질문 계약, 중복 스크롤, 200자 제한과 최대 3개 �
   fireEvent.click(screen.getByRole('button', { name: '보관' }));
   expect(ask).toHaveBeenCalledTimes(1);
   expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
-  const input = screen.getByLabelText('자유 질문');
-  fireEvent.change(input, { target: { value: '가'.repeat(201) } });
-  expect(screen.getByRole('button', { name: '묻기' })).toBeDisabled();
-  fireEvent.change(input, { target: { value: '냉동해도 돼요?' } });
-  fireEvent.click(screen.getByRole('button', { name: '묻기' }));
-  await screen.findByRole('heading', { name: '냉동해도 돼요?' });
-  expect(ask).toHaveBeenLastCalledWith({
-    question: '냉동해도 돼요?',
-    item_id: 'item:green_onion',
-    market_id: 'market:demo',
-  });
-  for (const label of ['손질', '제철']) {
+  expect(screen.queryByLabelText('자유 질문')).toBeNull();
+  expect(screen.queryByRole('heading', { name: '물어보기' })).toBeNull();
+  for (const label of ['손질', '제철', '고르는 법']) {
     fireEvent.click(screen.getByRole('button', { name: label }));
     await screen.findByRole('heading', { name: label });
   }
   expect(screen.getAllByRole('heading', { level: 3 }).map((node) => node.textContent)).toEqual([
+    '고르는 법',
     '제철',
     '손질',
-    '냉동해도 돼요?',
   ]);
 });
 it('대기 중 비활성과 aria-live 및 503 재시도', async () => {

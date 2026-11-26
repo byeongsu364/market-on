@@ -134,7 +134,12 @@ function PriceRows({ item, market }: { item: Item; market: Market }) {
   const rows = p.varieties.length
     ? p.varieties
         .filter((v) => v.reference_price != null)
-        .map((v) => ({ key: v.variety_id, name: `${item.name} ${v.name}`, variety: v.variety_id }))
+        // 품종 이름이 품목 이름과 같으면(대파·양파처럼 품종 구분이 없는 품목) 한 번만
+        .map((v) => ({
+          key: v.variety_id,
+          name: v.name === item.name ? item.name : `${item.name} ${v.name}`,
+          variety: v.variety_id,
+        }))
     : [{ key: item.item_id, name: item.name, variety: undefined }];
   return (
     <>
