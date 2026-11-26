@@ -11,6 +11,10 @@ const show = (path: string) =>
 it('결과의 실제 체크박스와 가격 비교를 표시하고 판정 표현을 사용하지 않는다', async () => {
   const { container } = show('/items/item:green_onion');
   await screen.findByRole('heading', { name: '대파' });
+  expect(screen.getByRole('link', { name: '대화로 더 묻기' })).toHaveAttribute(
+    'href',
+    '/chat?item_id=item%3Agreen_onion',
+  );
   const checkbox = screen.getAllByRole('checkbox')[0];
   fireEvent.click(checkbox);
   expect(checkbox).toBeChecked();

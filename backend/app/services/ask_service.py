@@ -17,8 +17,9 @@ from .price_report_service import hash_device
 TOPICS = {'select': '확인 포인트', 'store': '보관', 'prep': '손질', 'season': '제철'}
 
 
-def ask(conn, data, device_id, *, embedder=None):
-    consume_quota(conn, device_id)
+def ask(conn, data, device_id, *, embedder=None, consume=True):
+    if consume:
+        consume_quota(conn, device_id)
     intent = data.intent or ask_intent.rule_intent(data.question) or ask_llm.classify(data.question)
     if intent not in ask_intent.INTENTS:
         return AskResponse(kind='out_of_scope')

@@ -633,3 +633,27 @@ summary {
 .poster h1 {
   word-break: keep-all;
 }
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-block: 24px;
+}
+.chat-bubble {
+  max-width: 90%;
+  overflow-wrap: anywhere;
+}
+.chat-user {
+  align-self: flex-end;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+}
+.chat-assistant {
+  align-self: flex-start;
+}
+.chat-tool {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}

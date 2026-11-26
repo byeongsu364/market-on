@@ -122,8 +122,9 @@ def compose(candidates, purpose, headcount, budget):
     ]
 
 
-def recommend(conn, data, device_id, *, embedder=None):
-    ask_service.consume_quota(conn, device_id)
+def recommend(conn, data, device_id, *, embedder=None, consume=True):
+    if consume:
+        ask_service.consume_quota(conn, device_id)
     if not store_repo.get_market(conn, data.market_id):
         raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 422)
     ids = sorted({r['item_id'] for r in store_repo.market_items(conn, data.market_id)})

@@ -265,3 +265,14 @@ export type AskResponse = {
   cached: boolean;
   removed: number;
 };
+
+export type ChatMessage = { role: 'user' | 'assistant'; content: string };
+export type ChatRequest = { messages: ChatMessage[]; market_id: string; item_id?: string };
+export type ChatResponse = {
+  reply: string;
+  citations: Citation[];
+  tools: { name: string; label: string }[];
+  items: { item_id: string; name: string }[];
+  model: string | null;
+  removed: number;
+};

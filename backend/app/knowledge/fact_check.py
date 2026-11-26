@@ -4,7 +4,7 @@ import re
 
 from .ingest import tag_entities
 
-NUMBER = r'-?\d+(?:\.\d+)?'
+NUMBER = r'(?<![A-Za-z0-9.\-])-?\d+(?:\.\d+)?'
 VALUES = re.compile(
     rf'({NUMBER})(?:\s*[~∼〜–—-]\s*({NUMBER}))?\s*(℃|°C|도|개월|달|일|주|월|%|Bx|kg|g|원|개|단|명)',
     re.IGNORECASE,
@@ -34,7 +34,14 @@ def normalize_values(text):
         '열': 10,
     }.items():
         text = re.sub(rf'{word}\s*(달|개월|일|주|월|도|g|kg|원|개|단|명)', rf'{value}\1', text)
-    return text.replace(',', '')
+    text = text.replace(',', '')
+    # "3만원", "1만 5천원" → 30000원, 15000원
+    text = re.sub(
+        r'(\d+)\s*만\s*(?:(\d+)\s*천\s*)?원',
+        lambda m: f'{int(m[1]) * 10000 + int(m[2] or 0) * 1000}원',
+        text,
+    )
+    return re.sub(r'(\d+)\s*천\s*원', lambda m: f'{int(m[1]) * 1000}원', text)
 
 
 def values(text):

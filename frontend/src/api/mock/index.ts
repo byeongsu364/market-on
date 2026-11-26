@@ -202,3 +202,32 @@ export async function ask(
     }));
   return mock(() => ({ ...base, kind: 'no_evidence', answer: '이 품목의 자료가 아직 없어요.' }));
 }
+
+export async function chat(
+  data: import('../../types/contract').ChatRequest,
+): Promise<import('../../types/contract').ChatResponse> {
+  const question = data.messages.at(-1)?.content ?? '';
+  if (question.includes('대파') || data.item_id === 'item:green_onion') {
+    const result = await ask({
+      item_id: 'item:green_onion',
+      intent: 'store',
+      market_id: data.market_id,
+    });
+    return {
+      reply: result.answer ?? '이 품목의 자료가 아직 없어요.',
+      citations: result.citations,
+      tools: [{ name: 'ask_knowledge', label: '근거 자료 찾기' }],
+      items: [{ item_id: 'item:green_onion', name: '대파' }],
+      model: result.model,
+      removed: 0,
+    };
+  }
+  return mock(() => ({
+    reply: '이 시장 장보기 질문을 도와드릴 수 있어요',
+    citations: [],
+    tools: [],
+    items: [],
+    model: null,
+    removed: 0,
+  }));
+}

@@ -25,6 +25,7 @@ export default function Result() {
           )}
           <Checklist key={f.itemId} criteria={f.item.data.criteria} />
           <AskPanel key={`ask:${f.itemId}`} itemId={f.itemId} />
+          <Link to={`/chat?item_id=${encodeURIComponent(f.itemId)}`}>대화로 더 묻기</Link>
           <section className="card" id="price-comparison">
             <h2>{t('priceComparison')}</h2>
             <label>
