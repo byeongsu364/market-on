@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { VIDEO_VERSION } from './facts';
 import v from './video.module.css';
 
 /**
@@ -60,6 +61,10 @@ function PlayIcon({ size = 32 }: { size?: number }) {
   );
 }
 
+/** 영상·포스터 주소에 판(version)을 붙여 Cloudflare·브라우저에 남은 예전 파일을 쓰지 않게(2026-11-27) */
+const versioned = (url?: string) =>
+  url && url.startsWith('/landing/video/') ? `${url}?v=${VIDEO_VERSION}` : url;
+
 const safePlay = (el: HTMLVideoElement) => {
   try {
     void el.play()?.catch(() => {});
@@ -83,7 +88,9 @@ export default function FeatureVideo({
   fit = 'cover',
   className,
 }: Props) {
-  const posters = poster == null ? [] : typeof poster === 'string' ? [poster] : [...poster];
+  const posters = (poster == null ? [] : typeof poster === 'string' ? [poster] : [...poster]).map(
+    (p) => versioned(p) as string,
+  );
   const reduced = useMediaQuery('(prefers-reduced-motion: reduce)');
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -91,13 +98,24 @@ export default function FeatureVideo({
   // 화면에 들어올 때만 재생, 나가면 멈춤
   useEffect(() => {
     const video = ref.current;
-    if (!video || reduced || typeof IntersectionObserver !== 'function') return;
+    if (!video) return;
+    // Safari는 muted 속성(attribute)이 있어야 자동 재생을 허용해요
+    video.muted = true;
+    video.setAttribute('muted', '');
+    if (reduced) {
+      video.pause();
+      return;
+    }
+    if (typeof IntersectionObserver !== 'function') {
+      safePlay(video);
+      return;
+    }
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) safePlay(video);
         else video.pause();
       },
-      { threshold: 0.35 },
+      { threshold: 0.2 },
     );
     io.observe(video);
     return () => {
@@ -115,14 +133,15 @@ export default function FeatureVideo({
         muted
         loop
         playsInline
-        preload="metadata"
+        autoPlay={!reduced}
+        preload="auto"
         poster={posters[0]}
         aria-label={label}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       >
-        {webm && <source src={webm} type="video/webm" />}
-        <source src={src} type="video/mp4" />
+        {webm && <source src={versioned(webm)} type="video/webm" />}
+        <source src={versioned(src)} type="video/mp4" />
       </video>
       {reduced && (
         <button

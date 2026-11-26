@@ -10,6 +10,9 @@ export const SITE_URL = 'https://marketon.laea.io/';
 export const SITE_HOST = 'marketon.laea.io';
 export const SITE_START_URL = `https://marketon.laea.io${APP_START}`;
 
+/** 기능 영상 파일을 바꾸면 올려요(주소 뒤 ?v=로 붙어 캐시된 예전 영상을 안 씀) */
+export const VIDEO_VERSION = '20261127-2';
+
 export const FACTS = {
   /** aT 소매가격 조사 6부류 전체 */
   items: 95,

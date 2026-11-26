@@ -5,7 +5,7 @@ import App from '../App';
 import { PC_APP_KEY, showLanding } from '../components/layout/desktopGate';
 import FeatureVideo from '../pages/landing/FeatureVideo';
 import { nextStop, stepDistance } from '../pages/landing/motion';
-import { SITE_START_URL } from '../pages/landing/facts';
+import { SITE_START_URL, VIDEO_VERSION } from '../pages/landing/facts';
 
 // 소개 사이트(PC 발표용, 2026-11-27 디자인 시안 marketon_site_v1): 홈 · 기능 · 다운로드 · 팀 소개
 function asDesktop(on: boolean, reducedMotion = false) {
@@ -233,7 +233,12 @@ describe('기능', () => {
     show('/intro/features');
     const video = await screen.findByLabelText(/^가게에서 노지 귤과 가격표를 찍으면/);
     expect(video.tagName).toBe('VIDEO');
-    expect(video).toHaveAttribute('poster', '/landing/video/anshimon.webp');
+    // 주소 뒤 ?v=판: 캐시에 남은 예전 영상을 쓰지 않게
+    expect(video.getAttribute('poster')).toMatch(/^\/landing\/video\/anshimon\.webp\?v=/);
+    expect(video.querySelector('source[type="video/mp4"]')?.getAttribute('src')).toMatch(
+      /^\/landing\/video\/anshimon\.mp4\?v=/,
+    );
+    expect(video).toHaveAttribute('muted');
     expect(video).toHaveProperty('muted', true);
     expect(document.querySelectorAll('video source[type="video/mp4"]')).toHaveLength(8);
     expect(document.querySelectorAll('video source[type="video/webm"]')).toHaveLength(8);
@@ -373,9 +378,10 @@ describe('FeatureVideo', () => {
     expect(video).toHaveAttribute('playsinline');
     expect(video).toHaveAttribute('poster', '/landing/card.webp');
     expect(Array.from(video.querySelectorAll('source')).map((x) => x.getAttribute('src'))).toEqual([
-      '/landing/video/anshimon.webm',
-      '/landing/video/anshimon.mp4',
+      `/landing/video/anshimon.webm?v=${VIDEO_VERSION}`,
+      `/landing/video/anshimon.mp4?v=${VIDEO_VERSION}`,
     ]);
+    expect(video).toHaveAttribute('autoplay');
     expect(screen.queryByRole('button')).toBeNull();
   });
 
@@ -395,6 +401,8 @@ it('기능 페이지 숫자·설명은 영상 속 화면(노지 귤 250원 · �
   // 레시피는 장바구니에서, 손질법은 결과 화면의 손질 버튼으로
   expect(text).toContain('레시피에서 고르기');
   expect(text).toContain('결과 화면에서 손질을 누르면');
+  expect(screen.getByText('레시피 추천', { selector: 'strong' })).toBeInTheDocument();
+  expect(screen.getByText('손질법', { selector: 'strong' })).toBeInTheDocument();
   expect(text).toContain('대파 1단 경동시장 2,128원');
   expect(text).not.toContain('9% 낮아요');
   expect(text).not.toContain('부사 3개 5,000원');
