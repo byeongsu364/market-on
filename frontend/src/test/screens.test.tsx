@@ -82,7 +82,7 @@ it('시장 미선택이면 선택 화면을 거쳐 원래 흐름으로 돌아온
 });
 it('선물 구성은 과일 품목과 출처를 표시한다', async () => {
   show('/recommend');
-  fireEvent.click(screen.getByRole('button', { name: '선물' }));
+  fireEvent.click(screen.getByRole('button', { name: '선물용' }));
   fireEvent.click(screen.getByRole('button', { name: '2명' }));
   fireEvent.click(screen.getByRole('button', { name: '2만원' }));
   expect(await screen.findByRole('heading', { name: '사과' })).toBeInTheDocument();

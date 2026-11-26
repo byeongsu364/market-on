@@ -31,6 +31,12 @@ type Entry =
 type Ask = Topic | 'after' | 'retry' | null;
 
 const PURPOSES: Purpose[] = ['집밥', '선물', '모임'];
+// 서버에는 한국어 값(집밥·선물·모임)을 보내고, 화면에는 고른 언어로(045)
+const PURPOSE_KEY: Record<Purpose, Key> = {
+  집밥: 'shopPurposeHome',
+  선물: 'shopPurposeGift',
+  모임: 'shopPurposeParty',
+};
 const HEADCOUNTS = [1, 2, 3, 4, 6, 8];
 const BUDGETS = [10000, 20000, 30000, 50000, 100000];
 const TOPICS: Topic[] = ['purpose', 'headcount', 'budget'];
@@ -239,8 +245,8 @@ export default function Shop() {
       {ask === 'purpose' && (
         <>
           {PURPOSES.map((p) => (
-            <Chip key={p} onClick={() => answer('purpose', p, p)}>
-              {p}
+            <Chip key={p} onClick={() => answer('purpose', p, t(PURPOSE_KEY[p]))}>
+              {t(PURPOSE_KEY[p])}
             </Chip>
           ))}
           {!desktop && !recipesShown && (

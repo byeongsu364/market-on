@@ -118,7 +118,7 @@ it('장바구니는 도우미가 차례로 묻고, 구성 뒤 조건 하나만 �
   );
   expect(screen.getByRole('heading', { name: '장바구니' })).toBeInTheDocument();
   expect(screen.getByText('어떤 용도로 사세요?')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: '모임' }));
+  fireEvent.click(screen.getByRole('button', { name: '모임용' }));
   expect(screen.getByText('몇 명이 드세요?')).toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('인원 직접 입력'), { target: { value: '12' } });
   fireEvent.click(screen.getByRole('button', { name: '확인' }));

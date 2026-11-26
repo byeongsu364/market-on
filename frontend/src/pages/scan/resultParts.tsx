@@ -2,7 +2,7 @@ import { useCallback, useState, useId } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getPriceHistory } from '../../api/price';
 import { useResource } from '../../hooks/useResource';
-import { useT } from '../../i18n';
+import { useT, type Key } from '../../i18n';
 import Button from '../../components/common/Button';
 import Icon from '../../components/common/Icon';
 import {
@@ -15,7 +15,7 @@ import {
   SectionHeader,
 } from '../../components/common/parts';
 import StorePriceDisplay from '../../components/domain/StorePriceDisplay';
-import { bandOf, BAND_LABELS, FALLBACK_LABELS, type PriceVerdict } from '../../utils/priceBand';
+import { bandOf, FALLBACK_LABELS, type PriceVerdict } from '../../utils/priceBand';
 import { diffPct } from '../../utils/diffPct';
 import { formatPrice } from '../../utils/formatPrice';
 import { formatDate } from '../../utils/formatDate';
@@ -32,7 +32,7 @@ export function BandCell({ band }: { band: PriceBand | null }) {
   return band ? (
     <span className={s.bandCell}>
       <MiniGauge band={band} />
-      {BAND_LABELS[band - 1]}
+      {t(`cardBand${band}` as Key)}
     </span>
   ) : (
     <span className={s.bandOff}>{t('scanCannotCompare')}</span>
