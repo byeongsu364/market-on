@@ -132,12 +132,17 @@ it('`/?market=market:demo`는 약도에 경계·핀·편의시설과 점포 목�
 
 it('`/?market=&item=`은 파는 점포만 핀으로 남기고 나머지는 점으로 줄인다', async () => {
   const spy = vi.spyOn(storesApi, 'getMarketMap');
+  const marketsSpy = vi.spyOn(api, 'getMarkets');
+  const marketSpy = vi.spyOn(api, 'getMarket');
   const { container } = show('/?market=market:demo&item=item:green_onion');
   expect(await screen.findByRole('heading', { name: '대파 파는 점포' })).toBeInTheDocument();
   expect(spy).toHaveBeenCalledWith('market:demo', 'item:green_onion', undefined);
   expect(await screen.findByText('3곳')).toBeInTheDocument();
   expect(pinButtons()).toHaveLength(3);
   expect(container.querySelectorAll('.mo-dot')).toHaveLength(21);
+  expect(marketsSpy).not.toHaveBeenCalled();
+  expect(marketSpy).toHaveBeenCalledTimes(1);
+  expect(spy).toHaveBeenCalledTimes(1);
   expect(
     within(screen.getByRole('list', { name: '대파 파는 점포' })).getAllByRole('button'),
   ).toHaveLength(3);

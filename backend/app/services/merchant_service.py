@@ -15,6 +15,12 @@ def get_store(conn, user):
     return {
         'store_id': store['id'],
         'name': store['name_ko'],
+        'payments': store.get('payments', []),
+        'intro': store.get('intro'),
+        'location': {'lat': store['lat'], 'lng': store['lng']}
+        if store.get('lat') is not None and store.get('lng') is not None
+        else None,
+        'location_confirmed': store.get('location_verified', False),
         'market_id': store['market_id'],
         'hours': {'open': '', 'close': ''} | (store['hours'] or {}),
         'item_ids': [i['item_id'] for i in merchant_repo.items(conn, store_id)],
@@ -27,12 +33,20 @@ def get_store(conn, user):
 
 def patch_store(conn, user, data):
     store_id = user['store_id']
+    if data.intro is not None:
+        from .moderation import check
+
+        check(data.intro)
     with conn.transaction():
         user_repo.lock_store(conn, store_id)
         if data.item_ids is not None:
             if set(data.item_ids) != merchant_repo.valid_items(conn, data.item_ids):
                 raise AppError('INVALID_ITEM', '품목을 확인하세요.', 422)
             store_repo.set_store_items(conn, store_id, data.item_ids, 'merchant')
+        if data.payments is not None:
+            conn.execute('update stores set payments=%s where id=%s', (data.payments, store_id))
+        if 'intro' in data.model_fields_set:
+            conn.execute('update stores set intro=%s where id=%s', (data.intro, store_id))
         if data.hours is not None:
             merchant_repo.update_hours(conn, store_id, data.hours.model_dump())
     return get_store(conn, user)
@@ -143,3 +157,24 @@ def confirm_price(conn, user, data):
         return price_repo.confirm_store_price(
             conn, user['store_id'], data.item_id, unit, data.price, user['id']
         )
+
+
+def save_location(conn, user, data):
+    from .market_service import distance
+    from types import SimpleNamespace
+
+    with conn.transaction():
+        user_repo.lock_store(conn, user['store_id'])
+        store = store_repo.get_store(conn, user['store_id'])
+        market = store_repo.get_market(conn, store['market_id'])
+        if (
+            market['lat'] is None
+            or market['lng'] is None
+            or distance(data.lat, data.lng, SimpleNamespace(**market)) * 6_371_000 > 2000
+        ):
+            raise AppError('INVALID_LOCATION', '시장 중심에서 2km 이내의 위치를 선택하세요.', 422)
+        conn.execute(
+            'update stores set lat=%s,lng=%s,location_verified=true where id=%s',
+            (data.lat, data.lng, user['store_id']),
+        )
+    return get_store(conn, user)

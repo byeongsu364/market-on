@@ -48,10 +48,12 @@ export default function MerchantHome() {
         <div className={desktop ? s.webStats : s.stats}>
           <Stat value={people(store.today_views)} label={t('storeViews')} />
           <Stat value={people(store.sale_views)} label={t('saleViews')} />
-          {extras && <Stat value={people(extras.favorites)} label={t('merchantFavorites')} />}
+          {extras?.favorites !== undefined && (
+            <Stat value={people(extras.favorites)} label={t('merchantFavorites')} />
+          )}
         </div>
       )}
-      {extras && <p className={s.help}>{t('merchantSampleValues')}</p>}
+      {extras?.favorites !== undefined && <p className={s.help}>{t('merchantSampleValues')}</p>}
     </Resource>
   );
 
@@ -118,11 +120,11 @@ export default function MerchantHome() {
     </Resource>
   );
 
-  const soldOut = extras && store && (
+  const soldOut = extras?.sold_out_item_ids && store && (
     <Section title={t('merchantItemsToday')}>
       <ul className={s.list}>
         {store.item_ids.map((id) => {
-          const out = extras.sold_out_item_ids.includes(id);
+          const out = extras.sold_out_item_ids?.includes(id) ?? false;
           const name = itemName(id);
           return (
             <li key={id} className={s.row}>
@@ -154,7 +156,6 @@ export default function MerchantHome() {
       title: t('storeInfo'),
       end: store && fill(t('merchantHours'), store.hours),
     },
-    // 가게 위치 저장은 백엔드가 없어 mock에서만(live는 extras가 null)
     ...(extras
       ? [
           {

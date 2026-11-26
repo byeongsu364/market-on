@@ -16,6 +16,10 @@ import { currentMockUser, mockUsers, onMockReset } from './merchant';
 
 const soldOut = new Map<string, Set<string>>();
 const locations = new Map<string, LatLng>();
+export const storeLocation = (id: string) => {
+  const point = locations.get(id);
+  return point ? { ...point, verified: true } : {};
+};
 const notices = new Map<string, string>();
 onMockReset(() => {
   soldOut.clear();

@@ -37,6 +37,7 @@ def test_items_contract_and_missing_market(monkeypatch):
 
 
 def test_radius(monkeypatch):
+    monkeypatch.setattr(store_repo, 'market_extras', lambda *a: dict(store_count=0, requests=0))
     monkeypatch.setattr(
         store_repo,
         'list_markets',
@@ -59,6 +60,7 @@ def test_radius(monkeypatch):
 
 
 def test_far_away_falls_back_to_nearest(monkeypatch):
+    monkeypatch.setattr(store_repo, 'market_extras', lambda *a: dict(store_count=0, requests=0))
     # 2026-11-26 실제: 안산 근처(경동시장 30km)에서 반경 10km 안에 시장이 없어 목록이 비었음
     monkeypatch.setattr(
         store_repo,

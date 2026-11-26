@@ -1,9 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as api from '../../api/merchant';
 import { useResource, useAction } from '../../hooks/useResource';
 import { useMarketMap } from '../../hooks/useMarketMap';
-import { useMarkets } from '../../hooks/useMarkets';
+import { useMarket } from '../../hooks/useMarkets';
 import MapView, { type MapPin } from '../../components/map/MapView';
 import Resource from '../../components/common/Resource';
 import Button from '../../components/common/Button';
@@ -13,6 +13,7 @@ import AppHeader from '../../components/layout/AppHeader';
 import { storeCategory } from '../../utils/category';
 import type { LatLng } from '../../types/contract';
 import { useT } from '../../i18n';
+import { isMock } from '../../api/client';
 import { fill } from './format';
 import s from './merchant.module.css';
 
@@ -25,19 +26,21 @@ const moves = [
   { key: 'merchantPinRight', icon: 'chevronRight', rotate: 0, d: [1, 0] },
 ] as const;
 
-// StorePin: 내 가게 핀을 확인하거나 옮겨 저장. 저장 API(PUT /merchant/store/location)가 아직 없어 mock에서만 저장됨.
-// live에서는 상인 홈에 이 링크가 없고, 주소로 들어오면 준비 중 안내만 보여 줌.
 export default function StorePin() {
   const t = useT();
   const navigate = useNavigate();
   const store = useResource(api.getStore);
   const extras = useResource(api.getExtras);
-  const markets = useMarkets();
+  const marketDetail = useMarket(store.data?.market_id ?? '');
   const map = useMarketMap(store.data?.market_id ?? '');
   const [moved, setMoved] = useState<LatLng | null>(null);
   const save = useAction(api.saveLocation);
-  const market = markets.data?.find((m) => m.market_id === store.data?.market_id)?.name ?? '';
-  const point = moved ?? extras.data?.location ?? null;
+  const market = marketDetail.data?.name ?? '';
+  const center = marketDetail.data;
+  const point = useMemo(
+    () => moved ?? extras.data?.location ?? (center ? { lat: center.lat, lng: center.lng } : null),
+    [moved, extras.data?.location, center],
+  );
   const zoneName = (zone: string) => map.data?.zones.find((z) => z.id === zone)?.name;
   const nudge = useCallback(
     (dx: number, dy: number) => {
@@ -92,7 +95,7 @@ export default function StorePin() {
           boundaryLabel={market}
           facilities={map.data?.facilities}
           pins={pins}
-          sample
+          sample={isMock}
           topInset={100}
           bottomInset={300}
         />

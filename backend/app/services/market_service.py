@@ -4,6 +4,7 @@ import logging
 from datetime import UTC, datetime, time
 from math import asin, cos, radians, sin, sqrt
 from zoneinfo import ZoneInfo
+from types import SimpleNamespace
 
 from app.core.errors import AppError
 from app.db.repositories import sale_repo, store_repo
@@ -32,6 +33,9 @@ def nearby(conn, lat=None, lng=None, device_id=None, radius_km=5):
             lat=m['lat'],
             lng=m['lng'],
             status=m.get('status', 'active'),
+            address=m.get('address'),
+            amenities=m.get('amenities'),
+            **store_repo.market_extras(conn, m['id']),
         )
         for m in store_repo.list_markets(conn)
         if m['lat'] is not None and m['lng'] is not None
@@ -72,7 +76,7 @@ def nearby(conn, lat=None, lng=None, device_id=None, radius_km=5):
     )
 
 
-def market_map(conn, market_id, item_id=None, unit=None):
+def market_map(conn, market_id, item_id=None, unit=None, lat=None, lng=None):
     from .store_price_service import store_price
 
     if store_repo.get_market(conn, market_id) is None:
@@ -130,6 +134,22 @@ def market_map(conn, market_id, item_id=None, unit=None):
         sale = sales.get(row['id'])
         stores.append(
             Store(
+                # 상가정보 좌표는 건물 단위(경동 108곳 중 101곳이 같은 점)라 지도 핀으로는
+                # 상인이 확인한 위치만 내보내요. 거리는 건물 좌표로도 계산해요.
+                lat=row.get('lat') if row.get('location_verified') else None,
+                lng=row.get('lng') if row.get('location_verified') else None,
+                category=row.get('store_category_id'),
+                naver_name=row['name_ko'],
+                verified=row.get('location_verified', False),
+                open_now=open_now(hours),
+                payments=row.get('payments', []),
+                intro=row.get('intro'),
+                distance_m=round(distance(lat, lng, SimpleNamespace(**row)) * 6_371_000)
+                if lat is not None
+                and lng is not None
+                and row.get('lat') is not None
+                and row.get('lng') is not None
+                else None,
                 source=row.get('source', 'manual'),
                 guessed_item_ids=guessed.get(row['id'], []),
                 items_basis=(
@@ -179,7 +199,7 @@ def search(conn, q):
     from app.db.repositories import market_request_repo
 
     return [
-        Market(market_id=m['id'], name=m['name_ko'], status=m['status'], lat=m['lat'], lng=m['lng'])
+        market_detail(conn, m['id'])
         for m in market_request_repo.search(conn, q.strip())
         if m['lat'] is not None and m['lng'] is not None
     ]
@@ -202,3 +222,32 @@ def market_items(conn, market_id):
     if store_repo.get_market(conn, market_id) is None:
         raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
     return store_repo.market_item_counts(conn, market_id)
+
+
+def open_now(hours, instant=None):
+    if not hours or not hours.get('open') or not hours.get('close'):
+        return None
+    try:
+        opening, closing = time.fromisoformat(hours['open']), time.fromisoformat(hours['close'])
+    except (ValueError, TypeError):
+        return None
+    current = (
+        (instant or datetime.now(ZoneInfo('Asia/Seoul'))).astimezone(ZoneInfo('Asia/Seoul')).time()
+    )
+    return opening <= current < closing
+
+
+def market_detail(conn, market_id):
+    m = store_repo.get_market(conn, market_id)
+    if m is None:
+        raise AppError('MARKET_NOT_FOUND', '시장을 찾을 수 없습니다.', 404)
+    return Market(
+        market_id=m['id'],
+        name=m['name_ko'],
+        status=m.get('status', 'active'),
+        lat=m['lat'],
+        lng=m['lng'],
+        address=m.get('address'),
+        amenities=m.get('amenities'),
+        **store_repo.market_extras(conn, market_id),
+    )

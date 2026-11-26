@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import type { PaymentMethod } from '../types/contract';
 import * as api from '../api/merchant';
 import { getPending, decide } from '../api/admin';
 import { useResource, useAction } from './useResource';
@@ -68,6 +69,10 @@ export function useStoreEdit() {
   const catalog = useItemCatalog();
   const [hours, setHours] = useState<{ open: string; close: string } | null>(null);
   const [selected, setSelected] = useState<string[] | null>(null);
+  const [payments, setPayments] = useState<PaymentMethod[] | null>(null);
+  const [intro, setIntro] = useState<string | null>(null);
+  const paymentValue = payments ?? store.data?.payments ?? [];
+  const introValue = intro ?? store.data?.intro ?? '';
   const chosen = selected ?? store.data?.item_ids ?? [];
   const value = hours ?? {
     open: store.data?.hours.open || '09:00',
@@ -81,9 +86,14 @@ export function useStoreEdit() {
     value,
     action,
     setHours,
+    paymentValue,
+    setPayments,
+    introValue,
+    setIntro,
     toggle: (id: string) =>
       setSelected(chosen.includes(id) ? chosen.filter((i) => i !== id) : [...chosen, id]),
-    save: () => action.run({ hours: value, item_ids: chosen }),
+    save: () =>
+      action.run({ hours: value, item_ids: chosen, payments: paymentValue, intro: introValue }),
   };
 }
 export function useAdmin() {

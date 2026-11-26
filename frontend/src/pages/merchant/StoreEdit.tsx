@@ -14,8 +14,6 @@ const times = Array.from(
   (_, i) => `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`,
 );
 
-// StoreEdit: 영업시간과 취급 품목(지금 API PATCH /merchant/store).
-// 시안의 품종·결제 수단·한 줄 소개는 저장할 API가 없어 이번에는 넣지 않음(030 5장 표 참고).
 export default function StoreEdit() {
   const f = useStoreEdit();
   const t = useT();
@@ -68,6 +66,38 @@ export default function StoreEdit() {
               </ChipRow>
             </Resource>
             <p className={s.help}>{t('merchantSellsHelp')}</p>
+          </div>
+          <div className={s.group}>
+            <span className={s.groupLabel}>결제 수단</span>
+            <ChipRow label="결제 수단" wrap>
+              {(['card', 'cash', 'transfer', 'onnuri'] as const).map((method, i) => (
+                <Chip
+                  key={method}
+                  pressed={f.paymentValue.includes(method)}
+                  onClick={() =>
+                    f.setPayments(
+                      f.paymentValue.includes(method)
+                        ? f.paymentValue.filter((p) => p !== method)
+                        : [...f.paymentValue, method],
+                    )
+                  }
+                >
+                  {['카드', '현금', '계좌이체', '온누리상품권'][i]}
+                </Chip>
+              ))}
+            </ChipRow>
+          </div>
+          <div className={s.group}>
+            <label htmlFor="store-intro" className={s.groupLabel}>
+              한 줄 소개
+            </label>
+            <input
+              id="store-intro"
+              className={s.select}
+              maxLength={80}
+              value={f.introValue}
+              onChange={(e) => f.setIntro(e.target.value)}
+            />
           </div>
           {f.action.error && <ErrorBox message={f.action.error} />}
           {f.action.data && (

@@ -5,7 +5,9 @@ import type { LatLng, MerchantExtras } from '../types/contract';
 import type { MerchantStore, ClosingSale, SaleRequest, PosterInfo } from '../types/contract';
 export const getStore = () =>
   isMock ? mock.getStore() : request<MerchantStore>('/merchant/store');
-export const updateStore = (q: Partial<Pick<MerchantStore, 'hours' | 'item_ids'>>) =>
+export const updateStore = (
+  q: Partial<Pick<MerchantStore, 'hours' | 'item_ids' | 'payments' | 'intro'>>,
+) =>
   isMock
     ? mock.updateStore(q)
     : request<MerchantStore>('/merchant/store', { method: 'PATCH', body: JSON.stringify(q) });
@@ -38,12 +40,24 @@ export const confirmPrice = (q: import('../types/contract').PriceConfirmRequest)
         body: JSON.stringify(q),
       });
 
-// 030: 백엔드에 아직 없는 기능(단골 수, 오늘 품절, 가게 위치 저장)은 mock에서만. live는 null이라 화면이 숨김.
 const notAvailable = () =>
   Promise.reject({ code: 'NOT_AVAILABLE', message: '아직 준비 중인 기능이에요.' });
 export const getExtras = (): Promise<MerchantExtras | null> =>
-  isMock ? mock030.extras() : Promise.resolve(null);
+  isMock
+    ? mock030.extras()
+    : getStore().then((s) => ({
+        location: s.location ?? null,
+        location_confirmed: s.location_confirmed ?? false,
+      }));
 export const setSoldOut = (item_id: string, out: boolean): Promise<MerchantExtras> =>
   isMock ? mock030.setSoldOut(item_id, out) : notAvailable();
 export const saveLocation = (point: LatLng): Promise<MerchantExtras> =>
-  isMock ? mock030.saveLocation(point) : notAvailable();
+  isMock
+    ? mock030.saveLocation(point)
+    : request<MerchantStore>('/merchant/store/location', {
+        method: 'PUT',
+        body: JSON.stringify(point),
+      }).then((s) => ({
+        location: s.location ?? null,
+        location_confirmed: s.location_confirmed ?? false,
+      }));

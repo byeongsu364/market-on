@@ -143,3 +143,15 @@ def market_item_counts(conn, market_id):
         group by i.item_id,e.name_ko order by e.name_ko,i.item_id""",
         (market_id,),
     )
+
+
+def market_extras(conn, market_id):
+    return rows(
+        conn,
+        """select
+        (select count(*) from stores where market_id=%s and active) as store_count,
+        (select count(*) from market_demand where market_id=%s and kind='request'
+         and day between (now() at time zone 'Asia/Seoul')::date-6
+         and (now() at time zone 'Asia/Seoul')::date) as requests""",
+        (market_id, market_id),
+    )[0]

@@ -12,7 +12,7 @@ import MiniMap from '../../components/domain/MiniMap';
 import RouteSheet from '../../components/domain/RouteSheet';
 import { useShoppingContext } from '../../hooks/useShoppingContext';
 import { useMarketMap } from '../../hooks/useMarketMap';
-import { useMarkets } from '../../hooks/useMarkets';
+import { useMarket, useMarkets } from '../../hooks/useMarkets';
 import { usePosition } from '../../hooks/usePosition';
 import { useActiveSales } from '../../hooks/useSales';
 import { usePrice } from '../../hooks/usePrice';
@@ -48,11 +48,11 @@ const NO_FILTERS: Filters = { open: false, sale: false, onnuri: false, verified:
 export default function MapInside({ marketId }: { marketId: string }) {
   const t = useT();
   const session = useSession();
-  const markets = useMarkets();
+  const detail = useMarket(marketId);
   const fromSession = session.market?.market_id === marketId ? session.market : null;
-  const market = markets.data?.find((m) => m.market_id === marketId) ?? fromSession;
+  const market = detail.data ?? fromSession;
   if (!market)
-    return markets.loading ? (
+    return detail.loading ? (
       <div className="page">
         <Loading />
       </div>
@@ -64,16 +64,23 @@ export default function MapInside({ marketId }: { marketId: string }) {
         </ButtonLink>
       </div>
     );
-  if (market.status === 'listed')
-    return <ListedMarket market={market} others={markets.data ?? []} />;
+  if (market.status === 'listed') return <ListedMarket market={market} />;
   return <MarketView market={market} />;
 }
 
 /** 준비 중 시장(시안 Request) */
-function ListedMarket({ market, others }: { market: Market; others: Market[] }) {
+function ListedMarket({ market }: { market: Market }) {
+  const markets = useMarkets();
+  const others = markets.data ?? [];
   const t = useT();
   const desktop = useIsDesktop();
   const session = useSession();
+  if (markets.loading)
+    return (
+      <div className="page">
+        <Loading />
+      </div>
+    );
   const alternative =
     session.nearbyActive ??
     others

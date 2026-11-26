@@ -34,6 +34,13 @@ class Hours(BaseModel):
 class StorePatch(BaseModel):
     hours: Hours | None = None
     item_ids: list[str] | None = None
+    payments: list[Literal['card', 'cash', 'transfer', 'onnuri']] | None = None
+    intro: str | None = Field(default=None, max_length=80)
+
+
+class StoreLocation(BaseModel):
+    lat: float = Field(ge=-90, le=90, allow_inf_nan=False)
+    lng: float = Field(ge=-180, le=180, allow_inf_nan=False)
 
 
 class SaleCreate(BaseModel):
