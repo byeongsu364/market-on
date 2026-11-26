@@ -1,5 +1,5 @@
 ---
-source: src:nongsaro-month-food-persimmon
+source: src:nics-month-food-persimmon
 doc_type: story
 lang: ko
 title: 단감 품종과 특징
@@ -12,4 +12,4 @@ store_id: null
 - '부유'는 한 개 220~230g 정도, 껍질은 등황색, 당도는 15~16°Bx 정도예요.
 - 국내 육성 품종으로 '감풍', '조완', '로망', '원미' 등이 있어요.
 
-출처: 이달의 식재료 - 감 (11월) (농촌진흥청 농사로)
+출처: 농식품 이달의 식재료 - 감 (농촌진흥청 국립식량과학원, 공공데이터포털)

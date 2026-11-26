@@ -23,13 +23,13 @@ def test_ingest_search_store_map_and_sale(auth_db):
         conn.execute(
             "select count(*) from entities where type='variety' and attrs ? 'description'"
         ).fetchone()[0]
-        == 3
+        == 2
     )
     assert (
         conn.execute(
             "select count(*) from entities e join sources s on s.source_key=e.attrs->>'description_source'"
         ).fetchone()[0]
-        == 3
+        == 2
     )
     found = item_service.search(conn, '부사')
     assert found[0].item_id == 'item:apple' and found[0].variety_id == 'variety:apple-fuji'

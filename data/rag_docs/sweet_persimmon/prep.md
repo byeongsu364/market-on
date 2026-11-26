@@ -1,5 +1,5 @@
 ---
-source: src:nongsaro-month-food-persimmon
+source: src:nics-month-food-persimmon
 doc_type: prep
 lang: ko
 title: 단감 손질하는 법
@@ -15,4 +15,4 @@ store_id: null
 - 안쪽의 스펀지 같은 부분은 도려내요.
 - 껍질에는 페놀 성분이 들어 있어요. 깨끗이 씻어 껍질째 먹는 방법도 안내해요.
 
-출처: 이달의 식재료 - 감 (11월) (농촌진흥청 농사로)
+출처: 농식품 이달의 식재료 - 감 (농촌진흥청 국립식량과학원, 공공데이터포털)

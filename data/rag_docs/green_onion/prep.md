@@ -1,5 +1,5 @@
 ---
-source: src:nongsaro-month-food-green-onion
+source: src:nics-month-food-green-onion
 doc_type: prep
 lang: ko
 title: 대파 손질하는 법
@@ -15,4 +15,4 @@ store_id: null
 - 생으로 쓰면 알싸한 매운맛과 특유의 향이 나고, 익히면 단맛이 나요.
 - 남은 부분은 밀폐용기에 냉장하거나 잘라서 냉동해 둘 수 있어요.
 
-출처: 이달의 식재료 - 움파(대파) (농촌진흥청 농사로)
+출처: 농식품 이달의 식재료 - 움파(대파) (농촌진흥청 국립식량과학원, 공공데이터포털)

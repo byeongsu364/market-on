@@ -38,12 +38,18 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     OPENAI_CHAT_MODEL: str | None = None
     OPENAI_BASE_URL: str = 'https://api.openai.com/v1'
+    GEMINI_CHAT_MODEL: str = 'gemini-flash-lite-latest'
+    # 젬마(학교 서버)가 먼저 답하고, 막히면 제미나이, 그래도 막히면 GPT
     LLM_ROUTES: dict[str, list[str]] = {
-        'recognize': ['gemma', 'openai'],
-        'ask': ['gemma', 'openai'],
-        'recommend': ['gemma', 'openai'],
-        'chat': ['openai', 'gemma'],
+        'recognize': ['gemma', 'gemini', 'openai'],
+        'ask': ['gemma', 'gemini', 'openai'],
+        'recommend': ['gemma', 'gemini', 'openai'],
+        'chat': ['gemma', 'gemini', 'openai'],
     }
+    # 외부 AI(제미나이·GPT) 사용 규칙: 모델별 하루 전체 횟수, 손님(기기·IP)별 1시간 횟수, 답변 길이
+    EXTERNAL_LLM_DAILY_LIMIT: int = 500
+    EXTERNAL_LLM_HOURLY_PER_CLIENT: int = 20
+    LLM_MAX_OUTPUT_TOKENS: int = 2048
     EMBEDDING_PROVIDER: str = 'ollama'
     GEMINI_EMBEDDING_MODEL: str = 'gemini-embedding-001'
     EMBEDDING_DIM: int = 1024

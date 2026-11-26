@@ -1,5 +1,5 @@
 ---
-source: src:nongsaro-month-food-persimmon
+source: src:nics-month-food-persimmon
 doc_type: criterion
 lang: ko
 title: 단감 고를 때 확인할 점
@@ -16,4 +16,4 @@ store_id: null
 - 꼭지 반대쪽(배꼽 부위)이 선홍색을 띨 때 당도가 높고, 단감은 떫은맛이 없어진다고 안내해요.
 - 품종마다 색이 달라요. '감풍', '조완'은 옅은 오렌지색, '로망'은 짙은 오렌지색이에요.
 
-출처: 이달의 식재료 - 감 (11월) (농촌진흥청 농사로)
+출처: 농식품 이달의 식재료 - 감 (농촌진흥청 국립식량과학원, 공공데이터포털)

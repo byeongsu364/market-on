@@ -49,9 +49,11 @@ export function useChat(marketId: string, itemId?: string) {
       const response = await chat({
         market_id: marketId,
         item_id: itemId,
-        messages: next
-          .slice(-9)
-          .map(({ role, content }) => ({ role, content: content.slice(0, 500) })),
+        messages: next.slice(-9).map(({ role, content, response }) => ({
+          role,
+          content: content.slice(0, 500),
+          ...(role === 'assistant' && response?.reply_sig ? { sig: response.reply_sig } : {}),
+        })),
       });
       setEntries([...next, { role: 'assistant', content: response.reply, response }]);
     } catch (e) {

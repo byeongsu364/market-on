@@ -1,5 +1,5 @@
 ---
-source: src:nongsaro-month-food-green-onion
+source: src:nics-month-food-green-onion
 doc_type: criterion
 lang: ko
 title: 대파 고를 때 확인할 점
@@ -16,4 +16,4 @@ store_id: null
 - 잔뿌리가 적당히 정리돼 있는지, 흙 같은 이물질이 묻어 있는지 봐요.
 - 흰 뿌리 쪽을 살짝 만져 보고 너무 무르지 않고 탄력이 있는지 확인해요.
 
-출처: 이달의 식재료 - 움파(대파) (농촌진흥청 농사로)
+출처: 농식품 이달의 식재료 - 움파(대파) (농촌진흥청 국립식량과학원, 공공데이터포털)

@@ -7,7 +7,7 @@ const catalog: Record<string, [string, string, VarietyExtra][]> = {
       {
         synonyms: ['부사'],
         description: '완전히 익으면 과육 속에 꿀이 생기고 저장성이 좋아요.',
-        description_source: '농촌진흥청 농사로 · 이달의 식재료 사과',
+        description_source: '농촌진흥청 국립식량과학원 · 이달의 식재료 사과',
         harvest: { label: '10월 하순 이후', from: '10' },
       },
     ],
@@ -15,8 +15,8 @@ const catalog: Record<string, [string, string, VarietyExtra][]> = {
       'variety:apple-hongro',
       '홍로',
       {
-        description: '국내에서 처음 육성한 품종이에요.',
-        description_source: '농촌진흥청 농사로 · 이달의 식재료 사과',
+        description: null,
+        description_source: null,
         harvest: { label: '9월 상·중순', from: '09', to: '09' },
       },
     ],

@@ -10,6 +10,8 @@ from .ask import Candidate, Citation
 class ChatMessage(BaseModel):
     role: Literal['user', 'assistant']
     content: str = Field(min_length=1, max_length=500)
+    # 도우미 메시지: 서버가 답과 함께 준 reply_sig를 그대로 돌려줘요. 없거나 틀리면 그 메시지는 빠져요
+    sig: str | None = Field(default=None, max_length=64)
 
 
 class ChatRequest(BaseModel):
@@ -36,3 +38,4 @@ class ChatResponse(BaseModel):
     items: list[Candidate] = Field(default_factory=list)
     model: str | None = None
     removed: int = 0
+    reply_sig: str | None = None

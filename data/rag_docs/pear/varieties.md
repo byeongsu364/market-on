@@ -1,5 +1,5 @@
 ---
-source: src:nongsaro-month-food-pear
+source: src:nics-month-food-pear
 doc_type: story
 lang: ko
 title: 배 품종과 특징
@@ -12,4 +12,4 @@ store_id: null
 - '만풍배', '한아름', '슈퍼골드', '신화' 등은 추석에 출하할 수 있도록 개발·보급되고 있어요.
 - 2017년까지 숙기와 껍질 색, 기능성이 다양한 37개 품종이 국내에서 육성됐어요.
 
-출처: 이달의 식재료 - 배 (9월) (농촌진흥청 농사로)
+출처: 농식품 이달의 식재료 - 배 (농촌진흥청 국립식량과학원, 공공데이터포털)

@@ -2,7 +2,7 @@
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from app.core.errors import AppError
 from app.deps import get_db
@@ -26,6 +26,8 @@ async def read_limited(upload: UploadFile | None, field: str) -> bytes:
 async def recognize(
     conn: Annotated[Any, Depends(get_db)],
     photo: Annotated[UploadFile | None, File()] = None,
+    use_location: Annotated[bool, Form()] = False,
 ):
+    """`use_location=true`(손님이 동의한 경우)일 때만 촬영 위치를 시장 ID·대략 좌표로 줄여 저장해요."""
     image = await read_limited(photo, 'photo')
-    return await scan_service.recognize(conn, image)
+    return await scan_service.recognize(conn, image, use_location)

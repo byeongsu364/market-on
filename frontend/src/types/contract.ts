@@ -26,6 +26,8 @@ export type Item = {
 export type RecognizeResponse = {
   model: string;
   media_id: string | null;
+  // 손님이 촬영 위치 사용에 동의했을 때만: 1km 안 가장 가까운 시장 ID와 대략 좌표(소수 둘째 자리)
+  photo_location?: { market_id: string | null; lat: number; lng: number } | null;
   price_tag: {
     price: number;
     variety_id: string | null;
@@ -317,7 +319,8 @@ export type AskResponse = {
   removed: number;
 };
 
-export type ChatMessage = { role: 'user' | 'assistant'; content: string };
+// 도우미 메시지는 서버가 준 reply_sig를 sig로 그대로 돌려줘요 (없으면 서버가 그 메시지를 빼요)
+export type ChatMessage = { role: 'user' | 'assistant'; content: string; sig?: string };
 export type ChatRequest = { messages: ChatMessage[]; market_id: string; item_id?: string };
 export type ChatResponse = {
   reply: string;
@@ -326,6 +329,7 @@ export type ChatResponse = {
   items: { item_id: string; name: string }[];
   model: string | null;
   removed: number;
+  reply_sig?: string | null;
 };
 
 export type MarketItem = { item_id: string; name: string; store_count: number };

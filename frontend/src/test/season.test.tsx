@@ -6,11 +6,14 @@ import * as itemsApi from '../api/items';
 import { getInSeason } from '../api/mock';
 
 it('mock season contract contains only featured months', async () => {
+  // 공공데이터포털 「이달의 식재료」 API 기준: 사과 11월, 배 10월 (2026-11-27)
   expect(await getInSeason(11)).toEqual([
+    { item_id: 'item:apple', name: '사과', label: '11월 식재료' },
     { item_id: 'item:sweet_persimmon', name: '단감', label: '11월 식재료' },
   ]);
   expect(await getInSeason(1)).toEqual([]);
-  expect((await getInSeason(9)).map((i) => i.item_id)).toEqual(['item:apple', 'item:pear']);
+  expect(await getInSeason(9)).toEqual([]);
+  expect((await getInSeason(10)).map((i) => i.item_id)).toEqual(['item:pear']);
 });
 
 it('시장 시트의 제철 탭은 품목을 지도 검색 결과에 연결하고 빈 달은 숨긴다', async () => {
@@ -28,7 +31,7 @@ it('시장 시트의 제철 탭은 품목을 지도 검색 결과에 연결하�
     'href',
     '/?market=market%3Ademo&item=item%3Asweet_persimmon',
   );
-  expect(within(section).getByText(/농사로가 \d+월 식재료로 소개해요/)).toBeInTheDocument();
+  expect(within(section).getByText(/농촌진흥청이 \d+월 식재료로 소개해요/)).toBeInTheDocument();
   view.unmount();
   load.mockResolvedValue([]);
   render(

@@ -61,7 +61,8 @@ def test_data_and_facts(catalog):
         for r in e.get('relations', [])
         if r['p'] in ('inSeason', 'harvestPeriod', 'producedIn')
     ]
-    assert len(edges) == 16
+    # 사과·배 제철 달을 공공데이터포털 API 기준으로 (사과 9·10월 → 11월, 배 9·10월 → 10월): 16 → 14
+    assert len(edges) == 14
     assert all(r.get('source') for r in edges)
     assert not list((DATA / 'rag_docs').glob('*/season.md'))
     assert len(list((DATA / 'rag_docs').glob('*/varieties.md'))) == 5
@@ -70,7 +71,7 @@ def test_data_and_facts(catalog):
     assert facts['harvest'][0]['variety_name'] == '부유'
     assert facts['harvest'][0]['label'] == '10월 하순~11월 상순'
     apple = season.season_facts(None, 'item:apple')
-    assert apple['featured_months'] == [9, 10]
+    assert apple['featured_months'] == [11]
     assert {h['variety_name'] for h in apple['harvest']} == {'후지', '홍로'}
     assert [r['name'] for r in season.season_facts(None, 'item:green_onion')['regions']] == [
         '부산 북구 명지',
@@ -80,7 +81,8 @@ def test_data_and_facts(catalog):
     assert season.season_facts(None, 'item:missing') == dict(
         featured_months=[], harvest=[], regions=[], sources=[]
     )
-    assert season.season_facts(None, 'item:apple', 11)['featured_months'] == []
+    assert season.season_facts(None, 'item:apple', 11)['featured_months'] == [11]
+    assert season.season_facts(None, 'item:apple', 9)['featured_months'] == []
 
 
 def test_ask_without_retrieval_or_llm(catalog, monkeypatch):
@@ -109,7 +111,11 @@ def test_ask_without_retrieval_or_llm(catalog, monkeypatch):
     assert result.kind == 'answer' and result.model is None
     assert '단감을 11월 식재료로 소개해요.' in result.answer
     assert '부유는 10월 하순~11월 상순에 수확해요(남부 주산지는 대개 11월 상순).' in result.answer
-    assert len(result.citations) == 1
+    # 11월 식재료는 공공데이터포털 API 목록, 부유 수확 시기는 이달의 농업기술(2유형) → 출처 2개
+    assert {c.title for c in result.citations} == {
+        '농식품 이달의 식재료 목록 (월별)',
+        '단감 수확 후 관리 요령 (이달의 농업기술)',
+    }
     for variety, kind in [('후지', 'answer'), ('시나노골드', 'no_evidence')]:
         result = ask_service.ask(
             None,

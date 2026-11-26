@@ -19,7 +19,6 @@ def test_exact_descriptions_and_sources():
     described = {e['id']: e['attrs'] for e in entities if e.get('attrs', {}).get('description')}
     assert {k: v['description'] for k, v in described.items()} == {
         'variety:apple-fuji': '완전히 익으면 과육 속에 꿀이 생기고 저장성이 좋아요.',
-        'variety:apple-hongro': '국내에서 처음 육성한 품종이에요.',
         'variety:sweet_persimmon-fuyu': '한 개 220~230g 정도, 껍질은 등황색, 당도는 15~16°Bx 정도예요.',
     }
     for attrs in described.values():
