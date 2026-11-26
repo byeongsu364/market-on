@@ -22,6 +22,19 @@ it('mock 계약과 지정 시세·온톨로지 문장을 유지한다', async ()
   expect(price.source).toContain('샘플');
   expect(price.observed_on).toBe('2026-11-20');
   const map: MarketMap = await api.map('market:demo', item.item_id);
+  expect(Object.keys(map).sort()).toEqual([
+    'layout',
+    'market_id',
+    'source_note',
+    'stores',
+    'zones',
+  ]);
+  expect(map.layout).toBe('schematic');
+  expect(map.stores[0]).toMatchObject({
+    source: 'manual',
+    items_basis: 'merchant',
+    guessed_item_ids: [],
+  });
   expect(map.zones).toHaveLength(6);
   expect(map.stores).toHaveLength(24);
   expect(map.stores.filter((s) => s.highlight)).toHaveLength(3);

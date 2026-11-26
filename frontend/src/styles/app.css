@@ -657,3 +657,37 @@ summary {
   border: 1px solid var(--color-border);
   border-radius: 999px;
 }
+
+.nearby-map {
+  height: 360px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin: 16px 0;
+}
+.map-marker {
+  white-space: nowrap;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+.market-preview {
+  max-height: 240px;
+  overflow: auto;
+}
+.market-preview .market-map {
+  max-height: 180px;
+}
+.chips button[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+}
+/* 네이버 지도 내부 레이어(z-index 높음)가 바텀시트 위로 비치지 않게 지도 안에 가둠 */
+.nearby-map {
+  position: relative;
+  isolation: isolate;
+}
+
+ul.chips {
+  padding: 0;
+  list-style: none;
+}

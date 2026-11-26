@@ -5,11 +5,12 @@ from datetime import datetime, timedelta, timezone
 from psycopg.errors import UniqueViolation
 from app.core.config import settings
 from app.core.errors import AppError
-from app.core import security
+from app.core import captcha, security
 from app.db.repositories import user_repo, session_repo, store_repo
 
 
 LOCK_AFTER = 5
+CAPTCHA_AFTER = 2  # 같은 아이디로 2번 틀리면 다음 로그인부터 캡차 필요
 LOCK_FOR = timedelta(minutes=10)
 # 없는 아이디도 실제 계정처럼 5회 실패 시 ACCOUNT_LOCKED를 돌려줘서
 # "잠기는 아이디 = 있는 아이디"로 계정 존재를 알아내지 못하게 함 (메모리에만, 개수 제한).
@@ -53,7 +54,22 @@ def session(conn, user):
     return public_user(conn, user), token
 
 
+def require_captcha(data):
+    """캡차가 없거나 틀리면 막아요. 비밀번호 해시(무거운 계산) 전에 불러요."""
+    if not settings.CAPTCHA_ENABLED:
+        return
+    if not data.captcha_id or not data.captcha_answer:
+        raise AppError('CAPTCHA_REQUIRED', '자동입력 방지 숫자를 입력해 주세요.', 400)
+    if not captcha.verify(data.captcha_id, data.captcha_answer):
+        raise AppError(
+            'CAPTCHA_INVALID',
+            '자동입력 방지 숫자가 맞지 않아요. 새 숫자로 다시 입력해 주세요.',
+            400,
+        )
+
+
 def signup(conn, data):
+    require_captcha(data)
     login_id = security.normalize_login_id(data.login_id)
     password_hash = security.hash_password(data.password.get_secret_value())
     try:
@@ -79,6 +95,14 @@ def login(conn, data):
         instant = now()
         if state['locked_until'] and state['locked_until'] > instant:
             return locked_error
+        # 2번 이상 틀렸거나, 잠겼다가 풀린 직후면 캡차부터
+        if state['locked_until'] or state['failed_logins'] >= CAPTCHA_AFTER:
+            # 캡차가 틀리면 비밀번호를 확인하지 않고 실패 횟수도 늘리지 않아요
+            # (없는 아이디도 똑같이 세서, 캡차 요구 여부로 계정 존재를 알 수 없음)
+            try:
+                require_captcha(data)
+            except AppError as error:
+                return error
         valid = security.verify_password(password, user['password_hash'] if user else None)
         if user and valid:
             user_repo.login_result(conn, user['id'], 0, None)

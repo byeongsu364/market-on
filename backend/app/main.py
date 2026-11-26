@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from app.db.pool import close_pool
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.schemas.market import PublicConfig
 from app.core.errors import AppError, app_error_handler, validation_error_handler
 from app.core.logging import setup_logging
 from app.routers import (
@@ -79,3 +80,8 @@ for router in routers:
 @app.get('/health')
 def health() -> dict[str, str]:
     return {'status': 'ok'}
+
+
+@app.get('/config/public', response_model=PublicConfig)
+def public_config():
+    return PublicConfig(naver_map_client_id=settings.NAVER_MAP_CLIENT_ID)

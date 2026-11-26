@@ -74,7 +74,7 @@ export default function PriceCompare({
         ))}
       {price.this_market && (
         <p>
-          {price.this_market.name} {formatPrice(price.this_market.price)}
+          이 시장 aT 조사값 · {price.this_market.name} {formatPrice(price.this_market.price)}
         </p>
       )}
       <p className="caption">

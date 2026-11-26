@@ -149,14 +149,14 @@ def test_search_empty_and_normalized(public, monkeypatch):
 
 def test_markets_contract(public, caplog):
     c, markets, stores = public
-    markets['far'] = dict(id='far', name_ko='가', lat=38, lng=127)
+    markets['far'] = dict(id='far', name_ko='가', lat=37.6, lng=127)
     markets['missing'] = dict(id='missing', name_ko='나', lat=None, lng=127)
     result = c.get('/markets/nearby?lat=37.57&lng=126.99').json()
     assert [m['market_id'] for m in result] == ['market:demo', 'far']
     assert all(
         set(m) == {'market_id', 'name', 'status', 'lat', 'lng', 'distance_m'} for m in result
     )
-    same = c.get('/markets/nearby?lat=38&lng=127').json()
+    same = c.get('/markets/nearby?lat=37.6&lng=127').json()
     assert same[0]['market_id'] == 'far' and same[0]['distance_m'] == 0
     assert 0 <= result[0]['distance_m'] < 1000
     assert result[1]['distance_m'] > 1000
@@ -167,7 +167,7 @@ def test_markets_contract(public, caplog):
         r = c.get('/markets/market:demo/map?item_id=item:green_onion')
     assert r.status_code == 200
     result = r.json()
-    assert set(result) == {'market_id', 'zones', 'stores'}
+    assert set(result) == {'market_id', 'zones', 'stores', 'layout', 'source_note'}
     assert [z['name'] for z in result['zones']] == [
         '청과',
         '채소',
@@ -185,6 +185,9 @@ def test_markets_contract(public, caplog):
     ]
     for i, s in enumerate(result['stores']):
         assert set(s) == {
+            'source',
+            'items_basis',
+            'guessed_item_ids',
             'store_id',
             'name',
             'zone_id',

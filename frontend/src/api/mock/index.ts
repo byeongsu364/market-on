@@ -18,7 +18,7 @@ export async function mock<T>(work: () => T): Promise<T> {
     throw { code: 'MOCK_FAILURE', message: '샘플 요청에 실패했어요. 다시 시도해 주세요.' };
   return work();
 }
-export const nearby = (lat?: number, lng?: number) =>
+export const nearby = (lat?: number, lng?: number, radius_km = 5) =>
   mock(() =>
     [...markets]
       .map((m) => ({
@@ -28,6 +28,7 @@ export const nearby = (lat?: number, lng?: number) =>
             ? null
             : Math.round(Math.hypot(m.lat - lat, m.lng - lng) * 111000),
       }))
+      .filter((m) => m.distance_m === null || m.distance_m <= radius_km * 1000)
       .map((m) => {
         if (m.status === 'listed' && m.distance_m !== null && m.distance_m <= 1000)
           record(m.market_id, 'nearby');
@@ -124,6 +125,8 @@ export const price = (q: PriceRequest): Promise<Price> =>
 export const map = (market_id: string, item_id?: string, unit?: string): Promise<MarketMap> =>
   mock(() => ({
     market_id,
+    layout: 'schematic',
+    source_note: '시연용 예시 배치',
     zones,
     stores: stores
       .map((s) => ({
@@ -264,3 +267,17 @@ export async function chat(
     removed: 0,
   }));
 }
+
+export const publicConfig = () => mock(() => ({ naver_map_client_id: null }));
+export const marketItems = (marketId: string) =>
+  mock(() => {
+    if (!markets.some((m) => m.market_id === marketId)) throw new Error('시장을 찾을 수 없어요.');
+    return items
+      .map((i) => ({
+        item_id: i.item_id,
+        name: i.name,
+        store_count: stores.filter((s) => s.sells.includes(i.item_id)).length,
+      }))
+      .filter((i) => i.store_count > 0)
+      .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+  });

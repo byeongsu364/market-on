@@ -1,12 +1,12 @@
 """Public market reads."""
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Query
 from uuid import UUID
 from app.deps import require_csrf
 from app.services import market_request_service as requests
 
 from app.deps import get_db
-from app.schemas.market import Market, MarketMap
+from app.schemas.market import Market, MarketMap, MarketItem
 from app.services import market_service
 
 router = APIRouter(prefix='/markets', tags=['markets'])
@@ -16,10 +16,11 @@ router = APIRouter(prefix='/markets', tags=['markets'])
 def nearby(
     lat: float | None = None,
     lng: float | None = None,
+    radius_km: float = Query(default=10, gt=0, le=30),
     x_device_id: UUID | None = Header(default=None),
     conn=Depends(get_db),
 ):
-    return market_service.nearby(conn, lat, lng, x_device_id)
+    return market_service.nearby(conn, lat, lng, x_device_id, radius_km)
 
 
 @router.get('/search', response_model=list[Market])
@@ -42,3 +43,8 @@ def market_map(
     market_id: str, item_id: str | None = None, unit: str | None = None, conn=Depends(get_db)
 ):
     return market_service.market_map(conn, market_id, item_id, unit)
+
+
+@router.get('/{market_id}/items', response_model=list[MarketItem])
+def market_items(market_id: str, conn=Depends(get_db)):
+    return market_service.market_items(conn, market_id)

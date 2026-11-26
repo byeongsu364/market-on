@@ -20,7 +20,14 @@ def store_page(conn, store_id):
     view_repo.increment(conn, store_id, now().astimezone(SEOUL).date())
     from .merchant_service import get_store
 
+    assortment = merchant_repo.items(conn, store_id)
+    guessed = [i['item_id'] for i in assortment if i.get('source') == 'sbiz_guess']
     return {
+        'source': store.get('source', 'manual'),
+        'guessed_item_ids': guessed,
+        'items_basis': ('mixed' if len(guessed) < len(assortment) else 'sbiz_guess')
+        if guessed
+        else 'merchant',
         'store': get_store(conn, {'store_id': store_id}),
         'items': [
             item_service.get_item(conn, i['item_id']) for i in merchant_repo.items(conn, store_id)

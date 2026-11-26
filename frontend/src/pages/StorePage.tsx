@@ -47,6 +47,7 @@ export default function StorePage() {
       {state.data && (
         <>
           <h1>{state.data.store.name}</h1>
+          {state.data.source === 'sbiz' && <p className="caption">공공데이터 상호명</p>}
           <p>
             {t('hoursPrefix')}
             {state.data.store.hours.open}–{state.data.store.hours.close}
@@ -70,6 +71,9 @@ export default function StorePage() {
                 to={`/items/${encodeURIComponent(i.item_id)}`}
               >
                 {i.name}
+                {state.data?.guessed_item_ids.includes(i.item_id) && (
+                  <small>업종 기준 · 상인 확인 전</small>
+                )}
               </Link>
             ))}
           </div>

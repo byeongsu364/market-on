@@ -1,0 +1,15 @@
+market: {id: 'market:gyeongdong', name_ko: 경동시장, at_mrkt_cd: '0110212', at_sgg_nm: 서울, region: 'region:seoul'}
+center: {lat: 37.5798, lng: 127.0397}
+radius_m: 300
+# 상가정보 건물명은 "경동시장"·"본관"·"신관"·"옥외점포"·빈칸으로 제각각 → 도로명 주소로 고름 (2026-11-26 실제 응답 확인)
+buildings: [경동시장]
+road_addresses: [고산자로36길 3]   # 경동시장 건물 (서울 동대문구 고산자로36길 3). 끝이 일치해야 함 — "고산자로36길 30"은 제외
+industries:
+  채소/과일 소매업: store_category:produce
+  건어물/젓갈 소매업: store_category:dried
+  수산물 소매업: store_category:seafood
+  정육점: store_category:meat
+  반찬/식료품 소매업: store_category:side_dish
+  떡/한과: store_category:snack
+category_items:
+  store_category:produce: [cat:vegetable, cat:fruit]

@@ -288,3 +288,26 @@ it('단일 품종은 칩을 표시하지 않는다', async () => {
   expect(screen.queryByRole('group', { name: '품종' })).not.toBeInTheDocument();
   expect(screen.queryByText('품종은 가격표나 상인에게 확인해 주세요')).not.toBeInTheDocument();
 });
+
+it('판매 점포는 5곳부터 펼치고 추정 품목을 표시한다', async () => {
+  const storesApi = await import('../api/stores');
+  const map = await mock.map('market:demo', 'item:green_onion');
+  map.stores = map.stores.slice(0, 8).map((s) => ({
+    ...s,
+    highlight: true,
+    source: 'sbiz',
+    items_basis: 'sbiz_guess',
+    guessed_item_ids: ['item:green_onion'],
+  }));
+  const spy = vi.spyOn(storesApi, 'getMarketMap').mockResolvedValue(map);
+  try {
+    const { container } = show('/items/item:green_onion', { method: 'manual' });
+    const more = await screen.findByRole('button', { name: '더 보기' });
+    expect(container.querySelectorAll('#selling-stores article')).toHaveLength(5);
+    expect(screen.getAllByText('업종 기준 · 상인 확인 전')).toHaveLength(5);
+    fireEvent.click(more);
+    expect(container.querySelectorAll('#selling-stores article')).toHaveLength(8);
+  } finally {
+    spy.mockRestore();
+  }
+});

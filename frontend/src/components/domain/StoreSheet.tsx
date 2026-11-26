@@ -69,6 +69,7 @@ export default function StoreSheet({
           {t('close')}
         </button>
         <h2 id="store-title">{store.name}</h2>
+        {store.source === 'sbiz' && <p className="caption">공공데이터 상호명</p>}
         <p>{zone}</p>
         {store.highlight && <StorePriceDisplay price={store.price} />}
         <h3>{t('sells')}</h3>
@@ -77,6 +78,7 @@ export default function StoreSheet({
             {store.sells.map((id) => (
               <span className="item-chip" key={id}>
                 {catalog.data?.find((i) => i.item_id === id)?.name ?? id}
+                {store.guessed_item_ids.includes(id) && <small>업종 기준 · 상인 확인 전</small>}
               </span>
             ))}
           </div>

@@ -39,6 +39,9 @@ class StorePrice(BaseModel):
 
 
 class Store(BaseModel):
+    items_basis: Literal['merchant', 'sbiz_guess', 'mixed'] = 'merchant'
+    source: Literal['manual', 'sbiz'] = 'manual'
+    guessed_item_ids: list[str] = []
     store_id: str
     name: str
     zone_id: str
@@ -52,6 +55,18 @@ class Store(BaseModel):
 
 
 class MarketMap(BaseModel):
+    layout: Literal['schematic', 'surveyed'] = 'schematic'
+    source_note: str = ''
     market_id: str
     zones: list[Zone]
     stores: list[Store]
+
+
+class MarketItem(BaseModel):
+    item_id: str
+    name: str
+    store_count: int
+
+
+class PublicConfig(BaseModel):
+    naver_map_client_id: str | None

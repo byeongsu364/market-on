@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useResultFlow, useRequireMarket } from '../hooks/useFlows';
 import Resource from '../components/common/Resource';
@@ -9,6 +10,16 @@ import { unitLabel } from '../utils/convertUnit';
 import { useT } from '../i18n';
 export default function Result() {
   const f = useResultFlow();
+  const [expandedFor, setExpandedFor] = useState('');
+  const listKey = `${f.itemId}:${f.map.data?.market_id}`;
+  const selling = (f.map.data?.stores ?? [])
+    .filter((s) => s.highlight)
+    .sort(
+      (a, b) =>
+        Number(!!b.active_sale) - Number(!!a.active_sale) ||
+        Number(!!b.price?.merchant_confirmed) - Number(!!a.price?.merchant_confirmed),
+    );
+  const visible = expandedFor === listKey ? selling : selling.slice(0, 5);
   const ready = useRequireMarket();
   const t = useT();
   if (!ready) return null;
@@ -66,41 +77,43 @@ export default function Result() {
           <section id="selling-stores">
             <h2>이 시장 판매 점포</h2>
             <Resource state={f.map}>
-              {f.map.data?.stores
-                .filter((s) => s.highlight)
-                .map((s) => (
-                  <article className="card" key={s.store_id}>
-                    <h3>
-                      <Link
-                        to={`/s/${encodeURIComponent(s.store_id)}?item=${encodeURIComponent(f.itemId)}&unit=${encodeURIComponent(f.unit)}`}
-                      >
-                        {s.name}
-                      </Link>
-                    </h3>
-                    <p>{f.map.data?.zones.find((z) => z.id === s.zone_id)?.name}</p>
-                    {s.active_sale && (
-                      <p>마감세일 · {s.active_sale.sale_price.toLocaleString()}원</p>
-                    )}
-                    <StorePriceDisplay price={s.price} />
-                  </article>
-                ))}
+              {visible.map((s) => (
+                <article className="card" key={s.store_id}>
+                  <h3>
+                    <Link
+                      to={`/s/${encodeURIComponent(s.store_id)}?item=${encodeURIComponent(f.itemId)}&unit=${encodeURIComponent(f.unit)}`}
+                    >
+                      {s.name}
+                    </Link>
+                  </h3>
+                  <p>{f.map.data?.zones.find((z) => z.id === s.zone_id)?.name}</p>
+                  {s.active_sale && <p>마감세일 · {s.active_sale.sale_price.toLocaleString()}원</p>}
+                  {s.guessed_item_ids.includes(f.itemId) && (
+                    <p className="caption">업종 기준 · 상인 확인 전</p>
+                  )}
+                  <StorePriceDisplay price={s.price} />
+                </article>
+              ))}
               {f.map.data?.stores.filter((s) => s.highlight).length === 0 && (
                 <p>등록된 판매 점포가 없어요</p>
               )}
+              {selling.length > 5 && expandedFor !== listKey && (
+                <button className="secondary" onClick={() => setExpandedFor(listKey)}>
+                  더 보기
+                </button>
+              )}
               <h3>{f.hasStoreContext ? '선택한 점포' : '어느 가게예요?'}</h3>
               <div className="chips">
-                {f.map.data?.stores
-                  .filter((s) => s.highlight)
-                  .map((s) => (
-                    <button
-                      className="chip"
-                      key={s.store_id}
-                      aria-pressed={f.storeId === s.store_id}
-                      onClick={() => f.setStoreId(s.store_id)}
-                    >
-                      {s.name}
-                    </button>
-                  ))}
+                {visible.map((s) => (
+                  <button
+                    className="chip"
+                    key={s.store_id}
+                    aria-pressed={f.storeId === s.store_id}
+                    onClick={() => f.setStoreId(s.store_id)}
+                  >
+                    {s.name}
+                  </button>
+                ))}
                 <button className="secondary" onClick={() => f.setStoreId(undefined)}>
                   건너뛰기
                 </button>

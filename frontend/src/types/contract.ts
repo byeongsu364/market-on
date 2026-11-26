@@ -88,6 +88,9 @@ export type Zone = {
   y: number;
 };
 export type Store = {
+  source: 'manual' | 'sbiz';
+  items_basis: 'merchant' | 'sbiz_guess' | 'mixed';
+  guessed_item_ids: string[];
   price: StorePrice;
   store_id: string;
   name: string;
@@ -100,6 +103,8 @@ export type Store = {
   active_sale?: Pick<ActiveSale, 'sale_price' | 'regular_price' | 'ends_at'> | null;
 };
 export type MarketMap = {
+  layout: 'schematic' | 'surveyed';
+  source_note: string;
   market_id: string;
   zones: Zone[];
   stores: Store[];
@@ -172,7 +177,14 @@ export type MerchantStore = {
 };
 export type PosterInfo = { store_name: string; market_name: string; url: string };
 export type PendingMerchant = User & { created_at: string };
-export type StorePage = { store: MerchantStore; items: Item[]; sales: ActiveSale[] };
+export type StorePage = {
+  source: Store['source'];
+  items_basis: Store['items_basis'];
+  guessed_item_ids: string[];
+  store: MerchantStore;
+  items: Item[];
+  sales: ActiveSale[];
+};
 
 export type PriceReportRequest = {
   item_id: string;
@@ -290,3 +302,6 @@ export type ChatResponse = {
   model: string | null;
   removed: number;
 };
+
+export type MarketItem = { item_id: string; name: string; store_count: number };
+export type PublicConfig = { naver_map_client_id: string | null };

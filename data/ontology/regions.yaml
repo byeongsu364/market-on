@@ -1,0 +1,2 @@
+entities:
+  - {id: 'region:seoul', type: region, name_ko: 서울, labels: {ko: [서울], en: [Seoul]}}

@@ -7,6 +7,10 @@ from pydantic import BaseModel, Field, SecretStr, AwareDatetime
 class Credentials(BaseModel):
     login_id: str = Field(max_length=200)
     password: SecretStr
+    # 자동입력 방지 문자 (GET /auth/captcha로 받은 id와 사용자가 읽은 숫자).
+    # exclude=True: 저장·응답·로그용 model_dump()에 섞이지 않게
+    captcha_id: str | None = Field(default=None, max_length=64, exclude=True)
+    captcha_answer: str | None = Field(default=None, max_length=10, exclude=True)
 
 
 class Signup(Credentials):
