@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_valid
 
 from app.schemas.price import PriceResponse
 
-AskIntent = Literal['select', 'store', 'prep', 'season', 'price', 'where']
+AskIntent = Literal['select', 'store', 'prep', 'season', 'story', 'price', 'where']
 
 
 class AskRequest(BaseModel):

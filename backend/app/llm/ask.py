@@ -16,7 +16,7 @@ def parse(text):
 
 def classify(question):
     prompt = (
-        '다음 질문의 의도를 select, store, prep, season, price, where 중 하나로 분류하세요. 해당 없으면 out_of_scope. JSON만: {"intent":"..."}\n질문: '
+        '다음 질문의 의도를 select, store, prep, season, story, price, where 중 하나로 분류하세요. 해당 없으면 out_of_scope. JSON만: {"intent":"..."}\n질문: '
         + json.dumps(question, ensure_ascii=False)
     )
     routed = run(

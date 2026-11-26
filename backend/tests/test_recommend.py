@@ -61,6 +61,7 @@ def test_budget_reduction_removal_fill_and_empty():
 
 @pytest.fixture
 def env(monkeypatch):
+    monkeypatch.setattr(svc.season, 'season_statements', lambda *a, **kw: [])
     conn = Mock()
     cache = {}
     version = ['v1']
@@ -280,3 +281,22 @@ def test_gift_keeps_balanced_quantities():
         min(result.values()) >= 4
         and sum(q * p for q, p in zip(result.values(), (1540, 4110, 1222))) <= 30000
     )
+
+
+def test_gift_season_evidence_and_sources(env, monkeypatch):
+    from app.schemas.ask import Citation
+
+    source = Citation(title='이달의 식재료', publisher='농사로', url=None, license=None)
+    facts = Mock(
+        return_value=[("농사로 '이달의 식재료'에서 사과를 9월, 10월 식재료로 소개해요.", [source])]
+    )
+    monkeypatch.setattr(svc.season, 'season_statements', facts)
+    env.output['reasons']['item:apple'] = {'text': '10월 식재료로 소개해요.', 'used': [2]}
+    result = request(env)
+    evidence = env.generate.call_args.args[0]['items'][0]['evidence']
+    assert evidence[-1]['number'] == 2 and '식재료' in evidence[-1]['text']
+    assert evidence[-1]['sources'][0]['title'] == source.title
+    assert result.items[0].reason == '10월 식재료로 소개해요.'
+    assert result.items[0].sources == [source]
+    assert 'season' not in env.search.call_args.kwargs['doc_types']
+    assert 1 <= facts.call_args.kwargs['month'] <= 12

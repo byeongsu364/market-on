@@ -6,7 +6,6 @@ DOC_TYPE_TO_INTENT = {
     'storage': 'store',
     'prep': 'prep',
     'story': 'story',
-    'season': 'season',
     'origin': 'origin',
     'safety': 'safety',
     'context': 'context',

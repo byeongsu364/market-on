@@ -1,0 +1,97 @@
+entities:
+- id: season:01
+  type: season
+  name_ko: 1월
+  labels:
+    ko:
+    - 1월
+    en:
+    - January
+- id: season:02
+  type: season
+  name_ko: 2월
+  labels:
+    ko:
+    - 2월
+    en:
+    - February
+- id: season:03
+  type: season
+  name_ko: 3월
+  labels:
+    ko:
+    - 3월
+    en:
+    - March
+- id: season:04
+  type: season
+  name_ko: 4월
+  labels:
+    ko:
+    - 4월
+    en:
+    - April
+- id: season:05
+  type: season
+  name_ko: 5월
+  labels:
+    ko:
+    - 5월
+    en:
+    - May
+- id: season:06
+  type: season
+  name_ko: 6월
+  labels:
+    ko:
+    - 6월
+    en:
+    - June
+- id: season:07
+  type: season
+  name_ko: 7월
+  labels:
+    ko:
+    - 7월
+    en:
+    - July
+- id: season:08
+  type: season
+  name_ko: 8월
+  labels:
+    ko:
+    - 8월
+    en:
+    - August
+- id: season:09
+  type: season
+  name_ko: 9월
+  labels:
+    ko:
+    - 9월
+    en:
+    - September
+- id: season:10
+  type: season
+  name_ko: 10월
+  labels:
+    ko:
+    - 10월
+    en:
+    - October
+- id: season:11
+  type: season
+  name_ko: 11월
+  labels:
+    ko:
+    - 11월
+    en:
+    - November
+- id: season:12
+  type: season
+  name_ko: 12월
+  labels:
+    ko:
+    - 12월
+    en:
+    - December

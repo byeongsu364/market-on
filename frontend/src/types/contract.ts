@@ -261,7 +261,7 @@ export type MarketApplication = {
   demand: MarketDemand;
 };
 
-export type AskIntent = 'select' | 'store' | 'prep' | 'season' | 'price' | 'where';
+export type AskIntent = 'select' | 'store' | 'prep' | 'season' | 'story' | 'price' | 'where';
 export type AskRequest = {
   question?: string;
   intent?: AskIntent;
@@ -305,3 +305,5 @@ export type ChatResponse = {
 
 export type MarketItem = { item_id: string; name: string; store_count: number };
 export type PublicConfig = { naver_map_client_id: string | null };
+
+export type InSeasonItem = { item_id: string; name: string; label: string };

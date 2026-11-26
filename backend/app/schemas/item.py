@@ -18,3 +18,9 @@ class Item(BaseModel):
     default_unit: str
     units: list[str]
     labels_i18n: dict[str, str]
+
+
+class InSeasonItem(BaseModel):
+    item_id: str
+    name: str
+    label: str

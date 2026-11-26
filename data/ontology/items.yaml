@@ -29,6 +29,11 @@ entities:
       - {p: isA, o: 'cat:vegetable'}
       - {p: soldBy, o: 'unit:bunch', props: {factor_kg: 0.8, default: true}, source: 'src:team-draft'}
       - {p: soldBy, o: 'unit:kg', props: {factor_kg: 1}}
+      - {o: 'season:03', p: inSeason, source: 'src:nongsaro-month-food-list'}
+      - {p: harvestPeriod, source: 'src:nongsaro-month-food-green-onion', v: {label: 가을~겨울, note: 일반적으로 늦가을이나 초봄에 씨를 뿌려 수확}}
+      - {o: 'region:busan-myeongji', p: producedIn, source: 'src:nongsaro-month-food-green-onion'}
+      - {o: 'region:jeonnam-coast', p: producedIn, source: 'src:nongsaro-month-food-green-onion'}
+      - {o: 'region:chungnam-asan', p: producedIn, source: 'src:nongsaro-month-food-green-onion'}
   - id: item:onion
     type: "item"
     name_ko: "양파"
@@ -44,6 +49,9 @@ entities:
       - {p: hasGrade, o: 'variety:onion-onion', props: {default: true}}
       - {p: isA, o: 'cat:vegetable'}
       - {p: soldBy, o: 'unit:kg', props: {factor_kg: 1, default: true}}
+      - {o: 'season:06', p: inSeason, source: 'src:nongsaro-month-food-list'}
+      - {p: harvestPeriod, source: 'src:nongsaro-month-food-onion', v: {from: '04', label: 4~6월, note: 가을에 씨를 뿌려 이듬해 수확, to: '06'}}
+      - {p: harvestPeriod, source: 'src:nongsaro-month-food-onion-2', v: {from: '09', label: 9월 상·중순, note: 고랭지 여름양파, to: '09'}}
   - id: item:apple
     type: "item"
     name_ko: "사과"
@@ -61,6 +69,8 @@ entities:
       - {p: hasGrade, o: 'variety:apple-shinano-gold'}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
+      - {o: 'season:09', p: inSeason, source: 'src:nongsaro-month-food-list'}
+      - {o: 'season:10', p: inSeason, source: 'src:nongsaro-month-food-list'}
   - id: item:pear
     type: "item"
     name_ko: "배"
@@ -76,6 +86,8 @@ entities:
       - {p: hasGrade, o: 'variety:pear-shingo', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
+      - {o: 'season:09', p: inSeason, source: 'src:nongsaro-month-food-list'}
+      - {o: 'season:10', p: inSeason, source: 'src:nongsaro-month-food-list'}
   - id: item:sweet_persimmon
     type: "item"
     name_ko: "단감"
@@ -91,6 +103,7 @@ entities:
       - {p: hasGrade, o: 'variety:sweet_persimmon-fuyu', props: {default: true}}
       - {p: isA, o: 'cat:fruit'}
       - {p: soldBy, o: 'unit:piece', props: {count: 1, default: true}}
+      - {o: 'season:11', p: inSeason, source: 'src:nongsaro-month-food-persimmon'}
   - id: unit:bunch
     type: unit
     name_ko: 단
@@ -115,12 +128,16 @@ entities:
     labels: {ko: [후지, 부사], en: [fuji]}
     kamis: {ctgry_cd: "400", item_cd: "411", vrty_cd: "05", grd_cd: "04", unit: 개, unit_sz: "10"}
     attrs: {}
+    relations:
+      - {p: harvestPeriod, source: 'src:nongsaro-month-food-apple', v: {from: '10', label: 10월 하순 이후, note: 만생종}}
   - id: variety:apple-hongro
     type: variety
     name_ko: 홍로
     labels: {ko: [홍로]}
     kamis: {ctgry_cd: "400", item_cd: "411", vrty_cd: "07", grd_cd: "04", unit: 개, unit_sz: "10"}
     attrs: {}
+    relations:
+      - {p: harvestPeriod, source: 'src:nongsaro-month-food-apple', v: {from: '09', label: 9월 상·중순, note: 중생종, to: '09'}}
   - id: variety:apple-shinano-gold
     type: variety
     name_ko: 시나노골드
@@ -139,6 +156,8 @@ entities:
     labels: {ko: [부유]}
     kamis: {ctgry_cd: "400", item_cd: "416", vrty_cd: "00", grd_cd: "04", unit: 개, unit_sz: "5"}
     attrs: {}
+    relations:
+      - {p: harvestPeriod, source: 'src:nongsaro-month-food-persimmon', v: {from: '10', label: 10월 하순~11월 상순, note: 남부 주산지는 대개 11월 상순, to: '11'}}
   - id: variety:green_onion-daepa
     type: variety
     name_ko: 대파

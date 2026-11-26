@@ -163,7 +163,7 @@ def test_intent_mapping_and_search(monkeypatch):
     from app.db.repositories import knowledge_repo as repo
     from app.knowledge.ingest import TOPICS
 
-    assert set(DOC_TYPE_TO_INTENT) == set(TOPICS)
+    assert set(DOC_TYPE_TO_INTENT) == set(TOPICS) - {'season'}
     assert doc_types_for_intent('select') == ['criterion', 'grade', 'merchant_tip']
     assert doc_types_for_intent('origin') == ['origin', 'specialty']
     with pytest.raises(ValueError):

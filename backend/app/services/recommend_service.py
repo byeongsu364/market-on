@@ -2,13 +2,14 @@
 
 from datetime import UTC, datetime
 from math import ceil
+from types import SimpleNamespace
 from zoneinfo import ZoneInfo
 
 import httpx
 
 from app.core.errors import AppError
 from app.db.repositories import ask_repo, knowledge_repo, sale_repo, store_repo
-from app.knowledge import answer_cache, citation, fact_check, retriever
+from app.knowledge import answer_cache, citation, fact_check, retriever, season
 from app.llm import recommend as recommend_llm
 from app.llm.factory import get_embedder
 from app.schemas.recommend import RecommendResponse
@@ -25,8 +26,8 @@ QUANTITIES = {'fruit_per_person': 1, 'gift_per_person': 2, 'gift_min': 3, 'veget
 MAX_ITEMS = 4
 # 이유 문장에 넘길 근거 문서 종류 (용도에 맞는 사실을 쓰게). 앞 종류부터 검색 순위를 둠
 PURPOSE_DOC_TYPES = {
-    '선물': ['storage', 'season', 'criterion'],
-    '모임': ['prep', 'criterion', 'season'],
+    '선물': ['storage', 'criterion'],
+    '모임': ['prep', 'criterion'],
     '집밥': ['prep', 'storage', 'criterion'],
 }
 PURPOSE_QUERY = {
@@ -201,6 +202,16 @@ def recommend(conn, data, device_id, *, embedder=None, consume=True):
             raise AppError(
                 'ASK_UNAVAILABLE', '지금은 답변을 찾을 수 없어요. 잠시 뒤 다시 물어봐 주세요.', 503
             ) from exc
+        if data.purpose == '선물':
+            month = datetime.now(ZoneInfo('Asia/Seoul')).month
+            for item in items:
+                statements = season.season_statements(
+                    conn, item['item_id'], item['name'], month=month
+                )
+                evidence[item['item_id']].extend(
+                    SimpleNamespace(content=text, season_sources=sources)
+                    for text, sources in statements
+                )
         dictionary = ask_repo.item_dictionary(conn)
         checked = {}
 
@@ -246,7 +257,15 @@ def recommend(conn, data, device_id, *, embedder=None, consume=True):
                     'quantity': i['quantity'],
                     'unit': i['unit_label'],
                     'evidence': [
-                        {'number': n, 'text': citation.clean_evidence(c.content)}
+                        {
+                            'number': n,
+                            'text': citation.clean_evidence(c.content),
+                            **(
+                                {'sources': [s.model_dump() for s in c.season_sources]}
+                                if hasattr(c, 'season_sources')
+                                else {}
+                            ),
+                        }
                         for n, c in enumerate(evidence[i['item_id']], 1)
                     ],
                 }
@@ -260,7 +279,17 @@ def recommend(conn, data, device_id, *, embedder=None, consume=True):
                     for item in items:
                         if item['item_id'] in checked:
                             item['reason'], chunks = checked[item['item_id']]
-                            item['sources'] = citation.attach_citations(conn, chunks)
+                            item['sources'] = (
+                                citation.attach_citations(
+                                    conn, [c for c in chunks if not hasattr(c, 'season_sources')]
+                                )
+                                if any(not hasattr(c, 'season_sources') for c in chunks)
+                                else []
+                            )
+                            for chunk in chunks:
+                                for source in getattr(chunk, 'season_sources', []):
+                                    if source not in item['sources']:
+                                        item['sources'].append(source)
                             model = routed.model
             except (AppError, httpx.HTTPError, TimeoutError):
                 pass

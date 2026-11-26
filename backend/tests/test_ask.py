@@ -31,7 +31,7 @@ DICTIONARY = [('대파', 'item:green_onion', '대파'), ('사과', 'item:apple',
         ('다듬는 법', 'prep'),
         ('제철', 'season'),
         ('언제 나와요', 'season'),
-        ('품종', 'season'),
+        ('품종', 'story'),
         ('산지', 'season'),
         ('고르는 법', 'select'),
         ('고를 때', 'select'),
@@ -414,3 +414,12 @@ def test_ask_price_includes_varieties(env, monkeypatch):
     )
     assert response.status_code == 200
     assert response.json()['price']['varieties'][0]['name'] == '홍로'
+
+
+def test_story_uses_existing_retrieval_path(env):
+    result = svc.ask(
+        env.conn, AskRequest(question='대파 특징', item_id='item:green_onion'), 'device'
+    )
+    assert result.intent == 'story'
+    assert env.search.call_args.kwargs['intent'] == 'story'
+    assert env.calls

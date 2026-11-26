@@ -6,7 +6,15 @@ import httpx
 
 from app.core.errors import AppError
 from app.db.repositories import ask_repo, knowledge_repo
-from app.knowledge import answer_cache, ask_intent, citation, fact_check, ontology, retriever
+from app.knowledge import (
+    answer_cache,
+    ask_intent,
+    citation,
+    fact_check,
+    ontology,
+    retriever,
+    season,
+)
 from app.llm import ask as ask_llm
 from app.llm.factory import get_embedder
 from app.schemas.ask import AskResponse
@@ -14,7 +22,13 @@ from app.schemas.ask import AskResponse
 from . import item_service, market_service, price_service
 from .price_report_service import hash_device
 
-TOPICS = {'select': '확인 포인트', 'store': '보관', 'prep': '손질', 'season': '제철'}
+TOPICS = {
+    'select': '확인 포인트',
+    'store': '보관',
+    'prep': '손질',
+    'season': '제철',
+    'story': '품종과 특징',
+}
 
 
 def ask(conn, data, device_id, *, embedder=None, consume=True):
@@ -24,15 +38,14 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
     if intent not in ask_intent.INTENTS:
         return AskResponse(kind='out_of_scope')
     result = AskResponse(kind='need_item', intent=intent)
-    ids = (
-        [data.item_id]
-        if data.item_id
-        else [
-            eid
-            for eid in ontology.resolve_entities(conn, data.question or '')
-            if knowledge_repo.get_item(conn, eid)
-        ]
-    )
+    if data.item_id:
+        ids = [data.item_id]
+    else:
+        resolved = ontology.resolve_entities(conn, data.question or '')
+        ids = [eid for eid in resolved if knowledge_repo.get_item(conn, eid)]
+        varieties = [eid for eid in resolved if eid.startswith('variety:')]
+        if not ids and varieties:
+            ids = knowledge_repo.variety_items(conn, varieties)
     if len(ids) != 1:
         candidates = {}
         for query in [data.question or '', *re.findall(r'[가-힣A-Za-z]+', data.question or '')]:
@@ -53,6 +66,17 @@ def ask(conn, data, device_id, *, embedder=None, consume=True):
             raise AppError('MARKET_REQUIRED', '시장을 선택해 주세요.', 422)
         result.kind = 'where'
         result.stores = market_service.selling_stores(conn, data.market_id, ids[0])
+        return result
+    if intent == 'season':
+        variety_id = ontology.match_variety(conn, ids[0], data.question or '')
+        statements = season.season_statements(conn, ids[0], item['name_ko'], variety_id=variety_id)
+        result.kind = 'answer' if statements else 'no_evidence'
+        result.answer = (
+            ' '.join(text for text, _ in statements)
+            if statements
+            else '이 품목의 제철 자료가 아직 없어요'
+        )
+        result.citations = season.statement_citations(statements)
         return result
     key = answer_cache.cache_key(conn, ids[0], intent, data.lang, data.question)
     cached = answer_cache.get_cached_answer(conn, key)

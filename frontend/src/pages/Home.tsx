@@ -1,3 +1,6 @@
+import { useCallback } from 'react';
+import { useResource } from '../hooks/useResource';
+import { getInSeason } from '../api/items';
 import MarketRequest from '../components/domain/MarketRequest';
 import { useMarketChoice } from '../hooks/useFlows';
 import ManualInput from '../components/domain/ManualInput';
@@ -41,6 +44,10 @@ export default function Home() {
   const ready = useRequireMarket();
   const t = useT();
   const catalog = useItemCatalog();
+  const month = Number(
+    new Intl.DateTimeFormat('en', { timeZone: 'Asia/Seoul', month: 'numeric' }).format(new Date()),
+  );
+  const seasonal = useResource(useCallback(() => getInSeason(month), [month]));
   const sales = useActiveSales(market?.market_id ?? 'market:demo');
   if (unsupported)
     return (
@@ -97,6 +104,23 @@ export default function Home() {
       </section>
       <Link to="/chat">궁금한 걸 물어보세요</Link>
       <ManualInput />
+      {!!seasonal.data?.length && (
+        <section aria-label={`${month}월 제철`}>
+          <h2>{month}월 제철</h2>
+          <div className="chips">
+            {seasonal.data.map((item) => (
+              <Link
+                className="chip"
+                key={item.item_id}
+                to={`/items/${encodeURIComponent(item.item_id)}`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+          <small>농사로 '이달의 식재료' 기준</small>
+        </section>
+      )}
       <section>
         <h2>{t('prices')}</h2>
         <Resource state={catalog}>

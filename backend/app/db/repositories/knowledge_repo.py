@@ -416,3 +416,45 @@ def catalog_ids(conn):
     return [
         r[0] for r in conn.execute("select id from entities where type='item' order by name_ko,id")
     ]
+
+
+def season_relations(conn, item_id):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select r.subject_id, r.predicate, r.object_id, r.object_value,
+        e.name_ko as subject_name, o.name_ko as object_name,
+        s.title, s.publisher, s.url, s.license
+        from entity_relations r join entities e on e.id=r.subject_id
+        left join entities o on o.id=r.object_id
+        join sources s on s.id=r.source_id
+        where (r.subject_id=%s or r.subject_id in (
+          select object_id from entity_relations where subject_id=%s and predicate='hasGrade'))
+        and r.predicate in ('inSeason','harvestPeriod','producedIn')
+        order by r.subject_id,r.id""",
+        (item_id, item_id),
+    )
+
+
+def in_season(conn, month):
+    from ._operational import rows
+
+    return rows(
+        conn,
+        """select distinct e.id as item_id,e.name_ko as name
+        from entities e join entity_relations r on r.subject_id=e.id
+        where e.type='item' and r.predicate='inSeason' and r.object_id=%s
+        order by e.name_ko,e.id""",
+        (f'season:{month:02}',),
+    )
+
+
+def variety_items(conn, variety_ids):
+    return [
+        r[0]
+        for r in conn.execute(
+            "select distinct subject_id from entity_relations where predicate='hasGrade' and object_id=any(%s) order by subject_id",
+            (variety_ids,),
+        )
+    ]

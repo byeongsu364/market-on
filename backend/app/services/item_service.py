@@ -65,3 +65,11 @@ def search(conn, q):
         if query
         else [get_item(conn, item_id) for item_id in repo.catalog_ids(conn)]
     )
+
+
+def in_season(conn, month=None):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    month = month if month is not None else datetime.now(ZoneInfo('Asia/Seoul')).month
+    return [dict(row, label=f'{month}월 식재료') for row in repo.in_season(conn, month)]

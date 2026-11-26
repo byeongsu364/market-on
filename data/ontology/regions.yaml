@@ -1,2 +1,5 @@
 entities:
   - {id: 'region:seoul', type: region, name_ko: 서울, labels: {ko: [서울], en: [Seoul]}}
+  - {id: 'region:busan-myeongji', type: region, name_ko: 부산 북구 명지, labels: {ko: [부산 북구 명지]}}
+  - {id: 'region:jeonnam-coast', type: region, name_ko: 전남 해안지방, labels: {ko: [전남 해안지방]}}
+  - {id: 'region:chungnam-asan', type: region, name_ko: 충남 아산, labels: {ko: [충남 아산]}}

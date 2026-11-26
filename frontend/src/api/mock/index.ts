@@ -180,7 +180,15 @@ export const recommend = (q: RecommendRequest): Promise<RecommendResponse> =>
 export async function ask(
   data: import('../../types/contract').AskRequest,
 ): Promise<import('../../types/contract').AskResponse> {
-  const intent = data.intent ?? (data.question?.includes('가격') ? 'price' : 'store');
+  const intent =
+    data.intent ??
+    (['제철', '언제', '철', '품종', '산지'].some((w) => data.question?.includes(w))
+      ? 'season'
+      : ['특징', '종류', '맛이 어때', '차이'].some((w) => data.question?.includes(w))
+        ? 'story'
+        : data.question?.includes('가격')
+          ? 'price'
+          : 'store');
   const item = items.find((i) => i.item_id === data.item_id || data.question?.includes(i.name));
   const base: import('../../types/contract').AskResponse = {
     kind: 'need_item',
@@ -217,6 +225,74 @@ export async function ask(
       stores: stores
         .filter((s) => s.sells.includes(item.item_id))
         .map((s) => ({ store_id: s.store_id, name: s.name })),
+    }));
+  }
+  if (intent === 'season') {
+    const facts: Record<
+      string,
+      { months: number[]; harvest: [string, string, string, string][]; regions?: string[] }
+    > = {
+      'item:apple': {
+        months: [9, 10],
+        harvest: [
+          ['후지', '10월 하순 이후', '만생종', 'apple'],
+          ['홍로', '9월 상·중순', '중생종', 'apple'],
+        ],
+      },
+      'item:pear': { months: [9, 10], harvest: [] },
+      'item:sweet_persimmon': {
+        months: [11],
+        harvest: [['부유', '10월 하순~11월 상순', '남부 주산지는 대개 11월 상순', 'persimmon']],
+      },
+      'item:onion': {
+        months: [6],
+        harvest: [
+          ['양파', '4~6월', '가을에 씨를 뿌려 이듬해 수확', 'onion'],
+          ['양파', '9월 상·중순', '고랭지 여름양파', 'onion-2'],
+        ],
+      },
+      'item:green_onion': {
+        months: [3],
+        harvest: [
+          ['대파', '가을~겨울', '일반적으로 늦가을이나 초봄에 씨를 뿌려 수확', 'green-onion'],
+        ],
+        regions: ['부산 북구 명지', '전남 해안지방', '충남 아산'],
+      },
+    };
+    const fact = facts[item.item_id];
+    const variety = ['후지', '부사', '홍로', '시나노골드', '신고', '부유'].find((v) =>
+      data.question?.includes(v),
+    );
+    const statements: string[] = [];
+    const sources = new Set<string>();
+    if (fact && !variety) {
+      const particle = (item.name.charCodeAt(item.name.length - 1) - 0xac00) % 28 ? '을' : '를';
+      statements.push(
+        `농사로 '이달의 식재료'에서 ${item.name}${particle} ${fact.months.map((m) => `${m}월`).join(', ')} 식재료로 소개해요.`,
+      );
+      sources.add(item.item_id === 'item:sweet_persimmon' ? 'persimmon' : 'list');
+    }
+    for (const [name, label, note, source] of fact?.harvest ?? []) {
+      if (variety && name !== (variety === '부사' ? '후지' : variety)) continue;
+      const particle = (name.charCodeAt(name.length - 1) - 0xac00) % 28 ? '은' : '는';
+      statements.push(`${name}${particle} ${label}에 수확해요(${note}).`);
+      sources.add(source);
+    }
+    if (fact?.regions && !variety) {
+      statements.push(`대파는 ${fact.regions.join(', ')}에서 많이 재배해요.`);
+      sources.add('green-onion');
+    }
+    return mock(() => ({
+      ...base,
+      kind: statements.length ? 'answer' : 'no_evidence',
+      answer: statements.join(' ') || '이 품목의 제철 자료가 아직 없어요',
+      citations: [...sources].map((source) => ({
+        draft: false,
+        title: `농사로 이달의 식재료 · ${source}`,
+        publisher: '농촌진흥청 농사로',
+        url: null,
+        license: '확인 필요',
+      })),
     }));
   }
   if (item.item_id === 'item:green_onion' && intent === 'store')
@@ -281,3 +357,20 @@ export const marketItems = (marketId: string) =>
       .filter((i) => i.store_count > 0)
       .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
   });
+
+export async function getInSeason(
+  month = Number(
+    new Intl.DateTimeFormat('en', { timeZone: 'Asia/Seoul', month: 'numeric' }).format(new Date()),
+  ),
+) {
+  const featured = [
+    { item_id: 'item:apple', name: '사과', months: [9, 10] },
+    { item_id: 'item:pear', name: '배', months: [9, 10] },
+    { item_id: 'item:sweet_persimmon', name: '단감', months: [11] },
+    { item_id: 'item:onion', name: '양파', months: [6] },
+    { item_id: 'item:green_onion', name: '대파', months: [3] },
+  ];
+  return featured
+    .filter((i) => i.months.includes(month))
+    .map(({ item_id, name }) => ({ item_id, name, label: `${month}월 식재료` }));
+}

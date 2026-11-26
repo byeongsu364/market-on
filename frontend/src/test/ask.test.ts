@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ask as mockAsk } from '../api/mock';
 
-vi.mock('../api/client', () => ({ isMock: false, request: vi.fn() }));
+vi.mock('../api/client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../api/client')>()),
+  isMock: false,
+  request: vi.fn(),
+}));
 import { ask } from '../api/ask';
 import { request } from '../api/client';
 
@@ -22,4 +26,21 @@ describe('ask contract', () => {
     expect(missing.kind).toBe('need_item');
     expect(missing.candidates?.length).toBeLessThanOrEqual(5);
   });
+});
+
+it('requests in-season through the shared client', async () => {
+  const { getInSeason } = await import('../api/items');
+  await getInSeason(11);
+  expect(request).toHaveBeenCalledWith('/items/in-season?month=11');
+});
+
+it('season mock returns ontology sentences with no model and no invented variety harvest', async () => {
+  const result = await mockAsk({ intent: 'season', item_id: 'item:sweet_persimmon' });
+  expect(result.answer).toContain('단감을 11월 식재료로 소개해요.');
+  expect(result.answer).toContain('부유는 10월 하순~11월 상순에 수확해요');
+  expect(result.model).toBeNull();
+  expect(result.citations).toHaveLength(1);
+  expect(
+    (await mockAsk({ intent: 'season', item_id: 'item:apple', question: '시나노골드 언제' })).kind,
+  ).toBe('no_evidence');
 });
