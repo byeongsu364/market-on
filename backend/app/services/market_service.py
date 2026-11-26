@@ -73,7 +73,12 @@ def market_map(conn, market_id, item_id=None, unit=None):
         ),
     )
     assortment = {}
-    for row in store_repo.market_items(conn, market_id):
+    guessed = {}
+    item_rows = store_repo.market_items(conn, market_id)
+    for row in item_rows:
+        if row.get('source') == 'sbiz_guess':
+            guessed.setdefault(row['store_id'], []).append(row['item_id'])
+    for row in item_rows:
         assortment.setdefault(row['store_id'], []).append(row['item_id'])
     sales = {
         s['store_id']: s
@@ -91,6 +96,13 @@ def market_map(conn, market_id, item_id=None, unit=None):
         sale = sales.get(row['id'])
         stores.append(
             Store(
+                source=row.get('source', 'manual'),
+                guessed_item_ids=guessed.get(row['id'], []),
+                items_basis=(
+                    'mixed' if len(guessed.get(row['id'], [])) < len(sells) else 'sbiz_guess'
+                )
+                if guessed.get(row['id'])
+                else 'merchant',
                 store_id=row['id'],
                 name=row['name_ko'],
                 zone_id=row['zone_id'] or '',
@@ -112,6 +124,10 @@ def market_map(conn, market_id, item_id=None, unit=None):
         stores.sort(key=lambda s: 2 if s.price is None else int(s.price.stale))
     return MarketMap(
         market_id=market_id,
+        layout='schematic',
+        source_note='소상공인 상가정보 2026-09 기준'
+        if any(s.source == 'sbiz' for s in stores) or market_id == 'market:gyeongdong'
+        else '시연용 예시 배치',
         zones=[Zone(id=z['id'], name=z['name_ko'], x=z['x'], y=z['y']) for z in zones],
         stores=stores,
     )

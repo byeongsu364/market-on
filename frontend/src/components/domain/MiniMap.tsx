@@ -10,9 +10,13 @@ export default function MiniMap({
 }) {
   return (
     <>
+      {map.layout === 'schematic' && (
+        <p className="caption">배치는 업종별 예시예요 · 실제 위치는 현장에서 확인해 주세요</p>
+      )}
+      <p className="caption">{map.source_note}</p>
       <svg
         className="market-map"
-        viewBox="0 0 376 548"
+        viewBox={`0 0 376 ${Math.max(548, ...map.stores.map((s) => s.map_y + 64))}`}
         role="group"
         aria-label="시장 점포 평면도"
         style={Object.fromEntries(zoneColors.map((c, i) => [`--zone-${i}`, c])) as CSSProperties}
@@ -23,9 +27,12 @@ export default function MiniMap({
               x={z.x}
               y={z.y}
               width="172"
-              height="172"
+              height={Math.max(
+                172,
+                ...map.stores.filter((s) => s.zone_id === z.id).map((s) => s.map_y - z.y + 60),
+              )}
               rx="8"
-              fill={`var(--zone-${i})`}
+              fill={`var(--zone-${i % zoneColors.length})`}
               fillOpacity="0.2"
             />
             <text x={z.x + 12} y={z.y + 26}>
@@ -57,7 +64,7 @@ export default function MiniMap({
               rx="4"
             />
             <text className={s.highlight ? 'highlight-label' : ''} x={s.map_x + 8} y={s.map_y + 32}>
-              {s.name.slice(3)}
+              {s.source === 'sbiz' ? s.name : s.name.slice(3)}
             </text>
             {s.active_sale && (
               <>
@@ -83,7 +90,7 @@ export default function MiniMap({
       >
         {map.zones.map((z, i) => (
           <li key={z.id}>
-            <span style={{ background: `var(--zone-${i})` }} />
+            <span style={{ background: `var(--zone-${i % zoneColors.length})` }} />
             {z.name}
           </li>
         ))}

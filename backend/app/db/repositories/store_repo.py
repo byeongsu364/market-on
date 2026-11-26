@@ -110,8 +110,24 @@ def stores_selling(conn, market_id, item_id):
 def market_items(conn, market_id):
     return rows(
         conn,
-        """select i.store_id,i.item_id from store_items i
+        """select i.store_id,i.item_id,i.source from store_items i
         join stores s on s.id=i.store_id where s.market_id=%s
         order by i.store_id,i.item_id""",
         (market_id,),
+    )
+
+
+def replace_guessed_items(conn, store_id, item_ids):
+    conn.execute("delete from store_items where store_id=%s and source='sbiz_guess'", (store_id,))
+    for item_id in item_ids:
+        conn.execute(
+            "insert into store_items(store_id,item_id,source) values(%s,%s,'sbiz_guess') on conflict(store_id,item_id) do nothing",
+            (store_id, item_id),
+        )
+
+
+def deactivate_missing_sbiz(conn, market_id, ids):
+    conn.execute(
+        "update stores set active=false where market_id=%s and source='sbiz' and not(id=any(%s))",
+        (market_id, ids),
     )

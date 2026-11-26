@@ -232,3 +232,19 @@ def test_other_item_variety_422(api):
     response = api.get('/price', params=QUERY | {'variety_id': 'variety:apple-fuji'})
     assert response.status_code == 422
     assert response.json()['error']['code'] == 'INVALID_VARIETY'
+
+
+def test_gyeongdong_this_market(api, monkeypatch):
+    monkeypatch.setattr(
+        store_repo,
+        'get_market',
+        lambda *a: dict(name_ko='경동시장', at_sgg_nm='서울', at_mrkt_cd='0110212'),
+    )
+    monkeypatch.setattr(
+        price_repo,
+        'fetch_rows',
+        lambda *a: [row(code='0110212', price=2500), row(code='other', price=3000)],
+    )
+    response = api.get('/price', params=QUERY | {'market_id': 'market:gyeongdong'})
+    assert response.status_code == 200
+    assert response.json()['this_market'] == {'price': 2000, 'name': '경동시장'}

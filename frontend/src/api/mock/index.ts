@@ -124,6 +124,8 @@ export const price = (q: PriceRequest): Promise<Price> =>
 export const map = (market_id: string, item_id?: string, unit?: string): Promise<MarketMap> =>
   mock(() => ({
     market_id,
+    layout: 'schematic',
+    source_note: '시연용 예시 배치',
     zones,
     stores: stores
       .map((s) => ({

@@ -43,6 +43,9 @@ export const markets: import('../../types/contract').Market[] = [
   },
 ];
 export const stores: Store[] = Array.from({ length: 24 }, (_, i) => ({
+  source: 'manual',
+  items_basis: 'merchant',
+  guessed_item_ids: [],
   store_id: `store:A-${String(i + 1).padStart(2, '0')}`,
   name: `점포 A-${String(i + 1).padStart(2, '0')}`,
   zone_id: zones[Math.floor(i / 4)].id,

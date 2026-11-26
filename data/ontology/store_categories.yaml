@@ -6,3 +6,5 @@ entities:
   - {id: 'store_category:meat', type: store_category, name_ko: 정육, labels: {ko: [정육], en: [meat]}}
   - {id: 'store_category:side_dish', type: store_category, name_ko: 반찬, labels: {ko: [반찬], en: [side dishes]}}
   - {id: 'store_category:snack', type: store_category, name_ko: 떡·분식, labels: {ko: [떡·분식], en: [rice cakes & snacks]}}
+  - {id: 'store_category:produce', type: store_category, name_ko: 채소·과일, labels: {ko: [채소·과일], en: [produce]}}
+  - {id: 'store_category:dried', type: store_category, name_ko: 건어물·젓갈, labels: {ko: [건어물·젓갈], en: [dried seafood and salted seafood]}}

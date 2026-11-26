@@ -7,7 +7,7 @@ from ._operational import rows
 def items(conn, store_id):
     return rows(
         conn,
-        'select e.id as item_id,e.name_ko from store_items i join entities e on e.id=i.item_id where i.store_id=%s order by e.id',
+        'select e.id as item_id,e.name_ko,i.source from store_items i join entities e on e.id=i.item_id where i.store_id=%s order by e.id',
         (store_id,),
     )
 

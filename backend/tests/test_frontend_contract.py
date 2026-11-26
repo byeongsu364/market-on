@@ -49,7 +49,7 @@ def test_store_sale_poster_contract(merchant):
     assert_sale(client.get('/merchant/sales').json()[0])
     assert_sale(client.get('/sales/active').json()[0], public=True)
     page = client.get('/stores/store:a').json()
-    assert set(page) == {'store', 'items', 'sales'}
+    assert set(page) == {'store', 'items', 'sales', 'source', 'items_basis', 'guessed_item_ids'}
     assert set(page['store']) == STORE
     assert set(page['items'][0]) == ITEM
     assert_sale(page['sales'][0], public=True)

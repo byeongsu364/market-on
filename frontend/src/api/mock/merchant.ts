@@ -234,6 +234,9 @@ export async function publicStore(id: string) {
   const store = info(id);
   return {
     store,
+    source: 'manual' as const,
+    items_basis: 'merchant' as const,
+    guessed_item_ids: [],
     items: items.filter((i) => store.item_ids.includes(i.item_id)),
     sales: activeSales().filter((s) => s.store_id === id),
   };

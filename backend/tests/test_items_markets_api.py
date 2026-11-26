@@ -167,7 +167,7 @@ def test_markets_contract(public, caplog):
         r = c.get('/markets/market:demo/map?item_id=item:green_onion')
     assert r.status_code == 200
     result = r.json()
-    assert set(result) == {'market_id', 'zones', 'stores'}
+    assert set(result) == {'market_id', 'zones', 'stores', 'layout', 'source_note'}
     assert [z['name'] for z in result['zones']] == [
         '청과',
         '채소',
@@ -185,6 +185,9 @@ def test_markets_contract(public, caplog):
     ]
     for i, s in enumerate(result['stores']):
         assert set(s) == {
+            'source',
+            'items_basis',
+            'guessed_item_ids',
             'store_id',
             'name',
             'zone_id',

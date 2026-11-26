@@ -17,10 +17,10 @@ def test_sample_formats_and_kamis():
         for path in sorted((DATA / 'ontology').glob('*.yaml'))
         for e in yaml.safe_load(path.read_text())['entities']
     ]
-    # 기존 엔터티 16개 + 품종 7개
-    assert len(entities) == 23
+    # 기존 엔터티 16개 + 품종 7개 + 경동시장 분류 2개·서울 지역
+    assert len(entities) == 26
     assert sum(e['type'] == 'category' for e in entities) == 2
-    assert sum(e['type'] == 'store_category' for e in entities) == 6
+    assert sum(e['type'] == 'store_category' for e in entities) == 8
     # 품목 KAMIS 코드는 aT 소매 품목코드표(신태빈 정리, 2026-11-20)에 실제로 있는 조합이어야 해요
     code_table = list(
         csv.DictReader(
@@ -100,7 +100,7 @@ def test_criterion_expansion_without_db(monkeypatch):
     monkeypatch.setattr(repo, 'prune_generated_criteria', prune)
     conn = Mock(transaction=nullcontext)
     counts = load_ontology(conn)
-    assert counts['added'] == 43  # 품종 7개 + 자동 확인 포인트 20개 포함
+    assert counts['added'] == 46  # 품종 7개 + 경동시장 분류·지역 3개 + 자동 확인 포인트 20개 포함
     assert saved['variety:apple-hongro']['type'] == 'variety'
     assert ('hasGrade', 'variety:apple-fuji', None, None, {'default': True}) in relations[
         'item:apple'

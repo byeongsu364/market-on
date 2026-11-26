@@ -102,3 +102,10 @@ it('낮은 신뢰도에서 후보와 동의어 검색으로 확정할 수 있다
   fireEvent.click(screen.getByRole('button', { name: '결과 보기' }));
   expect(await screen.findByRole('heading', { name: '대파' })).toBeInTheDocument();
 });
+
+it('예시 배치임을 지도에서 안내한다', async () => {
+  show('/map');
+  expect(
+    await screen.findByText('배치는 업종별 예시예요 · 실제 위치는 현장에서 확인해 주세요'),
+  ).toBeInTheDocument();
+});
