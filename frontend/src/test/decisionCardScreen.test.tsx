@@ -40,7 +40,7 @@ const show = (path = '/items/item:green_onion') =>
     </MemoryRouter>,
   );
 async function openCard() {
-  const button = await screen.findByRole('button', { name: '판단 카드 만들기' });
+  const button = await screen.findByRole('button', { name: '안심On 만들기' });
   // 기준시세를 기본 품종으로 한 번 더 받는 동안 버튼이 잠깐 다시 꺼짐 → 켜졌을 때 눌러 시트가 열릴 때까지
   await waitFor(
     () => {
@@ -115,7 +115,7 @@ it('생성 중 로딩과 생성 실패를 표시한다', async () => {
     }),
   );
   show();
-  const button = await screen.findByRole('button', { name: '판단 카드 만들기' });
+  const button = await screen.findByRole('button', { name: '안심On 만들기' });
   await waitFor(
     () => {
       if (!(button as HTMLButtonElement).disabled) fireEvent.click(button);
@@ -158,7 +158,7 @@ it('시트 머리에 안심On·저장이 있고 레시피 보기는 없다', asy
   await screen.findByRole('heading', { name: '대파' });
   await openCard();
   const dialog = screen.getByRole('dialog');
-  expect(within(dialog).getByRole('heading', { name: '판단 카드' })).toHaveTextContent('안심On');
+  expect(within(dialog).getByRole('heading', { name: '안심On' })).toHaveTextContent('안심On');
   expect(within(dialog).getByRole('link', { name: '저장' })).toBeInTheDocument();
   expect(within(dialog).queryByRole('button', { name: /레시피 보기/ })).toBeNull();
   // 제철은 이달의 식재료로 채워서 그림
