@@ -85,7 +85,7 @@ it.each([
   );
   fireEvent.change(screen.getByLabelText('궁금한 점'), { target: { value: '대파?' } });
   fireEvent.click(screen.getByRole('button', { name: '보내기' }));
-  expect(screen.getByText('확인하고 있어요')).toBeInTheDocument();
+  expect(screen.getByText('근거 찾는 중')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '보내기' })).toBeDisabled();
   reject({ status });
   await waitFor(() => expect(screen.getByRole('button', { name: '보내기' })).toBeEnabled());

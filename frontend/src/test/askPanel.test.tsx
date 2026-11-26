@@ -84,9 +84,8 @@ it('대기 중 비활성과 aria-live 및 503 재시도', async () => {
     </Wrapper>,
   );
   fireEvent.click(screen.getByRole('button', { name: '보관' }));
-  expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent(
-    '근거 자료를 찾고 있어요',
-  );
+  // 040: 기다리는 동안 단계 문구 (근거 찾는 중 → 정리 중 → 답 쓰는 중)
+  expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent('근거 찾는 중');
   for (const button of screen.getAllByRole('button')) expect(button).toBeDisabled();
   reject({ status: 503 });
   expect(await screen.findByRole('alert')).toHaveTextContent('지금은 답변을 찾을 수 없어요');

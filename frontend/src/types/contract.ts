@@ -318,6 +318,8 @@ export type AskResponse = {
   model: string | null;
   cached: boolean;
   removed: number;
+  // 040: 서버가 실제로 거친 단계 (search·extract·write·check)
+  steps?: string[];
 };
 
 // 도우미 메시지는 서버가 준 reply_sig를 sig로 그대로 돌려줘요 (없으면 서버가 그 메시지를 빼요)
@@ -331,6 +333,8 @@ export type ChatResponse = {
   model: string | null;
   removed: number;
   reply_sig?: string | null;
+  // 040: 서버가 실제로 거친 단계 (plan·tools·write·check)
+  steps?: string[];
 };
 
 export type MarketItem = { item_id: string; name: string; store_count: number };
