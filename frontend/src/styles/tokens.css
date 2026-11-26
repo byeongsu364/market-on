@@ -70,6 +70,7 @@
   --tint-persimmon: #2b2017;
   --tint-green-onion: #1b261b;
   --tint-onion: #2a2419;
+  --tint-mandarin: #2b2017;
   --color-canvas: #111113;
   --color-canvas-soft: #161618;
   --color-surface-card: #19191b;
@@ -142,6 +143,7 @@
   --tint-persimmon: #fff0e1;
   --tint-green-onion: #eaf5e6;
   --tint-onion: #fbf0df;
+  --tint-mandarin: #fff0e1;
   --color-on-pin: #ffffff;
 
   /* 예전 구역 미니맵용(새 화면에는 쓰지 않음, MiniMap 대체 화면에서만) */
