@@ -156,7 +156,10 @@ describe('기능', () => {
   it('목차 칩 11개가 섹션으로 이어지고, 기능 탭이 지금 탭이다', async () => {
     show('/intro/features');
     expect(
-      await screen.findByRole('heading', { level: 1, name: '살펴보고, 고르고, 납득하고, 삽니다.' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: '살펴보고, 고르고, 납득하고, 구매합니다.',
+      }),
     ).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: '주요 메뉴' });
     expect(within(nav).getByRole('link', { name: '기능' })).toHaveAttribute('aria-current', 'page');

@@ -135,7 +135,7 @@ it('판단 카드 데이터에 가격 구간과 "신선도는 직접 확인했�
   expect(card.bandLabels).toEqual(['많이 낮음', '낮음', '조금 높음', '높음']);
   expect(card.footer).toBe('신선도는 직접 확인했어요');
   expect(card.alt).toContain('가격 자리 많이 낮음');
-  expect(card.alt).not.toMatch(/판정하지 않아요|사지 마세요/);
+  expect(card.alt).not.toMatch(/판정하지 않아요|사지 마세요|구매하지 마세요/);
   const noPrice = buildCardData({ ...base, value: '' });
   expect(noPrice.band).toBeNull();
   expect(noPrice.bandLine).toBe('');
@@ -181,7 +181,7 @@ it('장보기 동선은 가까운 순서로 돌고 한 점포에서 여러 품�
   expect(walkMinutes(flat.map((s) => s.leg_m))).toBeNull();
 });
 
-it('장보기 동선 화면은 순서를 매기고 산 곳을 체크하면 남은 곳이 줄어든다', async () => {
+it('장보기 동선 화면은 순서를 매기고 구매한 곳을 체크하면 남은 곳이 줄어든다', async () => {
   sessionStorage.clear();
   show('/shop/route?market=market:demo&item=item:apple&item=item:green_onion');
   const boxes = await screen.findAllByRole('checkbox');
@@ -203,7 +203,7 @@ it('장보기 동선 화면은 순서를 매기고 산 곳을 체크하면 남�
     '/?market=market%3Ademo&store=store%3AA-07&item=item%3Agreen_onion',
   );
   fireEvent.click(boxes[1]);
-  expect(screen.getByText('다 샀어요')).toBeInTheDocument();
+  expect(screen.getByText('모두 구매했어요')).toBeInTheDocument();
   expect(screen.queryByRole('link', { name: '다음 점포로 길 안내' })).not.toBeInTheDocument();
   // 약도에 순서 번호와 "핀 위치는 예시"
   expect(screen.getByText(/미리보기 지도/)).toBeInTheDocument();

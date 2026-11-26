@@ -117,7 +117,7 @@ it('장바구니는 도우미가 차례로 묻고, 구성 뒤 조건 하나만 �
     </Wrapper>,
   );
   expect(screen.getByRole('heading', { name: '장바구니' })).toBeInTheDocument();
-  expect(screen.getByText('어떤 용도로 사세요?')).toBeInTheDocument();
+  expect(screen.getByText('어떤 용도로 구매하세요?')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '모임용' }));
   expect(screen.getByText('몇 명이 드세요?')).toBeInTheDocument();
   fireEvent.change(screen.getByLabelText('인원 직접 입력'), { target: { value: '12' } });
@@ -136,9 +136,9 @@ it('장바구니는 도우미가 차례로 묻고, 구성 뒤 조건 하나만 �
     expect.objectContaining({ purpose: '모임', headcount: 12, budget: 30000 }),
   );
   await waitFor(() =>
-    expect(screen.getAllByRole('heading', { name: '이렇게 사면 돼요' })).toHaveLength(2),
+    expect(screen.getAllByRole('heading', { name: '이렇게 구매하면 돼요' })).toHaveLength(2),
   );
   fireEvent.click(screen.getByRole('button', { name: '처음부터' }));
-  expect(screen.queryByRole('heading', { name: '이렇게 사면 돼요' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: '이렇게 구매하면 돼요' })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: '집밥' })).toBeInTheDocument();
 });

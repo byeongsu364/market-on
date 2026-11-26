@@ -34,7 +34,7 @@ const FLOW = [
   { no: '1', text: '사진 한 장으로 고르고' },
   { no: '2', text: '근거로 비교하고' },
   { no: '3', text: '안심On으로 납득하고', on: true },
-  { no: '4', text: '파는 가게에서 삽니다' },
+  { no: '4', text: '파는 가게에서 구매합니다' },
 ];
 
 const ANSHIMON_STEPS = [
@@ -51,7 +51,7 @@ const ANSHIMON_STEPS = [
 ];
 
 const LOOP = [
-  { title: '안심하고 산 손님이', text: '안심On 카드를 친구에게 공유해요.' },
+  { title: '안심하고 구매한 손님이', text: '안심On 카드를 친구에게 공유해요.' },
   { title: '가게가 노출되고', text: '카드와 지도에 상호가 함께 표시돼요.' },
   { title: '새 손님이 찾아와요', text: '공유를 받은 친구가 같은 가게로 와요.', key: true },
   { title: '매출과 재고 소진', text: '바겐세일 정보로 남은 재고까지 팔아요.' },
@@ -224,7 +224,7 @@ function Features() {
         <div className={f.intro}>
           <p className={b.kicker}>기능 · 솔루션 자세히 보기</p>
           <h1 id="features-title" className={b.h1}>
-            살펴보고, 고르고, 납득하고, 삽니다.
+            살펴보고, 고르고, 납득하고, 구매합니다.
           </h1>
           <p className={b.lead}>기능마다 실제 화면을 붙였어요.</p>
         </div>
@@ -267,7 +267,7 @@ function Features() {
             <h2 id="anshimon-title" className={f.h3main}>
               사진 한 장이면,
               <br />
-              사도 될 근거가 한 화면에.
+              구매해도 될 근거가 한 화면에.
             </h2>
             <p className={b.leadSm}>
               상품과 가격표를 찍으면 품목과 품종을 알아보고, 안심On 카드로 구매 결정에 필요한 자료를
@@ -469,7 +469,7 @@ function Features() {
               <div className={f.afterHead}>
                 <p className={b.kicker}>구매 후 · 장바구니와 물어보기</p>
                 <h2 id="after-title" className={f.h3}>
-                  사고 나서도, 끝까지 쓰게.
+                  구매하고 나서도, 끝까지 쓰게.
                 </h2>
                 <p className={b.leadSm}>
                   레시피는 장바구니에서 이달 제철 재료로 골라요. 손질법과 보관법은 결과 화면에서
@@ -625,7 +625,7 @@ function Features() {
               <br />
               선택은 사용자가.
             </p>
-            <span>살까 말까, 이유를 켜 드릴게요.</span>
+            <span>구매할까 말까, 이유를 켜 드릴게요.</span>
           </div>
         </div>
       </section>

@@ -32,7 +32,7 @@ const BASES = [
   { no: '05', title: '파는 가게', body: '이 시장 안 어느 점포에서 파는지' },
 ];
 
-const NOT_SAID = ['신선', '등급', '별점', '사지 마세요'];
+const NOT_SAID = ['신선', '등급', '별점', '구매하지 마세요'];
 
 const ANSHIMON_ALT =
   '안심On 카드 화면: 노지 귤 현장 가격 250원과 기준시세 279원, 기준시세보다 10% 낮아요, 비교 근거 4가지';
@@ -160,7 +160,7 @@ export default function Landing() {
               안심하고 구매할 수 있는 시장을 만듭니다.
             </h2>
             <p className={b.lead}>
-              AI가 대신 고르면 생각이 멈춰요. Market-On은 사기 직전에 필요한 근거 다섯 가지를 켜고,
+              AI가 대신 고르면 생각이 멈춰요. Market-On은 구매 직전에 필요한 근거 다섯 가지를 켜고,
               선택은 손님에게 남겨요.
             </p>
           </div>
@@ -206,7 +206,7 @@ export default function Landing() {
               <h2 id="solution-title" className={`${b.h2} ${m.reveal}`}>
                 사진 한 장으로,
                 <br />
-                사기 전부터 산 뒤까지.
+                구매 전부터 구매 후까지.
               </h2>
             </div>
             <Link to="/intro/features" className={`${b.btn} ${b.btnPrimary}`}>

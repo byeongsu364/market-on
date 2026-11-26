@@ -116,7 +116,7 @@ export function markerLabel(m: MapMarker): string {
     case 'market':
       return m.active ? m.name : `${m.name}, 준비 중`;
     case 'stop':
-      return `${m.order}번째 ${m.name}${m.done ? ', 산 곳' : ''}`;
+      return `${m.order}번째 ${m.name}${m.done ? ', 구매한 곳' : ''}`;
     case 'me':
       return '내 위치';
   }
