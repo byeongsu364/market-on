@@ -1,256 +1,125 @@
-# Market-On · Design Tokens v1 (라이트 / 다크)
+# Market-On · Design Tokens v2 (라이트 / 다크)
 
-> **요약** — 색은 로고 **P5 올리브·피치** 5색(+로고 부제용 반투명 2색)만 써요. 개발에서는 원색 값을 직접 쓰지 않고 **시맨틱 토큰**(`--color-bg`, `--color-text` …)만 써요. 테마 전환은 `<html data-theme="dark">` 하나로 끝나요.
-> 바로 붙여 넣는 코드는 **4장(CSS 변수)**, **5장(Tailwind)** 에 있어요. 기본은 기기 설정(`prefers-color-scheme`)을 따르고, 사용자가 고르면 그 값을 우선해요.
-> 접근성: 본문 글자는 WCAG AA(4.5:1) 이상이 되도록 정했어요. 그래서 로고 부제의 반투명 색과 앱 보조 글자색은 **값이 달라요**(6장).
->
-> 기준일 2026-11-22 · 출처: `로고/A_컬러맵/P5_올리브_피치_가로형.svg` · `_가로형_다크.svg` · `_아이콘.svg` (값 그대로 추출)
-> 표시: **[확정]** 로고에서 그대로 가져온 값 · **[제안]** 앱 개발을 위해 추가한 값 (팀 검토 후 확정)
+> **2026-11-26 바꿈** · 지시서 [030](./tasks/030-frontend-integration.md) · 이유: 화면 시안 52개와 함께 정한 Market-On 디자인 시스템(흰 바탕, 검은 글자, 켜진 것 하나만 주황)으로 바꿨어요. v1의 올리브·피치 팔레트(`--olive`, `--peach`, `--cream` 계열)는 없앴어요. 팀 승인은 **[확인 필요]**.
+> 값의 출처: 디자인 시스템 `tokens.json`(https://claude.ai/artifact/L1V5Jh6ykC828Qkox5KdTx). 코드는 `frontend/src/styles/tokens.css`.
+> 테마 전환은 지금처럼 `<html data-theme="dark">` 하나. 기본은 기기 설정을 따라요. 다크 화면 다듬기는 이번 범위가 아니에요(값만 둠).
 
----
+## 1. 원칙
 
-## 1. 원색 팔레트 [확정]
+- 흰 바탕(`canvas`)에 검은 글자(`ink`, `body`). 화면에서 색을 내는 것은 품목 그림과 지도 핀뿐이에요.
+- 주요(검정) 버튼은 한 화면에 하나. 나머지는 테두리 없는 옅은 면(`surface-strong`).
+- 주황(`signal`)은 켜진 것 하나에만: 가격 눈금의 켜진 칸, 마감세일 점, 로고의 켜진 칸.
+- 좋고 나쁨을 초록·빨강으로 칠하지 않아요. 가격 차이는 ▲▼와 숫자를 `signal-text` 한 색으로.
 
-| 이름 | HEX | 역할 |
-|---|---|---|
-| Olive 올리브 | `#3A5F2B` | 브랜드 기본색 (아이콘 판, 다크 배경) |
-| Olive Deep 진올리브 | `#2F4A23` | 글자 (워드마크 "Market") |
-| Peach 피치 | `#FF9F7A` | 강조 면, 다크 모드 강조 글자 |
-| Peach Deep 진피치 | `#D9643C` | 라이트 모드 강조 글자 (워드마크 "On") |
-| Cream 크림 | `#FFF8F1` | 라이트 배경, 다크 글자 |
+## 2. 예전 변수 이름과 새 토큰
 
-로고 부제 전용: `#2F4A23A6`(진올리브 65%, 라이트) · `#FFF8F1B3`(크림 70%, 다크) — **로고에만** 써요.
+컴포넌트가 쓰던 변수 이름은 그대로 두고 값만 바꿨어요.
 
----
+| 예전 변수 | 새 토큰 |
+| --- | --- |
+| `--color-bg` | `canvas` |
+| `--color-card` | `surface-card` |
+| `--color-surface`, `--color-on-surface` | `primary`, `on-primary` |
+| `--color-text` | `ink` |
+| `--color-text-secondary` | `body` |
+| `--color-accent`, `--color-on-accent` | `signal`, `on-signal` |
+| `--color-accent-text` | `signal-text` |
+| `--color-border` | `hairline-strong` (입력창·체크박스는 `control-border`) |
+| `--color-focus` | `ink` |
+| `--radius-button` | `radius-lg` |
+| `--radius-card` | `radius-xl` |
+| `--font-sans`, `--font-heading` | `sans` 하나(Pretendard Variable) |
 
-## 2. 시맨틱 토큰 (라이트 / 다크)
+## 3. 색
 
-| 토큰 | CSS 변수 | 라이트 | 다크 | 로고에서 쓰인 곳 | 앱에서 쓰는 곳 | 구분 |
-|---|---|---|---|---|---|---|
-| 배경 | `--color-bg` | `#FFF8F1` 크림 | `#3A5F2B` 올리브 | 다크 로고 배경 | 앱 전체 배경 | 확정 |
-| 카드 | `--color-card` | `#FFFFFF` | `#2F4A23` 진올리브 | — | 결과 카드, 바텀시트, 점포 상세 | 제안 |
-| 버튼·아이콘 판 | `--color-surface` | `#3A5F2B` 올리브 | `#FFF8F1` 크림 | 아이콘 둥근 사각형 | 주요 버튼, 헤더, 하단 탭 선택 | 확정 |
-| 판 위 요소 | `--color-on-surface` | `#FFF8F1` 크림 | `#3A5F2B` 올리브 | 아이콘 차양·렌즈 테두리 | 주요 버튼 위 글자·아이콘 | 확정 |
-| 본문 글자 | `--color-text` | `#2F4A23` 진올리브 | `#FFF8F1` 크림 | 워드마크 "Market" | 제목, 본문 | 확정 |
-| 보조 글자 | `--color-text-secondary` | `#596D4C` | `#D8D9C9` | (부제는 반투명 원본 사용) | 출처·날짜·조사지역, 안내 문구 | 제안 |
-| 강조 글자 | `--color-accent-text` | `#D9643C` 진피치 | `#FF9F7A` 피치 | 워드마크 "On" | 가격 ±%, 강조 숫자 (18px 이상 굵게) | 확정 |
-| 강조 면 | `--color-accent` | `#FF9F7A` 피치 | `#FF9F7A` 피치 | 차양 줄무늬, 체크 표시 | 배지, 지도 강조 점포, 체크박스 선택 | 확정 |
-| 강조 면 위 글자 | `--color-on-accent` | `#2F4A23` 진올리브 | `#2F4A23` 진올리브 | — | 배지 글자, "오늘 추천" 라벨 | 제안 |
-| 구분선 | `--color-border` | `#2F4A231F` (12%) | `#FFF8F129` (16%) | — | 카드 테두리, 리스트 구분선 | 제안 |
-| 포커스 링 | `--color-focus` | `#D9643C` | `#FF9F7A` | — | 키보드·스크린리더 포커스 | 제안 |
+| 토큰 | CSS 변수 | 라이트 | 다크 | 쓰는 곳 |
+| --- | --- | --- | --- | --- |
+| `canvas` | `--color-canvas` | `#ffffff` | `#111113` | 페이지 바탕. 앱 화면과 랜딩 모두 여기서 시작한다. |
+| `canvas-soft` | `--color-canvas-soft` | `#fafafa` | `#161618` | 번갈아 깔리는 띠, 지도 바깥 면. |
+| `surface-card` | `--color-surface-card` | `#ffffff` | `#19191b` | 카드, 바텀시트, 입력창 바탕. 1px hairline-strong 테두리와 함께 쓴다. |
+| `surface-strong` | `--color-surface-strong` | `#f4f4f6` | `#232326` | 보조 버튼, 칩, 꼬리표, 묶음 면, 사진 자리 면. 테두리 없이 면으로만 구분한다. |
+| `surface-dark` | `--color-surface-dark` | `#171717` | `#26262a` | 판단 카드(공유 이미지), 점포 QR 면, 강조 카드. 글자는 on-dark. |
+| `hairline` | `--color-hairline` | `#ebecef` | `#232326` | 목록 구분선. 장식용 선이며 컨트롤 테두리로 쓰지 않는다. |
+| `hairline-strong` | `--color-hairline-strong` | `#dcdee0` | `#34343a` | 흰 바탕 위 외곽선 버튼의 1px 안쪽 선, 바텀시트 손잡이. 장식용 선이며 입력창 테두리로 쓰지 않는다. |
+| `control-border` | `--color-control-border` | `#8b8d93` | `#6e7178` | 입력창, 체크박스, 라디오 테두리. canvas와 surface-card 위에서 3:1 이상. 버튼과 칩에는 쓰지 않는다. |
+| `ink` | `--color-ink` | `#171717` | `#ededed` | 제목, 품목명, 가격 숫자, 강조 본문. canvas, canvas-soft, surface-card, surface-strong, signal-soft 위. 포커스 링도 이 색 2px. |
+| `body` | `--color-body` | `#60646c` | `#b0b4ba` | 기본 본문. canvas, canvas-soft, surface-card, surface-strong 위. |
+| `muted` | `--color-muted` | `#6b6f77` | `#8b8f97` | 출처, 조사일, 꼬리표 글자. canvas, surface-card, surface-strong 위에서 4.5:1 이상. |
+| `primary` | `--color-primary` | `#000000` | `#ffffff` | 주요 버튼 채움. 한 화면에 하나(찍기, 길 안내 시작). |
+| `primary-active` | `--color-primary-active` | `#1a1a1a` | `#e6e6e6` | 주요 버튼을 누른 상태. |
+| `on-primary` | `--color-on-primary` | `#ffffff` | `#171717` | primary 위의 글자와 아이콘. |
+| `on-dark` | `--color-on-dark` | `#ffffff` | `#ffffff` | surface-dark 위의 글자. |
+| `on-dark-soft` | `--color-on-dark-soft` | `#b0b4ba` | `#b0b4ba` | surface-dark 위의 보조 글자(출처, 날짜). |
+| `signal` | `--color-signal` | `#f2622e` | `#ff8a5b` | 켜진 것 하나를 가리키는 색: 로고의 켜진 칸, 가격 눈금의 켜진 칸, 마감세일 점. 면과 표시에만 쓰고 본문 글자로 쓰지 않는다. canvas 위에서 3:1 이상. |
+| `signal-text` | `--color-signal-text` | `#c2410c` | `#ff9f7a` | 가격 ±% 숫자와 강조 숫자. canvas, surface-card, signal-soft 위에서 4.5:1 이상. |
+| `on-signal` | `--color-on-signal` | `#171717` | `#171717` | signal 면 위의 글자. 흰색을 쓰지 않는다. |
+| `signal-soft` | `--color-signal-soft` | `#fff1ea` | `#2b1a13` | 강조된 점포, 한 줄 요약 뒤의 옅은 면. 글자는 ink 또는 signal-text. |
+| `wash-light` | `--color-wash-light` | `#fff6ef` | `#2a1c15` | 랜딩과 포스터 머리 부분의 번짐, 밝은 쪽. 앱 화면에는 쓰지 않는다. |
+| `wash-mid` | `--color-wash-mid` | `#ffe6d3` | `#4a2c1c` | 랜딩과 포스터 머리 부분의 번짐, 짙은 쪽. 동작 색이 아니다. |
+| `link` | `--color-link` | `#0d74ce` | `#70b8ff` | 긴 글 속 링크. canvas와 surface-card 위. 버튼에는 쓰지 않는다. |
+| `danger` | `--color-danger` | `#b42318` | `#ff9a8f` | 입력 오류 문장과 테두리. 항상 문장과 함께 쓴다. 가격이 높다는 뜻으로 쓰지 않는다. |
+| `gauge-off` | `--color-gauge-off` | `#e6e7eb` | `#34343a` | 가격 눈금의 꺼진 칸. 켜진 칸은 signal. |
+| `gauge-off-dark` | `--color-gauge-off-dark` | `#34343a` | `#34343a` | surface-dark 면 위 가격 눈금의 꺼진 칸(판단 카드). |
+| `pin-produce` | `--pin-produce` | `#1f9d55` | `#1f9d55` | 시장 안 지도의 채소·과일 점포 핀. 핀 안 사과 아이콘은 on-pin. |
+| `pin-dried` | `--pin-dried` | `#b7791f` | `#b7791f` | 건어물·젓갈 점포 핀. 핀 안 단지 아이콘은 on-pin. |
+| `pin-seafood` | `--pin-seafood` | `#2477e0` | `#2477e0` | 수산 점포 핀. 핀 안 생선 아이콘은 on-pin. |
+| `pin-side` | `--pin-side` | `#8a56d6` | `#8a56d6` | 반찬 점포 핀. 핀 안 그릇 아이콘은 on-pin. |
+| `pin-meat` | `--pin-meat` | `#e0484e` | `#e0484e` | 정육 점포 핀. 핀 안 고기 아이콘은 on-pin. 가격이 높다는 뜻으로 쓰지 않는다. |
+| `pin-ricecake` | `--pin-ricecake` | `#d2488f` | `#d2488f` | 떡 점포 핀. 핀 안 꼬치떡 아이콘은 on-pin. |
+| `on-pin` | `--color-on-pin` | `#ffffff` | `#ffffff` | 핀 색 여섯 가지 위의 아이콘과 2px 테두리. 여섯 색 모두에서 3:1 이상(아이콘 기준). 핀 색 위에 글자는 쓰지 않는다. |
+| `zone-0` | `--color-zone-0` | `#c9b458` | `#c9b458` | 지도 구역 면, 청과. 20% 농도 면으로만 쓰고 글자색으로 쓰지 않는다. |
+| `zone-1` | `--color-zone-1` | `#7fa36b` | `#7fa36b` | 지도 구역 면, 채소. 20% 농도 면으로만. |
+| `zone-2` | `--color-zone-2` | `#6e9bb0` | `#6e9bb0` | 지도 구역 면, 수산. 20% 농도 면으로만. |
+| `zone-3` | `--color-zone-3` | `#b07a6e` | `#b07a6e` | 지도 구역 면, 정육. 20% 농도 면으로만. |
+| `zone-4` | `--color-zone-4` | `#a08bb0` | `#a08bb0` | 지도 구역 면, 반찬. 20% 농도 면으로만. |
+| `zone-5` | `--color-zone-5` | `#c4a484` | `#c4a484` | 지도 구역 면, 떡·분식. 20% 농도 면으로만. |
 
-- `보조 글자`를 로고처럼 반투명(65%/70%)으로 쓰면 대비가 3.6:1 / 4.4:1로 AA에 못 미쳐요. 그래서 같은 색 계열을 **80% 농도로 섞은 단색**으로 정했어요.
-- 지도 구역 6색(청과·채소·수산·정육·반찬·떡/분식)은 **[확인 필요]** 이 팔레트와 겹치지 않는 별도 세트로 정해요. 강조 점포는 구역 색과 상관없이 항상 `--color-accent` + 굵은 테두리로 보여 줘요.
+## 4. 글자 (Pretendard Variable 한 가족, 숫자는 `tabular-nums`)
 
----
+| 이름 | 크기 | 굵기 | 행간 | 자간 | 쓰는 곳 |
+| --- | --- | --- | --- | --- | --- |
+| `display-xl` | 48px | 600 | 1.1 | -1.44px | 랜딩과 포스터의 머리글. |
+| `display-lg` | 30px | 600 | 1.2 | -1px | 결과 화면의 결론 한 줄. |
+| `display-md` | 26px | 600 | 1.25 | -0.7px | 앱 화면 제목. |
+| `display-sm` | 19px | 600 | 1.35 | -0.4px | 화면 안 묶음 제목, 바텀시트 제목. |
+| `price-xl` | 40px | 700 | 1.05 | -1.2px | 가격표의 가격, 기준시세 대비 ±%. tabular-nums와 함께. |
+| `price-md` | 24px | 700 | 1.15 | -0.6px | 목록 안의 가격, 점포별 가격. tabular-nums와 함께. |
+| `title-md` | 18px | 600 | 1.4 | 0 | 컴포넌트 제목, 가격표의 품목명. |
+| `title-sm` | 16px | 600 | 1.4 | 0 | 목록 라벨, 점포 이름. |
+| `body-md` | 16px | 400 | 1.5 | 0 | 기본 본문. |
+| `body-sm` | 14px | 400 | 1.5 | 0 | 보조 본문, 단위, 안내 문장. |
+| `caption` | 13px | 400 | 1.4 | 0 | 출처, 조사일, 꼬리표. |
+| `label` | 11px | 600 | 1.4 | 0.88px | 배지, 섹션 라벨. |
+| `button` | 16px | 600 | 1 | 0 | 버튼 글자. |
+| `code` | 13px | 400 | 1.5 | 0 | 점포 번호, 코드, 개발 문서의 코드 조각. |
 
-## 3. 테마 전환 규칙
+## 5. 간격·모서리·그림자
 
-1. 처음 접속하면 기기 설정(`prefers-color-scheme`)을 따라요.
-2. 사용자가 설정에서 고르면 `localStorage('theme')`에 저장하고 `<html data-theme="light|dark">`를 붙여요.
-3. 컴포넌트는 `var(--color-*)` 또는 Tailwind 시맨틱 클래스(`bg-bg`, `text-text`)만 써요. **HEX를 직접 쓰지 않아요.**
-4. 이미지·로고는 테마에 맞는 파일로 바꿔요 (7장).
-5. 시장 현장(햇빛 아래)을 고려해 **기본 추천은 라이트**예요. 다크는 저녁 장보기·외국인 투어 시연에서 보여 줘요.
+간격(4px 단위): `space-1` 4px · `space-2` 8px · `space-3` 12px · `space-4` 16px · `space-5` 20px · `space-6` 24px · `space-8` 32px · `space-12` 48px · `space-24` 96px
 
----
+| 변수 | 값 | 쓰는 곳 |
+| --- | --- | --- |
+| `--radius-xs` | 6px | 꼬리표, 지도 출처 표시. |
+| `--radius-sm` | 10px | 작은 버튼(높이 38px). |
+| `--radius-md` | 12px | 입력창, 중간 버튼(높이 48px). |
+| `--radius-lg` | 14px | 큰 버튼(높이 54px), 품목 그림 판. |
+| `--radius-xl` | 20px | 묶음 면, 선택된 점포 카드, 판단 카드. |
+| `--radius-xxl` | 24px | 바텀시트 위 모서리. |
+| `--radius-pill` | 9999px | 칩, 지도 위 시장 이름표, 토글, 가격 눈금 칸의 아래쪽. |
 
-## 4. CSS 변수 (붙여 넣기용)
+| 변수 | 값 | 쓰는 곳 |
+| --- | --- | --- |
+| `--shadow-soft` | `0 1px 2px rgba(0, 0, 0, 0.06), 0 6px 16px rgba(0, 0, 0, 0.10)` | 지도 위에 뜬 검색창, 칩, 둥근 버튼. |
+| `--shadow-sheet` | `0 -2px 20px rgba(0, 0, 0, 0.10)` | 바텀시트. |
 
-```css
-/* tokens.css */
-:root,
-[data-theme="light"] {
-  /* palette */
-  --olive: #3A5F2B;
-  --olive-deep: #2F4A23;
-  --peach: #FF9F7A;
-  --peach-deep: #D9643C;
-  --cream: #FFF8F1;
+## 6. 가격 눈금
 
-  /* semantic */
-  --color-bg: var(--cream);
-  --color-card: #FFFFFF;
-  --color-surface: var(--olive);
-  --color-on-surface: var(--cream);
-  --color-text: var(--olive-deep);
-  --color-text-secondary: #596D4C;
-  --color-accent-text: var(--peach-deep);
-  --color-accent: var(--peach);
-  --color-on-accent: var(--olive-deep);
-  --color-border: #2F4A231F;
-  --color-focus: var(--peach-deep);
+네 칸(많이 낮음, 살 만함, 조금 높음, 높음) 가운데 한 칸만 `signal`로 켜요. 구간은 화면에 보이는 `diff_pct`(반올림한 정수)로 정하고 문구는 코드(`frontend/src/utils/priceBand.ts`)가 골라요.
 
-  /* type & shape */
-  --font-sans: "Noto Sans KR", system-ui, sans-serif;
-  --radius-card: 16px;
-  --radius-button: 12px;
-  --radius-icon: 24%;
-  color-scheme: light;
-}
-
-[data-theme="dark"] {
-  --color-bg: var(--olive);
-  --color-card: var(--olive-deep);
-  --color-surface: var(--cream);
-  --color-on-surface: var(--olive);
-  --color-text: var(--cream);
-  --color-text-secondary: #D8D9C9;
-  --color-accent-text: var(--peach);
-  --color-accent: var(--peach);
-  --color-on-accent: var(--olive-deep);
-  --color-border: #FFF8F129;
-  --color-focus: var(--peach);
-  color-scheme: dark;
-}
-
-/* 사용자가 직접 고르지 않았을 때 기기 설정을 따름 */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-bg: var(--olive);
-    --color-card: var(--olive-deep);
-    --color-surface: var(--cream);
-    --color-on-surface: var(--olive);
-    --color-text: var(--cream);
-    --color-text-secondary: #D8D9C9;
-    --color-accent-text: var(--peach);
-    --color-border: #FFF8F129;
-    --color-focus: var(--peach);
-    color-scheme: dark;
-  }
-}
-
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-}
-```
-
-```js
-// theme.js — 테마 적용 (첫 렌더 전에 실행해 깜빡임 방지)
-const saved = localStorage.getItem("theme"); // "light" | "dark" | null
-if (saved) document.documentElement.dataset.theme = saved;
-
-export function setTheme(mode) {
-  document.documentElement.dataset.theme = mode;
-  localStorage.setItem("theme", mode);
-}
-```
-
----
-
-## 5. Tailwind 설정 (붙여 넣기용)
-
-```js
-// tailwind.config.js
-export default {
-  darkMode: ["selector", '[data-theme="dark"]'],
-  theme: {
-    extend: {
-      colors: {
-        bg: "var(--color-bg)",
-        card: "var(--color-card)",
-        surface: "var(--color-surface)",
-        "on-surface": "var(--color-on-surface)",
-        text: "var(--color-text)",
-        "text-secondary": "var(--color-text-secondary)",
-        "accent-text": "var(--color-accent-text)",
-        accent: "var(--color-accent)",
-        "on-accent": "var(--color-on-accent)",
-        border: "var(--color-border)",
-        focus: "var(--color-focus)",
-      },
-      fontFamily: { sans: ["Noto Sans KR", "system-ui", "sans-serif"] },
-      borderRadius: { card: "16px", button: "12px" },
-    },
-  },
-};
-```
-
-색이 CSS 변수로 바뀌므로 `dark:` 접두사를 컴포넌트마다 붙일 필요가 없어요. `bg-surface text-on-surface` 하나로 두 모드가 다 맞아요.
-
----
-
-## 6. 사용 규칙
-
-| # | 규칙 | 이유 |
-|---|---|---|
-| 1 | 피치(`#FF9F7A`)는 **라이트 모드에서 글자로 쓰지 않아요** | 크림 위 1.9:1 |
-| 2 | 강조 글자(`accent-text`)는 **18px 이상 굵게**만 써요 | 라이트 3.4:1, 다크 3.7:1 → 큰 글자 기준(3:1)만 통과 |
-| 3 | 작은 글자(출처·날짜)는 `text-secondary`를 써요 | 라이트 5.4:1, 다크 5.2:1 |
-| 4 | 피치 면 위 글자는 진올리브(`on-accent`)로 써요 | 4.9:1 |
-| 5 | 한 화면에서 피치 강조는 **2곳 이하** | 강조가 많으면 아무것도 강조되지 않음 |
-| 6 | 가격 비교는 색만으로 구분하지 않고 **▼ / ▲ + 숫자**로 함께 보여 줘요 | 색약 사용자, "싸다/비싸다" 판정 대신 사실만 표시 |
-| 7 | 신선도·추천 같은 판정 색(초록=좋음, 빨강=나쁨)은 쓰지 않아요 | "소비자가 판단한다" 원칙 |
-
-### 대비표 (WCAG)
-
-| 조합 | 라이트 | 다크 | 판정 |
-|---|---|---|---|
-| 본문 글자 / 배경 | 9.4:1 | 7.0:1 | AA 통과 |
-| 본문 글자 / 카드 | 9.9:1 | 9.4:1 | AA 통과 |
-| 보조 글자 / 배경 | 5.4:1 | 5.2:1 | AA 통과 |
-| 판 위 요소 / 버튼 판 | 7.0:1 | 7.0:1 | AA 통과 |
-| 강조 글자 / 배경 | 3.4:1 | 3.7:1 | 큰 글자만 |
-| 강조 면 위 글자 (진올리브 / 피치) | 4.9:1 | 4.9:1 | AA 통과 |
-| 피치 / 크림 | 1.9:1 | — | 글자 금지 |
-
----
-
-## 7. 컴포넌트 매핑
-
-| 컴포넌트 | 배경 | 글자·아이콘 | 테두리 | 화면 |
-|---|---|---|---|---|
-| 주요 버튼 (찍기, 확인) | `surface` | `on-surface` | — | S1·S2·S3 |
-| 보조 버튼 | `transparent` | `text` | `border` | 전 화면 |
-| 칩 (선택 전 / 후) | `card` / `surface` | `text` / `on-surface` | `border` / — | S2·S6·M1 |
-| 카드 | `card` | `text` | `border` | S3·S5 |
-| 확인 포인트 체크박스 (선택) | `accent` | `on-accent` (체크) | — | S3 |
-| 가격 ±% | — | `accent-text` (굵게 20px) | — | S1·S3 |
-| 출처·날짜 캡션 | — | `text-secondary` (12px) | — | 전 화면 |
-| 배지 "오늘 추천" | `accent` | `on-accent` | — | S1·S5 |
-| 지도 강조 점포 | `accent` | `on-accent` | 2px `text` | S4 |
-| 하단 탭 (선택 / 기본) | `bg` | `text` / `text-secondary` | 상단 `border` | 전 화면 |
-
----
-
-## 8. 로고 파일 사용
-
-| 상황 | 파일 |
-|---|---|
-| 라이트 헤더·발표 자료 흰 배경 | `P5_올리브_피치_가로형.svg` |
-| 다크 헤더·발표 자료 어두운 배경 | `P5_올리브_피치_가로형_다크.svg` |
-| PWA 앱 아이콘·파비콘·스플래시 | `P5_올리브_피치_아이콘.svg` (512×512, 두 모드 공통) |
-
-- PWA `manifest.json`: `"theme_color": "#3A5F2B"`, `"background_color": "#FFF8F1"`
-- `<meta name="theme-color" content="#FFF8F1" media="(prefers-color-scheme: light)">` / `content="#3A5F2B" media="(prefers-color-scheme: dark)"`
-
----
-
-## 9. 단점을 장점으로 바꾸는 전략
-
-| 단점 | 장점으로 바꾸는 표현 | 적용 가능성 |
-|---|---|---|
-| 피치가 밝아 글자로 못 씀 | "로고 색을 그대로 쓰되 **명암비 기준으로 글자색을 따로 정한 접근성 설계**" | **7/10** |
-| 다크 모드까지 만들면 작업량이 늘어남 | "색을 토큰으로 묶어 **`data-theme` 한 줄로 전환**돼요. 컴포넌트는 손대지 않아요" | **8/10** |
-| 색 수가 적음 (5색) | "5색만으로 화면을 만들어 **시장 현장에서도 한눈에 읽히는 단순한 화면**" | **7/10** |
-| 판정 색(초록·빨강)을 쓰지 않아 정보가 약해 보임 | "색으로 판정하지 않는 것도 **'소비자가 판단한다' 원칙의 일부**예요" | **8/10** |
-
----
-
-## 10. 루브릭 (디자인 시스템 기준)
-
-| 기준 | 배점 | 점수 | 근거 |
-|---|---|---|---|
-| 창의성 | 20 | 15 | 시장 차양·렌즈 모티프 로고와 앱 색이 하나로 이어짐 |
-| 기술성 | 20 | 17 | 시맨틱 토큰 + CSS 변수 + Tailwind, 테마 전환 한 줄 |
-| 완성도 | 30 | 25 | 두 모드 모두 AA 대비 확인, 컴포넌트 매핑까지 정리 |
-| 활용성 | 20 | 16 | 발표 자료·홍보물·앱이 같은 토큰을 씀 |
-| 발표·협업 | 10 | 8 | 팀원 모두 같은 변수 이름으로 개발 |
-| **합계** | **100** | **81** | 보완: 지도 구역 6색 확정, 실제 기기(햇빛 아래)에서 라이트 화면 확인 |
-
-### 남은 할 일
-- [ ] 지도 구역 6색 세트 확정 (팔레트와 구분되고 색약에서도 구분되는 조합)
-- [ ] 프론트엔드 초안 색을 이 토큰으로 교체 (#16301F·#E8743B·#F7F5EE 폐기)
-- [ ] **[제안]** 값(카드·보조 글자·구분선·포커스) 팀 검토 후 확정
-- [ ] 대회 당일 `tokens.css`·`tailwind.config.js`는 위 코드를 보고 **현장에서 새로 작성** (서약서 1항: 사전 코드 제출 금지)
+| 기준시세 대비 | 칸 | 문구 |
+| --- | --- | --- |
+| 30% 넘게 낮음 | 1 | 많이 낮아요, 상태를 꼭 확인하세요 |
+| 30% 낮음 ~ 5% 높음 | 2 | 살 만한 가격이에요 |
+| 5% 초과 ~ 20% 이하 높음 | 3 | 시세보다 조금 높아요 |
+| 20% 넘게 높음 | 4 | 시세보다 높은 편이에요 |
+| 기준시세 없음·대체값 | 모두 끔 | 비교는 참고만 하세요 |
